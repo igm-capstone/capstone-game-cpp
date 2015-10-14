@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GraphicsMath", "Rig3D\Graph
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Memory", "Rig3D\Memory\Memory\Memory.vcxproj", "{09A0A24C-6BE9-44BA-9FB9-6E8D5121F404}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Engine", "Engine", "{A9F10425-BF7A-4395-A7D5-EE5D048D006C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -58,5 +60,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{77B5F1D0-8A48-4F96-AFF6-366D6FBAF351} = {A9F10425-BF7A-4395-A7D5-EE5D048D006C}
+		{70FC823A-7C79-4F25-B851-062628395D54} = {A9F10425-BF7A-4395-A7D5-EE5D048D006C}
+		{6B0DF065-7618-4147-9FFF-AA205D7EF02E} = {A9F10425-BF7A-4395-A7D5-EE5D048D006C}
+		{09A0A24C-6BE9-44BA-9FB9-6E8D5121F404} = {A9F10425-BF7A-4395-A7D5-EE5D048D006C}
 	EndGlobalSection
 EndGlobal
