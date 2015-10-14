@@ -9,6 +9,7 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <fstream>
+#include "PathFinder\Graph.h"
 
 using namespace Rig3D;
 
@@ -22,6 +23,7 @@ public:
 		mOptions.mWindowHeight = 600;
 		mOptions.mGraphicsAPI = GRAPHICS_API_DIRECTX11;
 		mOptions.mFullScreen = false;
+
 	}
 
 	~Proto_03_Remix()
@@ -29,8 +31,14 @@ public:
 		
 	}
 
-	 void VInitialize() override {}
-	void VUpdate(double milliseconds) override {}
+	 void VInitialize() override {
+		 auto graph = PathFinder::Graph<10, 10>();
+	 }
+	void VUpdate(double milliseconds) override {
+
+	}
+
+
 	void VRender() override {}
 	void VShutdown() override{}
 	void VOnResize() override{}
