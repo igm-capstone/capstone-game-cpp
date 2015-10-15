@@ -137,6 +137,7 @@
     <ClCompile Include="LevelReader.cpp" />
     <ClCompile Include="PathFinder\Fringe.cpp" />
     <ClCompile Include="PathFinder\main.cpp" />
+    <ClCompile Include="SceneObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rig3D\Rig3D\Rig3D.vcxproj">
@@ -146,6 +147,7 @@
   <ItemGroup>
     <ClInclude Include="PathFinder\Graph.h" />
     <ClInclude Include="PathFinder\Fringe.h" />
+    <ClInclude Include="SceneObject.h" />
     <ClInclude Include="trace.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
