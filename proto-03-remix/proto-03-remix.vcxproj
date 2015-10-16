@@ -134,7 +134,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LevelReader.cpp" />
+    <ClCompile Include="PathFinder\Fringe.cpp" />
     <ClCompile Include="PathFinder\main.cpp" />
+    <ClCompile Include="SceneObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rig3D\Rig3D\Rig3D.vcxproj">
@@ -142,8 +145,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LevelReader.h" />
     <ClInclude Include="PathFinder\Graph.h" />
     <ClInclude Include="PathFinder\Fringe.h" />
+    <ClInclude Include="SceneObject.h" />
     <ClInclude Include="trace.h" />
   </ItemGroup>
   <ItemGroup>
