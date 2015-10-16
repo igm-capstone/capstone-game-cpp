@@ -23,7 +23,7 @@ typedef cliqCity::memory::LinearAllocator LinearAllocator;
 static const int gCircleVertexCount = 13;
 static const int gCircleIndexCount	= 36;	// Indices = (vertices - 1) * 3
 
-static const int gSceneMemorySize	= 10240; 
+static const int gSceneMemorySize	= 20480; 
 static const int gMeshMemorySize	= 1024;
 
 char gSceneMemory[gSceneMemorySize];
@@ -63,6 +63,9 @@ public:
 	DX3D11Renderer*					mRenderer;
 	Input*							mInput;
 
+	ID3D11Device*					mDevice;
+	ID3D11DeviceContext*			mDeviceContext;
+
 #pragma region IScene Override
 	Proto_03_Remix() :
 		mSceneAllocator((void*)gSceneMemory, (void*)(gSceneMemory + gSceneMemorySize)),
@@ -84,6 +87,9 @@ public:
 	void VInitialize() override
 	{
 		mRenderer = &DX3D11Renderer::SharedInstance();
+		mDeviceContext = mRenderer->GetDeviceContext();
+		mDevice = mRenderer->GetDevice();
+
 		mInput = &Input::SharedInstance();
 
 		InitializeLevel();
@@ -137,7 +143,24 @@ public:
 		}
 	}
 
-	void VRender() override{}
+	void VRender() override
+	{
+		float color[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
+		
+		mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_TRIANGLE);
+
+		mDeviceContext->RSSetViewports(1, &mRenderer->GetViewport());
+		mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), mRenderer->GetDepthStencilView());
+		mDeviceContext->ClearRenderTargetView(*mRenderer->GetRenderTargetView(), color);
+		mDeviceContext->ClearDepthStencilView(
+			mRenderer->GetDepthStencilView(),
+			D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+			1.0f,
+			0);
+
+		mRenderer->VSwapBuffers();
+	}
+
 	void VShutdown() override {}
 	void VOnResize() override {}
 #pragma endregion
