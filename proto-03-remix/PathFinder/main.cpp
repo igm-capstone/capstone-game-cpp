@@ -93,12 +93,14 @@ public:
 		mRenderer	= &DX3D11Renderer::SharedInstance();
 		mInput		= &Input::SharedInstance();
 
-		//readWalls("D:\\Users\\hxs1151\\Projects\\Capstone\\Proto03-Remix\\UnitySceneExport.json");
+		
+		// Test code. MyLevel should be out of this scope to be used outside initialization.
+		LevelReader myLvlReader("UnitySceneExport.json");
+		myLvlReader.ReadLevel();
 
 	}
 	void VUpdate(double milliseconds) override {
-
-
+		
 		if ((&Input::SharedInstance())->GetKeyDown(KEYCODE_UP))
 		{
 			TRACE("Treta" << 1 << " " << 1.0f << true);

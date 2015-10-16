@@ -135,7 +135,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="LevelReader.cpp" />
-    <ClCompile Include="PathFinder\Fringe.cpp" />
     <ClCompile Include="PathFinder\main.cpp" />
     <ClCompile Include="SceneObject.cpp" />
   </ItemGroup>
