@@ -202,7 +202,57 @@ void LevelReader::ReadPlayer(std::string path, vec3f *PlayerPos)
 
 void LevelReader::ReadRobot(std::string path, std::vector<RobotInfo> *RobotArray)
 {
+	// Declarations
+	// File stream reader
+	std::fstream lvlFile;
+	std::string readLine;
 
+	// Open file
+	lvlFile.open(path);
+	// Go to Robot section
+	while (std::getline(lvlFile, readLine))
+	{
+		if (readLine == "ROBOT:") break;
+	}
+
+	while (std::getline(lvlFile, readLine))
+	{
+		if (readLine == "LIGHT:") break;
+
+		RobotInfo InsertRobot;
+		if (readLine == "Position")
+		{
+			// Read position Data
+			std::getline(lvlFile, readLine);
+			std::istringstream iss(readLine);
+			if (iss)
+			{
+				float x, y, z;
+				iss >> x >> y >> z;
+				InsertRobot.Position = vec3f(x, y, z);
+			}
+		}
+		// Read next line
+		std::getline(lvlFile, readLine);
+		if (readLine == "WAYPOINTS ")
+		{
+			while (std::getline(lvlFile, readLine))
+			{
+				if (readLine == "END") break;
+				std::istringstream iss(readLine);
+				if (iss)
+				{
+					float x, y, z;
+					iss >> x >> y >> z;
+					vec3f insertVec = vec3f(x, y, z);
+					InsertRobot.Waypoints.insert(InsertRobot.Waypoints.end(), insertVec);
+				}
+			}
+		}
+		RobotArray->insert(RobotArray->end(), InsertRobot);
+	}
+	// Close file
+	lvlFile.close();
 }
 
 void LevelReader::ReadLights(std::string path, std::vector<vec3f> *LightArray)
