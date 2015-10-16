@@ -11,6 +11,7 @@
 #include <fstream>
 #include "PathFinder\Graph.h"
 #include "SceneObject.h"
+#include "LevelReader.h"
 
 #define PI 3.1415926535f
 
@@ -85,6 +86,8 @@ public:
 
 		auto graph = PathFinder::Graph<10, 10>();
 
+
+		//readWalls("D:\\Users\\hxs1151\\Projects\\Capstone\\Proto03-Remix\\UnitySceneExport.json");
 
 	}
 	void VUpdate(double milliseconds) override {
