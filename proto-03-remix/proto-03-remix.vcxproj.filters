@@ -44,12 +44,15 @@
     <ClInclude Include="LevelReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\SampleVertexShader.hlsl">
+    <FxCompile Include="Shaders\QuadVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\SamplePixelShader.hlsl">
+    <FxCompile Include="Shaders\QuadPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
