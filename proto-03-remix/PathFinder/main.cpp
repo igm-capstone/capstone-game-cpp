@@ -23,12 +23,12 @@ typedef cliqCity::memory::LinearAllocator LinearAllocator;
 static const int gCircleVertexCount = 13;
 static const int gCircleIndexCount	= 36;	// Indices = (vertices - 1) * 3
 
-static const int gSceneMemorySize	= 1024;
+static const int gSceneMemorySize	= 10240; 
 static const int gMeshMemorySize	= 1024;
 
-static const char gSceneMemory[gSceneMemorySize];
-static const char gStaticMeshMemory[gMeshMemorySize];
-static const char gDynamicMeshMemory[gMeshMemorySize];
+char gSceneMemory[gSceneMemorySize];
+char gStaticMeshMemory[gMeshMemorySize];
+char gDynamicMeshMemory[gMeshMemorySize];
 
 
 class Proto_03_Remix : public IScene, public virtual IRendererDelegate
@@ -45,11 +45,14 @@ public:
 	MeshLibrary<LinearAllocator>	mDynamicMeshLibrary;
 
 	SceneObject*					mWalls;
+	SceneObject*					mBlocks;
 	SceneObject*					mRobots;
 	SceneObject*					mLights;
 	SceneObject*					mPlayer;
+	SceneObject*					mGoal;
 
 	int								mWallCount;
+	int								mBlockCount;
 
 	IMesh*							mWallMesh;
 	IMesh*							mRobotMesh;
@@ -80,27 +83,24 @@ public:
 
 	void VInitialize() override
 	{
-		graph = PathFinder::Graph<10, 10>();
+		mRenderer = &DX3D11Renderer::SharedInstance();
+		mInput = &Input::SharedInstance();
 
+		InitializeLevel();
+		InitializeGeometry();
+
+		// TO DO: Make Initialize function (InitializeGraph)
+		graph = PathFinder::Graph<10, 10>();
 		graph.grid[4][8].weight = 100;
 		graph.grid[4][7].weight = 100;
 		graph.grid[4][6].weight = 100;
 		graph.grid[4][5].weight = 100;
 		graph.grid[4][4].weight = 100;
 		graph.grid[4][3].weight = 100;
-
-
-		mRenderer	= &DX3D11Renderer::SharedInstance();
-		mInput		= &Input::SharedInstance();
-
-		
-		// Test code. MyLevel should be out of this scope to be used outside initialization.
-		LevelReader myLvlReader("UnitySceneExport.json");
-		myLvlReader.ReadLevel();
-
 	}
 	void VUpdate(double milliseconds) override {
-		
+
+
 		if ((&Input::SharedInstance())->GetKeyDown(KEYCODE_UP))
 		{
 			TRACE("Treta" << 1 << " " << 1.0f << true);
@@ -143,16 +143,60 @@ public:
 #pragma endregion
 
 #pragma region Initialization
+	void InitializeLevel()
+	{
+		LevelReader levelReader("UnitySceneExport.json");
+		levelReader.ReadLevel();
+
+		// Walls
+		LoadSceneObjectData(&mWalls, &levelReader.mWalls.Position[0], &levelReader.mWalls.Rotation[0], &levelReader.mWalls.Scale[0], levelReader.mWalls.Position.size(), 0);
+		mWallCount = levelReader.mWalls.Position.size();
+
+		// Blocks
+		LoadSceneObjectData(&mBlocks, &levelReader.mBlocks.Position[0], &levelReader.mBlocks.Rotation[0], &levelReader.mBlocks.Scale[0], levelReader.mBlocks.Position.size(), 0);
+		mBlockCount = levelReader.mBlocks.Position.size();
+
+		// Lights
+		LoadSceneObjectData(&mLights, &levelReader.mLights[0], NULL, NULL, levelReader.mLights.size(), 1);
+		mBlockCount = levelReader.mBlocks.Position.size();
+
+		// Player
+		mPlayer = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject), alignof(SceneObject), 0));
+		mPlayer->mTransform.mPosition = levelReader.mPlayerPos;
+
+		// Goal
+		mGoal = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject), alignof(SceneObject), 0));
+		mGoal->mTransform.mPosition = levelReader.mGoalPos;
+	}
+
 	// Used for walls and blocks... Write overloads for sceneobjects with additional data (robots)
-	void LoadSceneObjectData(SceneObject* sceneObjects, vec3f* positions, vec3f* rotations, vec3f* scales, int size)
+	void LoadSceneObjectData(SceneObject** sceneObjects, vec3f* positions, vec3f* rotations, vec3f* scales, int size, int TransformType)
 	{
 		// Allocate size SceneObjects
-		sceneObjects = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject) * size, alignof(SceneObject), 0));
-		for (int i = 0; i < size; i++)
+		*sceneObjects = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject) * size, alignof(SceneObject), 0));
+
+		switch(TransformType)
 		{
-			sceneObjects[i].mTransform.mPosition	= positions[i];
-			sceneObjects[i].mTransform.mRotation	= rotations[i];
-			sceneObjects[i].mTransform.mScale		= scales[i];
+		case 0:
+		{
+			for (int i = 0; i < size; i++)
+			{
+				(*sceneObjects)[i].mTransform.mPosition = positions[i];
+				(*sceneObjects)[i].mTransform.mRotation = rotations[i];
+				(*sceneObjects)[i].mTransform.mScale = scales[i];
+			}
+			break;
+		}
+		case 1:
+		{
+			for (int i = 0; i < size; i++)
+			{
+				(*sceneObjects)[i].mTransform.mPosition = positions[i];
+			}
+			break;
+		}
+		default:
+			break;
 		}
 	}
 
@@ -203,6 +247,7 @@ public:
 		mRenderer->VSetMeshVertexBufferData(mCircleMesh, circleVertices, sizeof(vec3f) * gCircleVertexCount, sizeof(vec3f), GPU_MEMORY_USAGE_STATIC);
 		mRenderer->VSetMeshIndexBufferData(mCircleMesh, circleIndices, gCircleIndexCount, GPU_MEMORY_USAGE_STATIC);
 	}
+
 #pragma endregion 
 };
 
