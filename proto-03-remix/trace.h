@@ -20,35 +20,31 @@ public:
 	Trace &operator << (std::string value) { ss << value; return *this; }
 	Trace &operator << (Trace &(*function)(Trace &trace)) { return function(*this); }
 
-	static Trace &Endl(Trace &trace)
+	static Trace &endl(Trace &trace)
 	{
 		trace.ss << std::endl;
 		
-		int count = 0;
 		while (true)
 		{
-			//trace.ss.read(trace.buff, 128);
-			trace.ss.get(trace.buff, 128);
-			count = trace.ss.gcount();
+			std::string str;
+			std::getline(trace.ss, str);
 
-			OutputDebugString(trace.buff);
-
-			if (count < 128)
+			if (str.empty())
 			{
 				break;
 			}
 
+			OutputDebugString(str.c_str());
+			OutputDebugString("\n");
 		}
-		
+
 		trace.ss.clear();
-		//trace.ss.seekp(0, std::ios::beg);
-		trace.ss.seekg(count-128, std::ios::cur);
 
 		return trace;
 	}
 };
 
-#define TRACE(message) Trace::GetTrace () << message << Trace::Endl
+#define TRACE(message) Trace::GetTrace () << message << Trace::endl
 
 #else
 #define TRACE(message)
