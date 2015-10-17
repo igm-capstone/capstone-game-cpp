@@ -412,8 +412,8 @@ Matrix4 Matrix4::lookToLH(const Vector3& direction, const Vector3& position, con
 Matrix4 Matrix4::lookAtLH(const Vector3& target, const Vector3& position, const Vector3& up)
 {
 	Vector4 f = normalize(Vector4(target - position, 0.0f));
-	Vector4 s = normalize(cross(f, up));
-	Vector4 u = cross(s, f);
+	Vector4 s = normalize(cross(up, f));
+	Vector4 u = cross(f, s);
 	Vector4 t = Vector4(position, 1.0f);
 
 	return Matrix4(s, u, f, t).inverse();

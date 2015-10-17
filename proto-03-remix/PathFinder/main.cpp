@@ -134,14 +134,10 @@ public:
 		graph.grid[4][3].weight = 100;
 
 
-		mQuadShaderData.View = mViewMatrix;
-		mQuadShaderData.Projection = mProjectionMatrix;
-		mQuadShaderData.Color = gWallColor;
-		mDeviceContext->UpdateSubresource(mQuadShaderBuffer, 0, NULL, &mQuadShaderData, 0, 0);
+		
 	}
-	void VUpdate(double milliseconds) override {
-
-
+	void VUpdate(double milliseconds) override 
+	{
 		if ((&Input::SharedInstance())->GetKeyDown(KEYCODE_UP))
 		{
 			TRACE("Treta" << 1 << " " << 1.0f << true);
@@ -211,6 +207,7 @@ public:
 		mDeviceContext->VSSetShader(mQuadVertexShader, NULL, 0);
 		mDeviceContext->PSSetShader(mQuadPixelShader, NULL, 0);
 
+		mDeviceContext->UpdateSubresource(mQuadShaderBuffer, 0, NULL, &mQuadShaderData, 0, 0);
 		mDeviceContext->VSSetConstantBuffers(0, 1, &mQuadShaderBuffer);
 
 		mRenderer->VBindMesh(mWallMesh);
@@ -226,8 +223,12 @@ public:
 		float aspectRatio = (float)mOptions.mWindowWidth / mOptions.mWindowHeight;
 		float halfHeight = 33.5f;
 		float halfWidth = 33.5f * aspectRatio;
-		mProjectionMatrix	= mat4f::normalizedOrthographicLH(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.3f, 1000.0f).transpose();
-		mViewMatrix			= mat4f::lookAtLH(vec3f(0.0f, 0.0f, 0.0f), vec3f(0.0f, 0.0f, -30.0f), vec3f(0.0f, 1.0f, 0.0f)).transpose();
+		mProjectionMatrix = mat4f::normalizedOrthographicLH(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.3f, 1000.0f).transpose();
+		mViewMatrix = mat4f::lookAtLH(vec3f(0.0f, 0.0f, 1.0f), vec3f(0.0f, 0.0f, -30.0f), vec3f(0.0f, 1.0f, 0.0f)).transpose();
+
+		mQuadShaderData.View = mViewMatrix;
+		mQuadShaderData.Projection = mProjectionMatrix;
+		mQuadShaderData.Color = gWallColor;
 	}
 
 	void InitializeLevel()
@@ -266,7 +267,7 @@ public:
 		{
 			for (int i = 0; i < size; i++)
 			{
-				(*transforms)[i] = (mat4f::scale(scales[i]) * mat4f::rotateZ(rotations[i].z * PI / 180.0f) * mat4f::translate(positions[i])).transpose();
+				(*transforms)[i] = (mat4f::scale(scales[i]) * mat4f::rotateY(PI) * mat4f::translate(positions[i])).transpose();
 			}
 			break;
 		}
@@ -323,10 +324,10 @@ public:
 	{
 		vec3f quadVertices[4] =
 		{
-			{ -1.0f, -1.0f, 0.0f },
-			{ +1.0f, -1.0f, 0.0f },
-			{ +1.0f, +1.0f, 0.0f },
-			{ -1.0f, +1.0f, 0.0f }
+			{ -0.85f, -0.85f, 0.0f },
+			{ +0.85f, -0.85f, 0.0f },
+			{ +0.85f, +0.85f, 0.0f },
+			{ -0.85f, +0.85f, 0.0f }
 		};
 
 		uint16_t quadIndices[6] = { 0, 1, 2, 2, 3, 0 };

@@ -2,7 +2,7 @@ struct Vertex
 {
 	float3		mPosition	: POSITION;
 	float4x4	mWorld		: WORLD;
-	uint		mInstanceID	: SV_InstanceID;
+//	uint		mInstanceID	: SV_InstanceID;
 };
 
 struct Pixel
