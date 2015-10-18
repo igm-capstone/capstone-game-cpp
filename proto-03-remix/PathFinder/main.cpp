@@ -194,7 +194,16 @@ public:
 		mRenderer->VSwapBuffers();
 	}
 
-	void VShutdown() override {}
+	void VShutdown() override {
+		mCircleMesh->~IMesh();
+		mWallMesh->~IMesh();
+		
+		ReleaseMacro(mQuadInputLayout);
+		ReleaseMacro(mQuadVertexShader);
+		ReleaseMacro(mQuadPixelShader);
+		ReleaseMacro(mQuadShaderBuffer);
+		ReleaseMacro(mWallInstanceBuffer);
+	}
 	void VOnResize() override {}
 #pragma endregion
 
