@@ -24,7 +24,7 @@ Pixel main(Vertex vertex)
 	matrix clip = mul(mul(vertex.mWorld, view), projection);
 
 	Pixel pixel;
-	pixel.mPositionH = mul(float4(vertex.mPosition, 1.0f), clip);
+	pixel.mPositionH = mul(float4(vertex.mPosition.xy, 14.0f, 1.0f), clip);
 	pixel.mColor = color * (vertex.mColorswitch+ 1.0f)/2;
 
 	return pixel;
