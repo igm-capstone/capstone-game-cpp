@@ -23,7 +23,7 @@ using namespace Rig3D;
 typedef cliqCity::memory::LinearAllocator LinearAllocator;
 
 static const vec4f gWallColor = { 1.0f, 0.0f, 1.0f, 1.0f };
-
+static const vec4f gCircleColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 static const int gCircleVertexCount = 13;
 static const int gCircleIndexCount	= 36;	// Indices = (vertices - 1) * 3
 
@@ -69,11 +69,12 @@ public:
 
 	mat4f*							mWallTransforms;
 	mat4f*							mBlockTransforms;
-	mat4f*							mLightTransforms;
+	mat4f*							mCircleTransforms;
+	float*							mCircleColorWeights;
 
 	int								mWallCount;
 	int								mBlockCount;
-	int								mLightCount;
+	int								mCircleCount;
 
 	IMesh*							mWallMesh;
 	IMesh*							mRobotMesh;
@@ -92,6 +93,12 @@ public:
 	ID3D11PixelShader*				mQuadPixelShader;
 	ID3D11Buffer*					mQuadShaderBuffer;
 	ID3D11Buffer*					mWallInstanceBuffer;
+
+	ID3D11InputLayout*				mCircleInputLayout;
+	ID3D11VertexShader*				mCircleVertexShader;
+	ID3D11PixelShader*				mCirclePixelShader;
+	ID3D11Buffer*					mCircleInstanceBuffer;
+	ID3D11Buffer*					mColorWeightInstanceBuffer;
 
 #pragma region IScene Override
 	Proto_03_Remix() :
@@ -121,7 +128,8 @@ public:
 
 		InitializeLevel();
 		InitializeGeometry();
-		InitializeShaders();
+		InitializeWallShaders();
+		InitializeLightShaders();
 		InitializeCamera();
 
 		// TO DO: Make Initialize function (InitializeGraph)
@@ -190,6 +198,7 @@ public:
 			0);
 
 		RenderWalls();
+		RenderLightCircles();
 
 		mRenderer->VSwapBuffers();
 	}
@@ -216,6 +225,7 @@ public:
 		mDeviceContext->VSSetShader(mQuadVertexShader, NULL, 0);
 		mDeviceContext->PSSetShader(mQuadPixelShader, NULL, 0);
 
+		mQuadShaderData.Color = gWallColor;
 		mDeviceContext->UpdateSubresource(mQuadShaderBuffer, 0, NULL, &mQuadShaderData, 0, 0);
 		mDeviceContext->VSSetConstantBuffers(0, 1, &mQuadShaderBuffer);
 
@@ -224,6 +234,29 @@ public:
 
 		mDeviceContext->DrawIndexedInstanced(mWallMesh->GetIndexCount(), mWallCount, 0, 0, 0);
 	}
+
+	void RenderLightCircles()
+	{
+		const UINT stride = sizeof(mat4f);
+		const UINT offset = 0;
+
+		const UINT Colorstride = sizeof(float);
+
+		mDeviceContext->IASetInputLayout(mCircleInputLayout);
+		mDeviceContext->VSSetShader(mCircleVertexShader, NULL, 0);
+		mDeviceContext->PSSetShader(mQuadPixelShader, NULL, 0);
+
+		mQuadShaderData.Color = gCircleColor;
+		mDeviceContext->UpdateSubresource(mQuadShaderBuffer, 0, NULL, &mQuadShaderData, 0, 0);
+		mDeviceContext->VSSetConstantBuffers(0, 1, &mQuadShaderBuffer);
+
+		mRenderer->VBindMesh(mCircleMesh);
+		mDeviceContext->IASetVertexBuffers(1, 1, &mCircleInstanceBuffer, &stride, &offset);
+		mDeviceContext->IASetVertexBuffers(2, 1, &mColorWeightInstanceBuffer, &Colorstride, &offset);
+
+		mDeviceContext->DrawIndexedInstanced(mCircleMesh->GetIndexCount(), mCircleCount, 0, 0, 0);
+	}
+
 #pragma endregion 
 
 #pragma region Initialization
@@ -237,7 +270,6 @@ public:
 
 		mQuadShaderData.View = mViewMatrix;
 		mQuadShaderData.Projection = mProjectionMatrix;
-		mQuadShaderData.Color = gWallColor;
 	}
 
 	void InitializeLevel()
@@ -254,8 +286,14 @@ public:
 		mBlockCount = levelReader.mBlocks.Position.size();
 
 		// Lights
-		LoadTransforms(&mLightTransforms, &levelReader.mLights[0], NULL, NULL, levelReader.mLights.size(), 1);
-		mLightCount = levelReader.mLights.size();
+		LoadTransforms(&mCircleTransforms, &levelReader.mLights[0], NULL, NULL, levelReader.mLights.size(), 1);
+		mCircleCount = levelReader.mLights.size();
+		
+		mCircleColorWeights = (float*)mSceneAllocator.Allocate(sizeof(float)*mCircleCount,alignof(float),0);
+		for (int i = 0;  i < mCircleCount; i++)
+		{
+			mCircleColorWeights[i] = 1.0f;
+		}
 
 		// Player
 		mPlayer = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject), alignof(SceneObject), 0));
@@ -284,7 +322,7 @@ public:
 		{
 			for (int i = 0; i < size; i++)
 			{
-				(*transforms)[i] = mat4f::translate(positions[i]).transpose();
+				(*transforms)[i] = (mat4f::rotateY(PI) *mat4f::translate(positions[i])).transpose();
 			}
 			break;
 		}
@@ -333,10 +371,10 @@ public:
 	{
 		vec3f quadVertices[4] =
 		{
-			{ -0.85f, -0.85f, 0.0f },
-			{ +0.85f, -0.85f, 0.0f },
-			{ +0.85f, +0.85f, 0.0f },
-			{ -0.85f, +0.85f, 0.0f }
+			{ -0.85f, -0.85f, -1.0f },
+			{ +0.85f, -0.85f, -1.0f },
+			{ +0.85f, +0.85f, -1.0f },
+			{ -0.85f, +0.85f, -1.0f }
 		};
 
 		uint16_t quadIndices[6] = { 0, 1, 2, 2, 3, 0 };
@@ -371,7 +409,7 @@ public:
 		mRenderer->VSetMeshIndexBufferData(mCircleMesh, circleIndices, gCircleIndexCount, GPU_MEMORY_USAGE_STATIC);
 	}
 
-	void InitializeShaders()
+	void InitializeWallShaders()
 	{
 		D3D11_INPUT_ELEMENT_DESC inputDescription[] =
 		{
@@ -379,7 +417,7 @@ public:
 			{ "WORLD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
 			{ "WORLD", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
 			{ "WORLD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-			{ "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
 		};
 
 		ID3DBlob* vsBlob;
@@ -443,6 +481,70 @@ public:
 		quadBufferDataDesc.StructureByteStride = 0;
 
 		mDevice->CreateBuffer(&quadBufferDataDesc, NULL, &mQuadShaderBuffer);
+	}
+
+	void InitializeLightShaders()
+	{
+		D3D11_INPUT_ELEMENT_DESC inputDescription[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "WORLD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "WORLD", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "WORLD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32_FLOAT, 2, 64, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
+		};
+
+		ID3DBlob* vsBlob;
+		D3DReadFileToBlob(L"CircleVertexShader.cso", &vsBlob);
+
+		// Create the shader on the device
+		mDevice->CreateVertexShader(
+			vsBlob->GetBufferPointer(),
+			vsBlob->GetBufferSize(),
+			NULL,
+			&mCircleVertexShader);
+
+		// Before cleaning up the data, create the input layout
+		if (inputDescription) {
+			mDevice->CreateInputLayout(
+				inputDescription,					// Reference to Description
+				6,									// Number of elments inside of Description
+				vsBlob->GetBufferPointer(),
+				vsBlob->GetBufferSize(),
+				&mCircleInputLayout);
+		}
+
+		// Clean up
+		vsBlob->Release();
+
+		// Instance buffer
+		D3D11_BUFFER_DESC circleInstanceBufferDesc;
+		circleInstanceBufferDesc.ByteWidth = sizeof(mat4f) * mCircleCount;
+		circleInstanceBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		circleInstanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		circleInstanceBufferDesc.CPUAccessFlags = 0;
+		circleInstanceBufferDesc.MiscFlags = 0;
+		circleInstanceBufferDesc.StructureByteStride = 0;
+
+		D3D11_SUBRESOURCE_DATA instanceData;
+		instanceData.pSysMem = mCircleTransforms;
+
+		mDevice->CreateBuffer(&circleInstanceBufferDesc, &instanceData, &mCircleInstanceBuffer);
+		
+		// Coloer Weight buffer
+		D3D11_BUFFER_DESC colorWeightsInstanceBufferDesc;
+		colorWeightsInstanceBufferDesc.ByteWidth = sizeof(float) * mCircleCount;
+		colorWeightsInstanceBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		colorWeightsInstanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		colorWeightsInstanceBufferDesc.CPUAccessFlags = 0;
+		colorWeightsInstanceBufferDesc.MiscFlags = 0;
+		colorWeightsInstanceBufferDesc.StructureByteStride = 0;
+
+		//D3D11_SUBRESOURCE_DATA instanceData;
+		instanceData.pSysMem = mCircleColorWeights;
+
+		mDevice->CreateBuffer(&colorWeightsInstanceBufferDesc, &instanceData, &mColorWeightInstanceBuffer);
 	}
 
 #pragma endregion 
