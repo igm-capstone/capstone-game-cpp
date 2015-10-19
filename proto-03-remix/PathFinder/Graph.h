@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstdint>
-#include <cfloat>
+//#include <cstdint>
+//#include <cfloat>
 #include <vector>
 #include "trace.h"
 #include <memory>
@@ -10,39 +10,40 @@ namespace PathFinder
 {
 	using namespace std;
 
-	struct Node {
+	struct INode {
 		float weight;
 		int16_t x;
 		int16_t y;
 		
-		Node() : weight(1), x(0), y(0) {}
-		Node(int16_t _x, int16_t _y) : weight(1), x(_x), y(_y) {}
-		Node(int16_t _x, int16_t _y, float _weight) : weight(_weight), x(_x), y(_y) {}
+		INode() : weight(1), x(0), y(0) {}
+		INode(int16_t _x, int16_t _y) : weight(1), x(_x), y(_y) {}
+		INode(int16_t _x, int16_t _y, float _weight) : weight(_weight), x(_x), y(_y) {}
 
-		bool operator==(const Node& rhs) const
+		bool operator==(const INode& rhs) const
 		{
 			return x == rhs.x && y == rhs.y && weight == rhs.weight;
 		}
 	};
 
+	template<class T>
 	struct Connection
 	{
 		float cost;
-		Node* from;
-		Node* to;
+		T* from;
+		T* to;
 
 		Connection() : cost(1), from(nullptr), to(nullptr) {}
-		Connection(float _cost, Node* _from, Node* _to) : cost(_cost), from(_from), to(_to) {}
+		Connection(float _cost, T* _from, T* _to) : cost(_cost), from(_from), to(_to) {}
 	};
 
 
-	template<int width, int height>
+	template<class T, int width, int height>
 	class Graph
 	{
 	private:
 
 	public:
-		Node grid[width][height] = {};
+		T grid[width][height] = {};
 		Graph()
 		{
 			TRACE("Hello " << 1);
@@ -62,7 +63,7 @@ namespace PathFinder
 
 		}
 
-		float Heuristic(Node* from, Node* to) const
+		float Heuristic(T* from, T* to) const
 		{
 			auto dx = abs(from->x - to->x);
 			auto dy = abs(from->y - to->y);
@@ -71,10 +72,10 @@ namespace PathFinder
 			auto d = fmin(dx, dy);
 
 			// Manhattan distance on a square grid
-			return abs(dx - dy) + (d * 1.4f);
+			return (float) (abs(dx - dy) + (d * 1.4f));
 		}
 
-		vector<Connection>* GetNodeConnections(Node* node)
+		vector<Connection<T>>* GetNodeConnections(T* node)
 		{
 			auto x = node->x;
 			auto y = node->y;
@@ -83,7 +84,7 @@ namespace PathFinder
 			auto notRightEdge = x < width - 1;
 			auto notBottomEdge = y > 0;
 			auto notTopEdge = y < height - 1;
-			auto connections = new vector<Connection>();
+			auto connections = new vector<Connection<T>>();
 			connections->reserve(8);
 
 			if (notTopEdge) CreateConnectionIfValid(connections, node, &grid[x][ y + 1]);
@@ -98,13 +99,13 @@ namespace PathFinder
 			return connections;
 		}
 
-		void CreateConnectionIfValid(vector<Connection>* list, Node* nodeFrom, Node* nodeTo)
+		void CreateConnectionIfValid(vector<Connection<T>>* list, T* nodeFrom, T* nodeTo)
 		{
 			if (nodeTo->weight < FLT_MAX)
 			{
 				// 1.4 for diagonals and 1 for horizontal or vertical connections
 				auto cost = nodeFrom->x == nodeTo->x || nodeFrom->x == nodeTo->x ? 1 : 1.4f;
-				auto conn = Connection(cost, nodeFrom, nodeTo);
+				auto conn = Connection<T>(cost, nodeFrom, nodeTo);
 				
 				list->push_back(conn);
 			}

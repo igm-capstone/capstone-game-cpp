@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="LevelReader.cpp" />
+    <ClCompile Include="Node.cpp" />
     <ClCompile Include="PathFinder\main.cpp" />
     <ClCompile Include="SceneObject.cpp" />
   </ItemGroup>
@@ -147,6 +148,7 @@
   <ItemGroup>
     <ClInclude Include="Grid.h" />
     <ClInclude Include="LevelReader.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="PathFinder\Graph.h" />
     <ClInclude Include="PathFinder\Fringe.h" />
     <ClInclude Include="SceneObject.h" />

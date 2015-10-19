@@ -9,12 +9,12 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <fstream>
-#include "PathFinder\Graph.h"
 #include "Fringe.h"
 #include "SceneObject.h"
 #include "LevelReader.h"
 #include "Rig3D/GraphicsMath/cgm.h"
 #include "Vertex.h"
+#include "Grid.h"
 
 #define PI 3.1415926535f
 
@@ -37,7 +37,7 @@ char gDynamicMeshMemory[gMeshMemorySize];
 
 class Proto_03_Remix : public IScene, public virtual IRendererDelegate
 {
-	PathFinder::Graph<10, 10> graph;
+	Grid& grid = grid.getInstance();
 
 public:
 
@@ -133,13 +133,13 @@ public:
 		InitializeCamera();
 
 		// TO DO: Make Initialize function (InitializeGraph)
-		graph = PathFinder::Graph<10, 10>();
+		/*graph = PathFinder::Graph<Node, 10, 10>();
 		graph.grid[4][8].weight = 100;
 		graph.grid[4][7].weight = 100;
 		graph.grid[4][6].weight = 100;
 		graph.grid[4][5].weight = 100;
 		graph.grid[4][4].weight = 100;
-		graph.grid[4][3].weight = 100;
+		graph.grid[4][3].weight = 100;*/
 
 
 		
@@ -148,37 +148,9 @@ public:
 	{
 		if ((&Input::SharedInstance())->GetKeyDown(KEYCODE_UP))
 		{
-			TRACE("Treta" << 1 << " " << 1.0f << true);
-
-			auto search = PathFinder::Fringe<10, 10>(graph);
-
-			auto start = &graph.grid[1][5];
-			auto end = &graph.grid[8][5];
-
-			auto result = search.FindPath(start, end);
-
-			std::stringstream ss;
-			for (int y = 0; y < 10; y++)
-			{
-				for (int x = 0; x < 10; x++)
-				{
-					bool inPath = false;
-					for (auto it = result.path.begin(); it != result.path.end(); ++it)
-					{
-						if (**it == graph.grid[x][y])
-						{
-							inPath = true;
-							break;
-						}
-					}
-
-					ss << " " << (inPath ? 'X' : graph.grid[x][y].weight > 1 ? '#' : 'O');
-				}
-				ss << std::endl;
-			}
-
-			TRACE(ss.str());
-
+			auto start = Vector3(10, 20, 0);
+			auto end = Vector3(-20, -20, 0);
+			grid.GetFringePath(start, end);
 		}
 	}
 

@@ -1,44 +1,47 @@
 #pragma once
 #include <list>
-#include <map>
+#include <unordered_map>
 #include "Graph.h"
 
 namespace PathFinder
 {
 	using namespace std;
 
+	template<class T>
 	struct SearchResult
 	{
 		float pathCost;
-		list<Node*> path;
+		list<T*> path;
 	};
 
+	template<class T>
 	struct CacheData
 	{
-		Node* parent;
+		T* parent;
 		float cost;
 	};
 
-	template<int width, int height>
+	template<class T, int width, int height>
 	class Fringe
 	{
 	private:
-		unordered_map<Node*, CacheData> cache;
-		Graph<width, height> graph;
+		unordered_map<T*, CacheData<T>> cache;
 
 	public:
-		Fringe(Graph<width, height> _graph) : graph(_graph) {}
+		Graph<T, width, height> graph;
+		Fringe() {}
+		Fringe(Graph<T, width, height> _graph) : graph(_graph) {}
 		~Fringe() {}
 
-		SearchResult FindPath(Node* startNode, Node* endNode)
+		SearchResult<T> FindPath(T* startNode, T* endNode)
 		{
-			auto result = SearchResult();
-			auto fringe = list<Node*>();
+			auto result = SearchResult<T>();
+			auto fringe = list<T*>();
 			auto fLimit = graph.Heuristic(startNode, endNode);
 			auto found = false;
 
 			fringe.push_front(startNode);
-			cache[startNode] = CacheData();
+			cache[startNode] = CacheData<T>();
 
 			auto itCount = 0;
 
@@ -69,9 +72,9 @@ namespace PathFinder
 					}
 
 					auto connections = graph.GetNodeConnections(node);
-					for(Connection conn : *connections)
+					for(Connection<T> conn : *connections)
 					{
-						Node* connNode = conn.to;
+						T* connNode = conn.to;
 						auto connCost = nodeData.cost + conn.cost * connNode->weight;
 
 						auto connData = cache[connNode];
