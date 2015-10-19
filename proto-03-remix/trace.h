@@ -3,6 +3,7 @@
 #if defined _DEBUG
 #include <sstream>
 #include <string>
+#include <Windows.h>
 #include <debugapi.h>
 
 class Trace
