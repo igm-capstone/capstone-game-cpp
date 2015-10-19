@@ -151,7 +151,7 @@ public:
 	}
 	void VUpdate(double milliseconds) override
 	{
-		float mPlayerSpeed = 1.0f;
+		float mPlayerSpeed = 0.005f;
 		bool moved = false;
 
 		if ((&Input::SharedInstance())->GetKeyDown(KEYCODE_F))
@@ -161,22 +161,22 @@ public:
 			grid.GetFringePath(start, end);
 		}
 		
-		if ((&Input::SharedInstance())->GetKeyDown(KEYCODE_LEFT))
+		if ((&Input::SharedInstance())->GetKey(KEYCODE_LEFT))
 		{
 			mPlayer->mTransform.mPosition.x -= mPlayerSpeed;
 			UpdatePlayer();
 		}
-		else if ((&Input::SharedInstance())->GetKeyDown(KEYCODE_RIGHT))
+		else if ((&Input::SharedInstance())->GetKey(KEYCODE_RIGHT))
 		{
 			mPlayer->mTransform.mPosition.x += mPlayerSpeed;
 			UpdatePlayer();
 		}
-		else if ((&Input::SharedInstance())->GetKeyDown(KEYCODE_UP))
+		else if ((&Input::SharedInstance())->GetKey(KEYCODE_UP))
 		{
 			mPlayer->mTransform.mPosition.y += mPlayerSpeed;
 			UpdatePlayer();
 		}
-		else if ((&Input::SharedInstance())->GetKeyDown(KEYCODE_DOWN))
+		else if ((&Input::SharedInstance())->GetKey(KEYCODE_DOWN))
 		{
 			mPlayer->mTransform.mPosition.y -= mPlayerSpeed;
 			UpdatePlayer();
