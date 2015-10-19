@@ -25,7 +25,7 @@ Pixel main(Vertex vertex)
 
 	Pixel pixel;
 	pixel.mPositionH = mul(float4(vertex.mPosition, 1.0f), clip);
-	pixel.mColor = color * vertex.mColorswitch;
+	pixel.mColor = color * (vertex.mColorswitch+ 1.0f)/2;
 
 	return pixel;
 }
