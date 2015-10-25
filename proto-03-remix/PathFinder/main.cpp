@@ -9,12 +9,12 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <fstream>
-#include "PathFinder\Graph.h"
 #include "Fringe.h"
 #include "SceneObject.h"
 #include "LevelReader.h"
 #include "Rig3D/GraphicsMath/cgm.h"
 #include "Vertex.h"
+#include "Grid.h"
 
 #define PI 3.1415926535f
 
@@ -23,7 +23,8 @@ using namespace Rig3D;
 typedef cliqCity::memory::LinearAllocator LinearAllocator;
 
 static const vec4f gWallColor = { 1.0f, 0.0f, 1.0f, 1.0f };
-
+static const vec4f gCircleColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+static const vec4f gPlayerColor = { 0.0f, 0.0f, 1.0f, 1.0f };
 static const int gCircleVertexCount = 13;
 static const int gCircleIndexCount	= 36;	// Indices = (vertices - 1) * 3
 
@@ -37,7 +38,7 @@ char gDynamicMeshMemory[gMeshMemorySize];
 
 class Proto_03_Remix : public IScene, public virtual IRendererDelegate
 {
-	PathFinder::Graph<10, 10> graph;
+	Grid& grid = grid.getInstance();
 
 public:
 
@@ -69,11 +70,13 @@ public:
 
 	mat4f*							mWallTransforms;
 	mat4f*							mBlockTransforms;
-	mat4f*							mLightTransforms;
+	mat4f*							mCircleTransforms;
+	float*							mCircleColorWeights;
+	mat4f							mPlayerTransform;
 
 	int								mWallCount;
 	int								mBlockCount;
-	int								mLightCount;
+	int								mCircleCount;
 
 	IMesh*							mWallMesh;
 	IMesh*							mRobotMesh;
@@ -92,6 +95,14 @@ public:
 	ID3D11PixelShader*				mQuadPixelShader;
 	ID3D11Buffer*					mQuadShaderBuffer;
 	ID3D11Buffer*					mWallInstanceBuffer;
+
+	ID3D11InputLayout*				mCircleInputLayout;
+	ID3D11VertexShader*				mCircleVertexShader;
+	ID3D11PixelShader*				mCirclePixelShader;
+	ID3D11Buffer*					mCircleInstanceBuffer;
+	ID3D11Buffer*					mColorWeightInstanceBuffer;
+
+	ID3D11Buffer*					mPlayerInstanceBuffer;
 
 #pragma region IScene Override
 	Proto_03_Remix() :
@@ -121,63 +132,62 @@ public:
 
 		InitializeLevel();
 		InitializeGeometry();
-		InitializeShaders();
+		InitializeWallShaders();
+		InitializeLightShaders();
+		InitializePlayerShaders();
 		InitializeCamera();
 
 		// TO DO: Make Initialize function (InitializeGraph)
-		graph = PathFinder::Graph<10, 10>();
+		/*graph = PathFinder::Graph<Node, 10, 10>();
 		graph.grid[4][8].weight = 100;
 		graph.grid[4][7].weight = 100;
 		graph.grid[4][6].weight = 100;
 		graph.grid[4][5].weight = 100;
 		graph.grid[4][4].weight = 100;
-		graph.grid[4][3].weight = 100;
+		graph.grid[4][3].weight = 100;*/
 
 
-		
+
 	}
-	void VUpdate(double milliseconds) override 
+	void VUpdate(double milliseconds) override
 	{
-		if ((&Input::SharedInstance())->GetKeyDown(KEYCODE_UP))
+		float mPlayerSpeed = 0.005f;
+		bool moved = false;
+
+		if ((&Input::SharedInstance())->GetKeyDown(KEYCODE_F))
 		{
-			TRACE("Treta" << 1 << " " << 1.0f << true);
-
-			auto search = PathFinder::Fringe<10, 10>(graph);
-
-			auto start = &graph.grid[1][5];
-			auto end = &graph.grid[8][5];
-
-			auto result = search.FindPath(start, end);
-
-			std::stringstream ss;
-			for (int y = 0; y < 10; y++)
-			{
-				for (int x = 0; x < 10; x++)
-				{
-					bool inPath = false;
-					for (auto it = result.path.begin(); it != result.path.end(); ++it)
-					{
-						if (**it == graph.grid[x][y])
-						{
-							inPath = true;
-							break;
-						}
-					}
-
-					ss << " " << (inPath ? 'X' : graph.grid[x][y].weight > 1 ? '#' : 'O');
-				}
-				ss << std::endl;
-			}
-
-			TRACE(ss.str());
-
+			auto start = Vector3(10, 20, 0);
+			auto end = Vector3(-20, -20, 0);
+			grid.GetFringePath(start, end);
 		}
+		
+		if ((&Input::SharedInstance())->GetKey(KEYCODE_LEFT))
+		{
+			mPlayer->mTransform.mPosition.x -= mPlayerSpeed;
+			UpdatePlayer();
+		}
+		else if ((&Input::SharedInstance())->GetKey(KEYCODE_RIGHT))
+		{
+			mPlayer->mTransform.mPosition.x += mPlayerSpeed;
+			UpdatePlayer();
+		}
+		else if ((&Input::SharedInstance())->GetKey(KEYCODE_UP))
+		{
+			mPlayer->mTransform.mPosition.y += mPlayerSpeed;
+			UpdatePlayer();
+		}
+		else if ((&Input::SharedInstance())->GetKey(KEYCODE_DOWN))
+		{
+			mPlayer->mTransform.mPosition.y -= mPlayerSpeed;
+			UpdatePlayer();
+		}
+
 	}
 
 	void VRender() override
 	{
 		float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		
+
 		mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_TRIANGLE);
 
 		mDeviceContext->RSSetViewports(1, &mRenderer->GetViewport());
@@ -190,11 +200,30 @@ public:
 			0);
 
 		RenderWalls();
+		RenderLightCircles();
+		RenderPlayer();
 
 		mRenderer->VSwapBuffers();
 	}
 
-	void VShutdown() override {}
+	void VShutdown() override {
+		mCircleMesh->~IMesh();
+		mWallMesh->~IMesh();
+
+		ReleaseMacro(mQuadInputLayout);
+		ReleaseMacro(mQuadVertexShader);
+		ReleaseMacro(mQuadPixelShader);
+		ReleaseMacro(mQuadShaderBuffer);
+		ReleaseMacro(mWallInstanceBuffer);
+
+		ReleaseMacro(mCircleInputLayout);
+		ReleaseMacro(mCircleVertexShader);
+		ReleaseMacro(mCirclePixelShader);
+		ReleaseMacro(mCircleInstanceBuffer);
+		ReleaseMacro(mColorWeightInstanceBuffer);
+
+		ReleaseMacro(mPlayerInstanceBuffer);
+	}
 	void VOnResize() override {}
 #pragma endregion
 
@@ -207,6 +236,7 @@ public:
 		mDeviceContext->VSSetShader(mQuadVertexShader, NULL, 0);
 		mDeviceContext->PSSetShader(mQuadPixelShader, NULL, 0);
 
+		mQuadShaderData.Color = gWallColor;
 		mDeviceContext->UpdateSubresource(mQuadShaderBuffer, 0, NULL, &mQuadShaderData, 0, 0);
 		mDeviceContext->VSSetConstantBuffers(0, 1, &mQuadShaderBuffer);
 
@@ -215,6 +245,58 @@ public:
 
 		mDeviceContext->DrawIndexedInstanced(mWallMesh->GetIndexCount(), mWallCount, 0, 0, 0);
 	}
+
+	void RenderLightCircles()
+	{
+		const UINT stride = sizeof(mat4f);
+		const UINT offset = 0;
+
+		const UINT Colorstride = sizeof(float);
+
+		mDeviceContext->IASetInputLayout(mCircleInputLayout);
+		mDeviceContext->VSSetShader(mCircleVertexShader, NULL, 0);
+		mDeviceContext->PSSetShader(mQuadPixelShader, NULL, 0);
+
+		mQuadShaderData.Color = gCircleColor;
+		mDeviceContext->UpdateSubresource(mQuadShaderBuffer, 0, NULL, &mQuadShaderData, 0, 0);
+		mDeviceContext->VSSetConstantBuffers(0, 1, &mQuadShaderBuffer);
+
+		mRenderer->VBindMesh(mCircleMesh);
+		mDeviceContext->IASetVertexBuffers(1, 1, &mCircleInstanceBuffer, &stride, &offset);
+		mDeviceContext->IASetVertexBuffers(2, 1, &mColorWeightInstanceBuffer, &Colorstride, &offset);
+
+		mDeviceContext->DrawIndexedInstanced(mCircleMesh->GetIndexCount(), mCircleCount, 0, 0, 0);
+	}
+
+	void RenderPlayer()
+	{
+		const UINT stride = sizeof(mat4f);
+		const UINT offset = 0;
+		mDeviceContext->IASetInputLayout(mQuadInputLayout);
+		mDeviceContext->VSSetShader(mQuadVertexShader, NULL, 0);
+		mDeviceContext->PSSetShader(mQuadPixelShader, NULL, 0);
+
+		mQuadShaderData.Color = gPlayerColor;
+		mDeviceContext->UpdateSubresource(mQuadShaderBuffer, 0, NULL, &mQuadShaderData, 0, 0);
+		mDeviceContext->VSSetConstantBuffers(0, 1, &mQuadShaderBuffer);
+
+		mRenderer->VBindMesh(mWallMesh);
+		mDeviceContext->IASetVertexBuffers(1, 1, &mPlayerInstanceBuffer, &stride, &offset);
+
+		mDeviceContext->DrawIndexedInstanced(mWallMesh->GetIndexCount(), 1, 0, 0, 0);
+	}
+
+	void UpdatePlayer() {
+		mPlayerTransform = (mat4f::rotateY(PI) *mat4f::translate(mPlayer->mTransform.mPosition)).transpose();
+
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		mDeviceContext->Map(mPlayerInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		// Copy the instances array into the instance buffer.
+		memcpy(mappedResource.pData, &mPlayerTransform, sizeof(mat4f));
+		// Unlock the instance buffer.
+		mDeviceContext->Unmap(mPlayerInstanceBuffer, 0);
+	}
+
 #pragma endregion 
 
 #pragma region Initialization
@@ -228,7 +310,6 @@ public:
 
 		mQuadShaderData.View = mViewMatrix;
 		mQuadShaderData.Projection = mProjectionMatrix;
-		mQuadShaderData.Color = gWallColor;
 	}
 
 	void InitializeLevel()
@@ -245,12 +326,22 @@ public:
 		mBlockCount = levelReader.mBlocks.Position.size();
 
 		// Lights
-		LoadTransforms(&mLightTransforms, &levelReader.mLights[0], NULL, NULL, levelReader.mLights.size(), 1);
-		mLightCount = levelReader.mLights.size();
+		LoadTransforms(&mCircleTransforms, &levelReader.mLights[0], NULL, NULL, levelReader.mLights.size(), 1);
+		mCircleCount = levelReader.mLights.size();
+		
+		mCircleColorWeights = (float*)mSceneAllocator.Allocate(sizeof(float)*mCircleCount,alignof(float),0);
+		for (int i = 0;  i < mCircleCount; i++)
+		{
+			mCircleColorWeights[i] = 1.0f;
+		}
 
 		// Player
 		mPlayer = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject), alignof(SceneObject), 0));
 		mPlayer->mTransform.mPosition = levelReader.mPlayerPos;
+		mPlayer->mTransform.mPosition.x += 1;
+		//Not using Transform.GetWorldMatrix because Scale, rotation and bleh
+		mPlayerTransform = (mat4f::rotateY(PI) *mat4f::translate(mPlayer->mTransform.mPosition)).transpose();
+
 
 		// Goal
 		mGoal = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject), alignof(SceneObject), 0));
@@ -275,7 +366,7 @@ public:
 		{
 			for (int i = 0; i < size; i++)
 			{
-				(*transforms)[i] = mat4f::translate(positions[i]).transpose();
+				(*transforms)[i] = (mat4f::rotateY(PI) *mat4f::translate(positions[i])).transpose();
 			}
 			break;
 		}
@@ -362,7 +453,7 @@ public:
 		mRenderer->VSetMeshIndexBufferData(mCircleMesh, circleIndices, gCircleIndexCount, GPU_MEMORY_USAGE_STATIC);
 	}
 
-	void InitializeShaders()
+	void InitializeWallShaders()
 	{
 		D3D11_INPUT_ELEMENT_DESC inputDescription[] =
 		{
@@ -370,7 +461,7 @@ public:
 			{ "WORLD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
 			{ "WORLD", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
 			{ "WORLD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-			{ "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
 		};
 
 		ID3DBlob* vsBlob;
@@ -434,6 +525,87 @@ public:
 		quadBufferDataDesc.StructureByteStride = 0;
 
 		mDevice->CreateBuffer(&quadBufferDataDesc, NULL, &mQuadShaderBuffer);
+	}
+
+	void InitializeLightShaders()
+	{
+		D3D11_INPUT_ELEMENT_DESC inputDescription[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "WORLD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "WORLD", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "WORLD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32_FLOAT, 2, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
+		};
+
+		ID3DBlob* vsBlob;
+		D3DReadFileToBlob(L"CircleVertexShader.cso", &vsBlob);
+
+		// Create the shader on the device
+		mDevice->CreateVertexShader(
+			vsBlob->GetBufferPointer(),
+			vsBlob->GetBufferSize(),
+			NULL,
+			&mCircleVertexShader);
+
+		// Before cleaning up the data, create the input layout
+		if (inputDescription) {
+			mDevice->CreateInputLayout(
+				inputDescription,					// Reference to Description
+				6,									// Number of elments inside of Description
+				vsBlob->GetBufferPointer(),
+				vsBlob->GetBufferSize(),
+				&mCircleInputLayout);
+		}
+
+		// Clean up
+		vsBlob->Release();
+
+		// Instance buffer
+		D3D11_BUFFER_DESC circleInstanceBufferDesc;
+		circleInstanceBufferDesc.ByteWidth = sizeof(mat4f) * mCircleCount;
+		circleInstanceBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		circleInstanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		circleInstanceBufferDesc.CPUAccessFlags = 0;
+		circleInstanceBufferDesc.MiscFlags = 0;
+		circleInstanceBufferDesc.StructureByteStride = 0;
+
+		D3D11_SUBRESOURCE_DATA instanceData;
+		instanceData.pSysMem = mCircleTransforms;
+
+		mDevice->CreateBuffer(&circleInstanceBufferDesc, &instanceData, &mCircleInstanceBuffer);
+		
+		// Coloer Weight buffer
+		D3D11_BUFFER_DESC colorWeightsInstanceBufferDesc;
+		colorWeightsInstanceBufferDesc.ByteWidth = sizeof(float) * mCircleCount;
+		colorWeightsInstanceBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+		colorWeightsInstanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		colorWeightsInstanceBufferDesc.CPUAccessFlags = 0;
+		colorWeightsInstanceBufferDesc.MiscFlags = 0;
+		colorWeightsInstanceBufferDesc.StructureByteStride = 0;
+
+		//D3D11_SUBRESOURCE_DATA instanceData;
+		instanceData.pSysMem = mCircleColorWeights;
+
+		mDevice->CreateBuffer(&colorWeightsInstanceBufferDesc, &instanceData, &mColorWeightInstanceBuffer);
+	}
+
+	void InitializePlayerShaders() {
+		//Mostly, re-using Walls shaders for now (or forever)
+		// Instance buffer
+		D3D11_BUFFER_DESC playerInstanceBufferDesc;
+		playerInstanceBufferDesc.ByteWidth = sizeof(mat4f);
+		playerInstanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+		playerInstanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		playerInstanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		playerInstanceBufferDesc.MiscFlags = 0;
+		playerInstanceBufferDesc.StructureByteStride = 0;
+
+		D3D11_SUBRESOURCE_DATA instanceData;
+		instanceData.pSysMem = &(mPlayerTransform);
+
+		mDevice->CreateBuffer(&playerInstanceBufferDesc, &instanceData, &mPlayerInstanceBuffer);
 	}
 
 #pragma endregion 
