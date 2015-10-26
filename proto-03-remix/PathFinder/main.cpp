@@ -104,6 +104,14 @@ public:
 
 	ID3D11Buffer*					mPlayerInstanceBuffer;
 
+	ID3D11RenderTargetView*			mShadowCastersRTV;
+	ID3D11Texture2D*				mShadowCastersMap;
+	ID3D11ShaderResourceView*		mShadowCastersSRV;
+	ID3D11PixelShader*				mSingleBufferPixelShader;
+	ID3D11VertexShader*				mSingleBufferVertexShader;
+	D3D11_VIEWPORT					mShadowViewport;
+	ID3D11SamplerState*				mSamplerState;
+	
 #pragma region IScene Override
 	Proto_03_Remix() :
 		mSceneAllocator((void*)gSceneMemory, (void*)(gSceneMemory + gSceneMemorySize)),
@@ -146,9 +154,9 @@ public:
 		graph.grid[4][4].weight = 100;
 		graph.grid[4][3].weight = 100;*/
 
-
-
+		VOnResize();
 	}
+
 	void VUpdate(double milliseconds) override
 	{
 		float mPlayerSpeed = 0.005f;
@@ -186,13 +194,17 @@ public:
 
 	void VRender() override
 	{
-		float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		float black[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 		mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_TRIANGLE);
-
 		mDeviceContext->RSSetViewports(1, &mRenderer->GetViewport());
-		mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), mRenderer->GetDepthStencilView());
-		mDeviceContext->ClearRenderTargetView(*mRenderer->GetRenderTargetView(), color);
+
+		ID3D11RenderTargetView* RTVs[2] = { *(mRenderer->GetRenderTargetView()), mShadowCastersRTV };
+		//mDeviceContext->RSSetViewports(1, &mRenderer->GetViewport());
+		mDeviceContext->OMSetRenderTargets(2, RTVs, mRenderer->GetDepthStencilView());
+		mDeviceContext->ClearRenderTargetView(*mRenderer->GetRenderTargetView(), black);
+		mDeviceContext->ClearRenderTargetView(mShadowCastersRTV, white);
 		mDeviceContext->ClearDepthStencilView(
 			mRenderer->GetDepthStencilView(),
 			D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
@@ -202,6 +214,29 @@ public:
 		RenderWalls();
 		RenderLightCircles();
 		RenderPlayer();
+
+		mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
+		mDeviceContext->PSSetSamplers(0, 1, &mSamplerState);
+		mDeviceContext->IASetInputLayout(mQuadInputLayout);
+		mDeviceContext->VSSetShader(mSingleBufferVertexShader, nullptr, 0);
+		mDeviceContext->PSSetShader(mSingleBufferPixelShader, nullptr, 0);
+		mDeviceContext->PSSetSamplers(0, 1, &mSamplerState);
+		//for (int i = 0; i < 4; i++) {
+			mDeviceContext->RSSetViewports(1, &mShadowViewport);
+			mDeviceContext->ClearDepthStencilView(
+				mRenderer->GetDepthStencilView(),
+				D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+				1.0f,
+				0);
+
+			mDeviceContext->PSSetShaderResources(0, 1, &mShadowCastersSRV);
+
+			mRenderer->VBindMesh(mWallMesh);
+			mRenderer->VDrawIndexed(0, mWallMesh->GetIndexCount());
+		//}
+
+		ID3D11ShaderResourceView* nullSRV[1] = { 0 };
+		mDeviceContext->PSSetShaderResources(0, 1, nullSRV);
 
 		mRenderer->VSwapBuffers();
 	}
@@ -223,8 +258,51 @@ public:
 		ReleaseMacro(mColorWeightInstanceBuffer);
 
 		ReleaseMacro(mPlayerInstanceBuffer);
+
+		ReleaseMacro(mShadowCastersRTV);
+		ReleaseMacro(mShadowCastersMap);
+		ReleaseMacro(mShadowCastersSRV);
+		ReleaseMacro(mSingleBufferPixelShader);
+		ReleaseMacro(mSingleBufferVertexShader);
+		ReleaseMacro(mSamplerState);
 	}
-	void VOnResize() override {}
+
+	void VOnResize() override 
+	{
+		ReleaseMacro(mShadowCastersRTV);
+		ReleaseMacro(mShadowCastersMap);
+		ReleaseMacro(mShadowCastersSRV);
+
+		D3D11_TEXTURE2D_DESC shadowCastersTextureDesc;
+		shadowCastersTextureDesc.Width = mRenderer->GetWindowWidth();
+		shadowCastersTextureDesc.Height = mRenderer->GetWindowHeight();
+		shadowCastersTextureDesc.ArraySize = 1;
+		shadowCastersTextureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+		shadowCastersTextureDesc.CPUAccessFlags = 0;
+		shadowCastersTextureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		shadowCastersTextureDesc.MipLevels = 1;
+		shadowCastersTextureDesc.MiscFlags = 0;
+		shadowCastersTextureDesc.SampleDesc.Count = 1;
+		shadowCastersTextureDesc.SampleDesc.Quality = 0;
+		shadowCastersTextureDesc.Usage = D3D11_USAGE_DEFAULT;
+
+		mDevice->CreateTexture2D(&shadowCastersTextureDesc, nullptr, &mShadowCastersMap);
+
+		D3D11_RENDER_TARGET_VIEW_DESC shadowCastersRTVDesc;
+		shadowCastersRTVDesc.Format = shadowCastersTextureDesc.Format;
+		shadowCastersRTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+		shadowCastersRTVDesc.Texture2D.MipSlice = 0;
+
+		mRenderer->GetDevice()->CreateRenderTargetView(mShadowCastersMap, &shadowCastersRTVDesc, &mShadowCastersRTV);
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC shadowCastersSRVDesc;
+		shadowCastersSRVDesc.Format = shadowCastersTextureDesc.Format;
+		shadowCastersSRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		shadowCastersSRVDesc.Texture2D.MipLevels = 1;
+		shadowCastersSRVDesc.Texture2D.MostDetailedMip = 0;
+
+		mDevice->CreateShaderResourceView(mShadowCastersMap, &shadowCastersSRVDesc, &mShadowCastersSRV);
+	}
 #pragma endregion
 
 #pragma region Render
@@ -310,6 +388,28 @@ public:
 
 		mQuadShaderData.View = mViewMatrix;
 		mQuadShaderData.Projection = mProjectionMatrix;
+
+		float width = static_cast<float>(mRenderer->GetWindowWidth()) * 0.25f;
+		float windowHeight = static_cast<float>(mRenderer->GetWindowHeight());
+		float height = windowHeight / 3.0f;
+		float topY = windowHeight - height;
+
+		mShadowViewport.TopLeftX = 0.0f;
+		mShadowViewport.TopLeftY = topY;
+		mShadowViewport.Width = width;
+		mShadowViewport.Height = height;
+		mShadowViewport.MinDepth = 0;
+		mShadowViewport.MaxDepth = 1;
+
+		D3D11_SAMPLER_DESC samplerDesc;
+		ZeroMemory(&samplerDesc, sizeof(D3D11_SAMPLER_DESC));
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+		mDevice->CreateSamplerState(&samplerDesc, &mSamplerState);
 	}
 
 	void InitializeLevel()
@@ -332,7 +432,10 @@ public:
 		mCircleColorWeights = (float*)mSceneAllocator.Allocate(sizeof(float)*mCircleCount,alignof(float),0);
 		for (int i = 0;  i < mCircleCount; i++)
 		{
-			mCircleColorWeights[i] = 1.0f;
+			if (i < 3)
+				mCircleColorWeights[i] = 1.0f;
+			else
+				mCircleColorWeights[i] = 0.0f;
 		}
 
 		// Player
@@ -525,6 +628,13 @@ public:
 		quadBufferDataDesc.StructureByteStride = 0;
 
 		mDevice->CreateBuffer(&quadBufferDataDesc, NULL, &mQuadShaderBuffer);
+
+		D3DReadFileToBlob(L"SingleBufferPixelShader.cso", &psBlob);
+		mDevice->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &mSingleBufferPixelShader);
+
+		D3DReadFileToBlob(L"SingleBufferVertexShader.cso", &psBlob);
+		mDevice->CreateVertexShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &mSingleBufferVertexShader);
+
 	}
 
 	void InitializeLightShaders()
