@@ -1,5 +1,4 @@
 #pragma once
-#include "Rig3D/GraphicsMath/cgm.h"
 
 template<class Vector>
 struct Ray

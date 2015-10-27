@@ -3,6 +3,7 @@
 #include <cmath>
 #include <algorithm>
 #include <float.h>
+#include "Rig3D/GraphicsMath/cgm.h"
 
 template<class Vector>
 int RaySphereIntersect(Ray<Vector> ray, Sphere<Vector> sphere, Vector& poi, float& t)
@@ -86,5 +87,26 @@ int IntersectRayAABB(Ray<Vector> ray, AABB<Vector> aabb, Vector& poi, float& t)
 
 	poi = ray.origin + ray.normal * tMin;
 	t = tMin;
+	return 1;
+}
+
+template<class Vector>
+int IntersectAABBAABB(AABB<Vector> aabb0, AABB<Vector> aabb1)
+{
+	int numElements = sizeof(Vector) / sizeof(float);
+	
+	Vector min0 = aabb0.origin - aabb0.radius;
+	Vector max0 = aabb0.origin + aabb0.radius;
+	Vector min1 = aabb1.origin - aabb1.radius;
+	Vector max1 = aabb1.origin + aabb1.radius;
+
+	for (int i = 0; i < numElements; i++)
+	{
+		if (max0[i] < min1[i] || min0[i] > max1[i])
+		{
+			return 0;
+		}
+	}
+
 	return 1;
 }
