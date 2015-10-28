@@ -32,8 +32,8 @@ float4 main(Pixel pixel) : SV_TARGET
 
 	step = 0.03;
 	start = 0.4;
-	for (int i = 1; i <= 20; i++) {
-		newCoords = float2(pixel.uv.x + (centerP.x - pixel.uv.x)*(start + step*i), pixel.uv.y + (centerP.y - pixel.uv.y)*(start + step*i));
+	for (int j = 1; j <= 20; j++) {
+		newCoords = float2(pixel.uv.x + (centerP.x - pixel.uv.x)*(start + step*j), pixel.uv.y + (centerP.y - pixel.uv.y)*(start + step*j));
 		newColor = mTexture.Sample(mSampler, newCoords);
 		if (newColor.r == 0)
 		{

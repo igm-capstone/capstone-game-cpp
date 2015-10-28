@@ -9,7 +9,7 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <fstream>
-#include "Fringe.h"
+#include "PathFinder/Fringe.h"
 #include "SceneObject.h"
 #include "LevelReader.h"
 #include "Rig3D/GraphicsMath/cgm.h"
