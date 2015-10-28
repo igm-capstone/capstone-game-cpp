@@ -22,6 +22,35 @@ using namespace Rig3D;
 
 typedef cliqCity::memory::LinearAllocator LinearAllocator;
 
+//class Colors
+//{
+//public:
+//	static const vec4f black;
+//	static const vec4f white;
+//	static const vec4f red;
+//	static const vec4f green;
+//	static const vec4f blue;
+//	static const vec4f cyan;
+//	static const vec4f yellow;
+//	static const vec4f magenta;
+//};
+
+namespace Colors
+{
+	static const vec4f black	= { 0.0f, 0.0f, 0.0f, 1.0f };
+	static const vec4f white	= { 1.0f, 1.0f, 1.0f, 1.0f };
+	static const vec4f red		= { 1.0f, 0.0f, 0.0f, 1.0f };
+	static const vec4f green	= { 0.0f, 1.0f, 0.0f, 1.0f };
+	static const vec4f blue		= { 0.0f, 0.0f, 1.0f, 1.0f };
+	static const vec4f cyan		= { 0.0f, 1.0f, 1.0f, 1.0f };
+	static const vec4f yellow	= { 1.0f, 1.0f, 0.0f, 1.0f };
+	static const vec4f magenta	= { 1.0f, 0.0f, 1.0f, 1.0f };
+}
+
+
+
+
+
 static const vec4f gWallColor = { 1.0f, 0.0f, 1.0f, 1.0f };
 static const vec4f gCircleColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 static const vec4f gPlayerColor = { 0.0f, 0.0f, 1.0f, 1.0f };
@@ -30,6 +59,9 @@ static const int gCircleIndexCount	= 36;	// Indices = (vertices - 1) * 3
 
 static const int gSceneMemorySize	= 20480; 
 static const int gMeshMemorySize	= 1024;
+
+static const int gLineTraceMaxCount = 10;
+static const int gLineTraceVertexCount = 2 * gLineTraceMaxCount;
 
 char gSceneMemory[gSceneMemorySize];
 char gStaticMeshMemory[gMeshMemorySize];
@@ -41,7 +73,6 @@ class Proto_03_Remix : public IScene, public virtual IRendererDelegate
 	Grid& grid = grid.getInstance();
 
 public:
-
 	struct QuadShaderData
 	{
 		mat4f View;
@@ -49,7 +80,20 @@ public:
 		vec4f Color;
 	};
 
+	struct LineTraceShaderData
+	{
+		mat4f View;
+		mat4f Projection;
+	};
+	
+	struct LineTraceVertex
+	{
+		vec4f Color;
+		vec3f Position;
+	};
+
 	QuadShaderData					mQuadShaderData;
+	LineTraceShaderData				mLineTraceShaderData;
 
 	mat4f							mViewMatrix;
 	mat4f							mProjectionMatrix;
@@ -68,6 +112,9 @@ public:
 	SceneObject*					mPlayer;
 	SceneObject*					mGoal;
 
+	LineTraceVertex					mLineTraceVertices[gLineTraceVertexCount];
+	int								mLineTraceDrawCount;
+
 	mat4f*							mWallTransforms;
 	mat4f*							mBlockTransforms;
 	mat4f*							mCircleTransforms;
@@ -83,6 +130,7 @@ public:
 	IMesh*							mCircleMesh;
 	IMesh*							mLightMesh;
 	IMesh*							mPlayerMesh;
+	IMesh*							mLineTraceMesh;
 
 	DX3D11Renderer*					mRenderer;
 	Input*							mInput;
@@ -96,6 +144,12 @@ public:
 	ID3D11Buffer*					mQuadShaderBuffer;
 	ID3D11Buffer*					mWallInstanceBuffer;
 
+	ID3D11InputLayout*				mLineTraceInputLayout;
+	ID3D11VertexShader*				mLineTraceVertexShader;
+	ID3D11PixelShader*				mLineTracePixelShader;
+	ID3D11Buffer*					mLineTraceShaderBuffer;
+	ID3D11Buffer*					mLineTraceInstanceBuffer;
+
 	ID3D11InputLayout*				mCircleInputLayout;
 	ID3D11VertexShader*				mCircleVertexShader;
 	ID3D11PixelShader*				mCirclePixelShader;
@@ -105,6 +159,7 @@ public:
 	ID3D11Buffer*					mPlayerInstanceBuffer;
 
 #pragma region IScene Override
+
 	Proto_03_Remix() :
 		mSceneAllocator((void*)gSceneMemory, (void*)(gSceneMemory + gSceneMemorySize)),
 		mStaticMeshAllocator((void*)gStaticMeshMemory, (void*)(gStaticMeshMemory + gMeshMemorySize)),
@@ -132,6 +187,7 @@ public:
 
 		InitializeLevel();
 		InitializeGeometry();
+		InitializeLineTraceShaders();
 		InitializeWallShaders();
 		InitializeLightShaders();
 		InitializePlayerShaders();
@@ -146,9 +202,8 @@ public:
 		graph.grid[4][4].weight = 100;
 		graph.grid[4][3].weight = 100;*/
 
-
-
 	}
+
 	void VUpdate(double milliseconds) override
 	{
 		float mPlayerSpeed = 0.005f;
@@ -202,6 +257,7 @@ public:
 		RenderWalls();
 		RenderLightCircles();
 		RenderPlayer();
+		RenderLineTrace();
 
 		mRenderer->VSwapBuffers();
 	}
@@ -224,10 +280,13 @@ public:
 
 		ReleaseMacro(mPlayerInstanceBuffer);
 	}
+
 	void VOnResize() override {}
+
 #pragma endregion
 
 #pragma region Render
+
 	void RenderWalls()
 	{
 		const UINT stride = sizeof(mat4f);
@@ -286,6 +345,25 @@ public:
 		mDeviceContext->DrawIndexedInstanced(mWallMesh->GetIndexCount(), 1, 0, 0, 0);
 	}
 
+	void RenderLineTrace()
+	{
+		mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_LINE);
+
+		mDeviceContext->IASetInputLayout(mLineTraceInputLayout);
+		mDeviceContext->VSSetShader(mLineTraceVertexShader, nullptr, 0);
+		mDeviceContext->PSSetShader(mLineTracePixelShader, nullptr, 0);
+
+		mDeviceContext->UpdateSubresource(static_cast<DX11Mesh*>(mLineTraceMesh)->mVertexBuffer, 0, nullptr, &mLineTraceVertices, 0, 0);
+		mDeviceContext->UpdateSubresource(mLineTraceShaderBuffer, 0, nullptr, &mLineTraceShaderData, 0, 0);
+		mDeviceContext->VSSetConstantBuffers(0, 1, &mLineTraceShaderBuffer);
+
+		mRenderer->VBindMesh(mLineTraceMesh);
+		mRenderer->VDrawIndexed(0, mLineTraceDrawCount);
+
+		// clear line reset line trace count
+		mLineTraceDrawCount = 0;
+	}
+
 	void UpdatePlayer() {
 		mPlayerTransform = (mat4f::rotateY(PI) *mat4f::translate(mPlayer->mTransform.mPosition)).transpose();
 
@@ -300,6 +378,7 @@ public:
 #pragma endregion 
 
 #pragma region Initialization
+
 	void InitializeCamera()
 	{
 		float aspectRatio = (float)mOptions.mWindowWidth / mOptions.mWindowHeight;
@@ -310,6 +389,9 @@ public:
 
 		mQuadShaderData.View = mViewMatrix;
 		mQuadShaderData.Projection = mProjectionMatrix;
+
+		mLineTraceShaderData.View = mViewMatrix;
+		mLineTraceShaderData.Projection = mProjectionMatrix;
 	}
 
 	void InitializeLevel()
@@ -407,8 +489,22 @@ public:
 
 	void InitializeGeometry()
 	{
+		InitializeLineTraceMesh();
 		InitializeQuadMesh();
 		InitializeCircleMesh();
+	}
+
+	void InitializeLineTraceMesh()
+	{
+		uint16_t lineTraceIndices[gLineTraceVertexCount];
+		for (auto i = 0; i < gLineTraceVertexCount; i++)
+		{
+			lineTraceIndices[i] = i;
+		}
+
+		mStaticMeshLibrary.NewMesh(&mLineTraceMesh, mRenderer);
+		mRenderer->VSetMeshVertexBufferData(mLineTraceMesh, mLineTraceVertices, sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex), GPU_MEMORY_USAGE_DEFAULT);
+		mRenderer->VSetMeshIndexBufferData( mLineTraceMesh, lineTraceIndices, gLineTraceVertexCount, GPU_MEMORY_USAGE_DEFAULT);
 	}
 
 	void InitializeQuadMesh()
@@ -431,7 +527,7 @@ public:
 	void InitializeCircleMesh()
 	{
 		vec3f circleVertices[gCircleVertexCount];
-		float angularDisplacement = (2.0f * PI) / gCircleVertexCount;
+		float angularDisplacement = (2.0f * PI) / (gCircleVertexCount - 1);
 		float radius	= 1.0f;
 		float angle		= 0.0f;
 
@@ -451,6 +547,63 @@ public:
 		mStaticMeshLibrary.NewMesh(&mCircleMesh, mRenderer);
 		mRenderer->VSetMeshVertexBufferData(mCircleMesh, circleVertices, sizeof(vec3f) * gCircleVertexCount, sizeof(vec3f), GPU_MEMORY_USAGE_STATIC);
 		mRenderer->VSetMeshIndexBufferData(mCircleMesh, circleIndices, gCircleIndexCount, GPU_MEMORY_USAGE_STATIC);
+	}
+
+	void InitializeLineTraceShaders()
+	{
+		D3D11_INPUT_ELEMENT_DESC inputDescription[] =
+		{
+			{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+
+		ID3DBlob* vsBlob;
+		D3DReadFileToBlob(L"LineTraceVertexShader.cso", &vsBlob);
+
+		// Create the shader on the device
+		mDevice->CreateVertexShader(
+			vsBlob->GetBufferPointer(),
+			vsBlob->GetBufferSize(),
+			nullptr,
+			&mLineTraceVertexShader);
+
+		// Before cleaning up the data, create the input layout
+		if (inputDescription) {
+			mDevice->CreateInputLayout(
+				inputDescription,					// Reference to Description
+				2,									// Number of elments inside of Description
+				vsBlob->GetBufferPointer(),
+				vsBlob->GetBufferSize(),
+				&mLineTraceInputLayout);
+		}
+
+		// Clean up
+		vsBlob->Release();
+
+		// Load Pixel Shader ---------------------------------------
+		ID3DBlob* psBlob;
+		D3DReadFileToBlob(L"LineTracePixelShader.cso", &psBlob);
+
+		// Create the shader on the device
+		mDevice->CreatePixelShader(
+			psBlob->GetBufferPointer(),
+			psBlob->GetBufferSize(),
+			nullptr,
+			&mLineTracePixelShader);
+
+		// Clean up
+		psBlob->Release();
+
+		// Constant buffers ----------------------------------------
+		D3D11_BUFFER_DESC lineTraceBufferDataDesc;
+		lineTraceBufferDataDesc.ByteWidth = sizeof(LineTraceShaderData);
+		lineTraceBufferDataDesc.Usage = D3D11_USAGE_DEFAULT;
+		lineTraceBufferDataDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		lineTraceBufferDataDesc.CPUAccessFlags = 0;
+		lineTraceBufferDataDesc.MiscFlags = 0;
+		lineTraceBufferDataDesc.StructureByteStride = 0;
+
+		mDevice->CreateBuffer(&lineTraceBufferDataDesc, nullptr, &mLineTraceShaderBuffer);
 	}
 
 	void InitializeWallShaders()
@@ -609,6 +762,21 @@ public:
 	}
 
 #pragma endregion 
+
+#pragma region Line Trace
+
+	void TraceLine(vec3f from, vec3f to, vec4f color)
+	{
+		auto index = mLineTraceDrawCount++;
+		mLineTraceVertices[index].Position = from;
+		mLineTraceVertices[index].Color = color;
+
+		index = mLineTraceDrawCount++;
+		mLineTraceVertices[index].Position = to;
+		mLineTraceVertices[index].Color = color;
+	}
+
+#pragma endregion
 };
 
 DECLARE_MAIN(Proto_03_Remix);

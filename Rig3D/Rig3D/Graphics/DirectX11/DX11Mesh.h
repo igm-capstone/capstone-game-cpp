@@ -18,10 +18,10 @@ namespace Rig3D
 		DX11Mesh();
 		~DX11Mesh();
 
-	protected:
 		ID3D11Buffer*	mVertexBuffer;
 		ID3D11Buffer*	mIndexBuffer;
 		
+	protected:
 		friend class DX3D11Renderer;
 	};
 }
