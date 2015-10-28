@@ -1,8 +1,7 @@
 struct Vertex
 {
-	float4		mPosition		: POSITION;
-	float4x4	mWorld			: WORLD;
-	float		mColorswitch	: BLENDWEIGHT;
+	float3		mPosition	: POSITION;
+	float4x4	mWorld		: WORLD;
 	//	uint		mInstanceID	: SV_InstanceID;
 };
 
@@ -24,8 +23,8 @@ Pixel main(Vertex vertex)
 	matrix clip = mul(mul(vertex.mWorld, view), projection);
 
 	Pixel pixel;
-	pixel.mPositionH = mul(float4(vertex.mPosition.xy, 14.0f, 1.0f), clip);
-	pixel.mColor = color * (vertex.mColorswitch+ 1.0f)/2;
+	pixel.mPositionH = mul(float4(vertex.mPosition, 1.0f), clip);
+	pixel.mColor = color;
 
 	return pixel;
 }

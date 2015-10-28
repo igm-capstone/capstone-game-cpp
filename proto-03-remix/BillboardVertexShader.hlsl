@@ -17,7 +17,7 @@ Pixel main(uint id:SV_VERTEXID)
 
 	pixel.position.x = (float)(id / 2) * 4.0 - 1.0;
 	pixel.position.y = (float)(id % 2) * 4.0 - 1.0;
-	pixel.position.z = 0.0;
+	pixel.position.z = 0.2;
 	pixel.position.w = 1.0;
 
 	pixel.uv.x = (float)(id / 2) * 2.0;
