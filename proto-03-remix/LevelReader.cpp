@@ -229,7 +229,7 @@ void LevelReader::ReadRobot(std::string path, std::vector<RobotInfo> *RobotArray
 			{
 				float x, y, z;
 				iss >> x >> y >> z;
-				InsertRobot.Position = vec3f(x, y, z);
+				InsertRobot.Transform.SetPosition(x, y, z);
 			}
 		}
 		// Read next line

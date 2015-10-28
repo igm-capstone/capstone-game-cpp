@@ -6,15 +6,15 @@ using namespace cliqCity::graphicsMath;
 
 Quaternion Quaternion::rollPitchYaw(const float& roll, const float& pitch, const float& yaw)
 {
-	float halfRoll		= roll	* 0.5f;
-	float halfPitch		= pitch * 0.5f;
-	float halfYaw		= yaw	* 0.5f;
-	float cosHalfRoll	= cosf(halfRoll);
-	float cosHalfPitch	= cosf(halfPitch);
-	float cosHalfYaw	= cosf(halfYaw);
-	float sinHalfRoll	= sinf(halfRoll);
-	float sinHalfPitch	= sinf(halfPitch);
-	float sinHalfYaw	= sinf(halfYaw);
+	float halfRoll = roll	* 0.5f;
+	float halfPitch = pitch * 0.5f;
+	float halfYaw = yaw	* 0.5f;
+	float cosHalfRoll = cosf(halfRoll);
+	float cosHalfPitch = cosf(halfPitch);
+	float cosHalfYaw = cosf(halfYaw);
+	float sinHalfRoll = sinf(halfRoll);
+	float sinHalfPitch = sinf(halfPitch);
+	float sinHalfYaw = sinf(halfYaw);
 	return Quaternion(
 		(cosHalfYaw * cosHalfPitch * cosHalfRoll) + (sinHalfYaw * sinHalfPitch * sinHalfRoll),
 		(cosHalfYaw * sinHalfPitch * cosHalfRoll) + (sinHalfYaw * cosHalfPitch * sinHalfRoll),
@@ -26,11 +26,6 @@ Quaternion Quaternion::angleAxis(const float& angle, const Vector3& axis)
 {
 	float halfAngle = angle * 0.5f;
 	return Quaternion(cos(halfAngle), sin(halfAngle) * axis);
-}
-
-float Quaternion::magnitude() const
-{
-	return sqrt((w * w) + v.magnitude2());
 }
 
 Quaternion Quaternion::conjugate() const
@@ -67,6 +62,27 @@ Matrix3 Quaternion::toMatrix3() const
 	return static_cast<Matrix3>(toMatrix4());
 }
 
+Vector3 Quaternion::toEuler() const
+{
+	Vector3 euler;
+
+	auto sp = -2.0f * (v.y*v.z - w*v.x);
+	if (fabs(sp) > 0.9999f)
+	{
+		euler.x = 1.570796f * sp;
+		euler.y = atan2(-v.x*v.z + w*v.y, 0.5f - v.y*v.y - v.z*v.z);
+		euler.z = 0.0f;
+	}
+	else
+	{
+		euler.x = asin(sp);
+		euler.y = atan2(v.x*v.z + w*v.y, 0.5f - v.x*v.x - v.y*v.y);
+		euler.z = atan2(v.x*v.y + w*v.z, 0.5f - v.x*v.x - v.z*v.z);
+	}
+
+	return euler;
+}
+
 Quaternion& Quaternion::operator*=(const Quaternion& rhs)
 {
 	float rW = (w * rhs.w) - dot(v, rhs.v);
@@ -96,9 +112,14 @@ Quaternion& Quaternion::operator-()
 	return *this;
 }
 
+float cliqCity::graphicsMath::magnitude(const Quaternion& quaternion)
+{
+	return sqrtf(quaternion.w * quaternion.w + quaternion.v.x * quaternion.v.x + quaternion.v.y * quaternion.v.y + quaternion.v.z * quaternion.v.z);
+}
+
 Quaternion cliqCity::graphicsMath::normalize(const Quaternion& quaternion)
 {
-	return Quaternion(quaternion) /= quaternion.magnitude();
+	return quaternion / magnitude(quaternion);
 }
 
 float cliqCity::graphicsMath::dot(const Quaternion& lhs, const Quaternion& rhs)

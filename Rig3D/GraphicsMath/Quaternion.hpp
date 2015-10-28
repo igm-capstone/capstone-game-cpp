@@ -29,12 +29,12 @@ namespace cliqCity
 			Quaternion(const Quaternion& quaternion) : Quaternion(quaternion.w, quaternion.v) {};
 			Quaternion() : Quaternion(1.0f, 0.0f, 0.0f, 0.0f) {};
 
-			float magnitude() const;
 			Quaternion conjugate() const;
 			Quaternion inverse() const;
 
 			Matrix4 toMatrix4() const;
 			Matrix3 toMatrix3() const;
+			Vector3 toEuler() const;
 
 			Quaternion& operator*=(const Quaternion& rhs);
 			Quaternion& operator*=(const float& rhs);
@@ -42,6 +42,7 @@ namespace cliqCity
 			Quaternion& operator-();
 		};
 
+		CGM_DLL float magnitude(const Quaternion& quaternion);
 		CGM_DLL Quaternion normalize(const Quaternion& quaternion);
 		CGM_DLL float dot(const Quaternion& lhs, const Quaternion& rhs);
 

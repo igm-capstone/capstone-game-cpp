@@ -12,10 +12,6 @@ namespace Rig3D
 	class RIG3D Transform
 	{
 	public:
-		vec3f	mPosition;
-		vec3f	mRotation;
-		vec3f	mScale;
-
 		Transform();
 		~Transform();
 
@@ -33,11 +29,38 @@ namespace Rig3D
 		vec3f GetUp();
 		vec3f GetRight();
 
-	private: // Not used yet.
+		inline bool IsDirty();
+
+		inline quatf GetRotation() const;
+		inline vec3f GetRollPitchYaw() const;
+		inline vec3f GetPosition() const;
+		inline vec3f GetScale() const;
+		inline Transform* GetParent() const;
+
+		inline void SetRotation(const quatf& rotation);
+		inline void SetRotation(const vec3f& euler);
+		inline void SetPosition(const vec3f& position);
+		inline void SetScale(const vec3f& scale);
+		inline void SetParent(Transform* parent);
+
+		inline void SetRotation(const float x, const float y, const float z);
+		inline void SetPosition(const float x, const float y, const float z);
+		inline void SetScale(const float x, const float y, const float z);
+
+	private: 
 		mat4f	mWorldMatrix;
+		mat4f	mLocalMatrix;
+
+		quatf	mRotation;
+		vec3f	mPosition;
+		vec3f	mScale;
+
 		vec3f	mForward;
 		vec3f	mUp;
 		vec3f	mRight;
+
+		Transform*	mParent;
+		bool		mIsDirty;
 	};
 }
 
