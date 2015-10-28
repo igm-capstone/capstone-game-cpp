@@ -22,6 +22,32 @@ using namespace Rig3D;
 
 typedef cliqCity::memory::LinearAllocator LinearAllocator;
 
+//class Colors
+//{
+//public:
+//	static const vec4f black;
+//	static const vec4f white;
+//	static const vec4f red;
+//	static const vec4f green;
+//	static const vec4f blue;
+//	static const vec4f cyan;
+//	static const vec4f yellow;
+//	static const vec4f magenta;
+//};
+
+namespace Colors
+{
+	static const vec4f black		= { 0.0f, 0.0f, 0.0f, 1.0f };
+	static const vec4f white		= { 1.0f, 1.0f, 1.0f, 1.0f };
+	static const vec4f red			= { 1.0f, 0.0f, 0.0f, 1.0f };
+	static const vec4f green		= { 0.0f, 1.0f, 0.0f, 1.0f };
+	static const vec4f blue			= { 0.0f, 0.0f, 1.0f, 1.0f };
+	static const vec4f cyan			= { 0.0f, 1.0f, 1.0f, 1.0f };
+	static const vec4f yellow		= { 1.0f, 1.0f, 0.0f, 1.0f };
+	static const vec4f magenta		= { 1.0f, 0.0f, 1.0f, 1.0f };
+	static const vec4f transparent	= { 1.0f, 1.0f, 1.0f, 0.0f };
+}
+
 static const vec4f gWallColor = { 1.0f, 0.0f, 1.0f, 1.0f };
 static const vec4f gCircleColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 static const vec4f gPlayerColor = { 0.0f, 0.0f, 1.0f, 1.0f };
@@ -31,6 +57,9 @@ static const int gCircleIndexCount	= 36;	// Indices = (vertices - 1) * 3
 static const int gSceneMemorySize	= 20480; 
 static const int gMeshMemorySize	= 1024;
 
+static const int gLineTraceMaxCount = 500;
+static const int gLineTraceVertexCount = 2 * gLineTraceMaxCount;
+
 char gSceneMemory[gSceneMemorySize];
 char gStaticMeshMemory[gMeshMemorySize];
 char gDynamicMeshMemory[gMeshMemorySize];
@@ -38,10 +67,9 @@ char gDynamicMeshMemory[gMeshMemorySize];
 
 class Proto_03_Remix : public IScene, public virtual IRendererDelegate
 {
-	Grid& grid = grid.getInstance();
+	Grid& grid = Grid::getInstance();
 
 public:
-
 	struct QuadShaderData
 	{
 		mat4f View;
@@ -54,7 +82,20 @@ public:
 		vec4f Point;
 	};
 
+	struct LineTraceShaderData
+	{
+		mat4f View;
+		mat4f Projection;
+	};
+
+	struct LineTraceVertex
+	{
+		vec4f Color;
+		vec3f Position;
+	};
+
 	QuadShaderData					mQuadShaderData;
+	LineTraceShaderData				mLineTraceShaderData;
 	PointShaderData					mPointShaderData;
 
 	mat4f							mViewMatrix;
@@ -69,14 +110,19 @@ public:
 
 	SceneObject*					mWalls;
 	SceneObject*					mBlocks;
-	SceneObject*					mRobots;
+	SceneObject*					mWaypoints;
 	SceneObject*					mLights;
 	SceneObject*					mPlayer;
 	SceneObject*					mGoal;
+	std::vector<RobotInfo>			mRobots;
+
+	LineTraceVertex					mLineTraceVertices[gLineTraceVertexCount];
+	int								mLineTraceDrawCount;
 
 	mat4f*							mWallTransforms;
 	mat4f*							mBlockTransforms;
 	mat4f*							mCircleTransforms;
+	mat4f*							mRobotTransforms;
 	float*							mCircleColorWeights;
 	mat4f							mPlayerTransform;
 	std::vector<vec3f>				mLightPos;
@@ -84,15 +130,16 @@ public:
 	int								mWallCount;
 	int								mBlockCount;
 	int								mCircleCount;
+	int								mRobotCount;
 
 	IMesh*							mWallMesh;
 	IMesh*							mRobotMesh;
 	IMesh*							mCircleMesh;
 	IMesh*							mLightMesh;
 	IMesh*							mPlayerMesh;
+	IMesh*							mLineTraceMesh;
 
 	DX3D11Renderer*					mRenderer;
-	Input*							mInput;
 
 	ID3D11Device*					mDevice;
 	ID3D11DeviceContext*			mDeviceContext;
@@ -102,6 +149,12 @@ public:
 	ID3D11PixelShader*				mQuadPixelShader;
 	ID3D11Buffer*					mQuadShaderBuffer;
 	ID3D11Buffer*					mWallInstanceBuffer;
+
+	ID3D11InputLayout*				mLineTraceInputLayout;
+	ID3D11VertexShader*				mLineTraceVertexShader;
+	ID3D11PixelShader*				mLineTracePixelShader;
+	ID3D11Buffer*					mLineTraceShaderBuffer;
+	ID3D11Buffer*					mLineTraceInstanceBuffer;
 
 	ID3D11InputLayout*				mCircleInputLayout;
 	ID3D11VertexShader*				mCircleVertexShader;
@@ -137,14 +190,19 @@ public:
 	float transp[4] = { 1.0f, 1.0f, 1.0f, 0.0f };
 	float black[4] = { 0.0f, 0.0f, 0.0f, 0.5f };
 
+	// singletons
+	Input& mInput = Input::SharedInstance();
+
+	Input* mInput1;
+
 	ID3D11ShaderResourceView* nullSRV[2] = { 0, 0 };
 
 #pragma region IScene Override
-	Proto_03_Remix() :
-		mSceneAllocator((void*)gSceneMemory, (void*)(gSceneMemory + gSceneMemorySize)),
-		mStaticMeshAllocator((void*)gStaticMeshMemory, (void*)(gStaticMeshMemory + gMeshMemorySize)),
-		mDynamicMeshAllocator((void*)gDynamicMeshMemory, (void*)(gDynamicMeshMemory + gMeshMemorySize))
 
+	Proto_03_Remix() :
+		mSceneAllocator(static_cast<void*>(gSceneMemory), static_cast<void*>(gSceneMemory + gSceneMemorySize)),
+		mStaticMeshAllocator(static_cast<void*>(gStaticMeshMemory), static_cast<void*>(gStaticMeshMemory + gMeshMemorySize)),
+		mDynamicMeshAllocator(static_cast<void*>(gDynamicMeshMemory), static_cast<void*>(gDynamicMeshMemory + gMeshMemorySize))
 	{
 		mOptions.mWindowCaption = "Shutter - Remix";
 		mOptions.mWindowWidth	= 1600;
@@ -163,13 +221,15 @@ public:
 		mDeviceContext = mRenderer->GetDeviceContext();
 		mDevice = mRenderer->GetDevice();
 
-		mInput = &Input::SharedInstance();
+		//mInput = Input::SharedInstance();
+		mInput1 = &Input::SharedInstance();
 
 		mRenderer->SetDelegate(this);
 		VOnResize();
 
 		InitializeLevel();
 		InitializeGeometry();
+		InitializeLineTraceShaders();
 		InitializeWallShaders();
 		InitializeLightShaders();
 		InitializePlayerShaders();
@@ -187,37 +247,40 @@ public:
 
 	void VUpdate(double milliseconds) override
 	{
+		TraceLine(vec3f(-30, -30, 20), vec3f(30, 30, 20), Colors::red);
+
 		float mPlayerSpeed = 0.25f;
 		bool moved = false;
 
-		if ((&Input::SharedInstance())->GetKeyDown(KEYCODE_F))
+		if (mInput.GetKeyDown(KEYCODE_F))
 		{
 			auto start = Vector3(10, 20, 0);
 			auto end = Vector3(-20, -20, 0);
 			grid.GetFringePath(start, end);
 		}
 		
-		if ((&Input::SharedInstance())->GetKey(KEYCODE_LEFT))
+		auto pos = mPlayer->mTransform.GetPosition();
+		if (mInput.GetKey(KEYCODE_LEFT))
 		{
-			mPlayer->mTransform.mPosition.x -= mPlayerSpeed;
+			pos.x -= mPlayerSpeed;
 			UpdatePlayer();
 		}
-		else if ((&Input::SharedInstance())->GetKey(KEYCODE_RIGHT))
+		if (mInput.GetKey(KEYCODE_RIGHT))
 		{
-			mPlayer->mTransform.mPosition.x += mPlayerSpeed;
+			pos.x += mPlayerSpeed;
 			UpdatePlayer();
 		}
-		else if ((&Input::SharedInstance())->GetKey(KEYCODE_UP))
+		if (mInput.GetKey(KEYCODE_UP))
 		{
-			mPlayer->mTransform.mPosition.y += mPlayerSpeed;
+			pos.y += mPlayerSpeed;
 			UpdatePlayer();
 		}
-		else if ((&Input::SharedInstance())->GetKey(KEYCODE_DOWN))
+		if (mInput.GetKey(KEYCODE_DOWN))
 		{
-			mPlayer->mTransform.mPosition.y -= mPlayerSpeed;
+			pos.y -= mPlayerSpeed;
 			UpdatePlayer();
 		}
-
+		mPlayer->mTransform.SetPosition(pos);
 	}
 
 	void VRender() override
@@ -237,8 +300,14 @@ public:
 		RenderWalls();		
 		RenderPlayer();
 		RenderLightCircles();
-		RenderShadowMask();
+		RenderPlayer();
+		RenderRobots();
 		
+		RenderShadowMask();
+
+		// changes the primitive type to lines
+		RenderLineTrace();
+
 		mRenderer->VSwapBuffers();
 	}
 
@@ -337,9 +406,11 @@ public:
 		mDevice->CreateShaderResourceView(mShadowsBMap, &shadowCastersSRVDesc, &mShadowsBSRV);
 		mDevice->CreateShaderResourceView(mShadowsFinalMap, &shadowCastersSRVDesc, &mShadowsFinalSRV);
 	}
+
 #pragma endregion
 
 #pragma region Render
+
 	void RenderWalls()
 	{
 		const UINT stride = sizeof(mat4f);
@@ -454,8 +525,47 @@ public:
 		mDeviceContext->DrawIndexedInstanced(mWallMesh->GetIndexCount(), 1, 0, 0, 0);
 	}
 
+	void RenderRobots()
+	{
+		for (auto robot : mRobots)
+		{
+			const auto pone = vec3f(1, 1, 0);
+			const auto none = vec3f(-1, 1, 0);
+			auto pos = robot.Transform.GetPosition();
+
+			TraceLine(pos + pone, pos - pone, Colors::blue);
+			TraceLine(pos + none, pos - none, Colors::blue);
+
+			for (int i = 1, len = robot.Waypoints.size(); i < len; i++)
+			{
+				TraceLine(robot.Waypoints[i - 1], robot.Waypoints[i], Colors::yellow);
+			}
+		}
+	}
+
+	void RenderLineTrace()
+	{
+		mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_LINE);
+
+		mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
+
+		mDeviceContext->IASetInputLayout(mLineTraceInputLayout);
+		mDeviceContext->VSSetShader(mLineTraceVertexShader, nullptr, 0);
+		mDeviceContext->PSSetShader(mLineTracePixelShader, nullptr, 0);
+
+		mDeviceContext->UpdateSubresource(static_cast<DX11Mesh*>(mLineTraceMesh)->mVertexBuffer, 0, nullptr, &mLineTraceVertices, 0, 0);
+		mDeviceContext->UpdateSubresource(mLineTraceShaderBuffer, 0, nullptr, &mLineTraceShaderData, 0, 0);
+		mDeviceContext->VSSetConstantBuffers(0, 1, &mLineTraceShaderBuffer);
+
+		mRenderer->VBindMesh(mLineTraceMesh);
+		mRenderer->VDrawIndexed(0, mLineTraceDrawCount);
+
+		// reset line trace count
+		mLineTraceDrawCount = 0;
+	}
+
 	void UpdatePlayer() {
-		mPlayerTransform = (mat4f::rotateY(PI) *mat4f::translate(mPlayer->mTransform.mPosition)).transpose();
+		mPlayerTransform = (mat4f::rotateY(PI) *mat4f::translate(mPlayer->mTransform.GetPosition())).transpose();
 
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		mDeviceContext->Map(mPlayerInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -465,9 +575,23 @@ public:
 		mDeviceContext->Unmap(mPlayerInstanceBuffer, 0);
 	}
 
+	void UpdateRobotTransforms()
+	{
+		mRobotCount = mRobots.size();
+		mRobotTransforms = reinterpret_cast<mat4f*>(mSceneAllocator.Allocate(sizeof(mat4f) * mRobotCount, alignof(mat4f), 0));
+
+		for (int i = 0; i < mRobotCount; i++)
+		{
+			auto robot = &mRobots[i];
+
+			mRobotTransforms[i] = robot->Transform.GetWorldMatrix();
+		}
+	}
+
 #pragma endregion 
 
 #pragma region Initialization
+
 	void InitializeCamera()
 	{
 		float aspectRatio = (float)mOptions.mWindowWidth / mOptions.mWindowHeight;
@@ -478,6 +602,9 @@ public:
 
 		mQuadShaderData.View = mViewMatrix;
 		mQuadShaderData.Projection = mProjectionMatrix;
+
+		mLineTraceShaderData.View = mViewMatrix;
+		mLineTraceShaderData.Projection = mProjectionMatrix;
 	}
 
 	void InitializeLevel()
@@ -498,6 +625,10 @@ public:
 		mCircleCount = levelReader.mLights.size();
 		mLightPos = levelReader.mLights;
 		
+		// Robots
+		mRobots = levelReader.mRobots;
+		UpdateRobotTransforms();
+
 		mCircleColorWeights = (float*)mSceneAllocator.Allocate(sizeof(float)*mCircleCount,alignof(float),0);
 		//for now, only the 5 first lights are "lit"
 		for (int i = 0;  i < mCircleCount; i++)
@@ -510,15 +641,14 @@ public:
 
 		// Player
 		mPlayer = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject), alignof(SceneObject), 0));
-		mPlayer->mTransform.mPosition = levelReader.mPlayerPos;
-		mPlayer->mTransform.mPosition.x += 1;
+		mPlayer->mTransform.SetPosition(levelReader.mPlayerPos + vec3f(1, 0, 0));
 		//Not using Transform.GetWorldMatrix because Scale, rotation and bleh
-		mPlayerTransform = (mat4f::rotateY(PI) *mat4f::translate(mPlayer->mTransform.mPosition)).transpose();
+		mPlayerTransform = (mat4f::rotateY(PI) *mat4f::translate(mPlayer->mTransform.GetPosition())).transpose();
 
 
 		// Goal
 		mGoal = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject), alignof(SceneObject), 0));
-		mGoal->mTransform.mPosition = levelReader.mGoalPos;
+		mGoal->mTransform.SetPosition(levelReader.mGoalPos);
 	}
 
 	void LoadTransforms(mat4f** transforms, vec3f* positions, vec3f* rotations, vec3f* scales, int size, int TransformType)
@@ -559,9 +689,9 @@ public:
 		{
 			for (int i = 0; i < size; i++)
 			{
-				(*sceneObjects)[i].mTransform.mPosition = positions[i];
-				(*sceneObjects)[i].mTransform.mRotation = rotations[i];
-				(*sceneObjects)[i].mTransform.mScale = scales[i];
+				(*sceneObjects)[i].mTransform.SetPosition(positions[i]);
+				(*sceneObjects)[i].mTransform.SetRotation(rotations[i]);
+				(*sceneObjects)[i].mTransform.SetScale(scales[i]);
 			}
 			break;
 		}
@@ -569,7 +699,7 @@ public:
 		{
 			for (int i = 0; i < size; i++)
 			{
-				(*sceneObjects)[i].mTransform.mPosition = positions[i];
+				(*sceneObjects)[i].mTransform.SetPosition(positions[i]);
 			}
 			break;
 		}
@@ -580,8 +710,22 @@ public:
 
 	void InitializeGeometry()
 	{
+		InitializeLineTraceMesh();
 		InitializeQuadMesh();
 		InitializeCircleMesh();
+	}
+
+	void InitializeLineTraceMesh()
+	{
+		uint16_t lineTraceIndices[gLineTraceVertexCount];
+		for (auto i = 0; i < gLineTraceVertexCount; i++)
+		{
+			lineTraceIndices[i] = i;
+		}
+
+		mStaticMeshLibrary.NewMesh(&mLineTraceMesh, mRenderer);
+		mRenderer->VSetMeshVertexBufferData(mLineTraceMesh, mLineTraceVertices, sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex), GPU_MEMORY_USAGE_DEFAULT);
+		mRenderer->VSetMeshIndexBufferData( mLineTraceMesh, lineTraceIndices, gLineTraceVertexCount, GPU_MEMORY_USAGE_DEFAULT);
 	}
 
 	void InitializeQuadMesh()
@@ -604,7 +748,7 @@ public:
 	void InitializeCircleMesh()
 	{
 		vec3f circleVertices[gCircleVertexCount];
-		float angularDisplacement = (2.0f * PI) / gCircleVertexCount;
+		float angularDisplacement = (2.0f * PI) / (gCircleVertexCount - 1);
 		float radius	= 1.0f;
 		float angle		= 0.0f;
 
@@ -624,6 +768,63 @@ public:
 		mStaticMeshLibrary.NewMesh(&mCircleMesh, mRenderer);
 		mRenderer->VSetMeshVertexBufferData(mCircleMesh, circleVertices, sizeof(vec3f) * gCircleVertexCount, sizeof(vec3f), GPU_MEMORY_USAGE_STATIC);
 		mRenderer->VSetMeshIndexBufferData(mCircleMesh, circleIndices, gCircleIndexCount, GPU_MEMORY_USAGE_STATIC);
+	}
+
+	void InitializeLineTraceShaders()
+	{
+		D3D11_INPUT_ELEMENT_DESC inputDescription[] =
+		{
+			{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+
+		ID3DBlob* vsBlob;
+		D3DReadFileToBlob(L"LineTraceVertexShader.cso", &vsBlob);
+
+		// Create the shader on the device
+		mDevice->CreateVertexShader(
+			vsBlob->GetBufferPointer(),
+			vsBlob->GetBufferSize(),
+			nullptr,
+			&mLineTraceVertexShader);
+
+		// Before cleaning up the data, create the input layout
+		if (inputDescription) {
+			mDevice->CreateInputLayout(
+				inputDescription,					// Reference to Description
+				2,									// Number of elments inside of Description
+				vsBlob->GetBufferPointer(),
+				vsBlob->GetBufferSize(),
+				&mLineTraceInputLayout);
+		}
+
+		// Clean up
+		vsBlob->Release();
+
+		// Load Pixel Shader ---------------------------------------
+		ID3DBlob* psBlob;
+		D3DReadFileToBlob(L"LineTracePixelShader.cso", &psBlob);
+
+		// Create the shader on the device
+		mDevice->CreatePixelShader(
+			psBlob->GetBufferPointer(),
+			psBlob->GetBufferSize(),
+			nullptr,
+			&mLineTracePixelShader);
+
+		// Clean up
+		psBlob->Release();
+
+		// Constant buffers ----------------------------------------
+		D3D11_BUFFER_DESC lineTraceBufferDataDesc;
+		lineTraceBufferDataDesc.ByteWidth = sizeof(LineTraceShaderData);
+		lineTraceBufferDataDesc.Usage = D3D11_USAGE_DEFAULT;
+		lineTraceBufferDataDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		lineTraceBufferDataDesc.CPUAccessFlags = 0;
+		lineTraceBufferDataDesc.MiscFlags = 0;
+		lineTraceBufferDataDesc.StructureByteStride = 0;
+
+		mDevice->CreateBuffer(&lineTraceBufferDataDesc, nullptr, &mLineTraceShaderBuffer);
 	}
 
 	void InitializeWallShaders()
@@ -850,6 +1051,21 @@ public:
 	}
 
 #pragma endregion 
+
+#pragma region Line Trace
+
+	void TraceLine(vec3f from, vec3f to, vec4f color)
+	{
+		auto index = mLineTraceDrawCount++;
+		mLineTraceVertices[index].Position = from;
+		mLineTraceVertices[index].Color = color;
+
+		index = mLineTraceDrawCount++;
+		mLineTraceVertices[index].Position = to;
+		mLineTraceVertices[index].Color = color;
+	}
+
+#pragma endregion
 };
 
 DECLARE_MAIN(Proto_03_Remix);

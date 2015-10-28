@@ -5,6 +5,7 @@
 #include <vector>
 #include "Rig3D\Engine.h"
 #include "Rig3D\GraphicsMath\cgm.h"
+#include <Rig3D/Common/Transform.h>
 
 struct WallInfo
 {
@@ -22,7 +23,7 @@ struct BlockInfo
 
 struct RobotInfo
 {
-	vec3f	Position;
+	Rig3D::Transform	Transform;
 	std::vector<vec3f>	Waypoints;
 };
 
