@@ -2,7 +2,9 @@
 #include "PathFinder\Fringe.h"
 #include "GraphicsMath\Vector.hpp"
 #include "Node.h"
+
 using namespace cliqCity::graphicsMath;
+using namespace PathFinder;
 
 const Vector3 startingCorner = Vector3(-52, -34, 0);
 const int maxSizeX = 105;
@@ -15,9 +17,6 @@ const int numSpheresY = 34;// round(maxSizeY / nodeRadius) / 2;
 #pragma once
 class Grid
 {
-private:
-	PathFinder::Fringe<Node, numSpheresX, numSpheresY> pathFinder;
-	
 public:
 	static Grid& getInstance()
 	{
@@ -25,9 +24,10 @@ public:
 		return instance;
 	}
 
+	PathFinder::Fringe<Node, numSpheresX, numSpheresY> pathFinder;
 	void UpdateGrid();
-	Node& getNodeAtPos(Vector3 pos);
-	void GetFringePath(Vector3 from, Vector3 to);
+	Node& GetNodeAt(Vector3 pos);
+	SearchResult<Node> GetPath(Vector3 from, Vector3 to);
 
 private:
 	Grid();

@@ -40,6 +40,8 @@ namespace PathFinder
 			auto fLimit = graph.Heuristic(startNode, endNode);
 			auto found = false;
 
+			cache.clear();
+
 			fringe.push_front(startNode);
 			cache[startNode] = CacheData<T>();
 

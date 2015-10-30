@@ -17,6 +17,8 @@
 #include "Grid.h"
 
 #define PI 3.1415926535f
+#include "Primitives.h"
+#include "TargetFollower.h"
 
 using namespace Rig3D;
 
@@ -67,7 +69,7 @@ char gDynamicMeshMemory[gMeshMemorySize];
 
 class Proto_03_Remix : public IScene, public virtual IRendererDelegate
 {
-	Grid& grid = Grid::getInstance();
+	Grid& mGrid = Grid::getInstance();
 
 public:
 	struct QuadShaderData
@@ -114,7 +116,9 @@ public:
 	SceneObject*					mLights;
 	SceneObject*					mPlayer;
 	SceneObject*					mGoal;
-	std::vector<RobotInfo>			mRobots;
+	vector<RobotInfo>				mRobots;
+
+	AABB<vec2f>*					mAABBs;
 
 	LineTraceVertex					mLineTraceVertices[gLineTraceVertexCount];
 	int								mLineTraceDrawCount;
@@ -131,6 +135,7 @@ public:
 	int								mBlockCount;
 	int								mCircleCount;
 	int								mRobotCount;
+	int								mAABBCount;
 
 	IMesh*							mWallMesh;
 	IMesh*							mRobotMesh;
@@ -247,45 +252,57 @@ public:
 
 	void VUpdate(double milliseconds) override
 	{
-		TraceLine(vec3f(-30, -30, 20), vec3f(30, 30, 20), Colors::red);
-
 		float mPlayerSpeed = 0.25f;
 		bool moved = false;
 
-		if (mInput.GetKeyDown(KEYCODE_F))
+		auto start = mPlayer->mTransform.GetPosition(); //Vector3(10, 20, 0);
+		auto end = Vector3(-20, -20, 0);
+		//grid.GetPath(start, end);
+		
+		auto from = mGrid.GetNodeAt(start);
+		auto to = mGrid.GetNodeAt(end);
+			
+		auto result = mGrid.pathFinder.FindPath(&from, &to);
+		static TargetFollower follower(mPlayer->mTransform, mAABBs, mAABBCount);
+		follower.MoveTowards(mRobots[0].Transform);
+		
+		if (result.path.size() > 0)
 		{
-			auto start = Vector3(10, 20, 0);
-			auto end = Vector3(-20, -20, 0);
-			grid.GetFringePath(start, end);
+			auto it = result.path.begin();
+			auto p1 = **it;
+			for (++it; it != result.path.end(); ++it)
+			{
+				auto p2 = **it;
+				TraceLine(p1.position, p2.position, Colors::blue);
+				p1 = p2;
+			}
 		}
+
 		
 		auto pos = mPlayer->mTransform.GetPosition();
 		if (mInput.GetKey(KEYCODE_LEFT))
 		{
 			pos.x -= mPlayerSpeed;
-			UpdatePlayer();
 		}
 		if (mInput.GetKey(KEYCODE_RIGHT))
 		{
 			pos.x += mPlayerSpeed;
-			UpdatePlayer();
 		}
 		if (mInput.GetKey(KEYCODE_UP))
 		{
 			pos.y += mPlayerSpeed;
-			UpdatePlayer();
 		}
 		if (mInput.GetKey(KEYCODE_DOWN))
 		{
 			pos.y -= mPlayerSpeed;
-			UpdatePlayer();
 		}
+		
 		mPlayer->mTransform.SetPosition(pos);
+		UpdatePlayer();
 	}
 
 	void VRender() override
 	{
-
 		mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_TRIANGLE);
 		mDeviceContext->RSSetViewports(1, &mRenderer->GetViewport());
 
@@ -529,16 +546,23 @@ public:
 	{
 		for (auto robot : mRobots)
 		{
-			const auto pone = vec3f(1, 1, 0);
-			const auto none = vec3f(-1, 1, 0);
+			const auto pone = vec3f(.5f, .5f, 0);
+			const auto none = vec3f(-.5f, .5f, 0);
 			auto pos = robot.Transform.GetPosition();
 
-			TraceLine(pos + pone, pos - pone, Colors::blue);
-			TraceLine(pos + none, pos - none, Colors::blue);
+			// cross
+			TraceLine(pos + pone, pos - pone, Colors::red);
+			TraceLine(pos + none, pos - none, Colors::red);
+			
+			// box
+			TraceLine(pos + pone, pos + none, Colors::red);
+			TraceLine(pos - pone, pos - none, Colors::red);
+			TraceLine(pos + pone, pos - none, Colors::red);
+			TraceLine(pos - pone, pos + none, Colors::red);
 
 			for (int i = 1, len = robot.Waypoints.size(); i < len; i++)
 			{
-				TraceLine(robot.Waypoints[i - 1], robot.Waypoints[i], Colors::yellow);
+				TraceLine(robot.Waypoints[i - 1], robot.Waypoints[i], Colors::green);
 			}
 		}
 	}
@@ -565,7 +589,9 @@ public:
 	}
 
 	void UpdatePlayer() {
-		mPlayerTransform = (mat4f::rotateY(PI) *mat4f::translate(mPlayer->mTransform.GetPosition())).transpose();
+		auto r = mPlayer->mTransform.GetRotation();
+		mPlayerTransform = mPlayer->mTransform.GetWorldMatrix().transpose();
+		//mPlayerTransform = (mat4f::rotateY(PI) * mat4f::translate(mPlayer->mTransform.GetPosition())).transpose();
 
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		mDeviceContext->Map(mPlayerInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -613,22 +639,23 @@ public:
 		levelReader.ReadLevel();
 
 		// Walls
-		LoadTransforms(&mWallTransforms, &levelReader.mWalls.Position[0], &levelReader.mWalls.Rotation[0], &levelReader.mWalls.Scale[0], levelReader.mWalls.Position.size(), 0);
 		mWallCount = levelReader.mWalls.Position.size();
-
+		LoadTransforms(&mWallTransforms, &levelReader.mWalls.Position[0], &levelReader.mWalls.Rotation[0], &levelReader.mWalls.Scale[0], mWallCount, 0);
+		
 		// Blocks
-		LoadTransforms(&mBlockTransforms, &levelReader.mBlocks.Position[0], &levelReader.mBlocks.Rotation[0], &levelReader.mBlocks.Scale[0], levelReader.mBlocks.Position.size(), 0);
 		mBlockCount = levelReader.mBlocks.Position.size();
+		LoadTransforms(&mBlockTransforms, &levelReader.mBlocks.Position[0], &levelReader.mBlocks.Rotation[0], &levelReader.mBlocks.Scale[0], mBlockCount, 0);
+
+		mAABBCount = mWallCount + mBlockCount;
+		mAABBs = reinterpret_cast<AABB<vec2f>*>(mSceneAllocator.Allocate(sizeof(AABB<vec2f>) * (mAABBCount), alignof(AABB<vec2f>), 0));
+		SetAABBs(levelReader.mWalls, mAABBs, 0);
+		SetAABBs(levelReader.mBlocks, mAABBs, mWallCount);
 
 		// Lights
-		LoadTransforms(&mCircleTransforms, &levelReader.mLights[0], NULL, NULL, levelReader.mLights.size(), 1);
 		mCircleCount = levelReader.mLights.size();
+		LoadTransforms(&mCircleTransforms, &levelReader.mLights[0], nullptr, nullptr, mCircleCount, 1);
 		mLightPos = levelReader.mLights;
 		
-		// Robots
-		mRobots = levelReader.mRobots;
-		UpdateRobotTransforms();
-
 		mCircleColorWeights = (float*)mSceneAllocator.Allocate(sizeof(float)*mCircleCount,alignof(float),0);
 		//for now, only the 5 first lights are "lit"
 		for (int i = 0;  i < mCircleCount; i++)
@@ -639,12 +666,15 @@ public:
 				mCircleColorWeights[i] = 0.0f;
 		}
 
+		// Robots
+		mRobots = levelReader.mRobots;
+		UpdateRobotTransforms();
+
 		// Player
 		mPlayer = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject), alignof(SceneObject), 0));
 		mPlayer->mTransform.SetPosition(levelReader.mPlayerPos + vec3f(1, 0, 0));
 		//Not using Transform.GetWorldMatrix because Scale, rotation and bleh
 		mPlayerTransform = (mat4f::rotateY(PI) *mat4f::translate(mPlayer->mTransform.GetPosition())).transpose();
-
 
 		// Goal
 		mGoal = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject), alignof(SceneObject), 0));
@@ -661,7 +691,7 @@ public:
 		{
 			for (int i = 0; i < size; i++)
 			{
-				(*transforms)[i] = (mat4f::scale(scales[i]) * mat4f::rotateY(PI) * mat4f::translate(positions[i])).transpose();
+				(*transforms)[i] = (mat4f::scale(scales[i]) * mat4f::translate(positions[i])).transpose();
 			}
 			break;
 		}
@@ -669,7 +699,7 @@ public:
 		{
 			for (int i = 0; i < size; i++)
 			{
-				(*transforms)[i] = (mat4f::rotateY(PI) *mat4f::translate(positions[i])).transpose();
+				(*transforms)[i] = (mat4f::translate(positions[i])).transpose();
 			}
 			break;
 		}
@@ -708,6 +738,15 @@ public:
 		}
 	}
 
+	static void SetAABBs(RectInfo rectInfo, AABB<Vector2>* aabb, int offset)
+	{
+		for (int i = 0; i < rectInfo.Position.size(); i++)
+		{
+			aabb[i + offset].origin = rectInfo.Position[i];
+			aabb[i + offset].halfSize = rectInfo.Scale[i];
+		}
+	}
+
 	void InitializeGeometry()
 	{
 		InitializeLineTraceMesh();
@@ -738,7 +777,7 @@ public:
 			{ -0.85f, +0.85f, 0.0f }
 		};
 
-		uint16_t quadIndices[6] = { 0, 1, 2, 2, 3, 0 };
+		uint16_t quadIndices[6] = { 0, 2, 1, 3, 2, 0 };
 
 		mStaticMeshLibrary.NewMesh(&mWallMesh, mRenderer);
 		mRenderer->VSetMeshVertexBufferData(mWallMesh, quadVertices, sizeof(vec3f) * 4, sizeof(vec3f), GPU_MEMORY_USAGE_STATIC);

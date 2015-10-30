@@ -43,6 +43,8 @@ namespace Rig3D
 		inline void SetScale(const vec3f& scale);
 		inline void SetParent(Transform* parent);
 
+		inline vec3f TransformPoint(vec3f point);
+
 		inline void SetRotation(const float x, const float y, const float z);
 		inline void SetPosition(const float x, const float y, const float z);
 		inline void SetScale(const float x, const float y, const float z);

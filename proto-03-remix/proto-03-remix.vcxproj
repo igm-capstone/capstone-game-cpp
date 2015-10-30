@@ -139,6 +139,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="SceneObject.cpp" />
+    <ClCompile Include="TargetFollower.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rig3D\Rig3D\Rig3D.vcxproj">
@@ -155,6 +156,7 @@
     <ClInclude Include="Primitives.h" />
     <ClInclude Include="RayCast.h" />
     <ClInclude Include="SceneObject.h" />
+    <ClInclude Include="TargetFollower.h" />
     <ClInclude Include="trace.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>

@@ -14,7 +14,7 @@ LevelReader::~LevelReader()
 }
 
 // Member functions
-void LevelReader::ReadWalls(std::string path, WallInfo *WallArray)
+void LevelReader::ReadWalls(std::string path, RectInfo *WallArray)
 {
 	// Declarations
 	// File stream reader
@@ -26,7 +26,7 @@ void LevelReader::ReadWalls(std::string path, WallInfo *WallArray)
 	// Go to Walls section
 	while (std::getline(lvlFile,readLine))
 	{
-		if (readLine == "WALLS: ") break;
+		if (readLine == "WALLS:") break;
 	}
 	// Go to Positions section
 	while (std::getline(lvlFile, readLine))
@@ -91,7 +91,7 @@ void LevelReader::ReadWalls(std::string path, WallInfo *WallArray)
 	lvlFile.close();
 }
 
-void LevelReader::ReadBlocks(std::string path, BlockInfo *BlockArray)
+void LevelReader::ReadBlocks(std::string path, RectInfo *BlockArray)
 {
 	// Declarations
 	// File stream reader
@@ -103,7 +103,7 @@ void LevelReader::ReadBlocks(std::string path, BlockInfo *BlockArray)
 	// Go to Blocks section
 	while (std::getline(lvlFile, readLine))
 	{
-		if (readLine == "MOVEABLEOBJECTS: ") break;
+		if (readLine == "MOVEABLEOBJECTS:") break;
 	}
 	// Go to Positions section
 	while (std::getline(lvlFile, readLine))
@@ -234,7 +234,7 @@ void LevelReader::ReadRobot(std::string path, std::vector<RobotInfo> *RobotArray
 		}
 		// Read next line
 		std::getline(lvlFile, readLine);
-		if (readLine == "WAYPOINTS ")
+		if (readLine == "WAYPOINTS")
 		{
 			while (std::getline(lvlFile, readLine))
 			{

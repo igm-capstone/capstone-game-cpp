@@ -51,8 +51,8 @@ int IntersectRayAABB(Ray<Vector> ray, AABB<Vector> aabb, Vector& poi, float& t)
 
 	for (int i = 0; i < numElements; i++)
 	{
-		float aabbMin = aabb.origin[i] - aabb.radius;
-		float aabbMax = aabb.origin[i] + aabb.radius;
+		float aabbMin = aabb.origin[i] - aabb.halfSize[i];
+		float aabbMax = aabb.origin[i] + aabb.halfSize[i];
 
 		if (abs(ray.direction[i]) < FLT_EPSILON)
 		{
@@ -75,8 +75,8 @@ int IntersectRayAABB(Ray<Vector> ray, AABB<Vector> aabb, Vector& poi, float& t)
 				t1 = temp;
 			}
 
-			tMin = std::max(tMin, t1);
-			tMax = std::min(tMax, t2);
+			tMin = max(tMin, t1);
+			tMax = min(tMax, t2);
 
 			if (tMin > tMax)
 			{
@@ -85,7 +85,7 @@ int IntersectRayAABB(Ray<Vector> ray, AABB<Vector> aabb, Vector& poi, float& t)
 		}
 	}
 
-	poi = ray.origin + ray.normal * tMin;
+	poi = ray.origin + ray.direction * tMin;
 	t = tMin;
 	return 1;
 }

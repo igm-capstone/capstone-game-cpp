@@ -2,6 +2,8 @@
 #include <cmath>
 #include "Quaternion.hpp"
 
+#define M_RAD_TO_DEG 57.2957801818848f
+
 using namespace cliqCity::graphicsMath;
 
 Quaternion Quaternion::rollPitchYaw(const float& roll, const float& pitch, const float& yaw)
@@ -115,6 +117,12 @@ Quaternion& Quaternion::operator-()
 float cliqCity::graphicsMath::magnitude(const Quaternion& quaternion)
 {
 	return sqrtf(quaternion.w * quaternion.w + quaternion.v.x * quaternion.v.x + quaternion.v.y * quaternion.v.y + quaternion.v.z * quaternion.v.z);
+}
+
+// Returns the angle in degrees between two rotations /a/ and /b/.
+float cliqCity::graphicsMath::angleBetween(const Quaternion& lhs, const Quaternion& rhs)
+{
+	return float(double(acos(fmin(abs(cliqCity::graphicsMath::dot(lhs, rhs)), 1.0f))) * 2.0f * M_RAD_TO_DEG);
 }
 
 Quaternion cliqCity::graphicsMath::normalize(const Quaternion& quaternion)
