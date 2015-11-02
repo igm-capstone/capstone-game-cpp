@@ -18,7 +18,7 @@ template<class Vector>
 struct AABB
 {
 	Vector origin;
-	float radius;
+	Vector radius;
 };
 
 template<class Vector>

@@ -110,3 +110,29 @@ int IntersectAABBAABB(AABB<Vector> aabb0, AABB<Vector> aabb1)
 
 	return 1;
 }
+
+template<class Vector>
+int IntersectSphereAABB(Sphere<Vector> sphere, AABB<Vector> aabb)
+{
+	int numElements = sizeof(Vector) / sizeof(float);
+
+	Vector aabbMin = aabb.origin - aabb.radius;
+	Vector aabbMax = aabb.origin + aabb.radius;
+	float s, d = 0.0f;
+
+	for (int i = 0; i < numElements; i++)
+	{
+		if (sphere.origin[i] < aabbMin[i])
+		{
+			s = sphere.origin[i] - aabbMin[i];
+			d += s * s;
+		}
+		else if (sphere.origin[i] > aabbMax[i])
+		{
+			s = sphere.origin[i] - aabbMax[i];
+			d += s * s;
+		}
+	}
+
+	return d <= sphere.radius * sphere.radius;
+}
