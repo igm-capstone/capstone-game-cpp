@@ -167,8 +167,7 @@ public:
 	ID3D11VertexShader*				mLineTraceVertexShader;
 	ID3D11PixelShader*				mLineTracePixelShader;
 	ID3D11Buffer*					mLineTraceShaderBuffer;
-	ID3D11Buffer*					mLineTraceInstanceBuffer;
-
+	
 	ID3D11InputLayout*				mCircleInputLayout;
 	ID3D11VertexShader*				mCircleVertexShader;
 	ID3D11PixelShader*				mCirclePixelShader;
@@ -322,7 +321,7 @@ public:
 		RenderWalls();		
 		RenderPlayer();
 		RenderLightCircles();
-		RenderPlayer();
+		//RenderPlayer();
 		RenderRobots();
 		
 		RenderShadowMask();
@@ -336,6 +335,7 @@ public:
 	void VShutdown() override {
 		mCircleMesh->~IMesh();
 		mWallMesh->~IMesh();
+		mLineTraceMesh->~IMesh();
 
 		ReleaseMacro(mQuadInputLayout);
 		ReleaseMacro(mQuadVertexShader);
@@ -350,6 +350,11 @@ public:
 		ReleaseMacro(mColorWeightInstanceBuffer);
 
 		ReleaseMacro(mPlayerInstanceBuffer);
+
+		ReleaseMacro(mLineTraceInputLayout);
+		ReleaseMacro(mLineTraceVertexShader);
+		ReleaseMacro(mLineTracePixelShader);
+		ReleaseMacro(mLineTraceShaderBuffer);
 
 		ReleaseMacro(mShadowCastersRTV);
 		ReleaseMacro(mShadowCastersMap);
