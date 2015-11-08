@@ -2,7 +2,7 @@
 
 
 
-SceneObject::SceneObject() : mMesh(nullptr), mParent(nullptr)
+SceneObject::SceneObject() : mTransform(nullptr), mMesh(nullptr), mParent(nullptr)
 {
 }
 

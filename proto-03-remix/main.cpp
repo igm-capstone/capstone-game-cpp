@@ -15,8 +15,10 @@
 #include "Rig3D/GraphicsMath/cgm.h"
 #include "Vertex.h"
 #include "Grid.h"
+#include "Intersection.h"
 
-#define PI 3.1415926535f
+#define PI					3.1415926535f
+#define UNITY_QUAD_RADIUS	0.85f
 
 using namespace Rig3D;
 
@@ -70,6 +72,8 @@ class Proto_03_Remix : public IScene, public virtual IRendererDelegate
 	Grid& grid = Grid::getInstance();
 
 public:
+
+
 	struct QuadShaderData
 	{
 		mat4f View;
@@ -101,6 +105,9 @@ public:
 	mat4f							mViewMatrix;
 	mat4f							mProjectionMatrix;
 
+	Transform						mPlayerTransform;
+	Transform						mGoalTransform;
+
 	LinearAllocator					mSceneAllocator;
 	LinearAllocator					mStaticMeshAllocator;
 	LinearAllocator					mDynamicMeshAllocator; // TO DO: This will likely need to be a Pool Allocator ->Gabe
@@ -112,8 +119,12 @@ public:
 	SceneObject*					mBlocks;
 	SceneObject*					mWaypoints;
 	SceneObject*					mLights;
-	SceneObject*					mPlayer;
-	SceneObject*					mGoal;
+
+	SceneObject						mPlayer;
+	SceneObject						mGoal;
+
+	BoxCollider						mPlayerCollider;
+
 	std::vector<RobotInfo>			mRobots;
 
 	LineTraceVertex					mLineTraceVertices[gLineTraceVertexCount];
@@ -124,8 +135,10 @@ public:
 	mat4f*							mCircleTransforms;
 	mat4f*							mRobotTransforms;
 	float*							mCircleColorWeights;
-	mat4f							mPlayerTransform;
+
 	std::vector<vec3f>				mLightPos;
+
+	BoxCollider*					mWallColliders;
 
 	int								mWallCount;
 	int								mBlockCount;
@@ -259,28 +272,37 @@ public:
 			grid.GetFringePath(start, end);
 		}
 		
-		auto pos = mPlayer->mTransform.GetPosition();
+		auto pos = mPlayer.mTransform->GetPosition();
 		if (mInput.GetKey(KEYCODE_LEFT))
 		{
 			pos.x -= mPlayerSpeed;
-			UpdatePlayer();
 		}
 		if (mInput.GetKey(KEYCODE_RIGHT))
 		{
 			pos.x += mPlayerSpeed;
-			UpdatePlayer();
 		}
 		if (mInput.GetKey(KEYCODE_UP))
 		{
 			pos.y += mPlayerSpeed;
-			UpdatePlayer();
 		}
 		if (mInput.GetKey(KEYCODE_DOWN))
 		{
 			pos.y -= mPlayerSpeed;
-			UpdatePlayer();
 		}
-		mPlayer->mTransform.SetPosition(pos);
+
+		BoxCollider aabb = { pos, mPlayer.mBoxCollider->radius };
+
+		for (int i = 0; i < mWallCount; i++)
+		{
+			if (IntersectAABBAABB(aabb, mWallColliders[i]))
+			{
+				return;
+			}
+		}
+
+		mPlayer.mTransform->SetPosition(pos);
+		mPlayer.mBoxCollider->origin = pos;
+		UpdatePlayer();
 	}
 
 	void VRender() override
@@ -565,12 +587,12 @@ public:
 	}
 
 	void UpdatePlayer() {
-		mPlayerTransform = (mat4f::rotateY(PI) *mat4f::translate(mPlayer->mTransform.GetPosition())).transpose();
+		mat4f playerWorldMatix = mPlayer.mTransform->GetWorldMatrix().transpose();
 
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		mDeviceContext->Map(mPlayerInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 		// Copy the instances array into the instance buffer.
-		memcpy(mappedResource.pData, &mPlayerTransform, sizeof(mat4f));
+		memcpy(mappedResource.pData, &playerWorldMatix, sizeof(mat4f));
 		// Unlock the instance buffer.
 		mDeviceContext->Unmap(mPlayerInstanceBuffer, 0);
 	}
@@ -613,7 +635,7 @@ public:
 		levelReader.ReadLevel();
 
 		// Walls
-		LoadTransforms(&mWallTransforms, &levelReader.mWalls.Position[0], &levelReader.mWalls.Rotation[0], &levelReader.mWalls.Scale[0], levelReader.mWalls.Position.size(), 0);
+		LoadStaticSceneObjects(&mWalls, &mWallTransforms, &mWallColliders, &levelReader.mWalls.Position[0], &levelReader.mWalls.Rotation[0], &levelReader.mWalls.Scale[0], levelReader.mWalls.Position.size());
 		mWallCount = levelReader.mWalls.Position.size();
 
 		// Blocks
@@ -640,15 +662,18 @@ public:
 		}
 
 		// Player
-		mPlayer = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject), alignof(SceneObject), 0));
-		mPlayer->mTransform.SetPosition(levelReader.mPlayerPos + vec3f(1, 0, 0));
-		//Not using Transform.GetWorldMatrix because Scale, rotation and bleh
-		mPlayerTransform = (mat4f::rotateY(PI) *mat4f::translate(mPlayer->mTransform.GetPosition())).transpose();
+		mPlayer.mTransform = &mPlayerTransform;
+		mPlayer.mTransform->SetPosition(levelReader.mPlayerPos + vec3f(1, 0, 0));
+		mPlayer.mTransform->RotateYaw(PI);
 
+		mPlayer.mBoxCollider = &mPlayerCollider;
+		mPlayer.mBoxCollider->origin = mPlayerTransform.GetPosition();
+		mPlayer.mBoxCollider->radius = vec3f(UNITY_QUAD_RADIUS) * mPlayerTransform.GetScale();
 
 		// Goal
-		mGoal = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject), alignof(SceneObject), 0));
-		mGoal->mTransform.SetPosition(levelReader.mGoalPos);
+		mGoal.mTransform = &mGoalTransform;
+		mGoal.mTransform->SetPosition(levelReader.mGoalPos);
+		mGoal.mTransform->RotateYaw(PI);
 	}
 
 	void LoadTransforms(mat4f** transforms, vec3f* positions, vec3f* rotations, vec3f* scales, int size, int TransformType)
@@ -678,33 +703,42 @@ public:
 		}
 	}
 
-	void LoadSceneObjectData(SceneObject** sceneObjects, vec3f* positions, vec3f* rotations, vec3f* scales, int size, int TransformType)
+	void LoadStaticSceneObjects(SceneObject** sceneObjects, mat4f** transforms, BoxCollider** colliders, vec3f* positions, vec3f* rotations, vec3f* scales, int size)
 	{
 		// Allocate size SceneObjects
 		*sceneObjects = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject) * size, alignof(SceneObject), 0));
+		*transforms = reinterpret_cast<mat4f*>(mSceneAllocator.Allocate(sizeof(mat4f) * size, alignof(mat4f), 0));
+		*colliders = reinterpret_cast<BoxCollider*>(mSceneAllocator.Allocate(sizeof(BoxCollider) * size, alignof(BoxCollider), 0));
 
-		switch(TransformType)
+		for (int i = 0; i < size; i++)
 		{
-		case 0:
-		{
-			for (int i = 0; i < size; i++)
-			{
-				(*sceneObjects)[i].mTransform.SetPosition(positions[i]);
-				(*sceneObjects)[i].mTransform.SetRotation(rotations[i]);
-				(*sceneObjects)[i].mTransform.SetScale(scales[i]);
-			}
-			break;
+			(*transforms)[i] = (mat4f::scale(scales[i]) * mat4f::rotateY(PI) * mat4f::translate(positions[i])).transpose();
+			(*colliders)[i] = BoxCollider({ positions[i], vec3f(0.85f) * scales[i] });
+
+			(*sceneObjects)[i].mWorldMatrix = transforms[i];
+			(*sceneObjects)[i].mBoxCollider = colliders[i];
 		}
-		case 1:
+	}
+
+	void LoadDynamicSceneObjects(SceneObject** sceneObjects, Transform** transforms, BoxCollider** colliders, vec3f* positions, vec3f* rotations, vec3f* scales, int size)
+	{
+		// Allocate size SceneObjects
+		*sceneObjects = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject) * size, alignof(SceneObject), 0));
+		*transforms = reinterpret_cast<Transform*>(mSceneAllocator.Allocate(sizeof(Transform) * size, alignof(Transform), 0));
+		*colliders = reinterpret_cast<BoxCollider*>(mSceneAllocator.Allocate(sizeof(BoxCollider) * size, alignof(BoxCollider), 0));
+
+		quatf yRotate = quatf::rollPitchYaw(0.0f, 0.0f, PI);
+
+		for (int i = 0; i < size; i++)
 		{
-			for (int i = 0; i < size; i++)
-			{
-				(*sceneObjects)[i].mTransform.SetPosition(positions[i]);
-			}
-			break;
-		}
-		default:
-			break;
+			(*transforms)[i].SetPosition(positions[i]);
+			(*transforms)[i].SetRotation(yRotate);
+			(*transforms)[i].SetScale(scales[i]);
+
+			(*colliders)[i] = BoxCollider({ positions[i], vec3f(UNITY_QUAD_RADIUS) * scales[i] });
+
+			(*sceneObjects)[i].mTransform = transforms[i];
+			(*sceneObjects)[i].mBoxCollider = colliders[i];
 		}
 	}
 
@@ -732,10 +766,10 @@ public:
 	{
 		vec3f quadVertices[4] =
 		{
-			{ -0.85f, -0.85f, 0.0f },
-			{ +0.85f, -0.85f, 0.0f },
-			{ +0.85f, +0.85f, 0.0f },
-			{ -0.85f, +0.85f, 0.0f }
+			{ -UNITY_QUAD_RADIUS, -UNITY_QUAD_RADIUS, 0.0f },
+			{ +UNITY_QUAD_RADIUS, -UNITY_QUAD_RADIUS, 0.0f },
+			{ +UNITY_QUAD_RADIUS, +UNITY_QUAD_RADIUS, 0.0f },
+			{ -UNITY_QUAD_RADIUS, +UNITY_QUAD_RADIUS, 0.0f }
 		};
 
 		uint16_t quadIndices[6] = { 0, 1, 2, 2, 3, 0 };
@@ -1044,10 +1078,10 @@ public:
 		playerInstanceBufferDesc.MiscFlags = 0;
 		playerInstanceBufferDesc.StructureByteStride = 0;
 
-		D3D11_SUBRESOURCE_DATA instanceData;
-		instanceData.pSysMem = &(mPlayerTransform);
+		//D3D11_SUBRESOURCE_DATA instanceData;
+		//instanceData.pSysMem = &(mPlayerWorldMatrix);
 
-		mDevice->CreateBuffer(&playerInstanceBufferDesc, &instanceData, &mPlayerInstanceBuffer);
+		mDevice->CreateBuffer(&playerInstanceBufferDesc, nullptr, &mPlayerInstanceBuffer);
 	}
 
 #pragma endregion 
