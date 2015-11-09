@@ -7,6 +7,8 @@
 #define RAD_TO_DEG 57.29578f
 #define DEG_TO_RAD 0.01745329f
 #define MOD(a, n) ((a) - (floorf((a) / (n)) * (n)))
+#include <functional>
+#include "Colors.h"
 
 static Vector3 gRepelOffset = { 0.66f, -0.6f, 0.0f };
 
@@ -19,7 +21,6 @@ static float gMaxRepel = 1.0f;
 static float gTurnRate = 50;
 static float gMoveSpeed = 20;
 
-using namespace std;
 using namespace PathFinder;
 
 namespace Rig3D
@@ -40,7 +41,8 @@ namespace Rig3D
 		TargetFollower(Transform& transform, AABB<vec2f>* aabbs, int aabbCount);
 		~TargetFollower();
 
-		void MoveTowards(Transform& target)
+		//, std::function<void(vec3f, vec3f, vec4f)>& DrawLine
+		void MoveTowards(Transform& target, std::function<void(vec3f, vec3f, vec4f)> DrawLine)
 		{
 			auto targetPosition = target.GetPosition();
 			auto position = mTransform.GetPosition();
@@ -75,21 +77,21 @@ namespace Rig3D
 
 			Quaternion rotation;
 			RotateTowards(&rotation, mTransform.GetRotation(), targetRotation, gTurnRate * 5 * deltaTime);
-			mTransform.SetRotation(rotation);
+			//mTransform.SetRotation(rotation);
 			auto r1 = rotation.toEuler() * RAD_TO_DEG;
 
 			auto frontOffset = position + mTransform.TransformPoint(vec3f(0, 1, 0) * gRepelFocus);
 			auto rightOffset = position + mTransform.TransformPoint(gRepelOffset);
 			auto leftOffset  = position + mTransform.TransformPoint(vec3f(-gRepelOffset.x, gRepelOffset.y, 0));
 
-			//Debug.DrawLine(rightOffset, rightOffset + (frontOffset - rightOffset).normalized * repelCastDistance);
+			DrawLine(rightOffset, rightOffset +  normalize(frontOffset - rightOffset) * gRepelCastDistance, Colors::blue);
 			ray = { rightOffset, frontOffset - rightOffset };
 			if (RayCast(&hit, ray, mAABBs, mAABBCount)) // i need cast distance here (repel cast distance)
 			{
 				mRepel = fmax(mRepel - gRepelIncrement, -gMaxRepel);
 			}
 
-			//Debug.DrawLine(leftOffset, leftOffset + (frontOffset - leftOffset).normalized * repelCastDistance);
+			DrawLine(leftOffset, leftOffset + normalize(frontOffset - leftOffset) * gRepelCastDistance, Colors::blue);
 			ray = { leftOffset, frontOffset - leftOffset };
 			if (RayCast(&hit, ray, mAABBs, mAABBCount)) // i need cast distance here (repel cast distance)
 			{
@@ -135,7 +137,7 @@ namespace Rig3D
 			moveStep.z *= moveDirection.z;
 */
 			TRACE(float(deltaTime));
-			mTransform.SetPosition(position + moveStep * gMoveSpeed * .1f * deltaTime);
+			//mTransform.SetPosition(position + moveStep * gMoveSpeed * .1f * deltaTime);
 		}
 
 		static void RotateTowards(Quaternion* out, const Quaternion& from, const Quaternion& to, float maxDegreesDelta)

@@ -15,10 +15,11 @@
 #include "Rig3D/GraphicsMath/cgm.h"
 #include "Vertex.h"
 #include "Grid.h"
-
-#define PI 3.1415926535f
 #include "Primitives.h"
 #include "TargetFollower.h"
+#include "Colors.h"
+
+#define PI 3.1415926535f
 
 using namespace Rig3D;
 
@@ -37,18 +38,6 @@ typedef cliqCity::memory::LinearAllocator LinearAllocator;
 //	static const vec4f magenta;
 //};
 
-namespace Colors
-{
-	static const vec4f black		= { 0.0f, 0.0f, 0.0f, 1.0f };
-	static const vec4f white		= { 1.0f, 1.0f, 1.0f, 1.0f };
-	static const vec4f red			= { 1.0f, 0.0f, 0.0f, 1.0f };
-	static const vec4f green		= { 0.0f, 1.0f, 0.0f, 1.0f };
-	static const vec4f blue			= { 0.0f, 0.0f, 1.0f, 1.0f };
-	static const vec4f cyan			= { 0.0f, 1.0f, 1.0f, 1.0f };
-	static const vec4f yellow		= { 1.0f, 1.0f, 0.0f, 1.0f };
-	static const vec4f magenta		= { 1.0f, 0.0f, 1.0f, 1.0f };
-	static const vec4f transparent	= { 1.0f, 1.0f, 1.0f, 0.0f };
-}
 
 static const vec4f gWallColor = { 1.0f, 0.0f, 1.0f, 1.0f };
 static const vec4f gCircleColor = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -264,7 +253,7 @@ public:
 			
 		auto result = mGrid.pathFinder.FindPath(&from, &to);
 		static TargetFollower follower(mPlayer->mTransform, mAABBs, mAABBCount);
-		follower.MoveTowards(mRobots[0].Transform);
+		//follower.MoveTowards(mRobots[0].Transform, [this](vec3f f, vec3f t, vec4f c) { TraceLine(f, t, c); });
 		
 		if (result.path.size() > 0)
 		{
@@ -589,9 +578,7 @@ public:
 	}
 
 	void UpdatePlayer() {
-		auto r = mPlayer->mTransform.GetRotation();
 		mPlayerTransform = mPlayer->mTransform.GetWorldMatrix().transpose();
-		//mPlayerTransform = (mat4f::rotateY(PI) * mat4f::translate(mPlayer->mTransform.GetPosition())).transpose();
 
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		mDeviceContext->Map(mPlayerInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -674,7 +661,7 @@ public:
 		mPlayer = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject), alignof(SceneObject), 0));
 		mPlayer->mTransform.SetPosition(levelReader.mPlayerPos + vec3f(1, 0, 0));
 		//Not using Transform.GetWorldMatrix because Scale, rotation and bleh
-		mPlayerTransform = (mat4f::rotateY(PI) *mat4f::translate(mPlayer->mTransform.GetPosition())).transpose();
+		mPlayerTransform = mPlayer->mTransform.GetWorldMatrix().transpose();
 
 		// Goal
 		mGoal = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject), alignof(SceneObject), 0));
@@ -699,7 +686,7 @@ public:
 		{
 			for (int i = 0; i < size; i++)
 			{
-				(*transforms)[i] = (mat4f::translate(positions[i])).transpose();
+				(*transforms)[i] = mat4f::translate(positions[i]).transpose();
 			}
 			break;
 		}

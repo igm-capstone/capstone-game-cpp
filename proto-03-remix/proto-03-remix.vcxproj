@@ -147,6 +147,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Colors.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="Intersection.h" />
     <ClInclude Include="LevelReader.h" />
