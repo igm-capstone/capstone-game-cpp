@@ -27,3 +27,8 @@ struct Sphere
 	Vector origin;
 	float radius;
 }; 
+
+typedef AABB<vec2f>		BoxCollider2D;
+typedef Sphere<vec2f>	CirceCollider;
+typedef AABB<vec3f>		BoxCollider;
+typedef Sphere<vec3f>	SphereCollider;
