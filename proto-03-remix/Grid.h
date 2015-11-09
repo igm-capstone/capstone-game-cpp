@@ -15,7 +15,7 @@ const int numSpheresY = 34;// round(maxSizeY / nodeRadius) / 2;
 #pragma once
 class Grid
 {
-private:
+public:
 	PathFinder::Fringe<Node, numSpheresX, numSpheresY> pathFinder;
 	
 public:
