@@ -2,7 +2,6 @@
 #include "Grid.h"
 #include <cmath>
 
-
 Grid::Grid()
 {
 	//Create nodes
@@ -18,7 +17,7 @@ Grid::Grid()
 	UpdateGrid();
 }
 
-Node& Grid::getNodeAtPos(Vector3 pos)
+Node& Grid::GetNodeAt(Vector3 pos)
 {
 	float x = (pos.x - nodeRadius - startingCorner.x) / (nodeRadius * 2);
 	float y = (pos.y - nodeRadius - startingCorner.y) / (nodeRadius * 2);
@@ -30,13 +29,17 @@ void Grid::UpdateGrid() {
 
 }
 
-void Grid::GetFringePath(Vector3 from, Vector3 to) {
-	TRACE("Treta" << 1 << " " << 1.0f << true);
+SearchResult<Node> Grid::GetPath(Vector3 from, Vector3 to) {
 
-	auto start = getNodeAtPos(from);
-	auto end = getNodeAtPos(to);
+	// we want the path backward because we want the
+	// pathfinder to retain cache for multiple queries 
+	// towards the same target (robots chasing player).
+	auto end = GetNodeAt(from);
+	auto start = GetNodeAt(to);
 
 	auto result = pathFinder.FindPath(&start, &end);
+
+	return result;
 
 	std::stringstream ss;
 	for (int y = 0; y < numSpheresY; y++)

@@ -7,8 +7,9 @@ using namespace cliqCity::graphicsMath;
 template<class Vector>
 struct RayCastHit
 {
-	AABB<Vector>* hit;
-	Vector poi;
+	AABB<Vector>*	hit;
+	Vector			poi;
+	float			distance;
 };
 
 template <class Vector>
@@ -23,7 +24,7 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, i
 		float t;
 		if (IntersectRayAABB(ray, aabbs[i], poi, t))
 		{
-			hits.push_back({ &aabbs[i], poi });
+			hits.push_back({ &aabbs[i], poi , 0.0f});	// Temp store zero for distance to save on calculations
 		}
 	}
 
@@ -39,6 +40,7 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, i
 		float distance = (hits.at(i).hit->origin - ray.origin).magnitude2();
 		if (distance < prevDistance)
 		{
+			hits.at(i).distance = sqrt(distance);
 			minIndex = i;
 			prevDistance = distance;
 		}

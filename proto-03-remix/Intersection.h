@@ -51,8 +51,8 @@ int IntersectRayAABB(Ray<Vector> ray, AABB<Vector> aabb, Vector& poi, float& t)
 
 	for (int i = 0; i < numElements; i++)
 	{
-		float aabbMin = aabb.origin[i] - aabb.radius;
-		float aabbMax = aabb.origin[i] + aabb.radius;
+		float aabbMin = aabb.origin[i] - aabb.halfSize[i];
+		float aabbMax = aabb.origin[i] + aabb.halfSize[i];
 
 		if (abs(ray.direction[i]) < FLT_EPSILON)
 		{
@@ -75,8 +75,8 @@ int IntersectRayAABB(Ray<Vector> ray, AABB<Vector> aabb, Vector& poi, float& t)
 				t1 = temp;
 			}
 
-			tMin = std::max(tMin, t1);
-			tMax = std::min(tMax, t2);
+			tMin = max(tMin, t1);
+			tMax = min(tMax, t2);
 
 			if (tMin > tMax)
 			{
@@ -85,7 +85,7 @@ int IntersectRayAABB(Ray<Vector> ray, AABB<Vector> aabb, Vector& poi, float& t)
 		}
 	}
 
-	poi = ray.origin + ray.normal * tMin;
+	poi = ray.origin + ray.direction * tMin;
 	t = tMin;
 	return 1;
 }
@@ -95,10 +95,10 @@ int IntersectAABBAABB(AABB<Vector> aabb0, AABB<Vector> aabb1)
 {
 	int numElements = sizeof(Vector) / sizeof(float);
 	
-	Vector min0 = aabb0.origin - aabb0.radius;
-	Vector max0 = aabb0.origin + aabb0.radius;
-	Vector min1 = aabb1.origin - aabb1.radius;
-	Vector max1 = aabb1.origin + aabb1.radius;
+	Vector min0 = aabb0.origin - aabb0.halfSize;
+	Vector max0 = aabb0.origin + aabb0.halfSize;
+	Vector min1 = aabb1.origin - aabb1.halfSize;
+	Vector max1 = aabb1.origin + aabb1.halfSize;
 
 	for (int i = 0; i < numElements; i++)
 	{
@@ -109,4 +109,30 @@ int IntersectAABBAABB(AABB<Vector> aabb0, AABB<Vector> aabb1)
 	}
 
 	return 1;
+}
+
+template<class Vector>
+int IntersectSphereAABB(Sphere<Vector> sphere, AABB<Vector> aabb)
+{
+	int numElements = sizeof(Vector) / sizeof(float);
+
+	Vector aabbMin = aabb.origin - aabb.radius;
+	Vector aabbMax = aabb.origin + aabb.radius;
+	float s, d = 0.0f;
+
+	for (int i = 0; i < numElements; i++)
+	{
+		if (sphere.origin[i] < aabbMin[i])
+		{
+			s = sphere.origin[i] - aabbMin[i];
+			d += s * s;
+		}
+		else if (sphere.origin[i] > aabbMax[i])
+		{
+			s = sphere.origin[i] - aabbMax[i];
+			d += s * s;
+		}
+	}
+
+	return d <= sphere.radius * sphere.radius;
 }

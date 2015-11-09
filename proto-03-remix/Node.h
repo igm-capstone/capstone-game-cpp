@@ -7,6 +7,7 @@ class Node : public PathFinder::INode {
 public:
 	Vector3 position;
 	Vector2 coord;
+	bool hasLight;
 
 public:
 	Node() {};

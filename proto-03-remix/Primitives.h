@@ -4,7 +4,7 @@ template<class Vector>
 struct Ray
 {
 	Vector origin;
-	Vector normal;
+	Vector direction;
 };
 
 template<class Vector>
@@ -18,7 +18,7 @@ template<class Vector>
 struct AABB
 {
 	Vector origin;
-	float radius;
+	Vector halfSize;
 };
 
 template<class Vector>
@@ -27,3 +27,8 @@ struct Sphere
 	Vector origin;
 	float radius;
 }; 
+
+typedef AABB<vec2f>		BoxCollider2D;
+typedef Sphere<vec2f>	CirceCollider;
+typedef AABB<vec3f>		BoxCollider;
+typedef Sphere<vec3f>	SphereCollider;

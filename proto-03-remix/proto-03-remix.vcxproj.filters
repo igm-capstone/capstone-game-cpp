@@ -33,6 +33,9 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TargetFollower.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PathFinder\Fringe.h">
@@ -68,6 +71,12 @@
     <ClInclude Include="Node.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TargetFollower.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Colors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\QuadVertexShader.hlsl">
@@ -98,6 +107,9 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\LineTracePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShadowGridComputeShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

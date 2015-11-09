@@ -178,6 +178,12 @@ void Transform::SetParent(Transform* parent)
 	mIsDirty = true;
 }
 
+vec3f Transform::TransformPoint(vec3f point)
+{
+	auto m = mat4f::translate(point) * GetWorldMatrix();
+	return { m.u.w, m.v.w, m.w.w };
+}
+
 void Transform::SetRotation(const float x, const float y, const float z)
 {
 	mRotation = quatf::rollPitchYaw(z, x, y);

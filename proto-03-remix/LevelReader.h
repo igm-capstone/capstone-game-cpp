@@ -7,14 +7,7 @@
 #include "Rig3D\GraphicsMath\cgm.h"
 #include <Rig3D/Common/Transform.h>
 
-struct WallInfo
-{
-	std::vector<vec3f>	Position;
-	std::vector<vec3f>	Rotation;
-	std::vector<vec3f>	Scale;
-};
-
-struct BlockInfo
+struct RectInfo
 {
 	std::vector<vec3f>	Position;
 	std::vector<vec3f>	Rotation;
@@ -34,8 +27,8 @@ class LevelReader
 public:
 
 	std::string				mPath;
-	WallInfo				mWalls;
-	BlockInfo				mBlocks;
+	RectInfo				mWalls;
+	RectInfo				mBlocks;
 	
 	vec3f					mPlayerPos;
 	vec3f					mGoalPos;
@@ -51,8 +44,8 @@ public:
 
 private:
 
-	void ReadWalls(std::string path, WallInfo *WallArray);
-	void ReadBlocks(std::string path, BlockInfo *BlockArray);
+	void ReadWalls(std::string path, RectInfo *WallArray);
+	void ReadBlocks(std::string path, RectInfo *BlockArray);
 	void ReadPlayer(std::string path, vec3f *PlayerPos);
 	void ReadRobot(std::string path, std::vector<RobotInfo> *RobotArray);
 	void ReadLights(std::string path, std::vector<vec3f> *LightArray);
