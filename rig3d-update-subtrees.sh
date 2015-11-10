@@ -16,7 +16,7 @@ do
 
             if [ -f "$prefix/$repopath/.gitmodules" ]
             then
-                test.sh "/$repopath"
+                rig3d-update-subtrees.sh "/$repopath"
             fi
             ;;
     esac
