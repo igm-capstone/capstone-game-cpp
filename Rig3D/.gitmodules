@@ -1,9 +1,0 @@
-[submodule "GraphicsMath"]
-	path = GraphicsMath
-	url = https://github.com/gortega56/GraphicsMath.git
-[submodule "EventHandler"]
-	path = EventHandler
-	url = https://github.com/gortega56/EventHandler.git
-[submodule "Memory"]
-	path = Memory
-	url = https://github.com/gortega56/Memory.git
