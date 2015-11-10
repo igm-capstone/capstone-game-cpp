@@ -5,7 +5,7 @@
 #include "Rig3D\Graphics\Interface\IMesh.h"
 #include "Rig3D\Common\Transform.h"
 #include "Memory\Memory\LinearAllocator.h"
-#include "Rig3D\MeshLibrary.h"
+#include "Rig3D\Graphics\MeshLibrary.h"
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <fstream>
@@ -917,8 +917,8 @@ public:
 		}
 
 		mStaticMeshLibrary.NewMesh(&mLineTraceMesh, mRenderer);
-		mRenderer->VSetMeshVertexBufferData(mLineTraceMesh, mLineTraceVertices, sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex), GPU_MEMORY_USAGE_DEFAULT);
-		mRenderer->VSetMeshIndexBufferData(mLineTraceMesh, lineTraceIndices, gLineTraceVertexCount, GPU_MEMORY_USAGE_DEFAULT);
+		mRenderer->VSetDynamicMeshVertexBuffer(mLineTraceMesh, mLineTraceVertices, sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex));
+		mRenderer->VSetDynamicMeshIndexBuffer(mLineTraceMesh, lineTraceIndices, gLineTraceVertexCount);
 	}
 
 	void InitializeQuadMesh()
@@ -934,8 +934,8 @@ public:
 		uint16_t quadIndices[6] = { 0, 2, 1, 3, 2, 0 };
 
 		mStaticMeshLibrary.NewMesh(&mWallMesh, mRenderer);
-		mRenderer->VSetMeshVertexBufferData(mWallMesh, quadVertices, sizeof(vec3f) * 4, sizeof(vec3f), GPU_MEMORY_USAGE_STATIC);
-		mRenderer->VSetMeshIndexBufferData(mWallMesh, quadIndices, 6, GPU_MEMORY_USAGE_STATIC);
+		mRenderer->VSetStaticMeshVertexBuffer(mWallMesh, quadVertices, sizeof(vec3f) * 4, sizeof(vec3f));
+		mRenderer->VSetStaticMeshIndexBuffer(mWallMesh, quadIndices, 6);
 	}
 
 	void InitializeCircleMesh()
@@ -959,8 +959,8 @@ public:
 		};
 
 		mStaticMeshLibrary.NewMesh(&mCircleMesh, mRenderer);
-		mRenderer->VSetMeshVertexBufferData(mCircleMesh, circleVertices, sizeof(vec3f) * gCircleVertexCount, sizeof(vec3f), GPU_MEMORY_USAGE_STATIC);
-		mRenderer->VSetMeshIndexBufferData(mCircleMesh, circleIndices, gCircleIndexCount, GPU_MEMORY_USAGE_STATIC);
+		mRenderer->VSetStaticMeshVertexBuffer(mCircleMesh, circleVertices, sizeof(vec3f) * gCircleVertexCount, sizeof(vec3f));
+		mRenderer->VSetStaticMeshIndexBuffer(mCircleMesh, circleIndices, gCircleIndexCount);
 	}
 
 	void InitializeLineTraceShaders()
@@ -1250,7 +1250,7 @@ public:
 
 #pragma region Line Trace
 
-	void TraceLine(vec3f from, vec3f to, vec4f color)
+	void TraceLine(const vec3f& from, const vec3f& to, const vec4f& color)
 	{
 		auto index = mLineTraceDrawCount++;
 		mLineTraceVertices[index].Position = from;

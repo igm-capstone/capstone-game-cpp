@@ -34,10 +34,11 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, i
 	}
 
 	float minIndex = 0;
-	float prevDistance = (hits.at(0).hit->origin - ray.origin).magnitude2();
+	// TODO! create magnitude2 function
+	float prevDistance = magnitude(hits.at(0).hit->origin - ray.origin);
 	for (int i = 1; i < hits.size(); i++)
 	{
-		float distance = (hits.at(i).hit->origin - ray.origin).magnitude2();
+		float distance = magnitude(hits.at(i).hit->origin - ray.origin);
 		if (distance < prevDistance)
 		{
 			hits.at(i).distance = sqrt(distance);

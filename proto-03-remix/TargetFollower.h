@@ -23,6 +23,9 @@ static float gMoveSpeed = 20;
 
 using namespace PathFinder;
 
+
+
+
 namespace Rig3D
 {
 	
@@ -42,7 +45,7 @@ namespace Rig3D
 		~TargetFollower();
 
 		//, std::function<void(vec3f, vec3f, vec4f)>& DrawLine
-		void MoveTowards(Transform& target, std::function<void(vec3f, vec3f, vec4f)> DrawLine)
+		void MoveTowards(Transform& target, std::function<void(vec3f, vec3f, void*)> DrawLine)
 		{
 			auto targetPosition = target.GetPosition();
 			auto position = mTransform.GetPosition();
@@ -55,7 +58,7 @@ namespace Rig3D
 			for (auto node : mSearchResult.path)
 			{
 				auto distance = node->position - position;
-				auto direction = distance *(1 / distance.magnitude());
+				auto direction = distance *(1 / magnitude(distance));
 
 				ray = { position, direction };
 				if (!RayCast(&hit, ray, mAABBs, mAABBCount))
@@ -80,18 +83,18 @@ namespace Rig3D
 			//mTransform.SetRotation(rotation);
 			auto r1 = rotation.toEuler() * RAD_TO_DEG;
 
-			auto frontOffset = position + mTransform.TransformPoint(vec3f(0, 1, 0) * gRepelFocus);
-			auto rightOffset = position + mTransform.TransformPoint(gRepelOffset);
-			auto leftOffset  = position + mTransform.TransformPoint(vec3f(-gRepelOffset.x, gRepelOffset.y, 0));
+			auto frontOffset = position + TransformPoint(mTransform, vec3f(0, 1, 0) * gRepelFocus);
+			auto rightOffset = position + TransformPoint(mTransform, gRepelOffset);
+			auto leftOffset  = position + TransformPoint(mTransform, vec3f(-gRepelOffset.x, gRepelOffset.y, 0));
 
-			DrawLine(rightOffset, rightOffset +  normalize(frontOffset - rightOffset) * gRepelCastDistance, Colors::blue);
+			//DrawLine(rightOffset, rightOffset +  normalize(frontOffset - rightOffset) * gRepelCastDistance, Colors::blue);
 			ray = { rightOffset, frontOffset - rightOffset };
 			if (RayCast(&hit, ray, mAABBs, mAABBCount)) // i need cast distance here (repel cast distance)
 			{
 				mRepel = fmax(mRepel - gRepelIncrement, -gMaxRepel);
 			}
 
-			DrawLine(leftOffset, leftOffset + normalize(frontOffset - leftOffset) * gRepelCastDistance, Colors::blue);
+			//DrawLine(leftOffset, leftOffset + normalize(frontOffset - leftOffset) * gRepelCastDistance, Colors::blue);
 			ray = { leftOffset, frontOffset - leftOffset };
 			if (RayCast(&hit, ray, mAABBs, mAABBCount)) // i need cast distance here (repel cast distance)
 			{
@@ -152,6 +155,14 @@ namespace Rig3D
 			return Slerp(out, from, to, t);
 		}
 
+		// TODO! move to engine
+		static vec3f TransformPoint(Transform& transform, const vec3f& point)
+		{
+			auto m = mat4f::translate(point) * transform.GetWorldMatrix();
+			return{ m.u.w, m.v.w, m.w.w };
+		}
+
+
 		static void Slerp(Quaternion* out, const Quaternion& from, const Quaternion& to, const float u)
 		{
 			Quaternion q0(from);
@@ -183,6 +194,15 @@ namespace Rig3D
 			out->v.x = q0.v.x + q1.v.x;
 			out->v.y = q0.v.y + q1.v.y;
 			out->v.z = q0.v.z + q1.v.z;
+		}
+		
+		// TODO! Move angleBetween to GraphicsMath Quaternion.cpp
+		#define M_RAD_TO_DEG 57.2957801818848f
+
+		// Returns the angle in degrees between two rotations /a/ and /b/.
+		static float angleBetween(const Quaternion& lhs, const Quaternion& rhs)
+		{
+			return float(double(acos(fmin(abs(cliqCity::graphicsMath::dot(lhs, rhs)), 1.0f))) * 2.0f * M_RAD_TO_DEG);
 		}
 	};
 
