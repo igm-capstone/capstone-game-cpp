@@ -83,9 +83,9 @@ namespace Rig3D
 			//mTransform.SetRotation(rotation);
 			auto r1 = rotation.toEuler() * RAD_TO_DEG;
 
-			auto frontOffset = position + TransformPoint(mTransform, vec3f(0, 1, 0) * gRepelFocus);
-			auto rightOffset = position + TransformPoint(mTransform, gRepelOffset);
-			auto leftOffset  = position + TransformPoint(mTransform, vec3f(-gRepelOffset.x, gRepelOffset.y, 0));
+			auto frontOffset = position + mTransform.TransformPoint(vec3f(0, 1, 0) * gRepelFocus);
+			auto rightOffset = position + mTransform.TransformPoint(gRepelOffset);
+			auto leftOffset  = position + mTransform.TransformPoint(vec3f(-gRepelOffset.x, gRepelOffset.y, 0));
 
 			//DrawLine(rightOffset, rightOffset +  normalize(frontOffset - rightOffset) * gRepelCastDistance, Colors::blue);
 			ray = { rightOffset, frontOffset - rightOffset };
@@ -154,14 +154,6 @@ namespace Rig3D
 			float t = fmin(1.0f, maxDegreesDelta / num);
 			return Slerp(out, from, to, t);
 		}
-
-		// TODO! move to engine
-		static vec3f TransformPoint(Transform& transform, const vec3f& point)
-		{
-			auto m = mat4f::translate(point) * transform.GetWorldMatrix();
-			return{ m.u.w, m.v.w, m.w.w };
-		}
-
 
 		static void Slerp(Quaternion* out, const Quaternion& from, const Quaternion& to, const float u)
 		{
