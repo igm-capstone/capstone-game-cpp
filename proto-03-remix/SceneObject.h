@@ -21,7 +21,7 @@ public:
 	union
 	{
 		BoxCollider*	mBoxCollider;
-		CirceCollider*	mSphereCollider;
+		CircleCollider*	mSphereCollider;
 	};
 
 	SceneObject();
