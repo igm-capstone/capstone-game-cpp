@@ -59,9 +59,6 @@
     <ClInclude Include="Primitives.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Intersection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RayCast.h">
       <Filter>Header Files</Filter>
     </ClInclude>
