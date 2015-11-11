@@ -1,7 +1,7 @@
 #pragma once
 #include "Rig3D/Common/Transform.h"
 #include "Rig3D/Graphics/Interface/IMesh.h"
-#include "Primitives.h"
+#include "Rig3D/Parametric.h"
 
 using namespace Rig3D;
 

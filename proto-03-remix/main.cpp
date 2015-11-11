@@ -15,8 +15,8 @@
 #include "Rig3D/GraphicsMath/cgm.h"
 #include "Vertex.h"
 #include "Grid.h"
-#include "Intersection.h"
-#include "Primitives.h"
+#include "Rig3D/Intersection.h"
+#include "Rig3D/Parametric.h"
 #include "TargetFollower.h"
 #include "Colors.h"
 
