@@ -159,6 +159,10 @@ namespace cliqCity
 		CGM_DLL float dot(const Vector3& lhs, const Vector3& rhs);
 		CGM_DLL float dot(const Vector4& lhs, const Vector4& rhs);
 
+		CGM_DLL Vector2 lerp(const Vector2& lhs, const Vector2& rhs, const float& t);
+		CGM_DLL Vector3 lerp(const Vector3& lhs, const Vector3& rhs, const float& t);
+		CGM_DLL Vector4 lerp(const Vector4& lhs, const Vector4& rhs, const float& t);
+
 		// Binary (Vector2)
 
 		CGM_DLL Vector2 operator+(const Vector2& lhs, const Vector2& rhs);

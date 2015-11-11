@@ -405,6 +405,21 @@ float cliqCity::graphicsMath::dot(const Vector4& lhs, const Vector4& rhs)
 #endif
 }
 
+Vector2 cliqCity::graphicsMath::lerp(const Vector2& v0, const Vector2& v1, const float& t)
+{
+	return (1.0f - t) * v0 + (v1 * t);
+}
+
+Vector3 cliqCity::graphicsMath::lerp(const Vector3& v0, const Vector3& v1, const float& t)
+{
+	return (1.0f - t) * v0 + (v1 * t);
+}
+
+Vector4 cliqCity::graphicsMath::lerp(const Vector4& v0, const Vector4& v1, const float& t)
+{
+	return (1.0f - t) * v0 + (v1 * t);
+}
+
 // Binary (Vector2)
 
 Vector2 cliqCity::graphicsMath::operator+(const Vector2& lhs, const Vector2& rhs)
