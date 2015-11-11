@@ -1,5 +1,5 @@
 #pragma once
-#include "Intersection.h"
+#include "Rig3D/Intersection.h"
 #include <vector>
 
 using namespace cliqCity::graphicsMath;
@@ -35,10 +35,10 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, i
 
 	float minIndex = 0;
 	// TODO! create magnitude2 function
-	float prevDistance = magnitude(hits.at(0).hit->origin - ray.origin);
+	float prevDistance = magnitudeSquared(hits.at(0).hit->origin - ray.origin);
 	for (int i = 1; i < hits.size(); i++)
 	{
-		float distance = magnitude(hits.at(i).hit->origin - ray.origin);
+		float distance = magnitudeSquared(hits.at(i).hit->origin - ray.origin);
 		if (distance < prevDistance)
 		{
 			hits.at(i).distance = sqrt(distance);
