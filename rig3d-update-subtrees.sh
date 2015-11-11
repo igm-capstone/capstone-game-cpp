@@ -3,7 +3,7 @@ echo $prefix
 
  if [ -z "$1" ]
 then
-    git subtree pull --prefix Rig3D git@github.com:igm-capstone/Rig3D.git master --squash
+    git subtree pull --prefix Rig3D https://github.com/igm-capstone/Rig3D.git master --squash
 fi
 
 cat $prefix/.gitmodules | grep -B1 url | while read line
