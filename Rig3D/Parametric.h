@@ -1,4 +1,5 @@
 #pragma once
+#include "GraphicsMath/cgm.h"
 
 template<class Vector>
 struct Ray
@@ -18,14 +19,14 @@ template<class Vector>
 struct AABB
 {
 	Vector origin;
-	float radius;
+	Vector radius;
 };
 
 template<class Vector>
 struct Sphere
 {
-	Vector origin;
-	float radius;
+	Vector	origin;
+	float	radius;
 };
 
 template<class Vector>
@@ -35,3 +36,8 @@ struct Plane
 	float  distance;
 	
 };
+
+typedef AABB<vec2f>		BoxCollider2D;
+typedef AABB<vec3f>		BoxCollider;
+typedef Sphere<vec2f>	CircleCollider;
+typedef Sphere<vec3f>	SphereCollider;
