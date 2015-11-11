@@ -134,6 +134,35 @@ float cliqCity::graphicsMath::dot(const Quaternion& lhs, const Quaternion& rhs)
 	return (lhs.w * rhs.w) + dot(lhs.v, rhs.v);
 }
 
+Quaternion cliqCity::graphicsMath::slerp(Quaternion q0, Quaternion q1, const float& t)
+{
+	float cosAngle = cliqCity::graphicsMath::dot(q0, q1);
+	if (cosAngle < 0.0f) {
+		q1 = -q1;
+		cosAngle = -cosAngle;
+	}
+
+	float k0, k1;
+
+	// Check for divide by zero
+	if (cosAngle > 0.9999f) {
+		k0 = 1.0f - t;
+		k1 = t;
+	}
+	else {
+		float angle = acosf(cosAngle);
+		float oneOverSinAngle = 1.0f / sinf(angle);
+
+		k0 = ((sinf(1.0f - t) * angle) * oneOverSinAngle);
+		k1 = (sinf(t * angle) * oneOverSinAngle);
+	}
+
+	q0 = q0 * k0;
+	q1 = q1 * k1;
+
+	return q0 + q1;
+}
+
 Quaternion cliqCity::graphicsMath::operator+(const Quaternion& lhs, const Quaternion& rhs)
 {
 	return Quaternion(lhs) += rhs;

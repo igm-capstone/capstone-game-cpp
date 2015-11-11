@@ -46,6 +46,7 @@ namespace cliqCity
 		CGM_DLL float magnitude(const Quaternion& quaternion);
 		CGM_DLL Quaternion normalize(const Quaternion& quaternion);
 		CGM_DLL float dot(const Quaternion& lhs, const Quaternion& rhs);
+		CGM_DLL Quaternion slerp(Quaternion q0, Quaternion q1, const float& t);
 
 		CGM_DLL Quaternion operator+(const Quaternion& lhs, const Quaternion& rhs);
 		CGM_DLL Quaternion operator*(const Quaternion& lhs, const Quaternion& rhs);
