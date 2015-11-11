@@ -81,10 +81,11 @@
     <ClInclude Include="Graphics\DirectX11\DX11ShaderReflection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="Graphics\rig_graphics_api_conversions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+=======
     <ClInclude Include="Graphics\Interface\IShader.h">
+>>>>>>> 177c1577ae30f0313ef2ebe28caa2e8bc50fad45
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
