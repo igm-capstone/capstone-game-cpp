@@ -23,6 +23,14 @@
 #define PI					3.1415926535f
 #define UNITY_QUAD_RADIUS	0.85f
 
+#if defined _DEBUG
+std::function<void(vec3f, vec3f, vec4f)> __gTraceLine;
+void TraceLine(vec3f from, vec3f to, vec4f color)
+{
+	__gTraceLine(from, to, color);
+}
+#endif
+
 using namespace Rig3D;
 
 typedef cliqCity::memory::LinearAllocator LinearAllocator;
@@ -227,6 +235,10 @@ public:
 		mOptions.mFullScreen = false;
 		mStaticMeshLibrary.SetAllocator(&mStaticMeshAllocator);
 		mDynamicMeshLibrary.SetAllocator(&mDynamicMeshAllocator);
+
+#if defined _DEBUG
+		__gTraceLine = [this](vec3f from, vec3f to, vec4f color) { TraceLine(from, to, color); };
+#endif
 	}
 
 	~Proto_03_Remix() {}
@@ -263,8 +275,10 @@ public:
 		float mPlayerSpeed = 0.25f;
 		bool moved = false;
 
+		auto target = mRobots[4];
+
 		auto start = mPlayer.mTransform->GetPosition(); //Vector3(10, 20, 0);
-		auto end = Vector3(-20, -20, 0);
+		auto end = target.Transform.GetPosition();
 		//grid.GetPath(start, end);
 		
 		auto from = mGrid.GetNodeAt(start);
@@ -272,7 +286,7 @@ public:
 			
 		auto result = mGrid.pathFinder.FindPath(&from, &to);
 		static TargetFollower follower(*mPlayer.mTransform, mAABBs, mAABBCount);
-		//follower.MoveTowards(mRobots[0].Transform, [this](vec3f f, vec3f t, vec4f c) { TraceLine(f, t, c); });
+		follower.MoveTowards(target.Transform, [this](vec3f f, vec3f t, vec4f c) { TraceLine(f, t, c); });
 		
 		if (result.path.size() > 0)
 		{

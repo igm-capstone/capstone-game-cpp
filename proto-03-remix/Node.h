@@ -5,8 +5,8 @@ using namespace cliqCity::graphicsMath;
 
 class Node : public PathFinder::INode {
 public:
-	Vector3 position;
 	Vector2 coord;
+	Vector3 position;
 	bool hasLight;
 
 public:

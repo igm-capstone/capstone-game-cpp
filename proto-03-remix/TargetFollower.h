@@ -41,7 +41,6 @@ namespace Rig3D
 		TargetFollower(Transform& transform, AABB<vec2f>* aabbs, int aabbCount);
 		~TargetFollower();
 
-		//, std::function<void(vec3f, vec3f, vec4f)>& DrawLine
 		void MoveTowards(Transform& target, std::function<void(vec3f, vec3f, vec4f)> DrawLine)
 		{
 			auto targetPosition = target.GetPosition();
@@ -65,19 +64,19 @@ namespace Rig3D
 				}
 			}
 
-			auto currentAngle = mTransform.GetRollPitchYaw().z;
+			auto currentAngle = mTransform.GetRollPitchYaw().z * RAD_TO_DEG;
 				
 			auto targetDistance = targetPosition - position;
 			auto targetAngle = atan2f(-targetDistance.x, targetDistance.y) * RAD_TO_DEG;
 			
 			auto da = abs(MOD(targetAngle - currentAngle + 180.0f, 360.0f) - 180);
 
-			auto targetRotation = Quaternion::rollPitchYaw(0, targetAngle * DEG_TO_RAD, 0);
+			auto targetRotation = Quaternion::rollPitchYaw(targetAngle * DEG_TO_RAD, 0, 0);
 			auto r = targetRotation.toEuler() * RAD_TO_DEG;
 
 			Quaternion rotation;
 			RotateTowards(&rotation, mTransform.GetRotation(), targetRotation, gTurnRate * 5 * deltaTime);
-			//mTransform.SetRotation(rotation);
+			mTransform.SetRotation(rotation);
 			auto r1 = rotation.toEuler() * RAD_TO_DEG;
 
 			auto frontOffset = position + mTransform.TransformPoint(vec3f(0, 1, 0) * gRepelFocus);
@@ -137,7 +136,7 @@ namespace Rig3D
 			moveStep.z *= moveDirection.z;
 */
 			TRACE(float(deltaTime));
-			//mTransform.SetPosition(position + moveStep * gMoveSpeed * .1f * deltaTime);
+			mTransform.SetPosition(position + moveStep * gMoveSpeed * .1f * deltaTime);
 		}
 
 		static void RotateTowards(Quaternion* out, const Quaternion& from, const Quaternion& to, float maxDegreesDelta)

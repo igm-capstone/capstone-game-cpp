@@ -24,7 +24,7 @@ public:
 		return instance;
 	}
 
-	PathFinder::Fringe<Node, numSpheresX, numSpheresY> pathFinder;
+	Fringe<Node, numSpheresX, numSpheresY> pathFinder;
 	void UpdateGrid();
 	Node& GetNodeAt(Vector3 pos);
 	SearchResult<Node> GetPath(Vector3 from, Vector3 to);

@@ -67,12 +67,12 @@ namespace PathFinder
 		{
 			auto dx = abs(from->x - to->x);
 			auto dy = abs(from->y - to->y);
-
+			//return dx + dy;
 			// diagonal
 			auto d = fmin(dx, dy);
 
 			// Manhattan distance on a square grid
-			return (float) (abs(dx - dy) + (d * 1.4f));
+			return (float) (abs(dy - dx) + (d * 1.4f));
 		}
 
 		vector<Connection<T>>* GetNodeConnections(T* node)
@@ -87,14 +87,14 @@ namespace PathFinder
 			auto connections = new vector<Connection<T>>();
 			connections->reserve(8);
 
-			if (notTopEdge) CreateConnectionIfValid(connections, node, &grid[x][ y + 1]);
-			if (notRightEdge && notTopEdge) CreateConnectionIfValid(connections, node, &grid[x + 1][ y + 1]);
-			if (notRightEdge) CreateConnectionIfValid(connections, node, &grid[x + 1][ y]);
-			if (notRightEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &grid[x + 1][ y - 1]);
-			if (notBottomEdge) CreateConnectionIfValid(connections, node, &grid[x][ y - 1]);
-			if (notLeftEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &grid[x - 1][ y - 1]);
-			if (notLeftEdge) CreateConnectionIfValid(connections, node, &grid[x - 1][ y]);
-			if (notLeftEdge && notTopEdge) CreateConnectionIfValid(connections, node, &grid[x - 1][ y + 1]);
+			if (notTopEdge) CreateConnectionIfValid(connections, node, &grid[x][y + 1]);
+			if (notRightEdge && notTopEdge) CreateConnectionIfValid(connections, node, &grid[x + 1][y + 1]);
+			if (notRightEdge) CreateConnectionIfValid(connections, node, &grid[x + 1][y]);
+			if (notRightEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &grid[x + 1][y - 1]);
+			if (notBottomEdge) CreateConnectionIfValid(connections, node, &grid[x][y - 1]);
+			if (notLeftEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &grid[x - 1][y - 1]);
+			if (notLeftEdge) CreateConnectionIfValid(connections, node, &grid[x - 1][y]);
+			if (notLeftEdge && notTopEdge) CreateConnectionIfValid(connections, node, &grid[x - 1][y + 1]);
 
 			return connections;
 		}
@@ -104,7 +104,7 @@ namespace PathFinder
 			if (nodeTo->weight < FLT_MAX)
 			{
 				// 1.4 for diagonals and 1 for horizontal or vertical connections
-				auto cost = nodeFrom->x == nodeTo->x || nodeFrom->x == nodeTo->x ? 1 : 1.4f;
+				auto cost = nodeFrom->x == nodeTo->x || nodeFrom->y == nodeTo->y ? 1 : 1.4f;
 				auto conn = Connection<T>(cost, nodeFrom, nodeTo);
 				
 				list->push_back(conn);

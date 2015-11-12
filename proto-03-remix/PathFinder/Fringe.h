@@ -2,6 +2,7 @@
 #include <list>
 #include <unordered_map>
 #include "Graph.h"
+#include <Colors.h>
 
 namespace PathFinder
 {
@@ -53,7 +54,7 @@ namespace PathFinder
 				
 				for (auto nodeIt = fringe.begin(); nodeIt != fringe.end();)
 				{
-					if (itCount++ > 1000) return result;
+					if (itCount++ > 10000) return result;
 
 					auto node = *nodeIt;
 					auto nodeData = cache[node];
@@ -74,6 +75,7 @@ namespace PathFinder
 					}
 
 					auto connections = graph.GetNodeConnections(node);
+
 					for(Connection<T> conn : *connections)
 					{
 						T* connNode = conn.to;
@@ -98,9 +100,14 @@ namespace PathFinder
 						connData.parent = node;
 						connData.cost = connCost;
 
-						// do i need to reassign?
+						Node* n = reinterpret_cast<Node*>(connNode);
+						TRACE_BOX(n->position, Colors::green);
+
+						
 						cache[connNode] = connData;
 					}
+
+					delete connections;
 
 					++nodeIt;
 					fringe.remove(node);
