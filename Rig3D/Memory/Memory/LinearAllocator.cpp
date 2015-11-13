@@ -8,12 +8,12 @@ using namespace cliqCity::memory;
 
 LinearAllocator::LinearAllocator(size_t size) : mIsOwner(true)
 {
-	mStart		= (uint8_t*)malloc(size);
+	mStart		= static_cast<uint8_t*>(malloc(size));
 	mEnd		= (mStart + size);
 	mCurrent	= mStart;
 }
 
-LinearAllocator::LinearAllocator(void* start, void* end) : mStart((uint8_t*)start), mEnd((uint8_t*)end), mIsOwner(false)
+LinearAllocator::LinearAllocator(void* start, void* end) : mStart(static_cast<uint8_t*>(start)), mEnd(static_cast<uint8_t*>(end)), mIsOwner(false)
 {
 	mCurrent = mStart;
 }

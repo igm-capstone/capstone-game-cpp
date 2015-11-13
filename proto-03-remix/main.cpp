@@ -5,7 +5,7 @@
 #include "Rig3D\Graphics\Interface\IMesh.h"
 #include "Rig3D\Common\Transform.h"
 #include "Memory\Memory\LinearAllocator.h"
-#include "Rig3D\MeshLibrary.h"
+#include "Rig3D\Graphics\MeshLibrary.h"
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <fstream>
@@ -15,8 +15,8 @@
 #include "Rig3D/GraphicsMath/cgm.h"
 #include "Vertex.h"
 #include "Grid.h"
-#include "Intersection.h"
-#include "Primitives.h"
+#include "Rig3D/Intersection.h"
+#include "Rig3D/Parametric.h"
 #include "TargetFollower.h"
 #include "Colors.h"
 
@@ -24,8 +24,8 @@
 #define UNITY_QUAD_RADIUS	0.85f
 
 #if defined _DEBUG
-std::function<void(vec3f, vec3f, vec4f)> __gTraceLine;
-void TraceLine(vec3f from, vec3f to, vec4f color)
+std::function<void(const vec3f&, const vec3f&, const vec4f&)> __gTraceLine;
+void TraceLine(const vec3f& from, const vec3f& to, const vec4f& color)
 {
 	__gTraceLine(from, to, color);
 }
@@ -237,7 +237,7 @@ public:
 		mDynamicMeshLibrary.SetAllocator(&mDynamicMeshAllocator);
 
 #if defined _DEBUG
-		__gTraceLine = [this](vec3f from, vec3f to, vec4f color) { TraceLine(from, to, color); };
+		__gTraceLine = [this](const vec3f& from, const vec3f& to, const vec4f& color) { TraceLine(from, to, color); };
 #endif
 	}
 
@@ -284,9 +284,9 @@ public:
 		auto from = mGrid.GetNodeAt(start);
 		auto to = mGrid.GetNodeAt(end);
 			
-		auto result = mGrid.pathFinder.FindPath(&from, &to);
+		auto result = mGrid.pathFinder.FindPath(&to, &from);
 		static TargetFollower follower(*mPlayer.mTransform, mAABBs, mAABBCount);
-		follower.MoveTowards(target.Transform, [this](vec3f f, vec3f t, vec4f c) { TraceLine(f, t, c); });
+		follower.MoveTowards(target.Transform);
 		
 		if (result.path.size() > 0)
 		{
@@ -931,8 +931,8 @@ public:
 		}
 
 		mStaticMeshLibrary.NewMesh(&mLineTraceMesh, mRenderer);
-		mRenderer->VSetMeshVertexBufferData(mLineTraceMesh, mLineTraceVertices, sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex), GPU_MEMORY_USAGE_DEFAULT);
-		mRenderer->VSetMeshIndexBufferData(mLineTraceMesh, lineTraceIndices, gLineTraceVertexCount, GPU_MEMORY_USAGE_DEFAULT);
+		mRenderer->VSetMeshVertexBuffer(mLineTraceMesh, mLineTraceVertices, sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex));
+		mRenderer->VSetDynamicMeshIndexBuffer(mLineTraceMesh, lineTraceIndices, gLineTraceVertexCount);
 	}
 
 	void InitializeQuadMesh()
@@ -948,8 +948,8 @@ public:
 		uint16_t quadIndices[6] = { 0, 2, 1, 3, 2, 0 };
 
 		mStaticMeshLibrary.NewMesh(&mWallMesh, mRenderer);
-		mRenderer->VSetMeshVertexBufferData(mWallMesh, quadVertices, sizeof(vec3f) * 4, sizeof(vec3f), GPU_MEMORY_USAGE_STATIC);
-		mRenderer->VSetMeshIndexBufferData(mWallMesh, quadIndices, 6, GPU_MEMORY_USAGE_STATIC);
+		mRenderer->VSetStaticMeshVertexBuffer(mWallMesh, quadVertices, sizeof(vec3f) * 4, sizeof(vec3f));
+		mRenderer->VSetStaticMeshIndexBuffer(mWallMesh, quadIndices, 6);
 	}
 
 	void InitializeCircleMesh()
@@ -973,8 +973,8 @@ public:
 		};
 
 		mStaticMeshLibrary.NewMesh(&mCircleMesh, mRenderer);
-		mRenderer->VSetMeshVertexBufferData(mCircleMesh, circleVertices, sizeof(vec3f) * gCircleVertexCount, sizeof(vec3f), GPU_MEMORY_USAGE_STATIC);
-		mRenderer->VSetMeshIndexBufferData(mCircleMesh, circleIndices, gCircleIndexCount, GPU_MEMORY_USAGE_STATIC);
+		mRenderer->VSetStaticMeshVertexBuffer(mCircleMesh, circleVertices, sizeof(vec3f) * gCircleVertexCount, sizeof(vec3f));
+		mRenderer->VSetStaticMeshIndexBuffer(mCircleMesh, circleIndices, gCircleIndexCount);
 	}
 
 	void InitializeLineTraceShaders()
@@ -1264,7 +1264,7 @@ public:
 
 #pragma region Line Trace
 
-	void TraceLine(vec3f from, vec3f to, vec4f color)
+	void TraceLine(const vec3f& from, const vec3f& to, const vec4f& color)
 	{
 		auto index = mLineTraceDrawCount++;
 		mLineTraceVertices[index].Position = from;

@@ -3,12 +3,13 @@
 #include <Rig3D/Common/Transform.h>
 #include <RayCast.h>
 #include <Rig3D/Common/Timer.h>
+#include <functional>
+#include "Colors.h"
+#include "trace.h"
 
 #define RAD_TO_DEG 57.29578f
 #define DEG_TO_RAD 0.01745329f
 #define MOD(a, n) ((a) - (floorf((a) / (n)) * (n)))
-#include <functional>
-#include "Colors.h"
 
 static Vector3 gRepelOffset = { 0.66f, -0.6f, 0.0f };
 
@@ -41,7 +42,7 @@ namespace Rig3D
 		TargetFollower(Transform& transform, AABB<vec2f>* aabbs, int aabbCount);
 		~TargetFollower();
 
-		void MoveTowards(Transform& target, std::function<void(vec3f, vec3f, vec4f)> DrawLine)
+		void MoveTowards(Transform& target)
 		{
 			auto targetPosition = target.GetPosition();
 			auto position = mTransform.GetPosition();
@@ -54,7 +55,7 @@ namespace Rig3D
 			for (auto node : mSearchResult.path)
 			{
 				auto distance = node->position - position;
-				auto direction = distance *(1 / distance.magnitude());
+				auto direction = distance *(1 / magnitude(distance));
 
 				ray = { position, direction };
 				if (!RayCast(&hit, ray, mAABBs, mAABBCount))
@@ -83,14 +84,14 @@ namespace Rig3D
 			auto rightOffset = position + mTransform.TransformPoint(gRepelOffset);
 			auto leftOffset  = position + mTransform.TransformPoint(vec3f(-gRepelOffset.x, gRepelOffset.y, 0));
 
-			DrawLine(rightOffset, rightOffset +  normalize(frontOffset - rightOffset) * gRepelCastDistance, Colors::blue);
+			//DrawLine(rightOffset, rightOffset +  normalize(frontOffset - rightOffset) * gRepelCastDistance, Colors::blue);
 			ray = { rightOffset, frontOffset - rightOffset };
 			if (RayCast(&hit, ray, mAABBs, mAABBCount)) // i need cast distance here (repel cast distance)
 			{
 				mRepel = fmax(mRepel - gRepelIncrement, -gMaxRepel);
 			}
 
-			DrawLine(leftOffset, leftOffset + normalize(frontOffset - leftOffset) * gRepelCastDistance, Colors::blue);
+			//DrawLine(leftOffset, leftOffset + normalize(frontOffset - leftOffset) * gRepelCastDistance, Colors::blue);
 			ray = { leftOffset, frontOffset - leftOffset };
 			if (RayCast(&hit, ray, mAABBs, mAABBCount)) // i need cast distance here (repel cast distance)
 			{
@@ -182,6 +183,15 @@ namespace Rig3D
 			out->v.x = q0.v.x + q1.v.x;
 			out->v.y = q0.v.y + q1.v.y;
 			out->v.z = q0.v.z + q1.v.z;
+		}
+		
+		// TODO! Move angleBetween to GraphicsMath Quaternion.cpp
+		#define M_RAD_TO_DEG 57.2957801818848f
+
+		// Returns the angle in degrees between two rotations /a/ and /b/.
+		static float angleBetween(const Quaternion& lhs, const Quaternion& rhs)
+		{
+			return float(double(acos(fmin(abs(cliqCity::graphicsMath::dot(lhs, rhs)), 1.0f))) * 2.0f * M_RAD_TO_DEG);
 		}
 	};
 

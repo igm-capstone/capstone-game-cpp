@@ -2,21 +2,19 @@
 #include <cmath>
 #include "Quaternion.hpp"
 
-#define M_RAD_TO_DEG 57.2957801818848f
-
 using namespace cliqCity::graphicsMath;
 
 Quaternion Quaternion::rollPitchYaw(const float& roll, const float& pitch, const float& yaw)
 {
-	float halfRoll = roll	* 0.5f;
-	float halfPitch = pitch * 0.5f;
-	float halfYaw = yaw	* 0.5f;
-	float cosHalfRoll = cosf(halfRoll);
-	float cosHalfPitch = cosf(halfPitch);
-	float cosHalfYaw = cosf(halfYaw);
-	float sinHalfRoll = sinf(halfRoll);
-	float sinHalfPitch = sinf(halfPitch);
-	float sinHalfYaw = sinf(halfYaw);
+	float halfRoll		= roll	* 0.5f;
+	float halfPitch		= pitch * 0.5f;
+	float halfYaw		= yaw	* 0.5f;
+	float cosHalfRoll	= cosf(halfRoll);
+	float cosHalfPitch	= cosf(halfPitch);
+	float cosHalfYaw	= cosf(halfYaw);
+	float sinHalfRoll	= sinf(halfRoll);
+	float sinHalfPitch	= sinf(halfPitch);
+	float sinHalfYaw	= sinf(halfYaw);
 	return Quaternion(
 		(cosHalfYaw * cosHalfPitch * cosHalfRoll) + (sinHalfYaw * sinHalfPitch * sinHalfRoll),
 		(cosHalfYaw * sinHalfPitch * cosHalfRoll) + (sinHalfYaw * cosHalfPitch * sinHalfRoll),
@@ -85,6 +83,13 @@ Vector3 Quaternion::toEuler() const
 	return euler;
 }
 
+Quaternion& Quaternion::operator+=(const Quaternion& rhs)
+{
+	w += rhs.w;
+	v += rhs.v;
+	return *this;
+}
+
 Quaternion& Quaternion::operator*=(const Quaternion& rhs)
 {
 	float rW = (w * rhs.w) - dot(v, rhs.v);
@@ -119,12 +124,6 @@ float cliqCity::graphicsMath::magnitude(const Quaternion& quaternion)
 	return sqrtf(quaternion.w * quaternion.w + quaternion.v.x * quaternion.v.x + quaternion.v.y * quaternion.v.y + quaternion.v.z * quaternion.v.z);
 }
 
-// Returns the angle in degrees between two rotations /a/ and /b/.
-float cliqCity::graphicsMath::angleBetween(const Quaternion& lhs, const Quaternion& rhs)
-{
-	return float(double(acos(fmin(abs(cliqCity::graphicsMath::dot(lhs, rhs)), 1.0f))) * 2.0f * M_RAD_TO_DEG);
-}
-
 Quaternion cliqCity::graphicsMath::normalize(const Quaternion& quaternion)
 {
 	return quaternion / magnitude(quaternion);
@@ -133,6 +132,40 @@ Quaternion cliqCity::graphicsMath::normalize(const Quaternion& quaternion)
 float cliqCity::graphicsMath::dot(const Quaternion& lhs, const Quaternion& rhs)
 {
 	return (lhs.w * rhs.w) + dot(lhs.v, rhs.v);
+}
+
+Quaternion cliqCity::graphicsMath::slerp(Quaternion q0, Quaternion q1, const float& t)
+{
+	float cosAngle = cliqCity::graphicsMath::dot(q0, q1);
+	if (cosAngle < 0.0f) {
+		q1 = -q1;
+		cosAngle = -cosAngle;
+	}
+
+	float k0, k1;
+
+	// Check for divide by zero
+	if (cosAngle > 0.9999f) {
+		k0 = 1.0f - t;
+		k1 = t;
+	}
+	else {
+		float angle = acosf(cosAngle);
+		float oneOverSinAngle = 1.0f / sinf(angle);
+
+		k0 = ((sinf(1.0f - t) * angle) * oneOverSinAngle);
+		k1 = (sinf(t * angle) * oneOverSinAngle);
+	}
+
+	q0 = q0 * k0;
+	q1 = q1 * k1;
+
+	return q0 + q1;
+}
+
+Quaternion cliqCity::graphicsMath::operator+(const Quaternion& lhs, const Quaternion& rhs)
+{
+	return Quaternion(lhs) += rhs;
 }
 
 Quaternion cliqCity::graphicsMath::operator*(const Quaternion& lhs, const Quaternion& rhs)

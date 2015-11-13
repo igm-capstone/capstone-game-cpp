@@ -359,7 +359,7 @@ Matrix4 Matrix4::normalizedOrthographicLH(
 		2.0f / (right - left), 0.0f, 0.0f, 0.0f,
 		0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f / (zFar - zNear), 0.0f,
-		-(right + left) / (right - left), -(top + bottom) / (top - bottom), zNear / (zNear - zFar), 1.0f);
+		-(right + left) / (right - left), -(top + bottom) / (top - bottom), -zNear / (zNear - zFar), 1.0f);
 }
 
 Matrix4 Matrix4::normalizedPerspectiveLH(
@@ -396,9 +396,9 @@ Matrix4 Matrix4::lookToRH(const Vector3& direction, const Vector3& position, con
 
 Matrix4 Matrix4::lookAtRH(const Vector3& target, const Vector3& position, const Vector3& up)
 {
-	Vector4 f = -normalize(Vector4(target - position, 0.0f));
-	Vector4 s = normalize(cross(f, up));
-	Vector4 u = cross(s, f);
+	Vector4 f = normalize(Vector4(position - target, 0.0f));
+	Vector4 s = normalize(cross(up, f));
+	Vector4 u = cross(f, s);
 	Vector4 t = Vector4(position, 1.0f);
 
 	return Matrix4(s, u, f, t).inverse();

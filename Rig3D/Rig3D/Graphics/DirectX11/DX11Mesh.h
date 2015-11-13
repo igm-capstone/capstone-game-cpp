@@ -20,8 +20,8 @@ namespace Rig3D
 
 		ID3D11Buffer*	mVertexBuffer;
 		ID3D11Buffer*	mIndexBuffer;
-		
 	protected:
+		
 		friend class DX3D11Renderer;
 	};
 }

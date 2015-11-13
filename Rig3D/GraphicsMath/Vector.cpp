@@ -2,19 +2,11 @@
 #include <cmath>
 #include "Vector.hpp"
 
+#define SIMD 1
+
 using namespace cliqCity::graphicsMath;
 
 // Vector2
-
-float Vector2::magnitude2() const
-{
-	return dot(*this, *this);
-}
-
-float Vector2::magnitude() const
-{
-	return sqrtf(magnitude2());
-}
 
 // Compound Assignment (Vector2)
 
@@ -99,16 +91,6 @@ float& Vector2::operator[](const unsigned int& index)
 }
 
 // Vector3
-
-float Vector3::magnitude2() const
-{
-	return dot(*this, *this);
-}
-
-float Vector3::magnitude() const
-{
-	return sqrtf(magnitude2());
-}
 
 // Compound Assignment (Vector3)
 
@@ -207,42 +189,44 @@ Vector3::operator Vector2()
 
 // Vector4
 
-float Vector4::magnitude2() const
-{
-	return dot(*this, *this);
-}
-
-float Vector4::magnitude() const
-{
-	return sqrtf(magnitude2());
-}
-
 // Compound Assignment (Vector4)
 
 Vector4& Vector4::operator+=(const Vector4& rhs)
 {
+#ifdef SIMD
+	this->v = simd::Add(this->v, rhs.v);
+#else
 	this->x += rhs.x;
 	this->y += rhs.y;
 	this->z += rhs.z;
 	this->w += rhs.w;
+#endif
 	return *this;
 }
 
 Vector4& Vector4::operator-=(const Vector4& rhs)
 {
+#ifdef SIMD
+	this->v = simd::Subtract(this->v, rhs.v);
+#else
 	this->x -= rhs.x;
 	this->y -= rhs.y;
 	this->z -= rhs.z;
 	this->w -= rhs.w;
+#endif
 	return *this;
 }
 
 Vector4& Vector4::operator*=(const Vector4& rhs)
 {
+#ifdef SIMD
+	this->v = simd::Multiply(this->v, rhs);
+#else
 	this->x *= rhs.x;
 	this->y *= rhs.y;
 	this->z *= rhs.z;
 	this->w *= rhs.w;
+#endif
 	return *this;
 }
 
@@ -250,28 +234,40 @@ Vector4& Vector4::operator*=(const Vector4& rhs)
 
 Vector4& Vector4::operator+=(const float& rhs)
 {
+#ifdef SIMD
+	this->v = simd::Add(this->v, simd::Set(rhs));
+#else
 	this->x += rhs;
 	this->y += rhs;
 	this->z += rhs;
 	this->w += rhs;
+#endif
 	return *this;
 }
 
 Vector4& Vector4::operator-=(const float& rhs)
 {
+#ifdef SIMD
+	this->v = simd::Subtract(this->v, simd::Set(rhs));
+#else
 	this->x -= rhs;
 	this->y -= rhs;
 	this->z -= rhs;
 	this->w -= rhs;
+#endif
 	return *this;
 }
 
 Vector4& Vector4::operator*=(const float& rhs)
 {
+#ifdef SIMD
+	this->v = simd::Multiply(this->v, simd::Set(rhs));
+#else
 	this->x *= rhs;
 	this->y *= rhs;
 	this->z *= rhs;
 	this->w *= rhs;
+#endif
 	return *this;
 }
 
@@ -294,19 +290,27 @@ Vector4& Vector4::operator--()
 
 Vector4& Vector4::operator=(const Vector4& rhs)
 {
+#ifdef SIMD
+	this->v = rhs.v;
+#else
 	x = rhs.x;
 	y = rhs.y;
 	z = rhs.z;
 	w = rhs.w;
+#endif
 	return *this;
 }
 
 Vector4& Vector4::operator-()
 {
+#ifdef SIMD
+	this->v = simd::Negate(this->v);
+#else
 	x = -x;
 	y = -y;
 	z = -z;
 	w = -w;
+#endif
 	return *this;
 }
 
@@ -315,39 +319,71 @@ float& Vector4::operator[](const unsigned int& index)
 	return reinterpret_cast<float *>(this)[index];
 }
 
-Vector4::operator Vector3()
-{
-	return Vector3(this->x, this->y, this->z);
-}
-
-Vector4::operator Vector2()
-{
-	return Vector2(this->x, this->y);
-}
-
 // Dot, Cross, Normalize
 
 Vector3 cliqCity::graphicsMath::cross(const Vector3& lhs, const Vector3& rhs)
 {
-	return Vector3(
+	return {
 		(lhs.y * rhs.z) - (lhs.z * rhs.y),
 		(lhs.z * rhs.x) - (lhs.x * rhs.z),
-		(lhs.x * rhs.y) - (lhs.y * rhs.x));
+		(lhs.x * rhs.y) - (lhs.y * rhs.x) };
+}
+
+float cliqCity::graphicsMath::magnitudeSquared(const Vector2& vector)
+{
+	return dot(vector, vector);
+}
+
+float cliqCity::graphicsMath::magnitudeSquared(const Vector3& vector)
+{
+	return dot(vector, vector);
+}
+
+float cliqCity::graphicsMath::magnitudeSquared(const Vector4& vector)
+{
+#ifdef SIMD
+	return simd::MagnitudeSquared(vector.v);
+#else
+	return dot(vector, vector);
+#endif
+}
+
+float cliqCity::graphicsMath::magnitude(const Vector2& vector)
+{
+	return sqrtf(dot(vector, vector));
+}
+
+float cliqCity::graphicsMath::magnitude(const Vector3& vector)
+{
+	return sqrtf(dot(vector, vector));
+}
+
+float cliqCity::graphicsMath::magnitude(const Vector4& vector)
+{
+#ifdef SIMD
+	return simd::Magnitude(vector.v);
+#else
+	return sqrtf(dot(vector, vector));
+#endif
 }
 
 Vector2 cliqCity::graphicsMath::normalize(const Vector2& vector)
 {
-	return vector / vector.magnitude();
+	return vector / magnitude(vector);
 }
 
 Vector3 cliqCity::graphicsMath::normalize(const Vector3& vector)
 {
-	return vector / vector.magnitude();
+	return vector / magnitude(vector);
 }
 
 Vector4 cliqCity::graphicsMath::normalize(const Vector4& vector)
 {
-	return vector / vector.magnitude();
+#ifdef SIMD
+	return simd::Normalize(vector.v);
+#else
+	return vector / magnitude(vector);
+#endif
 }
 
 float cliqCity::graphicsMath::dot(const Vector2& lhs, const Vector2& rhs)
@@ -362,7 +398,26 @@ float cliqCity::graphicsMath::dot(const Vector3& lhs, const Vector3& rhs)
 
 float cliqCity::graphicsMath::dot(const Vector4& lhs, const Vector4& rhs)
 {
+#ifdef SIMD
+	return simd::Dot(lhs.v, rhs.v);
+#else
 	return (lhs.x * rhs.x) + (lhs.y * rhs.y) + (lhs.z * rhs.z) + (lhs.w * rhs.w);
+#endif
+}
+
+Vector2 cliqCity::graphicsMath::lerp(const Vector2& v0, const Vector2& v1, const float& t)
+{
+	return (1.0f - t) * v0 + (v1 * t);
+}
+
+Vector3 cliqCity::graphicsMath::lerp(const Vector3& v0, const Vector3& v1, const float& t)
+{
+	return (1.0f - t) * v0 + (v1 * t);
+}
+
+Vector4 cliqCity::graphicsMath::lerp(const Vector4& v0, const Vector4& v1, const float& t)
+{
+	return (1.0f - t) * v0 + (v1 * t);
 }
 
 // Binary (Vector2)

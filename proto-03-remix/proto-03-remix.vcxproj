@@ -151,12 +151,10 @@
   <ItemGroup>
     <ClInclude Include="Colors.h" />
     <ClInclude Include="Grid.h" />
-    <ClInclude Include="Intersection.h" />
     <ClInclude Include="LevelReader.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="PathFinder\Graph.h" />
     <ClInclude Include="PathFinder\Fringe.h" />
-    <ClInclude Include="Primitives.h" />
     <ClInclude Include="RayCast.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="TargetFollower.h" />

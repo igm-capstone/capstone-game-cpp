@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{09A0A24C-6BE9-44BA-9FB9-6E8D5121F404}</ProjectGuid>
-    <RootNamespace>Memory</RootNamespace>
+    <ProjectGuid>{1C5A5D6B-AF85-4870-87AA-99CEA5006F4E}</ProjectGuid>
+    <RootNamespace>SIMD</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -28,7 +28,7 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -38,7 +38,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>Utility</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -118,18 +118,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AllocatorUtility.h" />
-    <ClInclude Include="LinearAllocator.h" />
-    <ClInclude Include="Memory.h" />
-    <ClInclude Include="PoolAllocator.h" />
-    <ClInclude Include="StackAllocator.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="AllocatorUtility.c" />
-    <ClCompile Include="LinearAllocator.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="PoolAllocator.cpp" />
-    <ClCompile Include="StackAllocator.cpp" />
+    <ClInclude Include="simd.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

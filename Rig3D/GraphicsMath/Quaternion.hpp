@@ -36,6 +36,7 @@ namespace cliqCity
 			Matrix3 toMatrix3() const;
 			Vector3 toEuler() const;
 
+			Quaternion& operator+=(const Quaternion& rhs);
 			Quaternion& operator*=(const Quaternion& rhs);
 			Quaternion& operator*=(const float& rhs);
 			Quaternion& operator/=(const float& rhs);
@@ -44,9 +45,10 @@ namespace cliqCity
 
 		CGM_DLL float magnitude(const Quaternion& quaternion);
 		CGM_DLL Quaternion normalize(const Quaternion& quaternion);
-		CGM_DLL float angleBetween(const Quaternion& lhs, const Quaternion& rhs);
 		CGM_DLL float dot(const Quaternion& lhs, const Quaternion& rhs);
+		CGM_DLL Quaternion slerp(Quaternion q0, Quaternion q1, const float& t);
 
+		CGM_DLL Quaternion operator+(const Quaternion& lhs, const Quaternion& rhs);
 		CGM_DLL Quaternion operator*(const Quaternion& lhs, const Quaternion& rhs);
 		CGM_DLL Quaternion operator*(const Quaternion& lhs, const float& rhs);
 		CGM_DLL Vector3 operator*(const Vector3& lhs, const Quaternion& rhs);
