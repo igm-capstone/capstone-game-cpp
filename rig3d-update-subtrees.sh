@@ -17,8 +17,8 @@ do
         url)
             #git rm -r $prefix/$repopath
             #git commit -m"Removed submodule $prefix/$repopath folder to add subtree"
-            git subtree pull --prefix $prefix/$repopath ${linearr[2]} develop --squash
-			#git subtree pull --prefix $prefix/$repopath ${linearr[2]} master --squash
+            git subtree pull --prefix $prefix/$repopath ${linearr[2]} master --squash
+
             if [ -f "$prefix/$repopath/.gitmodules" ]
             then
                 rig3d-update-subtrees.sh "/$repopath"
