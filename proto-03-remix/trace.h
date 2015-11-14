@@ -5,6 +5,10 @@
 #include <string>
 #include <Windows.h>
 #include <debugapi.h>
+#include <functional>
+#include <GraphicsMath/Vector.hpp>
+
+extern std::function<void(const cliqCity::graphicsMath::Vector3&, const cliqCity::graphicsMath::Vector3&, const cliqCity::graphicsMath::Vector4&)> __gTraceLine;
 
 class Trace
 {
@@ -45,8 +49,28 @@ public:
 	}
 };
 
+inline void __TraceBox(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
+{
+	const auto pone = cliqCity::graphicsMath::Vector3(.5f, .5f, 0);
+	const auto none = cliqCity::graphicsMath::Vector3(-.5f, .5f, 0);
+
+	// cross
+	__gTraceLine(pos + pone, pos - pone, color);
+	__gTraceLine(pos + none, pos - none, color);
+
+	// box
+	__gTraceLine(pos + pone, pos + none, color);
+	__gTraceLine(pos - pone, pos - none, color);
+	__gTraceLine(pos + pone, pos - none, color);
+	__gTraceLine(pos - pone, pos + none, color);
+}
+
 #define TRACE(message) Trace::GetTrace () << message << Trace::endl
+#define TRACE_BOX(position, color) __TraceBox(position, color)
+#define TRACE_LINE(from, to, color) __gTraceLine(from, to color)
 
 #else
 #define TRACE(message)
+#define TRACE_BOX(position, color)
+#define TRACE_LINE(position, color)
 #endif
