@@ -127,6 +127,7 @@ public:
 	vector<RobotInfo>				mRobots;
 
 	AABB<vec2f>*					mAABBs;
+	Sphere<vec3f>*					mLightColliders;
 
 	LineTraceVertex					mLineTraceVertices[gLineTraceVertexCount];
 	int								mLineTraceDrawCount;
@@ -272,7 +273,8 @@ public:
 
 	void VUpdate(double milliseconds) override
 	{
-		float mPlayerSpeed = 0.25f;
+		HandleInput(Input::SharedInstance());
+
 		bool moved = false;
 
 		auto target = mRobots[4];
@@ -300,38 +302,7 @@ public:
 			}
 		}
 
-		auto pos = mPlayer.mTransform->GetPosition();
-		if (mInput.GetKey(KEYCODE_LEFT))
-		{
-			pos.x -= mPlayerSpeed;
-		}
-		if (mInput.GetKey(KEYCODE_RIGHT))
-		{
-			pos.x += mPlayerSpeed;
-		}
-		if (mInput.GetKey(KEYCODE_UP))
-		{
-			pos.y += mPlayerSpeed;
-		}
-		if (mInput.GetKey(KEYCODE_DOWN))
-		{
-			pos.y -= mPlayerSpeed;
-		}
-
-		BoxCollider aabb = { pos, mPlayer.mBoxCollider->halfSize };
-
-		for (int i = 0; i < mWallCount; i++)
-		{
-			if (IntersectAABBAABB(aabb, mWallColliders[i]))
-			{
-				return;
-			}
-		}
-
-		mPlayer.mTransform->SetPosition(pos);
-		mPlayer.mBoxCollider->origin = pos;
-		UpdatePlayer();
-		UpdatePlayer();
+		
 	}
 
 	void VRender() override
@@ -801,6 +772,8 @@ public:
 		mBlockCount = levelReader.mBlocks.Position.size();
 		LoadTransforms(&mBlockTransforms, &levelReader.mBlocks.Position[0], &levelReader.mBlocks.Rotation[0], &levelReader.mBlocks.Scale[0], mBlockCount, 0);
 
+
+		// Note: We are allocating aabbs twice!!! Maybe we should allocate our data structures before filling them out with level data?
 		mAABBCount = mWallCount + mBlockCount;
 		mAABBs = reinterpret_cast<AABB<vec2f>*>(mSceneAllocator.Allocate(sizeof(AABB<vec2f>) * (mAABBCount), alignof(AABB<vec2f>), 0));
 		SetAABBs(levelReader.mWalls, mAABBs, 0);
@@ -808,7 +781,8 @@ public:
 
 		// Lights
 		mCircleCount = levelReader.mLights.size();
-		LoadTransforms(&mCircleTransforms, &levelReader.mLights[0], nullptr, nullptr, mCircleCount, 1);
+		LoadLights(&mLights, &mCircleTransforms, &mLightColliders, &levelReader.mLights[0], mCircleCount);
+	//	LoadTransforms(&mCircleTransforms, &levelReader.mLights[0], nullptr, nullptr, mCircleCount, 1);
 		mLightPos = levelReader.mLights;
 
 		mCircleColorWeights = (float*)mSceneAllocator.Allocate(sizeof(float)*mCircleCount, alignof(float), 0);
@@ -884,25 +858,20 @@ public:
 		}
 	}
 
-	void LoadDynamicSceneObjects(SceneObject** sceneObjects, Transform** transforms, BoxCollider** colliders, vec3f* positions, vec3f* rotations, vec3f* scales, int size)
+	void LoadLights(SceneObject** sceneObjects, mat4f** transforms, SphereCollider** colliders, vec3f* positions, int size)
 	{
 		// Allocate size SceneObjects
 		*sceneObjects = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject) * size, alignof(SceneObject), 0));
-		*transforms = reinterpret_cast<Transform*>(mSceneAllocator.Allocate(sizeof(Transform) * size, alignof(Transform), 0));
-		*colliders = reinterpret_cast<BoxCollider*>(mSceneAllocator.Allocate(sizeof(BoxCollider) * size, alignof(BoxCollider), 0));
-
-		quatf yRotate = quatf::rollPitchYaw(0.0f, 0.0f, PI);
+		*transforms = reinterpret_cast<mat4f*>(mSceneAllocator.Allocate(sizeof(mat4f) * size, alignof(mat4f), 0));
+		*colliders = reinterpret_cast<SphereCollider*>(mSceneAllocator.Allocate(sizeof(SphereCollider) * size, alignof(SphereCollider), 0));
 
 		for (int i = 0; i < size; i++)
 		{
-			(*transforms)[i].SetPosition(positions[i]);
-			(*transforms)[i].SetRotation(yRotate);
-			(*transforms)[i].SetScale(scales[i]);
+			(*transforms)[i] = mat4f::translate(positions[i]).transpose();
+			(*colliders)[i] = SphereCollider({ positions[i], 1.0f });
 
-			(*colliders)[i] = BoxCollider({ positions[i], vec3f(UNITY_QUAD_RADIUS) * scales[i] });
-
-			(*sceneObjects)[i].mTransform = transforms[i];
-			(*sceneObjects)[i].mBoxCollider = colliders[i];
+			(*sceneObjects)[i].mWorldMatrix = transforms[i];
+			(*sceneObjects)[i].mSphereCollider = colliders[i];
 		}
 	}
 
@@ -1276,6 +1245,53 @@ public:
 	}
 
 #pragma endregion
+
+	void HandleInput(Input& input)
+	{
+		// Player Mouse
+
+		if (input.GetMouseButtonDown(MOUSEBUTTON_LEFT))
+		{
+			ScreenPoint& screenPoint = input.mousePosition;
+
+		}
+
+
+		// Player Movement
+		float mPlayerSpeed = 0.25f;
+
+		auto pos = mPlayer.mTransform->GetPosition();
+		if (input.GetKey(KEYCODE_LEFT))
+		{
+			pos.x -= mPlayerSpeed;
+		}
+		if (input.GetKey(KEYCODE_RIGHT))
+		{
+			pos.x += mPlayerSpeed;
+		}
+		if (input.GetKey(KEYCODE_UP))
+		{
+			pos.y += mPlayerSpeed;
+		}
+		if (input.GetKey(KEYCODE_DOWN))
+		{
+			pos.y -= mPlayerSpeed;
+		}
+
+		BoxCollider aabb = { pos, mPlayer.mBoxCollider->halfSize };
+
+		for (int i = 0; i < mWallCount; i++)
+		{
+			if (IntersectAABBAABB(aabb, mWallColliders[i]))
+			{
+				return;
+			}
+		}
+
+		mPlayer.mTransform->SetPosition(pos);
+		mPlayer.mBoxCollider->origin = pos;
+		UpdatePlayer();
+	}
 };
 
 DECLARE_MAIN(Proto_03_Remix);
