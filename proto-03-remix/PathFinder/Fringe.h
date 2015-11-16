@@ -66,10 +66,9 @@ namespace PathFinder
 						continue;
 					}
 
-					if (*node == *endNode)
+					if (node == endNode)
 					{
 						found = true;
-						endNode = node;
 						break;
 					}
 
@@ -79,6 +78,12 @@ namespace PathFinder
 					{
 						T* connNode = conn.to;
 						auto connCost = nodeData.cost + conn.cost * connNode->weight;
+
+						// never go back to start node..
+						if (connNode == startNode)
+						{
+							continue;
+						}
 
 						auto connData = cache[connNode];
 						if (connData.parent != nullptr && connCost >= connData.cost)
@@ -100,7 +105,7 @@ namespace PathFinder
 						connData.cost = connCost;
 
 						Node* n = reinterpret_cast<Node*>(connNode);
-						TRACE_BOX(n->position, Colors::green);
+						TRACE_SMALL_BOX(n->position, Colors::green);
 
 						
 						cache[connNode] = connData;

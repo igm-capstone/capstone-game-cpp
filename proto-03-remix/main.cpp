@@ -239,9 +239,9 @@ public:
 
 	void VInitialize() override
 	{
-		mRenderer = &DX3D11Renderer::SharedInstance();
+		mRenderer      = &DX3D11Renderer::SharedInstance();
 		mDeviceContext = mRenderer->GetDeviceContext();
-		mDevice = mRenderer->GetDevice();
+		mDevice        = mRenderer->GetDevice();
 
 		mRenderer->SetDelegate(this);
 		VOnResize();
@@ -280,8 +280,9 @@ public:
 		auto from = mGrid.GetNodeAt(start);
 		auto to = mGrid.GetNodeAt(end);
 			
-		auto result = mGrid.pathFinder.FindPath(&to, &from);
+		auto result = mGrid.pathFinder.FindPath(to, from);
 		static TargetFollower follower(*mPlayer.mTransform, mAABBs, mAABBCount);
+		const vec3f zone{ 0, 0, 5 };
 		follower.MoveTowards(target.Transform);
 		
 		if (result.path.size() > 0)
@@ -291,7 +292,7 @@ public:
 			for (++it; it != result.path.end(); ++it)
 			{
 				auto p2 = **it;
-				TraceLine(p1.position, p2.position, Colors::blue);
+				TraceLine(p1.position + zone, p2.position + zone, Colors::blue);
 				p1 = p2;
 			}
 		}
@@ -639,11 +640,12 @@ public:
 			const auto none = vec3f(-.5f, .5f, 0);
 			auto pos = robot.Transform.GetPosition();
 
-			TRACE_BOX(pos, Colors::red);
+			TRACE_SMALL_DIAMOND(pos, Colors::red);
+			TRACE_SMALL_CROSS(pos, Colors::red);
 
 			for (int i = 1, len = robot.Waypoints.size(); i < len; i++)
 			{
-				TraceLine(robot.Waypoints[i - 1], robot.Waypoints[i], Colors::green);
+				TraceLine(robot.Waypoints[i - 1], robot.Waypoints[i], Colors::yellow);
 			}
 		}
 	}
@@ -727,7 +729,13 @@ public:
 			{
 				auto node = &mGrid.graph.grid[x][y];
 
-				node->weight = node->hasLight ? 0 : FLT_MAX;
+				//node->weight = node->hasLight ? 0 : FLT_MAX;
+
+				RayCastHit<vec3f> hit;
+				if (RayCast(&hit, { node->position, vec3f(0, 0, 1) }, mWallColliders, mWallCount))
+				{
+					node->weight = FLT_MAX;
+				}
 
 				if (node->weight > 1)
 				{

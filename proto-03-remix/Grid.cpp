@@ -18,12 +18,12 @@ Grid::Grid()
 	UpdateGrid();
 }
 
-Node& Grid::GetNodeAt(Vector3 pos)
+Node* Grid::GetNodeAt(Vector3 pos)
 {
 	float x = (pos.x - nodeRadius - startingCorner.x) / (nodeRadius * 2);
 	float y = (pos.y - nodeRadius - startingCorner.y) / (nodeRadius * 2);
 
-	return graph.grid[(int)round(x)][(int)round(y)];
+	return &(graph.grid[(int)round(x)][(int)round(y)]);
 }
 
 void Grid::UpdateGrid() {
@@ -38,7 +38,7 @@ SearchResult<Node> Grid::GetPath(Vector3 from, Vector3 to) {
 	auto end = GetNodeAt(from);
 	auto start = GetNodeAt(to);
 
-	auto result = pathFinder.FindPath(&start, &end);
+	auto result = pathFinder.FindPath(start, end);
 
 	return result;
 }

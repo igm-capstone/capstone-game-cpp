@@ -52,23 +52,28 @@ namespace Rig3D
 			RayCastHit<vec2f> hit;
 
 			mSearchResult = mGrid.GetPath(position, targetPosition);
-			for (auto node = mSearchResult.path.rbegin(); node != mSearchResult.path.rend(); ++node)
+			if (mSearchResult.path.size() > 1)
 			{
-				auto distance = (*node)->position - position;
-				auto distanceMag = magnitude(distance);
-				auto direction = distance * (1 / distanceMag);
-
-				ray = { position, direction };
-				if (!RayCast(&hit, ray, mAABBs, mAABBCount, distanceMag))
+				for (auto node = mSearchResult.path.rbegin(); node != mSearchResult.path.rend(); ++node)
 				{
-					auto test = node;
-					if (++test == mSearchResult.path.rend())
-					{
-						--node;
-					}
+					auto distance = (*node)->position - position;
+					auto mag = magnitude(distance);
+					auto direction = distance * (1 / mag);
 
-					targetPosition = (*node)->position;
-					break;
+					ray = { position, direction };
+					if (!RayCast(&hit, ray, mAABBs, mAABBCount, mag))
+					{
+						auto test = node;
+						if (++test == mSearchResult.path.rend())
+						{
+							--node;
+						}
+
+						targetPosition = (*node)->position;
+
+						TRACE_LINE(position, targetPosition, Colors::cyan);
+						break;
+					}
 				}
 			}
 
@@ -80,12 +85,10 @@ namespace Rig3D
 			auto da = abs(MOD(targetAngle - currentAngle + 180.0f, 360.0f) - 180);
 
 			auto targetRotation = Quaternion::rollPitchYaw(targetAngle * DEG_TO_RAD, 0, 0);
-			auto r = targetRotation.toEuler() * RAD_TO_DEG;
 
 			Quaternion rotation;
 			RotateTowards(&rotation, mTransform.GetRotation(), targetRotation, gTurnRate * 5 * deltaTime);
 			mTransform.SetRotation(rotation);
-			auto r1 = rotation.toEuler() * RAD_TO_DEG;
 
 			auto frontOffset = position + mTransform.TransformPoint(vec3f(0, 1, 0) * gRepelFocus);
 			auto rightOffset = position + mTransform.TransformPoint(gRepelOffset);
@@ -129,7 +132,7 @@ namespace Rig3D
 
 			// "forward"
 			//Debug.DrawLine(transform.position, transform.position + transform.up);
-			TRACE_LINE(mTransform.GetPosition(), mTransform.GetPosition() /*+ transform.TransformDirection(moveDirection).normalized*/, Colors::yellow);
+			TRACE_LINE(mTransform.GetPosition(), mTransform.GetPosition() + mTransform.GetUp() * 3 /*+ transform.TransformDirection(moveDirection).normalized*/, Colors::red);
 
 			/*if (GetComponent<Animator>())
 			{

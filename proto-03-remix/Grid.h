@@ -27,7 +27,7 @@ public:
 	Graph<Node, numSpheresX, numSpheresY> graph;
 	Fringe<Node, numSpheresX, numSpheresY> pathFinder;
 	void UpdateGrid();
-	Node& GetNodeAt(Vector3 pos);
+	Node* GetNodeAt(Vector3 pos);
 	SearchResult<Node> GetPath(Vector3 from, Vector3 to);
 
 private:
