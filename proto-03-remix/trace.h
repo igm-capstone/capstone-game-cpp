@@ -39,8 +39,8 @@ public:
 				break;
 			}
 
-			OutputDebugString(str.c_str());
-			OutputDebugString("\n");
+			//OutputDebugString(str.c_str());
+			//OutputDebugString("\n");
 		}
 
 		trace.ss.clear();

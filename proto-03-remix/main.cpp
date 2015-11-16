@@ -58,7 +58,7 @@ static const int gCircleIndexCount = 36;	// Indices = (vertices - 1) * 3
 static const int gSceneMemorySize = 20480;
 static const int gMeshMemorySize = 1024;
 
-static const int gLineTraceMaxCount = 5000;
+static const int gLineTraceMaxCount = 10000;
 static const int gLineTraceVertexCount = 2 * gLineTraceMaxCount;
 
 char gSceneMemory[gSceneMemorySize];
@@ -153,6 +153,7 @@ public:
 	IMesh*							mLightMesh;
 	IMesh*							mPlayerMesh;
 	IMesh*							mLineTraceMesh;
+	IMesh*							mGridMesh;
 
 	DX3D11Renderer*					mRenderer;
 
@@ -193,19 +194,20 @@ public:
 	ID3D11PixelShader*				mShadowCasterPixelShader;
 	ID3D11VertexShader*				mBillboardVertexShader;
 	ID3D11PixelShader*				mBillboardPixelShader;
-	ID3D11VertexShader*				mShadowVertexShader;
 	ID3D11PixelShader*				mShadowPixelShader;
+	ID3D11PixelShader*				mGridPixelShader;
+	ID3D11RenderTargetView*			mGridRTV;
+	ID3D11Texture2D*				mGridMap;
 	ID3D11SamplerState*				mSamplerState;
 	ID3D11BlendState*				mBlendStateShadowMask;
 	ID3D11BlendState*				mBlendStateShadowCalc;
 	ID3D11Buffer*					mPointShaderBuffer;
 
-	ID3D11ComputeShader*			mShadowGridComputeShader;
-	ID3D11Buffer*				mSrcDataGPUBuffer;
-	ID3D11ShaderResourceView*	mSrcDataGPUBufferView;
 
-	ID3D11Texture2D*			mDestTexture;
-	ID3D11ShaderResourceView*	mDestTextureView;
+	ID3D11ComputeShader*		mShadowGridComputeShader;
+	ID3D11ShaderResourceView*	mSrcDataGPUBufferView0;
+	ID3D11ShaderResourceView*	mSrcDataGPUBufferView1;
+
 	ID3D11Buffer*				mDestDataGPUBuffer;
 	ID3D11Buffer*				mDestDataGPUBufferCPURead;
 	ID3D11UnorderedAccessView*	mDestDataGPUBufferView;
@@ -351,9 +353,11 @@ public:
 		RenderPlayer();
 		RenderLightCircles();
 		RenderRobots();
-		//RenderGrid();
+		RenderGrid();
 
 		RenderShadowMask();
+
+		RenderGridToBuffer();
 
 		// changes the primitive type to lines
 		RenderLineTrace();
@@ -365,6 +369,7 @@ public:
 		mCircleMesh->~IMesh();
 		mWallMesh->~IMesh();
 		mLineTraceMesh->~IMesh();
+		mGridMesh->~IMesh();
 
 		ReleaseMacro(mQuadInputLayout);
 		ReleaseMacro(mQuadVertexShader);
@@ -401,18 +406,17 @@ public:
 		ReleaseMacro(mBillboardPixelShader);
 		ReleaseMacro(mShadowCasterPixelShader);
 		ReleaseMacro(mShadowPixelShader);
-		ReleaseMacro(mShadowVertexShader);
+		ReleaseMacro(mGridPixelShader);
+		ReleaseMacro(mGridMap);
+		ReleaseMacro(mGridRTV);
 		ReleaseMacro(mBlendStateShadowMask);
 		ReleaseMacro(mBlendStateShadowCalc);
 		ReleaseMacro(mSamplerState);
 		ReleaseMacro(mPointShaderBuffer);
 
 		ReleaseMacro(mShadowGridComputeShader);
-		ReleaseMacro(mSrcDataGPUBuffer);
-		ReleaseMacro(mSrcDataGPUBufferView);
-		
-		ReleaseMacro(mDestTexture);
-		ReleaseMacro(mDestTextureView);
+		ReleaseMacro(mSrcDataGPUBufferView0);
+		ReleaseMacro(mSrcDataGPUBufferView1);
 		ReleaseMacro(mDestDataGPUBuffer);
 		ReleaseMacro(mDestDataGPUBufferCPURead);
 		ReleaseMacro(mDestDataGPUBufferView);
@@ -435,8 +439,11 @@ public:
 		ReleaseMacro(mDestDataGPUBuffer);
 		ReleaseMacro(mDestDataGPUBufferCPURead);
 		ReleaseMacro(mDestDataGPUBufferView);
-		ReleaseMacro(mSrcDataGPUBuffer);
-		ReleaseMacro(mSrcDataGPUBufferView);
+		ReleaseMacro(mSrcDataGPUBufferView0);
+		ReleaseMacro(mSrcDataGPUBufferView1);
+		ReleaseMacro(mGridMap);
+		ReleaseMacro(mGridRTV);
+
 
 		D3D11_TEXTURE2D_DESC shadowCastersTextureDesc;
 		shadowCastersTextureDesc.Width = mRenderer->GetWindowWidth();
@@ -454,9 +461,8 @@ public:
 		mDevice->CreateTexture2D(&shadowCastersTextureDesc, nullptr, &mShadowCastersMap);
 		mDevice->CreateTexture2D(&shadowCastersTextureDesc, nullptr, &mShadowsAMap);
 		mDevice->CreateTexture2D(&shadowCastersTextureDesc, nullptr, &mShadowsBMap);
-
-		shadowCastersTextureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 		mDevice->CreateTexture2D(&shadowCastersTextureDesc, nullptr, &mShadowsFinalMap);
+		mDevice->CreateTexture2D(&shadowCastersTextureDesc, nullptr, &mGridMap);
 
 
 		D3D11_RENDER_TARGET_VIEW_DESC shadowCastersRTVDesc;
@@ -468,6 +474,7 @@ public:
 		mRenderer->GetDevice()->CreateRenderTargetView(mShadowsAMap, &shadowCastersRTVDesc, &mShadowsARTV);
 		mRenderer->GetDevice()->CreateRenderTargetView(mShadowsBMap, &shadowCastersRTVDesc, &mShadowsBRTV);
 		mRenderer->GetDevice()->CreateRenderTargetView(mShadowsFinalMap, &shadowCastersRTVDesc, &mShadowsFinalRTV);
+		mRenderer->GetDevice()->CreateRenderTargetView(mGridMap, &shadowCastersRTVDesc, &mGridRTV);
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC shadowCastersSRVDesc;
 		shadowCastersSRVDesc.Format = shadowCastersTextureDesc.Format;
@@ -486,7 +493,7 @@ public:
 			descGPUBuffer.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
 			descGPUBuffer.ByteWidth = numSpheresX*numSpheresY * sizeof(int);
 			descGPUBuffer.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-			descGPUBuffer.StructureByteStride = sizeof(int);	// We assume the output data is in the RGBA format, 8 bits per channel
+			descGPUBuffer.StructureByteStride = sizeof(int);
 
 			mDevice->CreateBuffer(&descGPUBuffer, NULL, &mDestDataGPUBuffer);
 
@@ -497,7 +504,7 @@ public:
 
 			D3D11_UNORDERED_ACCESS_VIEW_DESC descView;
 			ZeroMemory(&descView, sizeof(descView));
-			descView.Format = DXGI_FORMAT_UNKNOWN;      // Format must be must be DXGI_FORMAT_UNKNOWN, when creating a View of a Structured Buffer
+			descView.Format = DXGI_FORMAT_UNKNOWN;
 			descView.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 			descView.Buffer.NumElements = numSpheresX*numSpheresY;
 
@@ -505,36 +512,15 @@ public:
 		}
 
 		{
-			D3D11_BUFFER_DESC descGPUBuffer;
-			ZeroMemory(&descGPUBuffer, sizeof(descGPUBuffer));
-			descGPUBuffer.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-			descGPUBuffer.ByteWidth = numSpheresX*numSpheresY * sizeof(vec4f);
-			descGPUBuffer.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-			descGPUBuffer.StructureByteStride = sizeof(vec4f);	// We assume the data is in the RGBA format, 8 bits per channel
-
-			vec4f points[numSpheresX*numSpheresY];
-			for (auto i = 0; i < numSpheresX; i++)
-				for (auto j = 0; j < numSpheresY; j++)
-					points[i*numSpheresY + j] = mGrid.getInstance().pathFinder.graph.grid[i][j].position;
-
-			D3D11_SUBRESOURCE_DATA InitData;
-			InitData.pSysMem = &points[0];
-			HRESULT h2 = mDevice->CreateBuffer(&descGPUBuffer, &InitData, &mSrcDataGPUBuffer);
-
-			// Now we create a view on the resource. DX11 requires you to send the data to shaders using a "shader view"
-			D3D11_BUFFER_DESC descBuf;
-			ZeroMemory(&descBuf, sizeof(descBuf));
-			mSrcDataGPUBuffer->GetDesc(&descBuf);
-
 			D3D11_SHADER_RESOURCE_VIEW_DESC descView;
 			ZeroMemory(&descView, sizeof(descView));
-			descView.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
-			descView.BufferEx.FirstElement = 0;
-
+			descView.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 			descView.Format = DXGI_FORMAT_UNKNOWN;
-			descView.BufferEx.NumElements = descBuf.ByteWidth / descBuf.StructureByteStride;
+			descView.Texture2D.MipLevels = 1;
+			descView.Texture2D.MostDetailedMip = 0;
 
-			mDevice->CreateShaderResourceView(mSrcDataGPUBuffer, &descView, &mSrcDataGPUBufferView);
+			mDevice->CreateShaderResourceView(mShadowsFinalMap, &descView, &mSrcDataGPUBufferView0);
+			mDevice->CreateShaderResourceView(mGridMap, &descView, &mSrcDataGPUBufferView1);
 		}
 	}
 
@@ -621,33 +607,32 @@ public:
 			mDeviceContext->Draw(3, 0);
 			mDeviceContext->PSSetShaderResources(0, 1, nullSRV);
 			mDeviceContext->OMSetBlendState(nullptr, nullptr, ~0);
-
-			//Compute 
-			mDeviceContext->CSSetShader(mShadowGridComputeShader, NULL, 0);
-			mDeviceContext->CSSetShaderResources(0, 1, &mSrcDataGPUBufferView);
-			mDeviceContext->CSSetUnorderedAccessViews(0, 1, &mDestDataGPUBufferView, NULL);
-			mDeviceContext->Dispatch(26, 17, 1);
-			mDeviceContext->CSSetShader(NULL, NULL, 0);
-			
-			mDeviceContext->CopyResource(mDestDataGPUBufferCPURead, mDestDataGPUBuffer);
-			
-			D3D11_MAPPED_SUBRESOURCE mappedResource;
-			mDeviceContext->Map(mDestDataGPUBufferCPURead, 0, D3D11_MAP_READ, 0, &mappedResource);
-
-			int* ints = reinterpret_cast<int*>(mappedResource.pData);
-
-			auto g = mGrid.pathFinder.graph.grid;
-
-			for (int i = 0; i < numSpheresX; i++)
-			{
-				for (int j = 0; j < numSpheresY; j++)
-				{
-					g[i][j].hasLight = ints[i+j*numSpheresX] == 1;
-				}
-			}
-
-			mDeviceContext->Unmap(mDestDataGPUBufferCPURead, 0);
+			mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
 		}
+
+		//Compute 
+		mDeviceContext->CSSetShader(mShadowGridComputeShader, NULL, 0);
+		mDeviceContext->CSSetShaderResources(0, 1, &mSrcDataGPUBufferView0);
+		mDeviceContext->CSSetShaderResources(1, 1, &mSrcDataGPUBufferView1);
+		mDeviceContext->CSSetUnorderedAccessViews(0, 1, &mDestDataGPUBufferView, NULL);
+		mDeviceContext->Dispatch(mRenderer->GetWindowWidth()/32, mRenderer->GetWindowHeight()/32, 1);
+		mDeviceContext->CSSetShader(NULL, NULL, 0);
+		mDeviceContext->CSSetShaderResources(0, 2, nullSRV);
+		mDeviceContext->CopyResource(mDestDataGPUBufferCPURead, mDestDataGPUBuffer);
+
+		//Map and update
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		mDeviceContext->Map(mDestDataGPUBufferCPURead, 0, D3D11_MAP_READ, 0, &mappedResource);
+		int* ints = reinterpret_cast<int*>(mappedResource.pData);
+		auto g = mGrid.pathFinder.graph.grid;
+		for (int i = 0; i < numSpheresX; i++)
+		{
+			for (int j = 0; j < numSpheresY; j++)
+			{
+				g[i][j].hasLight = ints[i+j*numSpheresX] == 1;
+			}
+		}
+		mDeviceContext->Unmap(mDestDataGPUBufferCPURead, 0);
 	}
 
 	void RenderShadowMask() {
@@ -711,15 +696,17 @@ public:
 	{
 		for (int i = 0; i < numSpheresX; i++)
 		{
-			for (int j = 0; j < numSpheresY; j++) 
+			for (int j = 0; j < numSpheresY; j++)
 			{
-			const auto pone = vec3f(nodeRadius, nodeRadius, 0);
-			const auto none = vec3f(-nodeRadius, nodeRadius, 0);
-			auto pos = mGrid.pathFinder.graph.grid[i][j].position;
+				const auto pone = vec3f(nodeRadius, nodeRadius, 0);
+				const auto none = vec3f(-nodeRadius, nodeRadius, 0);
+				auto pos = mGrid.pathFinder.graph.grid[i][j].position;
+				auto hasLight = mGrid.pathFinder.graph.grid[i][j].hasLight;
 
-			TraceLine(pos + pone, pos - pone, Colors::magenta);
-			TraceLine(pos + none, pos - none, Colors::magenta);
-
+				if (!hasLight) {
+					TraceLine(pos + pone, pos - pone, Colors::magenta);
+					TraceLine(pos + none, pos - none, Colors::magenta);
+				}
 			}
 		}
 	}
@@ -743,6 +730,25 @@ public:
 
 		// reset line trace count
 		mLineTraceDrawCount = 0;
+	}
+
+
+	void RenderGridToBuffer()
+	{
+		mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_POINT);
+
+		mDeviceContext->OMSetRenderTargets(1, &mGridRTV, nullptr);
+
+		mDeviceContext->IASetInputLayout(mLineTraceInputLayout);
+		mDeviceContext->VSSetShader(mLineTraceVertexShader, nullptr, 0);
+		mDeviceContext->PSSetShader(mGridPixelShader, nullptr, 0);
+
+		//mDeviceContext->UpdateSubresource(static_cast<DX11Mesh*>(mGridMesh)->mVertexBuffer, 0, nullptr, &mGridVertices, 0, 0);
+		mDeviceContext->UpdateSubresource(mLineTraceShaderBuffer, 0, nullptr, &mLineTraceShaderData, 0, 0);
+		mDeviceContext->VSSetConstantBuffers(0, 1, &mLineTraceShaderBuffer);
+
+		mRenderer->VBindMesh(mGridMesh);
+		mRenderer->VDrawIndexed(0, numSpheresX * numSpheresY);
 	}
 
 	void UpdatePlayer() {
@@ -917,6 +923,7 @@ public:
 
 	void InitializeGeometry()
 	{
+		InitializeGridMesh();
 		InitializeLineTraceMesh();
 		InitializeQuadMesh();
 		InitializeCircleMesh();
@@ -933,6 +940,34 @@ public:
 		mStaticMeshLibrary.NewMesh(&mLineTraceMesh, mRenderer);
 		mRenderer->VSetMeshVertexBuffer(mLineTraceMesh, mLineTraceVertices, sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex));
 		mRenderer->VSetDynamicMeshIndexBuffer(mLineTraceMesh, lineTraceIndices, gLineTraceVertexCount);
+	}
+
+	void InitializeGridMesh()
+	{
+		auto grid = mGrid.pathFinder.graph.grid;
+		const int gridCount = numSpheresX*numSpheresY;
+
+		LineTraceVertex vertices[gridCount];
+
+		for (auto i = 0; i < numSpheresX; i++)
+		{
+			for (auto j = 0; j < numSpheresY; j++)
+			{
+				vertices[i + j*numSpheresX].Position = grid[i][j].position;
+				vertices[i + j*numSpheresX].Color = grid[i][j].coord;
+				vertices[i + j*numSpheresX].Color.z = numSpheresX;
+			}
+		}
+
+		uint16_t indices[gridCount];
+		for (auto i = 0; i < gridCount; i++)
+		{
+			indices[i] = i;
+		}
+
+		mStaticMeshLibrary.NewMesh(&mGridMesh, mRenderer);
+		mRenderer->VSetMeshVertexBuffer(mGridMesh, vertices, sizeof(LineTraceVertex) * gridCount, sizeof(LineTraceVertex));
+		mRenderer->VSetDynamicMeshIndexBuffer(mGridMesh, indices, gridCount);
 	}
 
 	void InitializeQuadMesh()
@@ -1129,11 +1164,12 @@ public:
 		D3DReadFileToBlob(L"ShadowPixelShader.cso", &psBlob);
 		mDevice->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &mShadowPixelShader);
 
-		D3DReadFileToBlob(L"ShadowVertexShader.cso", &psBlob);
-		mDevice->CreateVertexShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &mShadowVertexShader);
-
 		D3DReadFileToBlob(L"ShadowCasterPixelShader.cso", &psBlob);
 		mDevice->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &mShadowCasterPixelShader);
+
+		D3DReadFileToBlob(L"GridPixelShader.cso", &psBlob);
+		mDevice->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &mGridPixelShader);
+
 
 		D3D11_SAMPLER_DESC samplerDesc;
 		ZeroMemory(&samplerDesc, sizeof(D3D11_SAMPLER_DESC));
