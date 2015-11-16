@@ -11,10 +11,11 @@
 #define DEG_TO_RAD 0.01745329f
 #define MOD(a, n) ((a) - (floorf((a) / (n)) * (n)))
 
-static Vector3 gRepelOffset = { 0.66f, -0.6f, 0.0f };
+//static Vector3 gRepelOffset = { 0.66f, -0.6f, 0.0f };
+static Vector3 gRepelOffset = { 1.4f, -1.4f, 0.0f };
 
-static float gRepelFocus = 4.0f;
-static float gRepelCastDistance = 2.0f;
+static float gRepelFocus = 6.0f;
+static float gRepelCastDistance = 4.0f;
 static float gRepelIncrement = 0.2f;
 static float gRapelDecay = 0.1f;
 static float gMaxRepel = 1.0f;
@@ -90,19 +91,19 @@ namespace Rig3D
 			RotateTowards(&rotation, mTransform.GetRotation(), targetRotation, gTurnRate * 5 * deltaTime);
 			mTransform.SetRotation(rotation);
 
-			auto frontOffset = position + mTransform.TransformPoint(vec3f(0, 1, 0) * gRepelFocus);
-			auto rightOffset = position + mTransform.TransformPoint(gRepelOffset);
-			auto leftOffset  = position + mTransform.TransformPoint(vec3f(-gRepelOffset.x, gRepelOffset.y, 0));
+			auto frontOffset = mTransform.TransformPoint(vec3f(0, 1, 0) * gRepelFocus);
+			auto rightOffset = mTransform.TransformPoint(gRepelOffset);
+			auto leftOffset  = mTransform.TransformPoint(vec3f(-gRepelOffset.x, gRepelOffset.y, 0));
 
 			TRACE_LINE(rightOffset, rightOffset +  normalize(frontOffset - rightOffset) * gRepelCastDistance, Colors::blue);
-			ray = { rightOffset, frontOffset - rightOffset };
+			ray = { rightOffset, normalize(frontOffset - rightOffset) };
 			if (RayCast(&hit, ray, mAABBs, mAABBCount, gRepelCastDistance)) // i need cast distance here (repel cast distance)
 			{
 				mRepel = fmax(mRepel - gRepelIncrement, -gMaxRepel);
 			}
 
 			TRACE_LINE(leftOffset, leftOffset + normalize(frontOffset - leftOffset) * gRepelCastDistance, Colors::blue);
-			ray = { leftOffset, frontOffset - leftOffset };
+			ray = { leftOffset, normalize(frontOffset - leftOffset) };
 			if (RayCast(&hit, ray, mAABBs, mAABBCount, gRepelCastDistance)) // i need cast distance here (repel cast distance)
 			{
 				mRepel = fmin(mRepel + gRepelIncrement, +gMaxRepel);

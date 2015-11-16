@@ -620,7 +620,7 @@ public:
 		const UINT offset = 0;
 		mDeviceContext->IASetInputLayout(mQuadInputLayout);
 		mDeviceContext->VSSetShader(mQuadVertexShader, NULL, 0);
-		mDeviceContext->PSSetShader(mShadowCasterPixelShader, NULL, 0);
+		mDeviceContext->PSSetShader(mQuadPixelShader, NULL, 0);
 
 		mQuadShaderData.Color = gPlayerColor;
 		mDeviceContext->UpdateSubresource(mQuadShaderBuffer, 0, NULL, &mQuadShaderData, 0, 0);
@@ -645,7 +645,7 @@ public:
 
 			for (int i = 1, len = robot.Waypoints.size(); i < len; i++)
 			{
-				TraceLine(robot.Waypoints[i - 1], robot.Waypoints[i], Colors::yellow);
+				TRACE_LINE(robot.Waypoints[i - 1], robot.Waypoints[i], Colors::yellow);
 			}
 		}
 	}
@@ -656,15 +656,10 @@ public:
 		{
 			for (int j = 0; j < numSpheresY; j++)
 			{
-				const auto pone = vec3f(nodeRadius, nodeRadius, 0);
-				const auto none = vec3f(-nodeRadius, nodeRadius, 0);
-				auto pos = mGrid.pathFinder.graph.grid[i][j].position;
-				auto hasLight = mGrid.pathFinder.graph.grid[i][j].hasLight;
+				auto pos = mGrid.graph.grid[i][j].position;
+				auto hasLight = mGrid.graph.grid[i][j].hasLight;
 
-				if (!hasLight) {
-					TraceLine(pos + pone, pos - pone, Colors::magenta);
-					TraceLine(pos + none, pos - none, Colors::magenta);
-				}
+				TRACE_BOX(pos, hasLight ? Colors::cyan : Colors::magenta);
 			}
 		}
 	}
