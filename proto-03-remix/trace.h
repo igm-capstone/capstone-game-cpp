@@ -67,10 +67,12 @@ inline void __TraceBox(const cliqCity::graphicsMath::Vector3& pos, const cliqCit
 
 #define TRACE(message) Trace::GetTrace () << message << Trace::endl
 #define TRACE_BOX(position, color) __TraceBox(position, color)
-#define TRACE_LINE(from, to, color) __gTraceLine(from, to color)
+#define TRACE_LINE(from, to, color) __gTraceLine(from, to, color)
 
 #else
+
 #define TRACE(message)
 #define TRACE_BOX(position, color)
 #define TRACE_LINE(position, color)
+
 #endif

@@ -24,30 +24,23 @@
 #define UNITY_QUAD_RADIUS	0.85f
 
 #if defined _DEBUG
+
 std::function<void(const vec3f&, const vec3f&, const vec4f&)> __gTraceLine;
 void TraceLine(const vec3f& from, const vec3f& to, const vec4f& color)
 {
 	__gTraceLine(from, to, color);
 }
+
+static const int gLineTraceMaxCount = 12000;
+#else
+static const int gLineTraceMaxCount = 0;
 #endif
+
+static const int gLineTraceVertexCount = 2 * gLineTraceMaxCount;
 
 using namespace Rig3D;
 
 typedef cliqCity::memory::LinearAllocator LinearAllocator;
-
-//class Colors
-//{
-//public:
-//	static const vec4f black;
-//	static const vec4f white;
-//	static const vec4f red;
-//	static const vec4f green;
-//	static const vec4f blue;
-//	static const vec4f cyan;
-//	static const vec4f yellow;
-//	static const vec4f magenta;
-//};
-
 
 static const vec4f gWallColor = { 1.0f, 0.0f, 1.0f, 1.0f };
 static const vec4f gCircleColor = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -55,16 +48,13 @@ static const vec4f gPlayerColor = { 0.0f, 0.0f, 1.0f, 1.0f };
 static const int gCircleVertexCount = 13;
 static const int gCircleIndexCount = 36;	// Indices = (vertices - 1) * 3
 
-static const int gSceneMemorySize = 20480;
+// __gLineTraceVertexCount is set to 0 if _DEBUG is not defined
+static const int gSceneMemorySize = 20480 + (gLineTraceVertexCount * 8 * 4);
 static const int gMeshMemorySize = 1024;
-
-static const int gLineTraceMaxCount = 5000;
-static const int gLineTraceVertexCount = 2 * gLineTraceMaxCount;
 
 char gSceneMemory[gSceneMemorySize];
 char gStaticMeshMemory[gMeshMemorySize];
 char gDynamicMeshMemory[gMeshMemorySize];
-
 
 class Proto_03_Remix : public IScene, public virtual IRendererDelegate
 {
@@ -128,8 +118,9 @@ public:
 
 	AABB<vec2f>*					mAABBs;
 
-	LineTraceVertex					mLineTraceVertices[gLineTraceVertexCount];
+	LineTraceVertex*				mLineTraceVertices;
 	int								mLineTraceDrawCount;
+	bool							mLineTraceOverflow;
 
 	mat4f*							mWallTransforms;
 	mat4f*							mBlockTransforms;
@@ -217,7 +208,7 @@ public:
 
 	// singletons
 	Input& mInput = Input::SharedInstance();
-	Grid& mGrid = Grid::getInstance();
+	Grid& mGrid = Grid::SharedInstance();
 
 	ID3D11ShaderResourceView* nullSRV[2] = { 0, 0 };
 
@@ -251,8 +242,9 @@ public:
 
 		mRenderer->SetDelegate(this);
 		VOnResize();
-
+		
 		InitializeLevel();
+		InitializeGrid();
 		InitializeGeometry();
 		InitializeLineTraceShaders();
 		InitializeWallShaders();
@@ -318,19 +310,19 @@ public:
 			pos.y -= mPlayerSpeed;
 		}
 
-		BoxCollider aabb = { pos, mPlayer.mBoxCollider->halfSize };
+		UpdateGrid();
 
-		for (int i = 0; i < mWallCount; i++)
-		{
-			if (IntersectAABBAABB(aabb, mWallColliders[i]))
-			{
-				return;
-			}
-		}
+		//BoxCollider aabb = { pos, mPlayer.mBoxCollider->halfSize };
+		//for (int i = 0; i < mWallCount; i++)
+		//{
+		//	if (IntersectAABBAABB(aabb, mWallColliders[i]))
+		//	{
+		//		return;
+		//	}
+		//}
 
 		mPlayer.mTransform->SetPosition(pos);
 		mPlayer.mBoxCollider->origin = pos;
-		UpdatePlayer();
 		UpdatePlayer();
 	}
 
@@ -515,7 +507,7 @@ public:
 			vec4f points[numSpheresX*numSpheresY];
 			for (auto i = 0; i < numSpheresX; i++)
 				for (auto j = 0; j < numSpheresY; j++)
-					points[i*numSpheresY + j] = mGrid.getInstance().pathFinder.graph.grid[i][j].position;
+					points[i*numSpheresY + j] = mGrid.SharedInstance().pathFinder.graph.grid[i][j].position;
 
 			D3D11_SUBRESOURCE_DATA InitData;
 			InitData.pSysMem = &points[0];
@@ -734,7 +726,7 @@ public:
 		mDeviceContext->VSSetShader(mLineTraceVertexShader, nullptr, 0);
 		mDeviceContext->PSSetShader(mLineTracePixelShader, nullptr, 0);
 
-		mDeviceContext->UpdateSubresource(static_cast<DX11Mesh*>(mLineTraceMesh)->mVertexBuffer, 0, nullptr, &mLineTraceVertices, 0, 0);
+		mDeviceContext->UpdateSubresource(static_cast<DX11Mesh*>(mLineTraceMesh)->mVertexBuffer, 0, nullptr, mLineTraceVertices, 0, 0);
 		mDeviceContext->UpdateSubresource(mLineTraceShaderBuffer, 0, nullptr, &mLineTraceShaderData, 0, 0);
 		mDeviceContext->VSSetConstantBuffers(0, 1, &mLineTraceShaderBuffer);
 
@@ -743,6 +735,7 @@ public:
 
 		// reset line trace count
 		mLineTraceDrawCount = 0;
+		mLineTraceOverflow = false;
 	}
 
 	void UpdatePlayer() {
@@ -754,6 +747,23 @@ public:
 		memcpy(mappedResource.pData, &playerWorldMatrix, sizeof(mat4f));
 		// Unlock the instance buffer.
 		mDeviceContext->Unmap(mPlayerInstanceBuffer, 0);
+	}
+
+	void UpdateGrid()
+	{
+		for (size_t x = 0; x < numSpheresX; x++)
+		{
+			for (size_t y = 0; y < numSpheresY; y++)
+			{
+				auto node = &mGrid.graph.grid[x][y];
+
+				if (node->weight > 1)
+				{
+					TRACE_BOX(node->position, Colors::magenta);
+				}
+			}
+		}
+
 	}
 
 	void UpdateRobotTransforms()
@@ -840,6 +850,24 @@ public:
 		mGoal.mTransform->RotateYaw(PI);
 	}
 
+	void InitializeGrid()
+	{
+		for (size_t x = 0; x < numSpheresX; x++)
+		{
+			for (size_t y = 0; y < numSpheresY; y++)
+			{
+				auto node = &mGrid.graph.grid[x][y];
+
+				RayCastHit<vec3f> hit;
+				if (RayCast(&hit, { node->position, vec3f(0, 0, 1) }, mWallColliders, mWallCount))
+				{
+					node->weight = FLT_MAX;
+				}
+			}
+		}
+
+	}
+
 	void LoadTransforms(mat4f** transforms, vec3f* positions, vec3f* rotations, vec3f* scales, int size, int TransformType)
 	{
 		*transforms = reinterpret_cast<mat4f*>(mSceneAllocator.Allocate(sizeof(mat4f) * size, alignof(mat4f), 0));
@@ -924,6 +952,8 @@ public:
 
 	void InitializeLineTraceMesh()
 	{
+		mLineTraceVertices = reinterpret_cast<LineTraceVertex*>(mSceneAllocator.Allocate(sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex), 0));
+
 		uint16_t lineTraceIndices[gLineTraceVertexCount];
 		for (auto i = 0; i < gLineTraceVertexCount; i++)
 		{
@@ -1266,6 +1296,18 @@ public:
 
 	void TraceLine(const vec3f& from, const vec3f& to, const vec4f& color)
 	{
+		if (mLineTraceOverflow)
+		{
+			return;
+		}
+
+		if (mLineTraceDrawCount >= gLineTraceVertexCount - 1)
+		{
+			TRACE("[WARNING] Reached maximum number of traced lines. Increase __gLineTraceMaxCount to trace more lines.");
+			mLineTraceOverflow = true;
+			return;
+		}
+
 		auto index = mLineTraceDrawCount++;
 		mLineTraceVertices[index].Position = from;
 		mLineTraceVertices[index].Color = color;

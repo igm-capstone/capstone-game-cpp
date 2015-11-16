@@ -52,15 +52,22 @@ namespace Rig3D
 			RayCastHit<vec2f> hit;
 
 			mSearchResult = mGrid.GetPath(position, targetPosition);
-			for (auto node : mSearchResult.path)
+			for (auto node = mSearchResult.path.rbegin(); node != mSearchResult.path.rend(); ++node)
 			{
-				auto distance = node->position - position;
-				auto direction = distance *(1 / magnitude(distance));
+				auto distance = (*node)->position - position;
+				auto distanceMag = magnitude(distance);
+				auto direction = distance * (1 / distanceMag);
 
 				ray = { position, direction };
-				if (!RayCast(&hit, ray, mAABBs, mAABBCount))
+				if (!RayCast(&hit, ray, mAABBs, mAABBCount, distanceMag))
 				{
-					targetPosition = node->position;
+					auto test = node;
+					if (++test == mSearchResult.path.rend())
+					{
+						--node;
+					}
+
+					targetPosition = (*node)->position;
 					break;
 				}
 			}
@@ -84,16 +91,16 @@ namespace Rig3D
 			auto rightOffset = position + mTransform.TransformPoint(gRepelOffset);
 			auto leftOffset  = position + mTransform.TransformPoint(vec3f(-gRepelOffset.x, gRepelOffset.y, 0));
 
-			//DrawLine(rightOffset, rightOffset +  normalize(frontOffset - rightOffset) * gRepelCastDistance, Colors::blue);
+			TRACE_LINE(rightOffset, rightOffset +  normalize(frontOffset - rightOffset) * gRepelCastDistance, Colors::blue);
 			ray = { rightOffset, frontOffset - rightOffset };
-			if (RayCast(&hit, ray, mAABBs, mAABBCount)) // i need cast distance here (repel cast distance)
+			if (RayCast(&hit, ray, mAABBs, mAABBCount, gRepelCastDistance)) // i need cast distance here (repel cast distance)
 			{
 				mRepel = fmax(mRepel - gRepelIncrement, -gMaxRepel);
 			}
 
-			//DrawLine(leftOffset, leftOffset + normalize(frontOffset - leftOffset) * gRepelCastDistance, Colors::blue);
+			TRACE_LINE(leftOffset, leftOffset + normalize(frontOffset - leftOffset) * gRepelCastDistance, Colors::blue);
 			ray = { leftOffset, frontOffset - leftOffset };
-			if (RayCast(&hit, ray, mAABBs, mAABBCount)) // i need cast distance here (repel cast distance)
+			if (RayCast(&hit, ray, mAABBs, mAABBCount, gRepelCastDistance)) // i need cast distance here (repel cast distance)
 			{
 				mRepel = fmin(mRepel + gRepelIncrement, +gMaxRepel);
 			}
@@ -122,7 +129,7 @@ namespace Rig3D
 
 			// "forward"
 			//Debug.DrawLine(transform.position, transform.position + transform.up);
-			//Debug.DrawLine(transform.position, transform.position + transform.TransformDirection(moveDirection).normalized, Color.yellow);
+			TRACE_LINE(mTransform.GetPosition(), mTransform.GetPosition() /*+ transform.TransformDirection(moveDirection).normalized*/, Colors::yellow);
 
 			/*if (GetComponent<Animator>())
 			{
@@ -136,7 +143,7 @@ namespace Rig3D
 			moveStep.y *= moveDirection.y;
 			moveStep.z *= moveDirection.z;
 */
-			TRACE(float(deltaTime));
+			//TRACE(float(deltaTime));
 			mTransform.SetPosition(position + moveStep * gMoveSpeed * .1f * deltaTime);
 		}
 
