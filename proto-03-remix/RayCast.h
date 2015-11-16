@@ -59,13 +59,13 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, i
 	std::vector<RayCastHit<Vector>> hits;
 	hits.reserve(count);
 
-	Line<vec3f> line(ray.origin, ray.origin + (ray.normal * maxDistance));
+	Line<Vector> line{ ray.origin, ray.origin + (ray.normal * maxDistance) };
 
 	for (int i = 0; i < count; i++)
 	{
 		Vector poi;
 		float t;
-		if (IntersectLineAABB(ray, aabbs[i], poi, t))
+		if (IntersectLineAABB(line, aabbs[i], poi, t))
 		{
 			hits.push_back({ &aabbs[i], poi , 0.0f });	// Temp store zero for distance to save on calculations
 		}

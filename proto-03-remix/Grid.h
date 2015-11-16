@@ -18,12 +18,13 @@ const int numSpheresY = 34;// round(maxSizeY / nodeRadius) / 2;
 class Grid
 {
 public:
-	static Grid& getInstance()
+	static Grid& SharedInstance()
 	{
 		static Grid instance;
 		return instance;
 	}
 
+	Graph<Node, numSpheresX, numSpheresY> graph;
 	Fringe<Node, numSpheresX, numSpheresY> pathFinder;
 	void UpdateGrid();
 	Node& GetNodeAt(Vector3 pos);
@@ -34,7 +35,5 @@ private:
 	Grid(Grid const&) = delete;
 	void operator=(Grid const&) = delete;
 	~Grid();
-
-
 };
 

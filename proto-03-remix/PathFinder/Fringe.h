@@ -29,9 +29,8 @@ namespace PathFinder
 		unordered_map<T*, CacheData<T>> cache;
 
 	public:
-		Graph<T, width, height> graph;
-		Fringe() {}
-		Fringe(Graph<T, width, height> _graph) : graph(_graph) {}
+		Graph<T, width, height>& graph;
+		Fringe(Graph<T, width, height>& _graph) : graph(_graph) {}
 		~Fringe() {}
 
 		SearchResult<T> FindPath(T* startNode, T* endNode)
@@ -54,7 +53,7 @@ namespace PathFinder
 				
 				for (auto nodeIt = fringe.begin(); nodeIt != fringe.end();)
 				{
-					if (itCount++ > 10000) return result;
+					if (itCount++ > 1000) return result;
 
 					auto node = *nodeIt;
 					auto nodeData = cache[node];

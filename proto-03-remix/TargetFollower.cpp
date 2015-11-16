@@ -4,7 +4,7 @@ using namespace Rig3D;
 
 
 TargetFollower::TargetFollower(Transform& transform, AABB<vec2f>* aabbs, int aabbbCount) : 
-	mGrid(Grid::getInstance()), 
+	mGrid(Grid::SharedInstance()), 
 	mTransform(transform),
 	mAABBs(aabbs), 
 	mAABBCount(aabbbCount),
