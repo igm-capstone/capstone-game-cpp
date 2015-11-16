@@ -1,6 +1,7 @@
 #pragma once
 #include "Rig3D/Intersection.h"
 #include <vector>
+#include <utility>
 
 using namespace cliqCity::graphicsMath;
 
@@ -24,7 +25,7 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, i
 		float t;
 		if (IntersectRayAABB(ray, aabbs[i], poi, t))
 		{
-			hits.push_back({ &aabbs[i], poi , 0.0f});	// Temp store zero for distance to save on calculations
+			hits.push_back({ &aabbs[i], poi , 0.0f });	// Temp store zero for distance to save on calculations
 		}
 	}
 
@@ -90,6 +91,40 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, i
 	}
 
 	*hitInfo = hits.at(minIndex);
+
+	return 1;
+}
+
+template<class Vector>
+int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, Sphere<Vector>* spheres, int count)
+{
+	uint32_t	minIndex;
+	float		tMin = FLT_MAX;
+
+	for (int i = 0; i < count; i++)
+	{
+		Vector poi;
+		float t;
+		if (IntersectRaySphere(ray, spheres[i], poi, t))
+		{
+			if (t < tMin) {
+				tMin = t;
+				minIndex = i;
+			}
+		}
+
+	}
+
+	// No hits
+	if (tMin == FLT_MAX)
+	{
+		return 0;
+	}
+
+	// Calculate stats for hit
+	hitInfo->hit = spheres[minIndex];
+	hitInfo->poi = ray.origin + ray.normal * tMin;
+	hitInfo->distance = cliqCity::graphicsMath::magnitude(spheres[minIndex].origin - ray.origin);
 
 	return 1;
 }
