@@ -765,7 +765,7 @@ public:
 
 	void InitializeCamera()
 	{
-		float aspectRatio = (float)mOptions.mWindowWidth / mOptions.mWindowHeight;
+		float aspectRatio = static_cast<float>(mOptions.mWindowWidth) / mOptions.mWindowHeight;
 		float halfHeight = 33.5f;
 		float halfWidth = 33.5f * aspectRatio;
 		mProjectionMatrix = mat4f::normalizedOrthographicLH(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.3f, 1000.0f).transpose();
@@ -1320,8 +1320,21 @@ public:
 
 		if (input.GetMouseButtonDown(MOUSEBUTTON_LEFT))
 		{
-			ScreenPoint& screenPoint = input.mousePosition;
+			float x = (2.0f * input.mousePosition.x) / mRenderer->GetWindowWidth() - 1.0f;
+			float y = 1.0f - (2.0f * input.mousePosition.y) / mRenderer->GetWindowHeight();
 
+			mat4f toWorld = (mQuadShaderData.Projection * mQuadShaderData.View).inverse();
+			vec3f worldPos = vec4f(x, y, 0.0f, 1.0f) * toWorld;
+			vec3f worldDir = vec3f(0.0f, 0.0f, 1.0f);
+			worldPos.z = -30.0f;
+
+			Ray<vec3f> ray = { worldPos, worldDir };
+
+			RayCastHit<vec3f> hit;
+			if (RayCast(&hit, ray, mLightColliders, mCircleCount))
+			{
+				mCircleColorWeights[hit.index] = mCircleColorWeights[hit.index] > 0 ? 0 : 1;
+			}
 		}
 
 
