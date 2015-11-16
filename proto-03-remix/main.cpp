@@ -1325,7 +1325,7 @@ public:
 			RayCastHit<vec3f> hit;
 			if (RayCast(&hit, ray, mLightColliders, mCircleCount))
 			{
-				// TO DO: Turn light on.
+				mCircleColorWeights[hit.index] = mCircleColorWeights[hit.index] > 0 ? 1 : 0;
 			}
 		}
 
