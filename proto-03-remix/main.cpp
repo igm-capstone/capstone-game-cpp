@@ -1325,7 +1325,7 @@ public:
 			RayCastHit<vec3f> hit;
 			if (RayCast(&hit, ray, mLightColliders, mCircleCount))
 			{
-				mCircleColorWeights[hit.index] = mCircleColorWeights[hit.index] > 0 ? 1 : 0;
+				mCircleColorWeights[hit.index] = mCircleColorWeights[hit.index] > 0 ? 0 : 1;
 			}
 		}
 
