@@ -22,6 +22,7 @@
     <ProjectGuid>{9CDF32CA-A3F4-45A2-B703-EC18792690EF}</ProjectGuid>
     <RootNamespace>proto03remix</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>capstone-game-cpp</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
