@@ -20,6 +20,19 @@
 #include "TargetFollower.h"
 #include "Colors.h"
 
+//Shaders - Headers are output from compiler
+#include "Shaders/obj/BillboardPixelShader.h"
+#include "Shaders/obj/BillboardVertexShader.h"
+#include "Shaders/obj/CircleVertexShader.h"
+#include "Shaders/obj/GridPixelShader.h"
+#include "Shaders/obj/LineTracePixelShader.h"
+#include "Shaders/obj/LineTraceVertexShader.h"
+#include "Shaders/obj/QuadPixelShader.h"
+#include "Shaders/obj/QuadVertexShader.h"
+#include "Shaders/obj/ShadowCasterPixelShader.h"
+#include "Shaders/obj/ShadowGridComputeShader.h"
+#include "Shaders/obj/ShadowPixelShader.h"
+
 #define PI					3.1415926535f
 #define UNITY_QUAD_RADIUS	0.85f
 
@@ -995,13 +1008,10 @@ public:
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 
-		ID3DBlob* vsBlob;
-		D3DReadFileToBlob(L"LineTraceVertexShader.cso", &vsBlob);
-
 		// Create the shader on the device
 		mDevice->CreateVertexShader(
-			vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(),
+			gLineTraceVertexShader,
+			sizeof(gLineTraceVertexShader),
 			nullptr,
 			&mLineTraceVertexShader);
 
@@ -1010,27 +1020,19 @@ public:
 			mDevice->CreateInputLayout(
 				inputDescription,					// Reference to Description
 				2,									// Number of elments inside of Description
-				vsBlob->GetBufferPointer(),
-				vsBlob->GetBufferSize(),
+				gLineTraceVertexShader,
+				sizeof(gLineTraceVertexShader),
 				&mLineTraceInputLayout);
 		}
 
-		// Clean up
-		vsBlob->Release();
-
-		// Load Pixel Shader ---------------------------------------
-		ID3DBlob* psBlob;
-		D3DReadFileToBlob(L"LineTracePixelShader.cso", &psBlob);
 
 		// Create the shader on the device
 		mDevice->CreatePixelShader(
-			psBlob->GetBufferPointer(),
-			psBlob->GetBufferSize(),
+			gLineTracePixelShader,
+			sizeof(gLineTracePixelShader),
 			nullptr,
 			&mLineTracePixelShader);
 
-		// Clean up
-		psBlob->Release();
 
 		// Constant buffers ----------------------------------------
 		D3D11_BUFFER_DESC lineTraceBufferDataDesc;
@@ -1055,13 +1057,10 @@ public:
 			{ "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
 		};
 
-		ID3DBlob* vsBlob;
-		D3DReadFileToBlob(L"QuadVertexShader.cso", &vsBlob);
-
 		// Create the shader on the device
 		mDevice->CreateVertexShader(
-			vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(),
+			gQuadVertexShader,
+			sizeof(gQuadVertexShader),
 			NULL,
 			&mQuadVertexShader);
 
@@ -1070,27 +1069,17 @@ public:
 			mDevice->CreateInputLayout(
 				inputDescription,					// Reference to Description
 				5,									// Number of elments inside of Description
-				vsBlob->GetBufferPointer(),
-				vsBlob->GetBufferSize(),
+				gQuadVertexShader,
+				sizeof(gQuadVertexShader),
 				&mQuadInputLayout);
 		}
 
-		// Clean up
-		vsBlob->Release();
-
-		// Load Pixel Shader ---------------------------------------
-		ID3DBlob* psBlob;
-		D3DReadFileToBlob(L"QuadPixelShader.cso", &psBlob);
-
 		// Create the shader on the device
 		mDevice->CreatePixelShader(
-			psBlob->GetBufferPointer(),
-			psBlob->GetBufferSize(),
+			gQuadPixelShader,
+			sizeof(gQuadPixelShader),
 			NULL,
 			&mQuadPixelShader);
-
-		// Clean up
-		psBlob->Release();
 
 		// Instance buffer
 		D3D11_BUFFER_DESC quadInstanceBufferDesc;
@@ -1117,14 +1106,11 @@ public:
 
 		mDevice->CreateBuffer(&quadBufferDataDesc, NULL, &mQuadShaderBuffer);
 
-		D3DReadFileToBlob(L"BillboardVertexShader.cso", &psBlob);
-		mDevice->CreateVertexShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &mBillboardVertexShader);
+		mDevice->CreateVertexShader(gBillboardVertexShader,sizeof(gBillboardVertexShader), nullptr, &mBillboardVertexShader);
 
-		D3DReadFileToBlob(L"BillboardPixelShader.cso", &psBlob);
-		mDevice->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &mBillboardPixelShader);
+		mDevice->CreatePixelShader(gBillboardPixelShader, sizeof(gBillboardPixelShader), nullptr, &mBillboardPixelShader);
 
-		D3DReadFileToBlob(L"ShadowGridComputeShader.cso", &psBlob);
-		mDevice->CreateComputeShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &mShadowGridComputeShader);
+		mDevice->CreateComputeShader(gShadowGridComputeShader, sizeof(gShadowGridComputeShader), nullptr, &mShadowGridComputeShader);
 
 		D3D11_BUFFER_DESC pointDesc;
 		pointDesc.ByteWidth = sizeof(PointShaderData);
@@ -1136,14 +1122,11 @@ public:
 
 		mDevice->CreateBuffer(&pointDesc, NULL, &mPointShaderBuffer);
 
-		D3DReadFileToBlob(L"ShadowPixelShader.cso", &psBlob);
-		mDevice->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &mShadowPixelShader);
+		mDevice->CreatePixelShader(gShadowPixelShader, sizeof(gShadowPixelShader), nullptr, &mShadowPixelShader);
 
-		D3DReadFileToBlob(L"ShadowCasterPixelShader.cso", &psBlob);
-		mDevice->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &mShadowCasterPixelShader);
+		mDevice->CreatePixelShader(gShadowCasterPixelShader, sizeof(gShadowCasterPixelShader), nullptr, &mShadowCasterPixelShader);
 
-		D3DReadFileToBlob(L"GridPixelShader.cso", &psBlob);
-		mDevice->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &mGridPixelShader);
+		mDevice->CreatePixelShader(gGridPixelShader, sizeof(gGridPixelShader), nullptr, &mGridPixelShader);
 
 
 		D3D11_SAMPLER_DESC samplerDesc;
@@ -1202,13 +1185,10 @@ public:
 			{ "BLENDWEIGHT", 0, DXGI_FORMAT_R32_FLOAT, 2, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
 		};
 
-		ID3DBlob* vsBlob;
-		D3DReadFileToBlob(L"CircleVertexShader.cso", &vsBlob);
-
 		// Create the shader on the device
 		mDevice->CreateVertexShader(
-			vsBlob->GetBufferPointer(),
-			vsBlob->GetBufferSize(),
+			gCircleVertexShader,
+			sizeof(gCircleVertexShader),
 			NULL,
 			&mCircleVertexShader);
 
@@ -1217,13 +1197,10 @@ public:
 			mDevice->CreateInputLayout(
 				inputDescription,					// Reference to Description
 				6,									// Number of elments inside of Description
-				vsBlob->GetBufferPointer(),
-				vsBlob->GetBufferSize(),
+				gCircleVertexShader,
+				sizeof(gCircleVertexShader),
 				&mCircleInputLayout);
 		}
-
-		// Clean up
-		vsBlob->Release();
 
 		// Instance buffer
 		D3D11_BUFFER_DESC circleInstanceBufferDesc;
