@@ -243,6 +243,16 @@ public:
 
 	void VInitialize() override
 	{
+		struct stat s;
+		if (stat("Assets", &s) != 0) {
+			_wchdir((LPCWSTR)L".."); 
+			if (stat("Assets", &s) != 0) {
+				MessageBox(NULL, (LPCWSTR)L"Assets folder not found.", (LPCWSTR)L"Error", MB_ICONERROR | MB_OK);
+				exit(1);
+			}
+		}
+
+
 		mRenderer      = &DX3D11Renderer::SharedInstance();
 		mDeviceContext = mRenderer->GetDeviceContext();
 		mDevice        = mRenderer->GetDevice();
@@ -779,7 +789,7 @@ public:
 
 	void InitializeLevel()
 	{
-		LevelReader levelReader("UnitySceneExport.json");
+		LevelReader levelReader("Assets/UnitySceneExport.json");
 		levelReader.ReadLevel();
 
 		// Walls
