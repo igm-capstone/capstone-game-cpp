@@ -7,6 +7,8 @@
 #include "Task.h"
 #include "Memory\Memory\PoolAllocator.h"
 
+#pragma warning(disable: 4251)
+
 #ifdef _WINDLL
 #define RIG3D __declspec(dllexport)
 #else

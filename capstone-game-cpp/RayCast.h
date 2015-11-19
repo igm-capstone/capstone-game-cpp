@@ -76,7 +76,7 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, u
 		return 0;
 	}
 
-	float minIndex = 0;
+	uint32_t minIndex = 0;
 
 	float prevDistance = magnitudeSquared(aabbs[hits.at(0).index].origin - ray.origin);
 	for (uint32_t i = 1; i < hits.size(); i++)

@@ -13,7 +13,7 @@ Texture2D Grid : register(t1);
 RWStructuredBuffer<GridNode> BufferOut : register(u0);
 
 [numthreads(32, 32, 1)]
-void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
+void main(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	float4 grid = Grid.Load(int3(dispatchThreadID.x, dispatchThreadID.y, 0));
 	float4 shadow = Shadows.Load(int3(dispatchThreadID.x, dispatchThreadID.y, 0));

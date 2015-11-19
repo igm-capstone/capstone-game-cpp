@@ -11,7 +11,7 @@ void* AlignedPointer(void* buffer, unsigned int alignment)
 	char adjustment = alignment - misalignment;
 	char* alignedPointer = rawPointer + adjustment;
 
-	assert(adjustment < 256, __FILE__, __LINE__);
+	assert(adjustment < 256);
 	alignedPointer[-1] = adjustment;
 
 	return (void*)alignedPointer;

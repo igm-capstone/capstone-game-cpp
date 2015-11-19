@@ -23,8 +23,6 @@
 #define PI					3.1415926535f
 #define UNITY_QUAD_RADIUS	0.85f
 
-#if defined _DEBUG
-
 std::function<void(const vec3f&, const vec3f&, const vec4f&)> __gTraceLine;
 void TraceLine(const vec3f& from, const vec3f& to, const vec4f& color)
 {
@@ -32,10 +30,6 @@ void TraceLine(const vec3f& from, const vec3f& to, const vec4f& color)
 }
 
 static const int gLineTraceMaxCount = 12000;
-#else
-static const int gLineTraceMaxCount = 0;
-#endif
-
 static const int gLineTraceVertexCount = 2 * gLineTraceMaxCount;
 
 using namespace Rig3D;
@@ -48,7 +42,6 @@ static const vec4f gPlayerColor = { 0.0f, 0.0f, 1.0f, 1.0f };
 static const int gCircleVertexCount = 13;
 static const int gCircleIndexCount = 36;	// Indices = (vertices - 1) * 3
 
-// __gLineTraceVertexCount is set to 0 if _DEBUG is not defined
 static const int gSceneMemorySize = 20480 + (gLineTraceVertexCount * 8 * 4);
 static const int gMeshMemorySize = 1024;
 
@@ -56,7 +49,7 @@ char gSceneMemory[gSceneMemorySize];
 char gStaticMeshMemory[gMeshMemorySize];
 char gDynamicMeshMemory[gMeshMemorySize];
 
-class Proto_03_Remix : public IScene, public virtual IRendererDelegate
+class Capstone : public IScene, public virtual IRendererDelegate
 {
 
 
@@ -217,7 +210,7 @@ public:
 
 #pragma region IScene Override
 
-	Proto_03_Remix() :
+	Capstone() :
 		mSceneAllocator(static_cast<void*>(gSceneMemory), static_cast<void*>(gSceneMemory + gSceneMemorySize)),
 		mStaticMeshAllocator(static_cast<void*>(gStaticMeshMemory), static_cast<void*>(gStaticMeshMemory + gMeshMemorySize)),
 		mDynamicMeshAllocator(static_cast<void*>(gDynamicMeshMemory), static_cast<void*>(gDynamicMeshMemory + gMeshMemorySize))
@@ -230,12 +223,10 @@ public:
 		mStaticMeshLibrary.SetAllocator(&mStaticMeshAllocator);
 		mDynamicMeshLibrary.SetAllocator(&mDynamicMeshAllocator);
 
-#if defined _DEBUG
 		__gTraceLine = [this](const vec3f& from, const vec3f& to, const vec4f& color) { TraceLine(from, to, color); };
-#endif
 	}
 
-	~Proto_03_Remix() {}
+	~Capstone() {}
 
 	void VInitialize() override
 	{
@@ -292,7 +283,7 @@ public:
 			for (++it; it != result.path.end(); ++it)
 			{
 				auto p2 = **it;
-				TraceLine(p1.position + zone, p2.position + zone, Colors::blue);
+				TRACE_LINE(p1.position + zone, p2.position + zone, Colors::blue);
 				p1 = p2;
 			}
 		}
@@ -896,7 +887,7 @@ public:
 
 	static void SetAABBs(RectInfo rectInfo, AABB<Vector2>* aabb, int offset)
 	{
-		for (int i = 0; i < rectInfo.Position.size(); i++)
+		for (size_t i = 0; i < rectInfo.Position.size(); i++)
 		{
 			aabb[i + offset].origin = rectInfo.Position[i];
 			aabb[i + offset].halfSize = rectInfo.Scale[i];
@@ -1328,7 +1319,7 @@ public:
 			RayCastHit<vec3f> hit;
 			if (RayCast(&hit, ray, mLightColliders, mCircleCount))
 			{
-				mCircleColorWeights[hit.index] = mCircleColorWeights[hit.index] > 0 ? 0 : 1;
+				mCircleColorWeights[hit.index] = mCircleColorWeights[hit.index] > 0 ? 0.0f : 1.0f;
 			}
 		}
 
@@ -1370,4 +1361,4 @@ public:
 	}
 };
 
-DECLARE_MAIN(Proto_03_Remix);
+DECLARE_MAIN(Capstone);
