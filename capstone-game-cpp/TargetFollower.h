@@ -47,7 +47,7 @@ namespace Rig3D
 		{
 			auto targetPosition = target.GetPosition();
 			auto position = mTransform.GetPosition();
-			auto deltaTime = 0.1f;//Timer::SharedInstance().GetDeltaTime();
+			auto deltaTime = 0.1f; //* Timer::SharedInstance().GetDeltaTime();
 
 			Ray<vec2f> ray;
 			RayCastHit<vec2f> hit;

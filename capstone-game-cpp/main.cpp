@@ -36,14 +36,21 @@
 #define PI					3.1415926535f
 #define UNITY_QUAD_RADIUS	0.85f
 
-std::function<void(const vec3f&, const vec3f&, const vec4f&)> __gTraceLine;
-void TraceLine(const vec3f& from, const vec3f& to, const vec4f& color)
-{
-	__gTraceLine(from, to, color);
-}
+#if defined _DEBUG
+
+
+__TraceFunction __gTraceLine;
 
 static const int gLineTraceMaxCount = 12000;
 static const int gLineTraceVertexCount = 2 * gLineTraceMaxCount;
+
+#else
+
+static const int gLineTraceVertexCount = 0;
+
+#endif
+
+
 
 using namespace Rig3D;
 
@@ -150,7 +157,6 @@ public:
 	IMesh*							mCircleMesh;
 	IMesh*							mLightMesh;
 	IMesh*							mPlayerMesh;
-	IMesh*							mLineTraceMesh;
 	IMesh*							mGridMesh;
 
 	DX3D11Renderer*					mRenderer;
@@ -221,6 +227,11 @@ public:
 
 	ID3D11ShaderResourceView* nullSRV[2] = { 0, 0 };
 
+#if defined _DEBUG
+	IMesh*							mLineTraceMesh;
+#endif // defined _DEBUG
+
+
 #pragma region IScene Override
 
 	Capstone() :
@@ -236,7 +247,11 @@ public:
 		mStaticMeshLibrary.SetAllocator(&mStaticMeshAllocator);
 		mDynamicMeshLibrary.SetAllocator(&mDynamicMeshAllocator);
 
-		__gTraceLine = [this](const vec3f& from, const vec3f& to, const vec4f& color) { TraceLine(from, to, color); };
+#if defined _DEBUG
+		__gTraceLine = [this] (const float& from_x, const float& from_y, const float& from_z, const float& to_x, const float& to_y, const float& to_z, const vec4f& color) {
+			TraceLine(from_x, from_y, from_z, to_x, to_y, to_z, color);
+		};
+#endif
 	}
 
 	~Capstone() {}
@@ -313,7 +328,6 @@ public:
 				p1 = p2;
 			}
 		}
-
 		
 		UpdateGrid();
 	}
@@ -350,8 +364,12 @@ public:
 	void VShutdown() override {
 		mCircleMesh->~IMesh();
 		mWallMesh->~IMesh();
-		mLineTraceMesh->~IMesh();
 		mGridMesh->~IMesh();
+
+#if defined _DEBUG
+		mLineTraceMesh->~IMesh();
+#endif // defined _DEBUG
+
 
 		ReleaseMacro(mQuadInputLayout);
 		ReleaseMacro(mQuadVertexShader);
@@ -653,8 +671,6 @@ public:
 	{
 		for (auto robot : mRobots)
 		{
-			const auto pone = vec3f(.5f, .5f, 0);
-			const auto none = vec3f(-.5f, .5f, 0);
 			auto pos = robot.Transform.GetPosition();
 
 			TRACE_SMALL_DIAMOND(pos, Colors::red);
@@ -683,6 +699,7 @@ public:
 
 	void RenderLineTrace()
 	{
+#if defined _DEBUG
 		mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_LINE);
 
 		mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
@@ -701,6 +718,8 @@ public:
 		// reset line trace count
 		mLineTraceDrawCount = 0;
 		mLineTraceOverflow = false;
+#endif // defined _DEBUG
+
 	}
 
 
@@ -930,6 +949,7 @@ public:
 
 	void InitializeLineTraceMesh()
 	{
+#if defined _DEBUG
 		mLineTraceVertices = reinterpret_cast<LineTraceVertex*>(mSceneAllocator.Allocate(sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex), 0));
 
 		uint16_t lineTraceIndices[gLineTraceVertexCount];
@@ -941,6 +961,7 @@ public:
 		mStaticMeshLibrary.NewMesh(&mLineTraceMesh, mRenderer);
 		mRenderer->VSetMeshVertexBuffer(mLineTraceMesh, mLineTraceVertices, sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex));
 		mRenderer->VSetDynamicMeshIndexBuffer(mLineTraceMesh, lineTraceIndices, gLineTraceVertexCount);
+#endif // defined _DEBUG
 	}
 
 	void InitializeGridMesh()
@@ -1265,7 +1286,14 @@ public:
 
 #pragma region Line Trace
 
-	void TraceLine(const vec3f& from, const vec3f& to, const vec4f& color)
+	void TraceLine(
+		const float& from_x, 
+		const float& from_y, 
+		const float& from_z, 
+		const float& to_x, 
+		const float& to_y, 
+		const float& to_z, 
+		const vec4f& color)
 	{
 		if (mLineTraceOverflow)
 		{
@@ -1280,11 +1308,15 @@ public:
 		}
 
 		auto index = mLineTraceDrawCount++;
-		mLineTraceVertices[index].Position = from;
+		mLineTraceVertices[index].Position.x = from_x;
+		mLineTraceVertices[index].Position.y = from_y;
+		mLineTraceVertices[index].Position.z = from_z;
 		mLineTraceVertices[index].Color = color;
 
 		index = mLineTraceDrawCount++;
-		mLineTraceVertices[index].Position = to;
+		mLineTraceVertices[index].Position.x = to_x;
+		mLineTraceVertices[index].Position.y = to_y;
+		mLineTraceVertices[index].Position.z = to_z;
 		mLineTraceVertices[index].Color = color;
 	}
 
