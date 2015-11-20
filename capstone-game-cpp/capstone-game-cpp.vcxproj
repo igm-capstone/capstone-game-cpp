@@ -55,7 +55,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Rig3D\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Rig3D.lib;Memory.lib;GraphicsMath.lib;EventHandler.lib;d3d11.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Rig3D.lib;Memory.lib;GraphicsMath.lib;EventHandler.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(TargetDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -76,7 +76,7 @@
       <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Rig3D.lib;Memory.lib;GraphicsMath.lib;EventHandler.lib;d3d11.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Rig3D.lib;Memory.lib;GraphicsMath.lib;EventHandler.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(TargetDir)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
