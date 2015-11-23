@@ -41,7 +41,7 @@
 
 __TraceFunction __gTraceLine;
 
-static const int gLineTraceMaxCount = 12000;
+static const int gLineTraceMaxCount = 20000;
 static const int gLineTraceVertexCount = 2 * gLineTraceMaxCount;
 
 #else
@@ -128,6 +128,7 @@ public:
 	BoxCollider						mPlayerCollider;
 
 	vector<RobotInfo>				mRobots;
+	TargetFollower*					mFollowers;
 
 	AABB<vec2f>*					mAABBs;
 	Sphere<vec3f>*					mLightColliders;
@@ -270,7 +271,6 @@ public:
 			}
 		}
 
-
 		mRenderer      = &DX3D11Renderer::SharedInstance();
 		mDeviceContext = mRenderer->GetDeviceContext();
 		mDevice        = mRenderer->GetDevice();
@@ -280,6 +280,7 @@ public:
 		
 		InitializeLevel();
 		InitializeGrid();
+		InitializeRobots();
 		InitializeGeometry();
 		InitializeLineTraceShaders();
 		InitializeWallShaders();
@@ -301,14 +302,20 @@ public:
 	{
 		HandleInput(Input::SharedInstance());
 
-		bool moved = false;
+		static int i = 0;
+		if (mInput.GetKeyDown(KEYCODE_SPACE)) i= (i + 1) % mRobotCount;
 
-		auto target = mRobots[4];
+		auto robot = mRobots[i].Transform;
+		auto player = mPlayer.mTransform;
+
+		auto target = mRobots[i];
 
 		auto start = mPlayer.mTransform->GetPosition(); //Vector3(10, 20, 0);
 		auto end = target.Transform.GetPosition();
 		//grid.GetPath(start, end);
 		
+		if (magnitude(end-start) < 1)  i = (i + 1) % mRobotCount;
+
 		auto from = mGrid.GetNodeAt(start);
 		auto to = mGrid.GetNodeAt(end);
 			
@@ -330,6 +337,7 @@ public:
 		}
 		
 		UpdateGrid();
+		UpdateRobots();
 	}
 
 	void VRender() override
@@ -760,13 +768,13 @@ public:
 			{
 				auto node = &mGrid.graph.grid[x][y];
 
-				//node->weight = node->hasLight ? 0 : FLT_MAX;
+				node->weight = node->hasLight ? 1 : FLT_MAX;
 
-				RayCastHit<vec3f> hit;
-				if (RayCast(&hit, { node->position, vec3f(0, 0, 1) }, mWallColliders, mWallCount))
-				{
-					node->weight = FLT_MAX;
-				}
+				//RayCastHit<vec3f> hit;
+				//if (RayCast(&hit, { node->position, vec3f(0, 0, 1) }, mWallColliders, mWallCount))
+				//{
+				//	node->weight = FLT_MAX;
+				//}
 
 				if (node->weight > 1)
 				{
@@ -777,14 +785,16 @@ public:
 
 	}
 
-	void UpdateRobotTransforms()
+	void UpdateRobots()
 	{
-		mRobotCount = mRobots.size();
-		mRobotTransforms = reinterpret_cast<mat4f*>(mSceneAllocator.Allocate(sizeof(mat4f) * mRobotCount, alignof(mat4f), 0));
+		auto player = mPlayer.mTransform;
 
 		for (int i = 0; i < mRobotCount; i++)
 		{
 			auto robot = &mRobots[i];
+			auto follower = mFollowers[i];
+
+			follower.MoveTowards(*player);
 
 			mRobotTransforms[i] = robot->Transform.GetWorldMatrix();
 		}
@@ -847,7 +857,8 @@ public:
 
 		// Robots
 		mRobots = levelReader.mRobots;
-		UpdateRobotTransforms();
+		mRobotCount = mRobots.size();
+		mRobotTransforms = reinterpret_cast<mat4f*>(mSceneAllocator.Allocate(sizeof(mat4f) * mRobotCount, alignof(mat4f), 0));
 
 		// Player
 		mPlayer.mTransform = &mPlayerTransform;
@@ -867,6 +878,16 @@ public:
 	void InitializeGrid()
 	{
 
+	}
+
+	void InitializeRobots()
+	{
+		
+		mFollowers = reinterpret_cast<TargetFollower*>(mSceneAllocator.Allocate(sizeof(TargetFollower) * mRobotCount, alignof(TargetFollower), 0));
+		for (auto i = 0; i < mRobotCount; i++)
+		{
+			new (&mFollowers[i]) TargetFollower(mRobots[i].Transform, mAABBs, mAABBCount);
+		}
 	}
 
 	void LoadTransforms(mat4f** transforms, vec3f* positions, vec3f* rotations, vec3f* scales, int size, int TransformType)

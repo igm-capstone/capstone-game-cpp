@@ -53,10 +53,11 @@ namespace PathFinder
 				
 				for (auto nodeIt = fringe.begin(); nodeIt != fringe.end();)
 				{
-					if (itCount++ > 1000) return result;
+					if (itCount++ > 20000) return result;
 
 					auto node = *nodeIt;
 					auto nodeData = cache[node];
+					
 					auto fNode = nodeData.cost + graph.Heuristic(node, endNode);
 
 					if (fNode > fLimit)
@@ -107,7 +108,6 @@ namespace PathFinder
 						Node* n = reinterpret_cast<Node*>(connNode);
 						TRACE_SMALL_BOX(n->position, Colors::green);
 
-						
 						cache[connNode] = connData;
 					}
 

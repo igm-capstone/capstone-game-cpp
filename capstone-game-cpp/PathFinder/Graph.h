@@ -72,7 +72,7 @@ namespace PathFinder
 			auto d = fmin(dx, dy);
 
 			// Manhattan distance on a square grid
-			return (float) (abs(dy - dx) + (d * 1.4f));
+			return float(abs(dy - dx) + (d * 1.4f));
 		}
 
 		vector<Connection<T>>* GetNodeConnections(T* node)
@@ -104,7 +104,7 @@ namespace PathFinder
 			if (nodeTo->weight < FLT_MAX)
 			{
 				// 1.4 for diagonals and 1 for horizontal or vertical connections
-				auto cost = nodeFrom->x == nodeTo->x || nodeFrom->y == nodeTo->y ? 1 : 1.4f;
+				auto cost = (nodeFrom->x == nodeTo->x || nodeFrom->y == nodeTo->y) ? 1 : 1.4f;
 				auto conn = Connection<T>(cost, nodeFrom, nodeTo);
 				
 				list->push_back(conn);

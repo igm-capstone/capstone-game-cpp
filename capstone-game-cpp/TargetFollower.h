@@ -40,8 +40,24 @@ namespace Rig3D
 		float				mReverseTime = 0;
 		float				mRepel = 0;
 
-		TargetFollower(Transform& transform, AABB<vec2f>* aabbs, int aabbCount);
-		~TargetFollower();
+		TargetFollower(Transform& transform, AABB<vec2f>* aabbs, int aabbbCount) :
+			mGrid(Grid::SharedInstance()),
+			mTransform(transform),
+			mAABBs(aabbs),
+			mAABBCount(aabbbCount),
+			mReverseTime(0),
+			mRepel(0)
+		{
+		}
+
+		~TargetFollower()
+		{
+		}
+
+		void Initialize()
+		{
+			
+		}
 
 		void MoveTowards(Transform& target)
 		{
