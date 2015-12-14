@@ -9,9 +9,10 @@ Grid::Grid()
 	for (int x = 0; x < numSpheresX; x++) {
 		for (int y = 0; y < numSpheresY; y++) {
 			Vector3 nodePos = startingCorner + Vector3((nodeRadius * 2) * x + nodeRadius, (nodeRadius * 2) * y + nodeRadius, 0);
-			Vector2 coord = Vector2((float)x, (float)y);
-			graph.grid[x][y].coord = coord;
-			graph.grid[x][y].position = nodePos;
+			graph.grid[x][y].x = x;
+			graph.grid[x][y].y = y;
+			graph.grid[x][y].weight = -10;
+			graph.grid[x][y].worldPos = nodePos;
 		}
 	}
 

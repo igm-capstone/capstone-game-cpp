@@ -73,7 +73,7 @@ namespace Rig3D
 			{
 				for (auto node = mSearchResult.path.rbegin(); node != mSearchResult.path.rend(); ++node)
 				{
-					auto distance = (*node)->position - position;
+					auto distance = (*node)->worldPos - position;
 					auto mag = magnitude(distance);
 					auto direction = distance * (1 / mag);
 
@@ -86,7 +86,7 @@ namespace Rig3D
 							--node;
 						}
 
-						targetPosition = (*node)->position;
+						targetPosition = (*node)->worldPos;
 
 						TRACE_LINE(position, targetPosition, Colors::cyan);
 						break;

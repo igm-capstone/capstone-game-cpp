@@ -24,7 +24,6 @@
 #include "Shaders/obj/BillboardPixelShader.h"
 #include "Shaders/obj/BillboardVertexShader.h"
 #include "Shaders/obj/CircleVertexShader.h"
-#include "Shaders/obj/GridPixelShader.h"
 #include "Shaders/obj/LineTracePixelShader.h"
 #include "Shaders/obj/LineTraceVertexShader.h"
 #include "Shaders/obj/QuadPixelShader.h"
@@ -100,6 +99,17 @@ public:
 		vec3f Position;
 	};
 
+	struct GridNode
+	{
+		vec3f worldPos;
+		int x;
+		int y;
+		float weight;
+		bool hasLight;
+	};
+
+	GridNode						mGridNodeData[numSpheresX*numSpheresY];
+
 	QuadShaderData					mQuadShaderData;
 	LineTraceShaderData				mLineTraceShaderData;
 	PointShaderData					mPointShaderData;
@@ -158,7 +168,6 @@ public:
 	IMesh*							mCircleMesh;
 	IMesh*							mLightMesh;
 	IMesh*							mPlayerMesh;
-	IMesh*							mGridMesh;
 
 	DX3D11Renderer*					mRenderer;
 
@@ -200,9 +209,6 @@ public:
 	ID3D11VertexShader*				mBillboardVertexShader;
 	ID3D11PixelShader*				mBillboardPixelShader;
 	ID3D11PixelShader*				mShadowPixelShader;
-	ID3D11PixelShader*				mGridPixelShader;
-	ID3D11RenderTargetView*			mGridRTV;
-	ID3D11Texture2D*				mGridMap;
 	ID3D11SamplerState*				mSamplerState;
 	ID3D11BlendState*				mBlendStateShadowMask;
 	ID3D11BlendState*				mBlendStateShadowCalc;
@@ -210,8 +216,8 @@ public:
 
 
 	ID3D11ComputeShader*		mShadowGridComputeShader;
-	ID3D11ShaderResourceView*	mSrcDataGPUBufferView0;
-	ID3D11ShaderResourceView*	mSrcDataGPUBufferView1;
+	ID3D11Buffer*				mSrcDataGPUBuffer;
+	ID3D11ShaderResourceView*	mSrcDataGPUBufferView;
 
 	ID3D11Buffer*				mDestDataGPUBuffer;
 	ID3D11Buffer*				mDestDataGPUBufferCPURead;
@@ -226,7 +232,7 @@ public:
 	Input& mInput = Input::SharedInstance();
 	Grid& mGrid = Grid::SharedInstance();
 
-	ID3D11ShaderResourceView* nullSRV[2] = { 0, 0 };
+	ID3D11ShaderResourceView* nullSRV[3] = { 0, 0, 0 };
 
 #if defined _DEBUG
 	IMesh*							mLineTraceMesh;
@@ -287,15 +293,6 @@ public:
 		InitializeLightShaders();
 		InitializePlayerShaders();
 		InitializeCamera();
-
-		// TO DO: Make Initialize function (InitializeGraph)
-		/*graph = PathFinder::Graph<Node, 10, 10>();
-		graph.grid[4][8].weight = 100;
-		graph.grid[4][7].weight = 100;
-		graph.grid[4][6].weight = 100;
-		graph.grid[4][5].weight = 100;
-		graph.grid[4][4].weight = 100;
-		graph.grid[4][3].weight = 100;*/
 	}
 
 	void VUpdate(double milliseconds) override
@@ -315,7 +312,7 @@ public:
 		//grid.GetPath(start, end);
 		
 		if (magnitude(end-start) < 1)  i = (i + 1) % mRobotCount;
-
+		/*
 		auto from = mGrid.GetNodeAt(start);
 		auto to = mGrid.GetNodeAt(end);
 			
@@ -331,11 +328,11 @@ public:
 			for (++it; it != result.path.end(); ++it)
 			{
 				auto p2 = **it;
-				TRACE_LINE(p1.position + zone, p2.position + zone, Colors::blue);
+				TRACE_LINE(p1.worldPos + zone, p2.worldPos + zone, Colors::blue);
 				p1 = p2;
 			}
 		}
-		
+		*/
 		UpdateGrid();
 		UpdateRobots();
 	}
@@ -361,8 +358,6 @@ public:
 
 		RenderShadowMask();
 
-		RenderGridToBuffer();
-
 		// changes the primitive type to lines
 		RenderLineTrace();
 
@@ -372,7 +367,6 @@ public:
 	void VShutdown() override {
 		mCircleMesh->~IMesh();
 		mWallMesh->~IMesh();
-		mGridMesh->~IMesh();
 
 #if defined _DEBUG
 		mLineTraceMesh->~IMesh();
@@ -414,17 +408,13 @@ public:
 		ReleaseMacro(mBillboardPixelShader);
 		ReleaseMacro(mShadowCasterPixelShader);
 		ReleaseMacro(mShadowPixelShader);
-		ReleaseMacro(mGridPixelShader);
-		ReleaseMacro(mGridMap);
-		ReleaseMacro(mGridRTV);
 		ReleaseMacro(mBlendStateShadowMask);
 		ReleaseMacro(mBlendStateShadowCalc);
 		ReleaseMacro(mSamplerState);
 		ReleaseMacro(mPointShaderBuffer);
 
 		ReleaseMacro(mShadowGridComputeShader);
-		ReleaseMacro(mSrcDataGPUBufferView0);
-		ReleaseMacro(mSrcDataGPUBufferView1);
+		ReleaseMacro(mSrcDataGPUBufferView);
 		ReleaseMacro(mDestDataGPUBuffer);
 		ReleaseMacro(mDestDataGPUBufferCPURead);
 		ReleaseMacro(mDestDataGPUBufferView);
@@ -447,10 +437,7 @@ public:
 		ReleaseMacro(mDestDataGPUBuffer);
 		ReleaseMacro(mDestDataGPUBufferCPURead);
 		ReleaseMacro(mDestDataGPUBufferView);
-		ReleaseMacro(mSrcDataGPUBufferView0);
-		ReleaseMacro(mSrcDataGPUBufferView1);
-		ReleaseMacro(mGridMap);
-		ReleaseMacro(mGridRTV);
+		ReleaseMacro(mSrcDataGPUBufferView);
 
 
 		D3D11_TEXTURE2D_DESC shadowCastersTextureDesc;
@@ -470,7 +457,6 @@ public:
 		mDevice->CreateTexture2D(&shadowCastersTextureDesc, nullptr, &mShadowsAMap);
 		mDevice->CreateTexture2D(&shadowCastersTextureDesc, nullptr, &mShadowsBMap);
 		mDevice->CreateTexture2D(&shadowCastersTextureDesc, nullptr, &mShadowsFinalMap);
-		mDevice->CreateTexture2D(&shadowCastersTextureDesc, nullptr, &mGridMap);
 
 
 		D3D11_RENDER_TARGET_VIEW_DESC shadowCastersRTVDesc;
@@ -482,7 +468,6 @@ public:
 		mRenderer->GetDevice()->CreateRenderTargetView(mShadowsAMap, &shadowCastersRTVDesc, &mShadowsARTV);
 		mRenderer->GetDevice()->CreateRenderTargetView(mShadowsBMap, &shadowCastersRTVDesc, &mShadowsBRTV);
 		mRenderer->GetDevice()->CreateRenderTargetView(mShadowsFinalMap, &shadowCastersRTVDesc, &mShadowsFinalRTV);
-		mRenderer->GetDevice()->CreateRenderTargetView(mGridMap, &shadowCastersRTVDesc, &mGridRTV);
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC shadowCastersSRVDesc;
 		shadowCastersSRVDesc.Format = shadowCastersTextureDesc.Format;
@@ -498,10 +483,10 @@ public:
 		{
 			D3D11_BUFFER_DESC descGPUBuffer;
 			ZeroMemory(&descGPUBuffer, sizeof(descGPUBuffer));
-			descGPUBuffer.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
-			descGPUBuffer.ByteWidth = numSpheresX*numSpheresY * sizeof(int);
+			descGPUBuffer.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+			descGPUBuffer.ByteWidth = numSpheresX*numSpheresY * sizeof(GridNode);
 			descGPUBuffer.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-			descGPUBuffer.StructureByteStride = sizeof(int);
+			descGPUBuffer.StructureByteStride = sizeof(GridNode);
 
 			mDevice->CreateBuffer(&descGPUBuffer, NULL, &mDestDataGPUBuffer);
 
@@ -520,16 +505,28 @@ public:
 		}
 
 		{
+			D3D11_BUFFER_DESC descGPUBuffer;
+			ZeroMemory(&descGPUBuffer, sizeof(descGPUBuffer));
+			descGPUBuffer.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+			descGPUBuffer.ByteWidth = numSpheresX*numSpheresY * sizeof(GridNode);
+			descGPUBuffer.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+			descGPUBuffer.StructureByteStride = sizeof(GridNode);
+
+			D3D11_SUBRESOURCE_DATA InitData;
+			InitData.pSysMem = mGridNodeData;
+			
+			mDevice->CreateBuffer(&descGPUBuffer, &InitData, &mSrcDataGPUBuffer);
+
 			D3D11_SHADER_RESOURCE_VIEW_DESC descView;
 			ZeroMemory(&descView, sizeof(descView));
-			descView.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			descView.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+			descView.BufferEx.FirstElement = 0;
 			descView.Format = DXGI_FORMAT_UNKNOWN;
-			descView.Texture2D.MipLevels = 1;
-			descView.Texture2D.MostDetailedMip = 0;
+			descView.BufferEx.NumElements = numSpheresX*numSpheresY;
 
-			mDevice->CreateShaderResourceView(mShadowsFinalMap, &descView, &mSrcDataGPUBufferView0);
-			mDevice->CreateShaderResourceView(mGridMap, &descView, &mSrcDataGPUBufferView1);
+			mDevice->CreateShaderResourceView(mSrcDataGPUBuffer, &descView, &mSrcDataGPUBufferView);
 		}
+
 	}
 
 #pragma endregion
@@ -620,24 +617,34 @@ public:
 
 		//Compute 
 		mDeviceContext->CSSetShader(mShadowGridComputeShader, NULL, 0);
-		mDeviceContext->CSSetShaderResources(0, 1, &mSrcDataGPUBufferView0);
-		mDeviceContext->CSSetShaderResources(1, 1, &mSrcDataGPUBufferView1);
+		mDeviceContext->UpdateSubresource(mSrcDataGPUBuffer, 0, NULL, &mGridNodeData, 0, 0);
+		mDeviceContext->CSSetShaderResources(0, 1, &mSrcDataGPUBufferView);
+		mDeviceContext->CSSetShaderResources(1, 1, &mShadowsFinalSRV);
+		mDeviceContext->CSSetShaderResources(2, 1, &mShadowCastersSRV);
 		mDeviceContext->CSSetUnorderedAccessViews(0, 1, &mDestDataGPUBufferView, NULL);
-		mDeviceContext->Dispatch(mRenderer->GetWindowWidth()/32, mRenderer->GetWindowHeight()/32, 1);
+		mDeviceContext->CSSetConstantBuffers(0, 1, &mLineTraceShaderBuffer);
+		for (int i = 0; i < 100; i++) {
+			mDeviceContext->Dispatch(34, 1, 1);
+			mDeviceContext->CopyResource(mSrcDataGPUBuffer, mDestDataGPUBuffer);
+		}
 		mDeviceContext->CSSetShader(NULL, NULL, 0);
-		mDeviceContext->CSSetShaderResources(0, 2, nullSRV);
+		mDeviceContext->CSSetShaderResources(0, 3, nullSRV);
+
+		//Copy results to a CPU friendly buffer
 		mDeviceContext->CopyResource(mDestDataGPUBufferCPURead, mDestDataGPUBuffer);
 
 		//Map and update
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		mDeviceContext->Map(mDestDataGPUBufferCPURead, 0, D3D11_MAP_READ, 0, &mappedResource);
-		int* ints = reinterpret_cast<int*>(mappedResource.pData);
+		GridNode* ints = reinterpret_cast<GridNode*>(mappedResource.pData);
 		auto g = mGrid.pathFinder.graph.grid;
 		for (int i = 0; i < numSpheresX; i++)
 		{
 			for (int j = 0; j < numSpheresY; j++)
 			{
-				g[i][j].hasLight = ints[i+j*numSpheresX] == 1;
+				g[i][j].hasLight = ints[i + j*numSpheresX].hasLight;
+				g[i][j].weight = ints[i + j*numSpheresX].weight;
+
 			}
 		}
 		mDeviceContext->Unmap(mDestDataGPUBufferCPURead, 0);
@@ -693,14 +700,35 @@ public:
 
 	void RenderGrid()
 	{
-		for (int i = 0; i < numSpheresX; i++)
+		int i, j;
+		for (i = 0; i < numSpheresX; i++)
 		{
-			for (int j = 0; j < numSpheresY; j++)
+			for (j = 0; j < numSpheresY; j++)
 			{
-				auto pos = mGrid.graph.grid[i][j].position;
+				auto pos = mGrid.graph.grid[i][j].worldPos;
 				auto hasLight = mGrid.graph.grid[i][j].hasLight;
-
-				TRACE_BOX(pos, hasLight ? Colors::cyan : Colors::magenta);
+				auto weight = mGrid.graph.grid[i][j].weight;
+				
+				vec4f c;
+				switch ((int)weight) {
+				case -10:
+					c = Colors::magenta;
+					break;
+				case -2:
+					c = Colors::red;
+					break;
+				case -1:
+					c = Colors::yellow;
+					break;
+				case 0:
+					c = Colors::green;
+					break;
+				default:
+					c = vec4f (0,0,weight*0.01f, 1);
+					break;
+				}
+				//TRACE_BOX(pos, hasLight ? Colors::cyan : Colors::magenta);
+				TRACE_SMALL_BOX(pos, c);
 			}
 		}
 	}
@@ -730,25 +758,6 @@ public:
 
 	}
 
-
-	void RenderGridToBuffer()
-	{
-		mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_POINT);
-
-		mDeviceContext->OMSetRenderTargets(1, &mGridRTV, nullptr);
-
-		mDeviceContext->IASetInputLayout(mLineTraceInputLayout);
-		mDeviceContext->VSSetShader(mLineTraceVertexShader, nullptr, 0);
-		mDeviceContext->PSSetShader(mGridPixelShader, nullptr, 0);
-
-		//mDeviceContext->UpdateSubresource(static_cast<DX11Mesh*>(mGridMesh)->mVertexBuffer, 0, nullptr, &mGridVertices, 0, 0);
-		mDeviceContext->UpdateSubresource(mLineTraceShaderBuffer, 0, nullptr, &mLineTraceShaderData, 0, 0);
-		mDeviceContext->VSSetConstantBuffers(0, 1, &mLineTraceShaderBuffer);
-
-		mRenderer->VBindMesh(mGridMesh);
-		mRenderer->VDrawIndexed(0, numSpheresX * numSpheresY);
-	}
-
 	void UpdatePlayer() {
 		mat4f playerWorldMatrix = mPlayer.mTransform->GetWorldMatrix().transpose();
 
@@ -762,13 +771,13 @@ public:
 
 	void UpdateGrid()
 	{
-		for (size_t x = 0; x < numSpheresX; x++)
+		/*for (size_t x = 0; x < numSpheresX; x++)
 		{
 			for (size_t y = 0; y < numSpheresY; y++)
 			{
 				auto node = &mGrid.graph.grid[x][y];
 
-				node->weight = node->hasLight ? 1 : FLT_MAX;
+				//node->weight = node->hasLight ? 1 : FLT_MAX;
 
 				//RayCastHit<vec3f> hit;
 				//if (RayCast(&hit, { node->position, vec3f(0, 0, 1) }, mWallColliders, mWallCount))
@@ -778,10 +787,10 @@ public:
 
 				if (node->weight > 1)
 				{
-					TRACE_BOX(node->position, Colors::magenta);
+					TRACE_BOX(node->worldPos, Colors::magenta);
 				}
 			}
-		}
+		}*/
 
 	}
 
@@ -794,9 +803,28 @@ public:
 			auto robot = &mRobots[i];
 			auto follower = mFollowers[i];
 
-			follower.MoveTowards(*player);
+			auto n = mGrid.GetNodeAt(robot->Transform.GetPosition());
 
-			mRobotTransforms[i] = robot->Transform.GetWorldMatrix();
+			Node* minNode = n;
+
+			TRACE_DIAMOND(n->worldPos, Colors::green);
+
+			if (n->weight > 100) return;
+			while (n->weight > 0) {
+				auto list = mGrid.graph.GetNodeConnections(n);
+				for (auto conn : *list) {
+					float w = conn.to->weight;
+					if (w < 0) continue;
+					if (w < minNode->weight)
+						minNode = conn.to;
+				}
+				TRACE_LINE(n->worldPos, minNode->worldPos, Colors::green);
+				n = minNode;
+			}
+
+			//follower.MoveTowards(*player);
+
+			//mRobotTransforms[i] = robot->Transform.GetWorldMatrix();
 		}
 	}
 
@@ -877,7 +905,18 @@ public:
 
 	void InitializeGrid()
 	{
+		auto grid = mGrid.pathFinder.graph.grid;
 
+		mGrid.GetNodeAt(mPlayer.mTransform->GetPosition())->weight = 0;
+
+		for (int i = 0; i < numSpheresX; i++) {
+			for (int j = 0; j < numSpheresY; j++) {
+				mGridNodeData[i + j*numSpheresX].worldPos = grid[i][j].worldPos;
+				mGridNodeData[i + j*numSpheresX].x = grid[i][j].x;
+				mGridNodeData[i + j*numSpheresX].y = grid[i][j].y;
+				mGridNodeData[i + j*numSpheresX].weight = grid[i][j].weight;
+			}
+		}
 	}
 
 	void InitializeRobots()
@@ -962,7 +1001,6 @@ public:
 
 	void InitializeGeometry()
 	{
-		InitializeGridMesh();
 		InitializeLineTraceMesh();
 		InitializeQuadMesh();
 		InitializeCircleMesh();
@@ -983,34 +1021,6 @@ public:
 		mRenderer->VSetMeshVertexBuffer(mLineTraceMesh, mLineTraceVertices, sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex));
 		mRenderer->VSetDynamicMeshIndexBuffer(mLineTraceMesh, lineTraceIndices, gLineTraceVertexCount);
 #endif // defined _DEBUG
-	}
-
-	void InitializeGridMesh()
-	{
-		auto grid = mGrid.pathFinder.graph.grid;
-		const int gridCount = numSpheresX*numSpheresY;
-
-		LineTraceVertex vertices[gridCount];
-
-		for (auto i = 0; i < numSpheresX; i++)
-		{
-			for (auto j = 0; j < numSpheresY; j++)
-			{
-				vertices[i + j*numSpheresX].Position = grid[i][j].position;
-				vertices[i + j*numSpheresX].Color = grid[i][j].coord;
-				vertices[i + j*numSpheresX].Color.z = numSpheresX;
-			}
-		}
-
-		uint16_t indices[gridCount];
-		for (auto i = 0; i < gridCount; i++)
-		{
-			indices[i] = i;
-		}
-
-		mStaticMeshLibrary.NewMesh(&mGridMesh, mRenderer);
-		mRenderer->VSetMeshVertexBuffer(mGridMesh, vertices, sizeof(LineTraceVertex) * gridCount, sizeof(LineTraceVertex));
-		mRenderer->VSetDynamicMeshIndexBuffer(mGridMesh, indices, gridCount);
 	}
 
 	void InitializeQuadMesh()
@@ -1180,9 +1190,6 @@ public:
 		mDevice->CreatePixelShader(gShadowPixelShader, sizeof(gShadowPixelShader), nullptr, &mShadowPixelShader);
 
 		mDevice->CreatePixelShader(gShadowCasterPixelShader, sizeof(gShadowCasterPixelShader), nullptr, &mShadowCasterPixelShader);
-
-		mDevice->CreatePixelShader(gGridPixelShader, sizeof(gGridPixelShader), nullptr, &mGridPixelShader);
-
 
 		D3D11_SAMPLER_DESC samplerDesc;
 		ZeroMemory(&samplerDesc, sizeof(D3D11_SAMPLER_DESC));

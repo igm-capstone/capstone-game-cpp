@@ -106,7 +106,7 @@ namespace PathFinder
 						connData.cost = connCost;
 
 						Node* n = reinterpret_cast<Node*>(connNode);
-						TRACE_SMALL_BOX(n->position, Colors::green);
+						TRACE_SMALL_BOX(n->worldPos, Colors::green);
 
 						cache[connNode] = connData;
 					}

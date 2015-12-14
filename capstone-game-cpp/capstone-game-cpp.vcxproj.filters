@@ -103,8 +103,5 @@
     <FxCompile Include="Shaders\ShadowGridComputeShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\GridPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
   </ItemGroup>
 </Project>
