@@ -135,6 +135,8 @@ public:
 	SceneObject						mPlayer;
 	SceneObject						mGoal;
 
+	Node*							mPlayerNode;
+
 	BoxCollider						mPlayerCollider;
 
 	vector<RobotInfo>				mRobots;
@@ -354,7 +356,7 @@ public:
 		RenderPlayer();
 		RenderLightCircles();
 		RenderRobots();
-		RenderGrid();
+		//RenderGrid();
 
 		RenderShadowMask();
 
@@ -615,39 +617,46 @@ public:
 			mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
 		}
 
-		//Compute 
-		mDeviceContext->CSSetShader(mShadowGridComputeShader, NULL, 0);
-		mDeviceContext->UpdateSubresource(mSrcDataGPUBuffer, 0, NULL, &mGridNodeData, 0, 0);
-		mDeviceContext->CSSetShaderResources(0, 1, &mSrcDataGPUBufferView);
-		mDeviceContext->CSSetShaderResources(1, 1, &mShadowsFinalSRV);
-		mDeviceContext->CSSetShaderResources(2, 1, &mShadowCastersSRV);
-		mDeviceContext->CSSetUnorderedAccessViews(0, 1, &mDestDataGPUBufferView, NULL);
-		mDeviceContext->CSSetConstantBuffers(0, 1, &mLineTraceShaderBuffer);
-		for (int i = 0; i < 100; i++) {
-			mDeviceContext->Dispatch(34, 1, 1);
-			mDeviceContext->CopyResource(mSrcDataGPUBuffer, mDestDataGPUBuffer);
-		}
-		mDeviceContext->CSSetShader(NULL, NULL, 0);
-		mDeviceContext->CSSetShaderResources(0, 3, nullSRV);
+		Node* newPlayerNode = mGrid.GetNodeAt(mPlayer.mTransform->GetPosition());
+		if (mPlayerNode != newPlayerNode) {
+			mPlayerNode = newPlayerNode;
 
-		//Copy results to a CPU friendly buffer
-		mDeviceContext->CopyResource(mDestDataGPUBufferCPURead, mDestDataGPUBuffer);
-
-		//Map and update
-		D3D11_MAPPED_SUBRESOURCE mappedResource;
-		mDeviceContext->Map(mDestDataGPUBufferCPURead, 0, D3D11_MAP_READ, 0, &mappedResource);
-		GridNode* ints = reinterpret_cast<GridNode*>(mappedResource.pData);
-		auto g = mGrid.pathFinder.graph.grid;
-		for (int i = 0; i < numSpheresX; i++)
-		{
-			for (int j = 0; j < numSpheresY; j++)
-			{
-				g[i][j].hasLight = ints[i + j*numSpheresX].hasLight;
-				g[i][j].weight = ints[i + j*numSpheresX].weight;
-
+			InitializeGrid();
+		
+			//Compute 
+			mDeviceContext->CSSetShader(mShadowGridComputeShader, NULL, 0);
+			mDeviceContext->UpdateSubresource(mSrcDataGPUBuffer, 0, NULL, &mGridNodeData, 0, 0);
+			mDeviceContext->CSSetShaderResources(0, 1, &mSrcDataGPUBufferView);
+			mDeviceContext->CSSetShaderResources(1, 1, &mShadowsFinalSRV);
+			mDeviceContext->CSSetShaderResources(2, 1, &mShadowCastersSRV);
+			mDeviceContext->CSSetUnorderedAccessViews(0, 1, &mDestDataGPUBufferView, NULL);
+			mDeviceContext->CSSetConstantBuffers(0, 1, &mLineTraceShaderBuffer);
+			for (int i = 0; i < 100; i++) {
+				mDeviceContext->Dispatch(34, 1, 1);
+				mDeviceContext->CopyResource(mSrcDataGPUBuffer, mDestDataGPUBuffer);
 			}
+			mDeviceContext->CSSetShader(NULL, NULL, 0);
+			mDeviceContext->CSSetShaderResources(0, 3, nullSRV);
+
+			//Copy results to a CPU friendly buffer
+			mDeviceContext->CopyResource(mDestDataGPUBufferCPURead, mDestDataGPUBuffer);
+
+			//Map and update
+			D3D11_MAPPED_SUBRESOURCE mappedResource;
+			mDeviceContext->Map(mDestDataGPUBufferCPURead, 0, D3D11_MAP_READ, 0, &mappedResource);
+			GridNode* ints = reinterpret_cast<GridNode*>(mappedResource.pData);
+			auto g = mGrid.pathFinder.graph.grid;
+			for (int i = 0; i < numSpheresX; i++)
+			{
+				for (int j = 0; j < numSpheresY; j++)
+				{
+					g[i][j].hasLight = ints[i + j*numSpheresX].hasLight;
+					g[i][j].weight = ints[i + j*numSpheresX].weight;
+
+				}
+			}
+			mDeviceContext->Unmap(mDestDataGPUBufferCPURead, 0);
 		}
-		mDeviceContext->Unmap(mDestDataGPUBufferCPURead, 0);
 	}
 
 	void RenderShadowMask() {
@@ -691,10 +700,10 @@ public:
 			TRACE_SMALL_DIAMOND(pos, Colors::red);
 			TRACE_SMALL_CROSS(pos, Colors::red);
 
-			for (int i = 1, len = robot.Waypoints.size(); i < len; i++)
+			/*for (int i = 1, len = robot.Waypoints.size(); i < len; i++)
 			{
 				TRACE_LINE(robot.Waypoints[i - 1], robot.Waypoints[i], Colors::yellow);
-			}
+			}*/
 		}
 	}
 
@@ -907,6 +916,12 @@ public:
 	{
 		auto grid = mGrid.pathFinder.graph.grid;
 
+		
+		for (int i = 0; i < numSpheresX; i++) {
+			for (int j = 0; j < numSpheresY; j++) {
+				grid[i][j].weight = -10;
+			}
+		}
 		mGrid.GetNodeAt(mPlayer.mTransform->GetPosition())->weight = 0;
 
 		for (int i = 0; i < numSpheresX; i++) {
