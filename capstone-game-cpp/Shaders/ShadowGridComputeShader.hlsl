@@ -49,10 +49,10 @@ bool CreateConnectionIfValid(out Connection conn, GridNode nodeFrom, GridNode no
 
 void GetConnections(GridNode node, out Connection conns[8], out int count)
 {
+	bool diagonal = true;
 	int x = node.x;
 	int y = node.y;
 
-	bool diagonal = false;
 	bool notLeftEdge = x > 0;
 	bool notRightEdge = x < numThreads - 1;
 	bool notBottomEdge = y > 0;

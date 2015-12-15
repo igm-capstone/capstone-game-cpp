@@ -77,7 +77,7 @@ namespace PathFinder
 
 		vector<Connection<T>>* GetNodeConnections(T* node)
 		{
-			bool diagonal = false;
+			bool diagonal = true;
 			auto x = node->x;
 			auto y = node->y;
 

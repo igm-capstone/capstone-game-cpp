@@ -618,7 +618,7 @@ public:
 		}
 
 		Node* newPlayerNode = mGrid.GetNodeAt(mPlayer.mTransform->GetPosition());
-		if (mPlayerNode != newPlayerNode) {
+		if (true || mPlayerNode != newPlayerNode) {
 			mPlayerNode = newPlayerNode;
 
 			InitializeGrid();
@@ -814,9 +814,26 @@ public:
 
 			auto n = mGrid.GetNodeAt(robot->Transform.GetPosition());
 
+			if (n->weight == -2)
+			{
+				auto list = mGrid.graph.GetNodeConnections(n);
+				Node* minNode = n;
+				float minWeight = FLT_MAX;
+
+				for (auto conn : *list) {
+					float w = conn.to->weight;
+					if (w < 0) continue;
+					if (w < minWeight)
+					{
+						minNode = conn.to;
+						minWeight = w;
+					}
+				}
+				n = minNode;
+			}
+
 			SearchResult<Node> searchResult;
 			searchResult.path.push_back(n);
-
 
 			TRACE_DIAMOND(n->worldPos, Colors::green);
 
@@ -844,7 +861,7 @@ public:
 
 			if (searchResult.path.size() <= 1)
 			{
-				return;
+				continue;
 			}
 
 			follower.MoveTowards(*player, searchResult);
