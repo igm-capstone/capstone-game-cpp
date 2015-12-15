@@ -64,34 +64,34 @@ void GetConnections(GridNode node, out Connection conns[8], out int count)
 		conns[count] = c;
 		count++;
 	}
-	if (notRightEdge && notTopEdge && CreateConnectionIfValid(c, node, getNode(x + 1, y + 1))) {
-		conns[count] = c;
-		count++;
-	}
+	//if (notRightEdge && notTopEdge && CreateConnectionIfValid(c, node, getNode(x + 1, y + 1))) {
+	//	conns[count] = c;
+	//	count++;
+	//}
 	if (notRightEdge && CreateConnectionIfValid(c, node, getNode(x + 1, y))) {
 		conns[count] = c;
 		count++;
 	}
-	if (notRightEdge && notBottomEdge && CreateConnectionIfValid(c, node, getNode(x + 1, y - 1))) {
-		conns[count] = c;
-		count++;
-	}
+	//if (notRightEdge && notBottomEdge && CreateConnectionIfValid(c, node, getNode(x + 1, y - 1))) {
+	//	conns[count] = c;
+	//	count++;
+	//}
 	if (notBottomEdge && CreateConnectionIfValid(c, node, getNode(x, y - 1))) {
 		conns[count] = c;
 		count++;
 	}
-	if (notLeftEdge && notBottomEdge && CreateConnectionIfValid(c, node, getNode(x - 1, y - 1))) {
-		conns[count] = c;
-		count++;
-	}
+	//if (notLeftEdge && notBottomEdge && CreateConnectionIfValid(c, node, getNode(x - 1, y - 1))) {
+	//	conns[count] = c;
+	//	count++;
+	//}
 	if (notLeftEdge && CreateConnectionIfValid(c, node, getNode(x - 1, y))) {
 		conns[count] = c;
 		count++;
 	}
-	if (notLeftEdge && notTopEdge && CreateConnectionIfValid(c, node, getNode(x - 1, y + 1))) {
-		conns[count] = c;
-		count++;
-	}
+	//if (notLeftEdge && notTopEdge && CreateConnectionIfValid(c, node, getNode(x - 1, y + 1))) {
+	//	conns[count] = c;
+	//	count++;
+	//}
 }
 
 

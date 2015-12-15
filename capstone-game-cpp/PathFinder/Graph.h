@@ -88,13 +88,13 @@ namespace PathFinder
 			connections->reserve(8);
 
 			if (notTopEdge) CreateConnectionIfValid(connections, node, &grid[x][y + 1]);
-			if (notRightEdge && notTopEdge) CreateConnectionIfValid(connections, node, &grid[x + 1][y + 1]);
+			//if (notRightEdge && notTopEdge) CreateConnectionIfValid(connections, node, &grid[x + 1][y + 1]);
 			if (notRightEdge) CreateConnectionIfValid(connections, node, &grid[x + 1][y]);
-			if (notRightEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &grid[x + 1][y - 1]);
+			//if (notRightEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &grid[x + 1][y - 1]);
 			if (notBottomEdge) CreateConnectionIfValid(connections, node, &grid[x][y - 1]);
-			if (notLeftEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &grid[x - 1][y - 1]);
+			//if (notLeftEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &grid[x - 1][y - 1]);
 			if (notLeftEdge) CreateConnectionIfValid(connections, node, &grid[x - 1][y]);
-			if (notLeftEdge && notTopEdge) CreateConnectionIfValid(connections, node, &grid[x - 1][y + 1]);
+			//if (notLeftEdge && notTopEdge) CreateConnectionIfValid(connections, node, &grid[x - 1][y + 1]);
 
 			return connections;
 		}

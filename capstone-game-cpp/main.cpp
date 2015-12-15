@@ -805,24 +805,40 @@ public:
 
 			auto n = mGrid.GetNodeAt(robot->Transform.GetPosition());
 
-			Node* minNode = n;
+			SearchResult<Node> searchResult;
+			searchResult.path.push_back(n);
+
 
 			TRACE_DIAMOND(n->worldPos, Colors::green);
 
-			if (n->weight > 100) return;
+			if (n->weight > 100 || n->weight < 0) continue;
+
 			while (n->weight > 0) {
 				auto list = mGrid.graph.GetNodeConnections(n);
+				Node* minNode = n;
+				float connCost = 0;
+
 				for (auto conn : *list) {
 					float w = conn.to->weight;
 					if (w < 0) continue;
 					if (w < minNode->weight)
+					{
 						minNode = conn.to;
+						connCost = conn.cost;
+					}
 				}
 				TRACE_LINE(n->worldPos, minNode->worldPos, Colors::green);
 				n = minNode;
+
+				searchResult.path.push_back(n);
 			}
 
-			//follower.MoveTowards(*player);
+			if (searchResult.path.size() <= 1)
+			{
+				return;
+			}
+
+			follower.MoveTowards(*player, searchResult);
 
 			//mRobotTransforms[i] = robot->Transform.GetWorldMatrix();
 		}

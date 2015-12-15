@@ -12,9 +12,9 @@
 #define MOD(a, n) ((a) - (floorf((a) / (n)) * (n)))
 
 //static Vector3 gRepelOffset = { 0.66f, -0.6f, 0.0f };
-static Vector3 gRepelOffset = { 1.4f, -1.4f, 0.0f };
+static Vector3 gRepelOffset = { 2.4f, -1.0f, 0.0f };
 
-static float gRepelFocus = 6.0f;
+static float gRepelFocus = 8.0f;
 static float gRepelCastDistance = 4.0f;
 static float gRepelIncrement = 0.2f;
 static float gRapelDecay = 0.1f;
@@ -59,17 +59,17 @@ namespace Rig3D
 			
 		}
 
-		void MoveTowards(Transform& target)
+		void MoveTowards(Transform& target, SearchResult<Node> searchResult)
 		{
-			auto targetPosition = target.GetPosition();
+			auto targetPosition = (*(++searchResult.path.begin()))->worldPos;
 			auto position = mTransform.GetPosition();
 			auto deltaTime = 0.1f; //* Timer::SharedInstance().GetDeltaTime();
 
 			Ray<vec2f> ray;
 			RayCastHit<vec2f> hit;
 
-			mSearchResult = mGrid.GetPath(position, targetPosition);
-			if (mSearchResult.path.size() > 1)
+			mSearchResult = searchResult;
+			/*if (mSearchResult.path.size() > 1)
 			{
 				for (auto node = mSearchResult.path.rbegin(); node != mSearchResult.path.rend(); ++node)
 				{
@@ -92,7 +92,7 @@ namespace Rig3D
 						break;
 					}
 				}
-			}
+			}*/
 
 			auto currentAngle = mTransform.GetRollPitchYaw().z * RAD_TO_DEG;
 				
