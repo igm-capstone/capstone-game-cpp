@@ -145,7 +145,6 @@ public:
 	AABB<vec2f>*					mAABBs;
 	Sphere<vec3f>*					mLightColliders;
 
-	LineTraceVertex*				mLineTraceVertices;
 	int								mLineTraceDrawCount;
 	bool							mLineTraceOverflow;
 
@@ -237,6 +236,7 @@ public:
 	ID3D11ShaderResourceView* nullSRV[3] = { 0, 0, 0 };
 
 #if defined _DEBUG
+	LineTraceVertex*				mLineTraceVertices;
 	IMesh*							mLineTraceMesh;
 #endif // defined _DEBUG
 
@@ -348,7 +348,7 @@ public:
 
 		mDeviceContext->RSSetViewports(1, &mRenderer->GetViewport());
 		mDeviceContext->OMSetRenderTargets(2, RTVs, mRenderer->GetDepthStencilView());
-		mDeviceContext->ClearRenderTargetView(*mRenderer->GetRenderTargetView(), white);
+		mDeviceContext->ClearRenderTargetView(*mRenderer->GetRenderTargetView(), black);
 		mDeviceContext->ClearRenderTargetView(mShadowCastersRTV, transp);
 		mDeviceContext->ClearDepthStencilView(mRenderer->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
@@ -780,7 +780,7 @@ public:
 
 	void UpdateGrid()
 	{
-		/*for (size_t x = 0; x < numSpheresX; x++)
+		for (size_t x = 0; x < numSpheresX; x++)
 		{
 			for (size_t y = 0; y < numSpheresY; y++)
 			{
@@ -793,13 +793,32 @@ public:
 				//{
 				//	node->weight = FLT_MAX;
 				//}
-
-				if (node->weight > 1)
+				vec4f color;
+				switch ((int)node->weight)
 				{
-					TRACE_BOX(node->worldPos, Colors::magenta);
+				case -10:
+					color = { 0.0f, 0.0f, 0.0f, 0.5f };// Colors::black;
+					break;
+				case -2:
+					color = { 1.0f, 0.0f, 0.0f, 0.5f };// Colors::red;
+					break;
+				case -1:
+					color = { 1.0f, 1.0f, 0.0f, 0.5f };// Colors::yellow;
+					break;
+				case 0:
+					color = { 0.0f, 0.0f, 0.0f, 0.5f };// Colors::green;
+					break;
+				default:
+					auto c = node->weight / 50;
+					c = c > 1 ? 1 : c < 0 ? 0 : c;
+					auto g =1 - (c > .5f ? c - .5f : 1 - c - .5f);
+					color = Vector4(c, 1-c, g, 0.5f);
+					break;
 				}
+
+				TRACE_SMALL_BOX(node->worldPos, color);
 			}
-		}*/
+		}
 
 	}
 
@@ -853,7 +872,7 @@ public:
 						connCost = conn.cost;
 					}
 				}
-				TRACE_LINE(n->worldPos, minNode->worldPos, Colors::green);
+				TRACE_LINE(n->worldPos, minNode->worldPos, Colors::yellow);
 				n = minNode;
 
 				searchResult.path.push_back(n);
@@ -932,7 +951,7 @@ public:
 
 		// Player
 		mPlayer.mTransform = &mPlayerTransform;
-		mPlayer.mTransform->SetPosition(levelReader.mPlayerPos + vec3f(1, 0, 0));
+		mPlayer.mTransform->SetPosition(levelReader.mPlayerPos + vec3f(45, -20, 0));
 		//mPlayer.mTransform->RotateYaw(PI);
 
 		mPlayer.mBoxCollider = &mPlayerCollider;
@@ -1371,6 +1390,7 @@ public:
 		const float& to_z, 
 		const vec4f& color)
 	{
+#if defined _DEBUG
 		if (mLineTraceOverflow)
 		{
 			return;
@@ -1394,6 +1414,7 @@ public:
 		mLineTraceVertices[index].Position.y = to_y;
 		mLineTraceVertices[index].Position.z = to_z;
 		mLineTraceVertices[index].Color = color;
+#endif
 	}
 
 #pragma endregion
