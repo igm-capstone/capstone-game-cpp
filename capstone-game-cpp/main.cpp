@@ -416,6 +416,7 @@ public:
 		ReleaseMacro(mPointShaderBuffer);
 
 		ReleaseMacro(mShadowGridComputeShader);
+		ReleaseMacro(mSrcDataGPUBuffer);
 		ReleaseMacro(mSrcDataGPUBufferView);
 		ReleaseMacro(mDestDataGPUBuffer);
 		ReleaseMacro(mDestDataGPUBufferCPURead);
