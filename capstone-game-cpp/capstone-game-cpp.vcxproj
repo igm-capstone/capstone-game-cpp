@@ -102,6 +102,8 @@
     <ClInclude Include="PathFinder\Fringe.h" />
     <ClInclude Include="RayCast.h" />
     <ClInclude Include="SceneObject.h" />
+    <ClInclude Include="Scenes\common.h" />
+    <ClInclude Include="Scenes\Level00.h" />
     <ClInclude Include="TargetFollower.h" />
     <ClInclude Include="trace.h" />
     <ClInclude Include="Vertex.h" />
