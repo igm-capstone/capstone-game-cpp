@@ -1,24 +1,15 @@
-#include <Windows.h>
-#include "Rig3D\Engine.h"
-#include "Rig3D\Graphics\Interface\IScene.h"
-#include "Rig3D\Graphics\DirectX11\DX3D11Renderer.h"
-#include "Rig3D\Graphics\Interface\IMesh.h"
-#include "Rig3D\Common\Transform.h"
-#include "Memory\Memory\LinearAllocator.h"
-#include "Rig3D\Graphics\MeshLibrary.h"
-#include <d3d11.h>
-#include <d3dcompiler.h>
-#include <fstream>
+#include "Scenes/common.h"
+
 #include "PathFinder/Fringe.h"
-#include "SceneObject.h"
-#include "LevelReader.h"
 #include "Rig3D/GraphicsMath/cgm.h"
-#include "Vertex.h"
-#include "Grid.h"
 #include "Rig3D/Intersection.h"
 #include "Rig3D/Parametric.h"
-#include "TargetFollower.h"
+#include "SceneObject.h"
+#include "LevelReader.h"
 #include "Colors.h"
+#include "Grid.h"
+#include "Vertex.h"
+#include "TargetFollower.h"
 
 //Shaders - Headers are output from compiler
 #include "Shaders/obj/BillboardPixelShader.h"
