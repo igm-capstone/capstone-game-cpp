@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Scenes/common.h"
 
 #include "PathFinder/Fringe.h"
@@ -10,6 +12,7 @@
 #include "Grid.h"
 #include "Vertex.h"
 #include "TargetFollower.h"
+#include "Rig3D/Application.h"
 
 //Shaders - Headers are output from compiler
 #include "Shaders/obj/BillboardPixelShader.h"
@@ -1414,6 +1417,11 @@ public:
 	void HandleInput(Input& input)
 	{
 		// Player Mouse
+
+		if (input.GetKeyDown(KEYCODE_1))
+		{
+			Application::SharedInstance().UnloadScene();
+		}
 
 		if (input.GetMouseButtonDown(MOUSEBUTTON_LEFT))
 		{

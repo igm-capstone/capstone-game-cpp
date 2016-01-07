@@ -14,6 +14,7 @@
 
 namespace Rig3D
 {
+	class Application;
 	class IRenderer;
 	class IScene;
 
@@ -30,6 +31,7 @@ namespace Rig3D
 		void	HandleEvent(const IEvent& iEvent) override;
 
 		void	RunScene(IScene* iScene);
+		void	RunApplication(Application* app);
 
 		IRenderer* GetRenderer() const;
 

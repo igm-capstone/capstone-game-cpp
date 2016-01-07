@@ -2,6 +2,7 @@
 #include "rig_defines.h"
 #include "Rig3D\Graphics\DirectX11\DX3D11Renderer.h"
 #include "Rig3D\Graphics\Interface\IScene.h"
+#include "Rig3D\Application.h"
 
 using namespace Rig3D;
 
@@ -162,6 +163,30 @@ void Engine::RunScene(IScene* iScene)
 	}
 
 	iScene->VShutdown();
+	Shutdown();
+}
+
+void Engine::RunApplication(Application* app)
+{
+	app->mLoadingScene->VInitialize();
+
+	// The message loop
+	double deltaTime = 0.0;
+	mTimer->Reset();
+	while (!mShouldQuit)
+	{
+		app->UpdateCurrentScene();
+
+		mTimer->Update(&deltaTime);
+		mEventHandler->Update();
+		app->Update(deltaTime);
+		//app->mCurrentScene->VUpdate(deltaTime);
+		//app->mCurrentScene->VRender();
+
+		mInput->Flush();
+	}
+
+	app->mLoadingScene->VShutdown();
 	Shutdown();
 }
 
