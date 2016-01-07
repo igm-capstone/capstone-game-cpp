@@ -3,7 +3,7 @@
 #include <vector>
 #include <utility>
 
-using namespace cliqCity::graphicsMath;
+using namespace Rig3D;
 
 template<class Vector>
 struct RayCastHit
@@ -36,10 +36,10 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, u
 
 	int minIndex = 0;
 
-	float prevDistance = magnitudeSquared(aabbs[hits.at(0).index].origin - ray.origin);
+	float prevDistance = cliqCity::graphicsMath::magnitudeSquared(aabbs[hits.at(0).index].origin - ray.origin);
 	for (uint32_t i = 1; i < hits.size(); i++)
 	{
-		float distance = magnitudeSquared(aabbs[hits.at(i).index].origin - ray.origin);
+		float distance = cliqCity::graphicsMath::magnitudeSquared(aabbs[hits.at(i).index].origin - ray.origin);
 		if (distance < prevDistance)
 		{
 			hits.at(i).distance = sqrt(distance);
@@ -78,10 +78,10 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, u
 
 	uint32_t minIndex = 0;
 
-	float prevDistance = magnitudeSquared(aabbs[hits.at(0).index].origin - ray.origin);
+	float prevDistance = cliqCity::graphicsMath::magnitudeSquared(aabbs[hits.at(0).index].origin - ray.origin);
 	for (uint32_t i = 1; i < hits.size(); i++)
 	{
-		float distance = magnitudeSquared(aabbs[hits.at(i).index].origin - ray.origin);
+		float distance = cliqCity::graphicsMath::magnitudeSquared(aabbs[hits.at(i).index].origin - ray.origin);
 		if (distance < prevDistance)
 		{
 			hits.at(i).distance = sqrt(distance);

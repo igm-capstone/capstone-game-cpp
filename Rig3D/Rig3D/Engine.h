@@ -5,7 +5,7 @@
 #include "Rig3D\Common\Input.h"
 #include "Rig3D\rig_defines.h"
 #include "Rig3D\Options.h"
-#include "Rig3D\Singleton.h"
+#include "Rig3D/Singleton.h"
 #include "Rig3D\Graphics\Interface\IRenderer.h"
 #include "Rig3D\Graphics\DirectX11\DX3D11Renderer.h"
 

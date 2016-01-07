@@ -40,8 +40,6 @@ static const int gLineTraceVertexCount = 0;
 
 #endif
 
-
-
 using namespace Rig3D;
 
 typedef cliqCity::memory::LinearAllocator LinearAllocator;
@@ -161,7 +159,7 @@ public:
 	IMesh*							mLightMesh;
 	IMesh*							mPlayerMesh;
 
-	DX3D11Renderer*					mRenderer;
+	TSingleton<IRenderer, DX3D11Renderer>*					mRenderer;
 
 	ID3D11Device*					mDevice;
 	ID3D11DeviceContext*			mDeviceContext;
@@ -270,7 +268,7 @@ public:
 			}
 		}
 
-		mRenderer      = &DX3D11Renderer::SharedInstance();
+		mRenderer = mEngine->GetRenderer();
 		mDeviceContext = mRenderer->GetDeviceContext();
 		mDevice        = mRenderer->GetDevice();
 

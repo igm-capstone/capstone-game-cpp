@@ -1675,11 +1675,6 @@ ID3D11DeviceContext* DX3D11Renderer::GetDeviceContext() const
 	return mDeviceContext;
 }
 
-HWND DX3D11Renderer::GetHWnd() const
-{
-	return mHWND;
-}
-
 IDXGISwapChain*	DX3D11Renderer::GetSwapChain()	const
 {
 	return mSwapChain;
