@@ -11,18 +11,13 @@ namespace Rig3D
 {
 	class RIG3D Application
 	{
-	private:
+	protected:
 		Application();
 		~Application();
 		Application(Application const&) = delete;
 		void operator=(Application const&) = delete;
 	public:
-		static Application& Application::SharedInstance()
-		{
-			static Application sharedInput;
-			return sharedInput;
-		}
-
+		Options mOptions;
 		IScene* mLoadingScene;
 		IScene* mCurrentScene;
 		IScene* mSceneToLoad;

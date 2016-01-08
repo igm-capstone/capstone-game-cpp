@@ -12,13 +12,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 	PSTR cmdLine,
 	int showCmd)
 {
-	Engine engine = Engine();
-	LoadingScreen loading = LoadingScreen();
-
-	Application& app = Application::SharedInstance();
-	app.mLoadingScene = &loading;
-	//app.LoadScene<LoadingScreen>();
-	//app.mCurrentScene = &loading;
+	Engine& engine = Singleton<Engine>::SharedInstance();
 
 	Options options;
 	options.mWindowCaption = "Shutter - Remix";
@@ -32,10 +26,16 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 		cmdLine,
 		showCmd,
 		options);
-	engine.RunApplication(&app);
+
+	LoadingScreen loading = LoadingScreen();
+
+	Application* app = engine.GetApplication();
+	app->mLoadingScene = &loading;
+	//app.LoadScene<LoadingScreen>();
+	//app.mCurrentScene = &loading;
+
+	engine.RunApplication(app);
 	return 0;
-
-
 
 	//Level00 scene;
 	//gRig3DScene = &scene;

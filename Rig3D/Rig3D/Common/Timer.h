@@ -17,7 +17,6 @@ namespace Rig3D
 	class RIG3D Timer
 	{
 	public:
-		static Timer& SharedInstance();
 		double GetApplicationTime();
 		double GetDeltaTime();
 		void Reset();
@@ -27,12 +26,6 @@ namespace Rig3D
 		ClockTime mApplicationStartTime;
 		ClockTime mSystemCurrentTime;
 		double mDeltaTime;
-
-		Timer();
-		~Timer();
-
-		Timer(Timer const&) = delete;
-		void operator=(Timer const&) = delete;
 	};
 }
 

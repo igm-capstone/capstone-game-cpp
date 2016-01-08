@@ -43,8 +43,6 @@ static const int gLineTraceVertexCount = 0;
 
 #endif
 
-
-
 using namespace Rig3D;
 
 typedef cliqCity::memory::LinearAllocator LinearAllocator;
@@ -164,7 +162,7 @@ public:
 	IMesh*							mLightMesh;
 	IMesh*							mPlayerMesh;
 
-	DX3D11Renderer*					mRenderer;
+	Renderer*						mRenderer;
 
 	ID3D11Device*					mDevice;
 	ID3D11DeviceContext*			mDeviceContext;
@@ -224,7 +222,8 @@ public:
 	float black[4] = { 0.0f, 0.0f, 0.0f, 0.5f };
 
 	// singletons
-	Input& mInput = Input::SharedInstance();
+	Engine* mEngine;
+	Input* mInput;
 	Grid& mGrid = Grid::SharedInstance();
 
 	ID3D11ShaderResourceView* nullSRV[3] = { 0, 0, 0 };
@@ -242,11 +241,6 @@ public:
 		mStaticMeshAllocator(static_cast<void*>(gStaticMeshMemory), static_cast<void*>(gStaticMeshMemory + gMeshMemorySize)),
 		mDynamicMeshAllocator(static_cast<void*>(gDynamicMeshMemory), static_cast<void*>(gDynamicMeshMemory + gMeshMemorySize))
 	{
-		mOptions.mWindowCaption = "Shutter - Remix";
-		mOptions.mWindowWidth = 1600;
-		mOptions.mWindowHeight = 1000;
-		mOptions.mGraphicsAPI = GRAPHICS_API_DIRECTX11;
-		mOptions.mFullScreen = false;
 		mStaticMeshLibrary.SetAllocator(&mStaticMeshAllocator);
 		mDynamicMeshLibrary.SetAllocator(&mDynamicMeshAllocator);
 
@@ -273,9 +267,11 @@ public:
 			}
 		}
 
-		mRenderer      = &DX3D11Renderer::SharedInstance();
-		mDeviceContext = mRenderer->GetDeviceContext();
-		mDevice        = mRenderer->GetDevice();
+		mEngine			= &Singleton<Engine>::SharedInstance();
+		mInput			= mEngine->GetInput();
+		mRenderer		= mEngine->GetRenderer();
+		mDeviceContext	= mRenderer->GetDeviceContext();
+		mDevice			= mRenderer->GetDevice();
 
 		mRenderer->SetDelegate(this);
 		VOnResize();
@@ -293,10 +289,10 @@ public:
 
 	void VUpdate(double milliseconds) override
 	{
-		HandleInput(Input::SharedInstance());
+		HandleInput(*mInput);
 
 		static int i = 0;
-		if (mInput.GetKeyDown(KEYCODE_SPACE)) i= (i + 1) % mRobotCount;
+		if (mInput->GetKeyDown(KEYCODE_SPACE)) i= (i + 1) % mRobotCount;
 
 		auto robot = mRobots[i].Transform;
 		auto player = mPlayer.mTransform;
@@ -890,7 +886,8 @@ public:
 
 	void InitializeCamera()
 	{
-		float aspectRatio = static_cast<float>(mOptions.mWindowWidth) / mOptions.mWindowHeight;
+		Options& opt = mEngine->GetApplication()->mOptions;
+		float aspectRatio = static_cast<float>(opt.mWindowWidth) / opt.mWindowHeight;
 		float halfHeight = 33.5f;
 		float halfWidth = 33.5f * aspectRatio;
 		mProjectionMatrix = mat4f::normalizedOrthographicLH(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.3f, 1000.0f).transpose();
@@ -1420,7 +1417,7 @@ public:
 
 		if (input.GetKeyDown(KEYCODE_1))
 		{
-			Application::SharedInstance().UnloadScene();
+			Singleton<Engine>::SharedInstance().GetApplication()->UnloadScene();
 		}
 
 		if (input.GetMouseButtonDown(MOUSEBUTTON_LEFT))

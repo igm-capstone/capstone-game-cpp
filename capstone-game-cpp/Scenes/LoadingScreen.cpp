@@ -4,7 +4,8 @@
 
 void LoadingScreen::VInitialize()
 {
-	mRenderer = &DX3D11Renderer::SharedInstance();
+	Engine& engine = Singleton<Engine>::SharedInstance();
+	mRenderer = engine.GetRenderer();
 	mDeviceContext = mRenderer->GetDeviceContext();
 
 	mRenderer->SetDelegate(this);
@@ -12,11 +13,12 @@ void LoadingScreen::VInitialize()
 
 void LoadingScreen::VUpdate(double milliseconds)
 {
-	auto input = &Input::SharedInstance();
+	Engine& engine = Singleton<Engine>::SharedInstance();
+	auto input = engine.GetInput();
 
 	if (input->GetKeyDown(KEYCODE_1))
 	{
-		Application::SharedInstance().LoadScene<Level00>();
+		engine.GetApplication()->LoadScene<Level00>();
 	}
 }
 

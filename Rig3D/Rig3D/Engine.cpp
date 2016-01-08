@@ -1,6 +1,5 @@
 #include "Engine.h"
 #include "rig_defines.h"
-#include "Rig3D\Graphics\DirectX11\DX3D11Renderer.h"
 #include "Rig3D\Graphics\Interface\IScene.h"
 #include "Rig3D\Application.h"
 
@@ -31,19 +30,22 @@ int Engine::Initialize(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine
 		return RIG_ERROR;
 	}
 
-	mRenderer = (options.mGraphicsAPI == GRAPHICS_API_DIRECTX11) ? &DX3D11Renderer::SharedInstance() : NULL; // TO DO: OpenGL Renderer
+	mRenderer = &TSingleton<IRenderer, DX3D11Renderer>::SharedInstance();
 	if (mRenderer->VInitialize(hInstance, mHWND, options) == RIG_ERROR)
 	{
 		return RIG_ERROR;
 	}
 
-	mInput = &Input::SharedInstance();
+	mInput = &Singleton<Input>::SharedInstance();
 	if (mInput->Initialize() == RIG_ERROR)
 	{
 		return RIG_ERROR;
 	}
 
-	mTimer = &Timer::SharedInstance();
+	mApplication = &Singleton<Application>::SharedInstance();
+	mApplication->mOptions = options;
+
+	mTimer = &Singleton<Timer>::SharedInstance();
 
 	return 0;
 }
@@ -64,11 +66,11 @@ int Engine::InitializeMainWindow(HINSTANCE hInstance, HINSTANCE prevInstance, PS
 	ex.hIconSm = NULL;
 
 	if (options.mFullScreen == false) {
-		ex.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+		ex.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
 	}
 
 	if (!RegisterClassEx(&ex)) {
-		MessageBox(0, L"RegisterClass Failed.", 0, 0);
+		MessageBox(nullptr, L"RegisterClass Failed.", nullptr, 0);
 		return RIG_ERROR;
 	}
 
@@ -148,7 +150,6 @@ void Engine::HandleEvent(const IEvent& iEvent)
 void Engine::RunScene(IScene* iScene)
 {
 	iScene->VInitialize();
-
 	// The message loop
 	double deltaTime = 0.0;
 	mTimer->Reset();
@@ -190,7 +191,22 @@ void Engine::RunApplication(Application* app)
 	Shutdown();
 }
 
-IRenderer* Engine::GetRenderer() const
+Renderer* Engine::GetRenderer() const
 {
 	return mRenderer;
+}
+
+Input* Engine::GetInput() const
+{
+	return mInput;
+}
+
+Timer* Engine::GetTimer() const
+{
+	return mTimer;
+}
+
+Application* Engine::GetApplication() const
+{
+	return mApplication;
 }

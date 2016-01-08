@@ -18,6 +18,6 @@ public:
 private:
 	float mBgColor[4] = { 0.2f, 0.2f, 0.2f, 0.5f };
 
-	DX3D11Renderer*			mRenderer;
+	Renderer*				mRenderer;
 	ID3D11DeviceContext*	mDeviceContext;
 };
