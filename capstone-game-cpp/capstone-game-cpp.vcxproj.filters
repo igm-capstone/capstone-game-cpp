@@ -89,6 +89,9 @@
     <ClInclude Include="Scenes\MainMenuScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="json.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\QuadVertexShader.hlsl">
