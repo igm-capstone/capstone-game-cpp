@@ -2,9 +2,10 @@
 
 //#include "Scenes\MainMenu.h"
 //#include "Scenes\Credits.h"
-#include <Rig3D/Application.h>
+#include <Rig3D\Application.h>
 //#include "Scenes\Level00.h"
 #include "Scenes\LoadingScreen.h"
+#include "Scenes\MainMenuScene.h"
 
 Rig3D::IScene *gRig3DScene = 0;
 int CALLBACK WinMain(HINSTANCE hInstance,
@@ -12,6 +13,8 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 	PSTR cmdLine,
 	int showCmd)
 {
+	using namespace Rig3D;
+
 	Engine& engine = Singleton<Engine>::SharedInstance();
 
 	Options options;
@@ -31,8 +34,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 
 	Application* app = engine.GetApplication();
 	app->mLoadingScene = &loading;
-	//app.LoadScene<LoadingScreen>();
-	//app.mCurrentScene = &loading;
+	app->LoadScene<MainMenuScene>();
 
 	engine.RunApplication(app);
 	return 0;

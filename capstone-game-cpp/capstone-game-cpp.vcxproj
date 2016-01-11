@@ -87,6 +87,7 @@
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="Scenes\LoadingScreen.cpp" />
+    <ClCompile Include="Scenes\MainMenuScene.cpp" />
     <ClCompile Include="TargetFollower.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -106,6 +107,7 @@
     <ClInclude Include="Scenes\common.h" />
     <ClInclude Include="Scenes\Level00.h" />
     <ClInclude Include="Scenes\LoadingScreen.h" />
+    <ClInclude Include="Scenes\MainMenuScene.h" />
     <ClInclude Include="TargetFollower.h" />
     <ClInclude Include="trace.h" />
     <ClInclude Include="Vertex.h" />

@@ -24,6 +24,7 @@ namespace Rig3D
 
 		void UpdateCurrentScene()
 		{
+			// TODO: Review logic
 			if (mSceneToLoad == nullptr)
 			{
 				if (unload)

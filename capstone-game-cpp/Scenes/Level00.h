@@ -840,6 +840,8 @@ public:
 					}
 				}
 				n = minNode;
+
+				delete list;
 			}
 
 			SearchResult<Node> searchResult;
@@ -867,6 +869,8 @@ public:
 				n = minNode;
 
 				searchResult.path.push_back(n);
+
+				delete list;
 			}
 
 			if (searchResult.path.size() <= 1)
@@ -1417,7 +1421,7 @@ public:
 
 		if (input.GetKeyDown(KEYCODE_1))
 		{
-			Singleton<Engine>::SharedInstance().GetApplication()->UnloadScene();
+			Singleton<Engine>::SharedInstance().GetApplication()->LoadScene<MainMenuScene>();
 		}
 
 		if (input.GetMouseButtonDown(MOUSEBUTTON_LEFT))

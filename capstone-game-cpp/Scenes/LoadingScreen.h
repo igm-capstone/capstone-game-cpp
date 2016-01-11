@@ -1,9 +1,7 @@
 #pragma once
 #include "Scenes/common.h"
 
-using namespace Rig3D;
-
-class LoadingScreen : public IScene, public virtual IRendererDelegate
+class LoadingScreen : public Rig3D::IScene, public virtual Rig3D::IRendererDelegate
 {
 public:
 	LoadingScreen() {};
@@ -16,8 +14,6 @@ public:
 	void VOnResize() override;
 
 private:
-	float mBgColor[4] = { 0.2f, 0.2f, 0.2f, 0.5f };
-
-	Renderer*				mRenderer;
+	Rig3D::Renderer*		mRenderer;
 	ID3D11DeviceContext*	mDeviceContext;
 };

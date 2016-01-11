@@ -1,9 +1,10 @@
-#include "LoadingScreen.h"
-#include "Rig3D/Application.h"
+﻿#include "MainMenuScene.h"
+#include <Rig3D/Singleton.h>
+#include "Level00.h"
 
 using namespace Rig3D;
 
-void LoadingScreen::VInitialize()
+void MainMenuScene::VInitialize()
 {
 	Engine& engine = Singleton<Engine>::SharedInstance();
 	mRenderer = engine.GetRenderer();
@@ -12,17 +13,23 @@ void LoadingScreen::VInitialize()
 	mRenderer->SetDelegate(this);
 }
 
-void LoadingScreen::VUpdate(double milliseconds)
+void MainMenuScene::VUpdate(double milliseconds)
 {
+	Engine& engine = Singleton<Engine>::SharedInstance();
+	auto input = engine.GetInput();
 
+	if (input->GetKeyDown(KEYCODE_1))
+	{
+		engine.GetApplication()->LoadScene<Level00>();
+	}
 }
 
-void LoadingScreen::VRender()
+void MainMenuScene::VRender()
 {
-	float bg[4] = { 0.2f, 0.2f, 0.2f, 0.5f };
+	float bg[4] = { 1.0f, 0.2f, 0.2f, 0.5f };
 
 	mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_TRIANGLE);
-
+	
 	mDeviceContext->RSSetViewports(1, &mRenderer->GetViewport());
 	mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), mRenderer->GetDepthStencilView());
 	mDeviceContext->ClearRenderTargetView(*mRenderer->GetRenderTargetView(), bg);
@@ -31,11 +38,10 @@ void LoadingScreen::VRender()
 	mRenderer->VSwapBuffers();
 }
 
-void LoadingScreen::VShutdown()
+void MainMenuScene::VShutdown()
 {
-
 }
 
-void LoadingScreen::VOnResize()
+void MainMenuScene::VOnResize()
 {
 }
