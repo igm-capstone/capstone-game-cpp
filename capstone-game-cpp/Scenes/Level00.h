@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Scenes/common.h"
-
 #include "PathFinder/Fringe.h"
 #include "Rig3D/GraphicsMath/cgm.h"
 #include "Rig3D/Intersection.h"

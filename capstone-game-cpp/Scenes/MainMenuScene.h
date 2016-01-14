@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include "common.h"
-
 class MainMenuScene : public Rig3D::IScene, public virtual Rig3D::IRendererDelegate
 {
 	Rig3D::Renderer*		mRenderer;

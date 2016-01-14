@@ -53,6 +53,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Rig3D\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Rig3D.lib;Memory.lib;GraphicsMath.lib;EventHandler.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -74,6 +75,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Rig3D\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Rig3D.lib;Memory.lib;GraphicsMath.lib;EventHandler.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -88,6 +90,7 @@
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="Scenes\LoadingScreen.cpp" />
     <ClCompile Include="Scenes\MainMenuScene.cpp" />
+    <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TargetFollower.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -105,10 +108,10 @@
     <ClInclude Include="PathFinder\Fringe.h" />
     <ClInclude Include="RayCast.h" />
     <ClInclude Include="SceneObject.h" />
-    <ClInclude Include="Scenes\common.h" />
     <ClInclude Include="Scenes\Level00.h" />
     <ClInclude Include="Scenes\LoadingScreen.h" />
     <ClInclude Include="Scenes\MainMenuScene.h" />
+    <ClInclude Include="stdafx.h" />
     <ClInclude Include="TargetFollower.h" />
     <ClInclude Include="trace.h" />
     <ClInclude Include="Vertex.h" />

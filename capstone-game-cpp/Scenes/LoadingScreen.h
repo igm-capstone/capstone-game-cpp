@@ -1,5 +1,4 @@
 #pragma once
-#include "Scenes/common.h"
 
 class LoadingScreen : public Rig3D::IScene, public virtual Rig3D::IRendererDelegate
 {

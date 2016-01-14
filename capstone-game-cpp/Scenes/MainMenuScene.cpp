@@ -1,4 +1,5 @@
-﻿#include "MainMenuScene.h"
+﻿#include "stdafx.h"
+#include "MainMenuScene.h"
 #include <Rig3D/Singleton.h>
 #include "Level00.h"
 

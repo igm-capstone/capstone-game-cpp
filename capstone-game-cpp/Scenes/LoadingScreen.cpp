@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "LoadingScreen.h"
 #include "Rig3D/Application.h"
 

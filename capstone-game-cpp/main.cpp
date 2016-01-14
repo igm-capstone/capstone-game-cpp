@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Rig3D\Graphics\Interface\IScene.h"
 
 //#include "Scenes\MainMenu.h"
