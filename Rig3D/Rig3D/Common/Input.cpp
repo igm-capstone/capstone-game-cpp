@@ -312,7 +312,7 @@ float Input::GetGamepadAxis(GamepadAxis axis, short id)
 		return 0;
 	}
 
-	float sign = rawValue > 0 ? 1 : -1;
+	float sign = rawValue > 0 ? 1.0f : -1.0f;
 	float magnitude = rawValue * sign;
 
 	//check if the controller is outside a circular dead zone

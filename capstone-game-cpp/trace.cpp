@@ -53,7 +53,7 @@ Trace::~Trace() {
 void Trace::InitializeLineTraceMesh()
 {
 
-	mLineTraceVertices = reinterpret_cast<LineTraceVertex*>(mTraceAllocator.Allocate(sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex), 0));
+	mLineTraceVertices = reinterpret_cast<LineTraceVertex*>(mTraceAllocator.Allocate(sizeof(LineTraceVertex) * gLineTraceVertexCount, alignof(LineTraceVertex), 0));
 
 	uint16_t lineTraceIndices[gLineTraceVertexCount];
 	for (auto i = 0; i < gLineTraceVertexCount; i++)

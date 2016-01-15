@@ -180,7 +180,7 @@ void Engine::RunApplication(Application* app)
 
 		mTimer->Update(&deltaTime);
 		mEventHandler->Update();
-		app->Update(deltaTime);
+		app->Update((float)deltaTime);
 		//app->mCurrentScene->VUpdate(deltaTime);
 		//app->mCurrentScene->VRender();
 
