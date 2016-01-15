@@ -360,13 +360,13 @@ namespace Rig3D
 		void SetAllocator(Allocator* allocator);
 		//void NewMesh(IMesh** mesh, IRenderer* renderer);
 		template<template<typename> class BaseRenderer, class API>
-		void NewMesh(IMesh** mesh, TSingleton<BaseRenderer, API>* renderer);
+		void NewMesh(IMesh** mesh, BaseRenderer<API>* renderer);
 
 		//template<template<typename> class Resource, class Vertex>
 		//void LoadMesh(IMesh** mesh, IRenderer* renderer, Resource<Vertex>& resource);
 
 		template<template<typename> class BaseRenderer, class API, template<typename> class Resource, class Vertex>
-		void LoadMesh(IMesh** mesh, TSingleton<BaseRenderer, API>* renderer, Resource<Vertex>& resource);
+		void LoadMesh(IMesh** mesh, BaseRenderer<API>* renderer, Resource<Vertex>& resource);
 	};
 
 	template<class Allocator>
@@ -401,7 +401,7 @@ namespace Rig3D
 
 	template<class Allocator>
 	template<template<typename> class BaseRenderer, class API>
-	void MeshLibrary<Allocator>::NewMesh(IMesh** mesh, TSingleton<BaseRenderer, API>* renderer)
+	void MeshLibrary<Allocator>::NewMesh(IMesh** mesh, BaseRenderer<API>* renderer)
 	{
 		(renderer->GetGraphicsAPI() == GRAPHICS_API_DIRECTX11) ? RIG_NEW(DX11Mesh, mAllocator, *mesh)() : RIG_NEW(DX11Mesh, mAllocator, *mesh)();
 	}
@@ -419,7 +419,7 @@ namespace Rig3D
 
 	template<class Allocator>
 	template<template<typename> class BaseRenderer, class API, template<typename> class Resource, class Vertex>
-	void MeshLibrary<Allocator>::LoadMesh(IMesh** mesh, TSingleton<BaseRenderer, API>* renderer, Resource<Vertex>& resource)
+	void MeshLibrary<Allocator>::LoadMesh(IMesh** mesh, BaseRenderer<API>* renderer, Resource<Vertex>& resource)
 	{
 		resource.Load();
 

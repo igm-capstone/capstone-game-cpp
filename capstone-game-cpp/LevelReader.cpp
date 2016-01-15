@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "LevelReader.h"
 
 using namespace Rig3D;

@@ -1,6 +1,7 @@
 #include "Engine.h"
 #include "rig_defines.h"
 #include "Rig3D\Graphics\Interface\IScene.h"
+#include "Rig3D\Application.h"
 
 using namespace Rig3D;
 
@@ -30,22 +31,21 @@ int Engine::Initialize(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine
 	}
 
 	mRenderer = &TSingleton<IRenderer, DX3D11Renderer>::SharedInstance();
-
-	TSingleton<IRenderer, DX3D11Renderer>* v = &TSingleton<IRenderer, DX3D11Renderer>::SharedInstance();
-
-	//mRenderer = (options.mGraphicsAPI == GRAPHICS_API_DIRECTX11) ? &DX3D11Renderer::SharedInstance() : NULL; // TO DO: OpenGL Renderer
 	if (mRenderer->VInitialize(hInstance, mHWND, options) == RIG_ERROR)
 	{
 		return RIG_ERROR;
 	}
 
-	mInput = &Input::SharedInstance();
+	mInput = &Singleton<Input>::SharedInstance();
 	if (mInput->Initialize() == RIG_ERROR)
 	{
 		return RIG_ERROR;
 	}
 
-	mTimer = &Timer::SharedInstance();
+	mApplication = &Singleton<Application>::SharedInstance();
+	mApplication->mOptions = options;
+
+	mTimer = &Singleton<Timer>::SharedInstance();
 
 	return 0;
 }
@@ -149,8 +149,6 @@ void Engine::HandleEvent(const IEvent& iEvent)
 
 void Engine::RunScene(IScene* iScene)
 {
-	iScene->mEngine = this;
-
 	iScene->VInitialize();
 	// The message loop
 	double deltaTime = 0.0;
@@ -169,7 +167,46 @@ void Engine::RunScene(IScene* iScene)
 	Shutdown();
 }
 
-TSingleton<IRenderer, DX3D11Renderer>* Engine::GetRenderer() const
+void Engine::RunApplication(Application* app)
+{
+	app->mLoadingScene->VInitialize();
+
+	// The message loop
+	double deltaTime = 0.0;
+	mTimer->Reset();
+	while (!mShouldQuit)
+	{
+		app->UpdateCurrentScene();
+
+		mTimer->Update(&deltaTime);
+		mEventHandler->Update();
+		app->Update(deltaTime);
+		//app->mCurrentScene->VUpdate(deltaTime);
+		//app->mCurrentScene->VRender();
+
+		mInput->Flush();
+	}
+
+	app->mLoadingScene->VShutdown();
+	Shutdown();
+}
+
+Renderer* Engine::GetRenderer() const
 {
 	return mRenderer;
+}
+
+Input* Engine::GetInput() const
+{
+	return mInput;
+}
+
+Timer* Engine::GetTimer() const
+{
+	return mTimer;
+}
+
+Application* Engine::GetApplication() const
+{
+	return mApplication;
 }

@@ -16,9 +16,6 @@ namespace Rig3D
 	class RIG3D IScene
 	{
 	public:
-		Options		mOptions;
-		Engine*		mEngine;
-
 		IScene();
 		virtual ~IScene();
 

@@ -49,9 +49,6 @@ namespace Rig3D
 		std::unordered_set<KeyCode>*	mKeysPressed;
 		WMEventHandler*					mEventHandler;
 
-		Input();
-		~Input();
-
 		static KeyCode KeyCodeFromWParam(WPARAM wParam);
 
 		void OnKeyDown(WPARAM wParam, LPARAM lParam);
@@ -65,13 +62,14 @@ namespace Rig3D
 		int  Initialize();
 		void Flush();
 
+		Input();
+		~Input();
+
 		void HandleEvent(const IEvent& iEvent) override;
 
 	public:
 		// don't look at me... I WAS FORCED!
 		ScreenPoint mousePosition;
-
-		static Input& SharedInstance();
 
 		bool GetKeyDown(KeyCode key);
 		bool GetKeyUp(KeyCode key);

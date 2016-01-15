@@ -4,22 +4,6 @@
 
 using namespace Rig3D;
 
-Timer& Timer::SharedInstance()
-{
-	static Timer sharedTimer;
-	return sharedTimer;
-}
-
-Timer::Timer()
-{
-	
-}
-
-Timer::~Timer()
-{
-}
-
-
 double Timer::GetApplicationTime()
 {
 	return Milliseconds(mSystemCurrentTime - mApplicationStartTime).count();

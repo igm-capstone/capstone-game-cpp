@@ -6,13 +6,6 @@
 
 using namespace Rig3D;
 
-
-Input& Input::SharedInstance()
-{
-	static Input sharedInput;
-	return sharedInput;
-}
-
 Input::Input()
 {
 	mKeysDown = new std::unordered_set<KeyCode>();
