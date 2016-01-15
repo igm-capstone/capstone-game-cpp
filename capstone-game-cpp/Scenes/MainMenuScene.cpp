@@ -11,6 +11,8 @@ void MainMenuScene::VInitialize()
 	mRenderer = engine.GetRenderer();
 	mDeviceContext = mRenderer->GetDeviceContext();
 
+	mNetworkManager = &Singleton<NetworkManager>::SharedInstance();
+
 	mRenderer->SetDelegate(this);
 }
 
@@ -21,6 +23,12 @@ void MainMenuScene::VUpdate(double milliseconds)
 
 	if (input->GetKeyDown(KEYCODE_1))
 	{
+		mNetworkManager->StartServer();
+		engine.GetApplication()->LoadScene<Level00>();
+	}
+	if (input->GetKeyDown(KEYCODE_2))
+	{
+		mNetworkManager->StartClient();
 		engine.GetApplication()->LoadScene<Level00>();
 	}
 }

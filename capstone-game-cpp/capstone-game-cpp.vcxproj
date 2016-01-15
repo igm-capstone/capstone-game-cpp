@@ -86,8 +86,12 @@
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="LevelReader.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Network\NetworkClient.cpp" />
+    <ClCompile Include="Network\NetworkManager.cpp" />
+    <ClCompile Include="Network\NetworkServer.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="SceneObject.cpp" />
+    <ClCompile Include="Scenes\Level00.cpp" />
     <ClCompile Include="Scenes\LoadingScreen.cpp" />
     <ClCompile Include="Scenes\MainMenuScene.cpp" />
     <ClCompile Include="stdafx.cpp" />
@@ -103,6 +107,10 @@
     <ClInclude Include="Grid.h" />
     <ClInclude Include="json.h" />
     <ClInclude Include="LevelReader.h" />
+    <ClInclude Include="Network\NetworkData.h" />
+    <ClInclude Include="Network\NetworkClient.h" />
+    <ClInclude Include="Network\NetworkManager.h" />
+    <ClInclude Include="Network\NetworkServer.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="PathFinder\Graph.h" />
     <ClInclude Include="PathFinder\Fringe.h" />
