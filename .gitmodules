@@ -1,3 +1,3 @@
-[submodule "simd"]
-	path = simd
-	url = https://github.com/gortega56/simd.git
+[submodule "SIMD"]
+	path = SIMD
+	url = https://github.com/gortega56/SIMD

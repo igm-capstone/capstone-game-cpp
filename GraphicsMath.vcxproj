@@ -51,6 +51,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)simd\SIMD\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -71,11 +72,16 @@
     <ClInclude Include="cgm.h" />
     <ClInclude Include="Matrix.hpp" />
     <ClInclude Include="Quaternion.hpp" />
+    <ClInclude Include="SIMDMatrix.hpp" />
+    <ClInclude Include="SIMDVector.hpp" />
     <ClInclude Include="Vector.hpp" />
+    <ClInclude Include="Operations.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Quaternion.cpp" />
+    <ClCompile Include="SIMDMatrix.cpp" />
+    <ClCompile Include="SIMDVector.cpp" />
     <ClCompile Include="Vector.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
