@@ -18,7 +18,18 @@ namespace cliqCity
 	{
 		struct CGM_DLL Matrix2
 		{
-			Vector2 u, v;
+			union
+			{
+				struct
+				{
+					Vector2 u, v;
+				};
+
+				Vector2 pRows[2];
+
+				float pData[2 * 2];
+			};
+
 
 			Matrix2(const Vector2& u, const Vector2& v);
 			Matrix2(
@@ -27,6 +38,7 @@ namespace cliqCity
 			Matrix2(float m[2][2]);
 			Matrix2(float s);
 			Matrix2();
+			Matrix2(const Matrix2& other);
 
 			Matrix2 transpose()		const;
 			Matrix2 inverse()		const;
@@ -37,15 +49,25 @@ namespace cliqCity
 			Matrix2& operator*=(const float& rhs);
 
 			Matrix2& operator=(const Matrix2& rhs);
-			Matrix2& operator-();
+			Matrix2  operator-();
 
-			Vector2& operator[](const unsigned int& index);
-			float&	 operator()(const unsigned int& row, const unsigned int& column);
+			Vector2&  operator[](const unsigned int& index);
+			float	 operator()(const unsigned int& row, const unsigned int& column);
 		};
 
 		struct CGM_DLL Matrix3
 		{
-			Vector3 u, v, w;
+			union
+			{
+				struct 
+				{
+					Vector3 u, v, w;
+				};
+
+				Vector3 pRows[3];
+
+				float pData[3 * 3];
+			};
 
 			static Matrix3 scale(const Vector3& s);
 			static Matrix3 rotate(const float& angle, const Vector3& a);
@@ -61,6 +83,7 @@ namespace cliqCity
 			Matrix3(float m[3][3]);
 			Matrix3(float s);
 			Matrix3();
+			Matrix3(const Matrix3& other);
 
 			Matrix3 transpose()		const;
 			Matrix3 inverse()		const;
@@ -74,12 +97,22 @@ namespace cliqCity
 			Matrix3& operator-();
 
 			Vector3& operator[](const unsigned int& index);
-			float&	 operator()(const unsigned int& row, const unsigned int& column);
+			float	 operator()(const unsigned int& row, const unsigned int& column);
 		};
 
 		struct CGM_DLL Matrix4
 		{
-			Vector4 u, v, w, t;
+			union 
+			{
+				struct
+				{
+					Vector4 u, v, w, t;
+				};
+
+				Vector4 pRows[4];
+
+				float pData[4 * 4];
+			};
 
 			static Matrix4 orthographicRH(const float& left, const float& right, const float& bottom, const float& top, const float& zNear, const float& zFar);
 			static Matrix4 perspectiveRH(const float& fovy, const float& aspectRatio, const float& zNear, const float& zFar);
@@ -121,6 +154,8 @@ namespace cliqCity
 			Matrix4(float m[4][4]);
 			Matrix4(float s);
 			Matrix4();
+			Matrix4(const Matrix4& other);
+
 
 			Matrix4 transpose()		const;
 			Matrix4 inverse()		const;
@@ -134,7 +169,7 @@ namespace cliqCity
 			Matrix4 operator-();
 
 			Vector4& operator[](const unsigned int& index);
-			float&	 operator()(const unsigned int& row, const unsigned int& column);
+			float	operator()(const unsigned int& row, const unsigned int& column);
 
 			operator Matrix3();
 		};
@@ -161,9 +196,10 @@ namespace cliqCity
 
 		CGM_DLL Matrix4 operator+(const Matrix4& lhs, const Matrix4& rhs);
 		CGM_DLL Matrix4 operator-(const Matrix4& lhs, const Matrix4& rhs);
+		
 		CGM_DLL Matrix4 operator*(const Matrix4& lhs, const Matrix4& rhs);
+		CGM_DLL Vector4 operator*(const Vector4& lhs, const Matrix4& rhs);
 		CGM_DLL Matrix4 operator*(const Matrix4& lhs, const float& rhs);
 		CGM_DLL Matrix4 operator*(const float& lhs, const Matrix4& rhs);
-		CGM_DLL Vector4 operator*(const Vector4& lhs, const Matrix4& rhs);
 	}
 }
