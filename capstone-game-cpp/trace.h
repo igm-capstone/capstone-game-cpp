@@ -14,7 +14,9 @@
 #define TRACE_SMALL_CROSS(position, color)		Trace::TraceSmallCross	(position, color)
 #define TRACE_SMALL_XCROSS(position, color)		Trace::TraceSmallXCross	(position, color)
 
-#define RENDERTRACE()							Trace::GetTrace().Render();
+#define RENDER_TRACE()							Trace::GetTrace().Render();
+
+#define TRACE_SET_VIEW_PROJ(mViewMatrix, mProjectionMatrix)		Trace::GetTrace().mLineTraceShaderData = { mViewMatrix, mProjectionMatrix };
 
 typedef std::function<void(const float&, const float&, const float&, const float&, const float&, const float&, const cliqCity::graphicsMath::Vector4& color)> __TraceFunction;
 
@@ -24,6 +26,7 @@ typedef cliqCity::memory::LinearAllocator LinearAllocator;
 
 class Trace
 {
+private:
 	static const int gLineTraceMaxCount = 20000;
 	static const int gLineTraceVertexCount = 2 * gLineTraceMaxCount;
 
@@ -126,6 +129,7 @@ public:
 #define TRACE_SMALL_CROSS(position, color)
 #define TRACE_SMALL_XCROSS(position, color)
 
-#define RENDERTRACE()
+#define RENDER_TRACE()
 
+#define TRACE_SET_VIEW_PROJ(mViewMatrix, mProjectionMatrix)	
 #endif

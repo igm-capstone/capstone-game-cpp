@@ -127,7 +127,7 @@ void Level00::VRender()
 	RenderShadowMask();
 
 	// changes the primitive type to lines
-	RENDERTRACE()
+	RENDER_TRACE()
 
 	mRenderer->VSwapBuffers();
 }
@@ -642,6 +642,8 @@ void Level00::InitializeCamera()
 
 	mQuadShaderData.View = mViewMatrix;
 	mQuadShaderData.Projection = mProjectionMatrix;
+
+	TRACE_SET_VIEW_PROJ(mViewMatrix, mProjectionMatrix)
 }
 
 void Level00::InitializeLevel()
