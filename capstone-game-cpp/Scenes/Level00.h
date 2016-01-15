@@ -1,4 +1,5 @@
 #pragma once
+#include "Scenes/BaseScene.h"
 
 #include "PathFinder/Fringe.h"
 #include "Rig3D/GraphicsMath/cgm.h"
@@ -26,11 +27,7 @@
 #define PI					3.1415926535f
 #define UNITY_QUAD_RADIUS	0.85f
 
-using namespace Rig3D;
-
-typedef cliqCity::memory::LinearAllocator LinearAllocator;
-
-class Level00 : public IScene, public virtual IRendererDelegate
+class Level00 : public BaseScene
 {
 public:
 	struct QuadShaderData
@@ -112,11 +109,6 @@ public:
 	IMesh*							mLightMesh;
 	IMesh*							mPlayerMesh;
 
-	Renderer*						mRenderer;
-
-	ID3D11Device*					mDevice;
-	ID3D11DeviceContext*			mDeviceContext;
-
 	ID3D11InputLayout*				mQuadInputLayout;
 	ID3D11VertexShader*				mQuadVertexShader;
 	ID3D11PixelShader*				mQuadPixelShader;
@@ -167,12 +159,9 @@ public:
 	float black[4] = { 0.0f, 0.0f, 0.0f, 0.5f };
 
 	// singletons
-	Engine* mEngine;
-	Input* mInput;
 	Grid& mGrid = Grid::SharedInstance();
-	NetworkManager* mNetworkManager;
+	
 	ID3D11ShaderResourceView* nullSRV[3] = { 0, 0, 0 };
-
 
 	Level00();
 	~Level00(){}

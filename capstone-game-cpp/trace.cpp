@@ -171,9 +171,10 @@ Trace& Trace::endl(Trace &trace)
 		{
 			break;
 		}
-
-		//OutputDebugString(str.c_str());
-		//OutputDebugString("\n");
+		
+		std::wstring wstr = std::wstring(str.begin(), str.end());
+		OutputDebugString(wstr.c_str());
+		OutputDebugString(L"\n");
 	}
 
 	trace.ss.clear();

@@ -83,6 +83,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Scenes\BaseScene.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="LevelReader.cpp" />
     <ClCompile Include="main.cpp" />
@@ -107,6 +108,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scenes\BaseScene.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="json.h" />

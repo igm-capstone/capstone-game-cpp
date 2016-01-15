@@ -31,7 +31,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 		showCmd,
 		options);
 
-	LoadingScreen loading = LoadingScreen();
+	LoadingScreen loading;
 
 	Application* app = engine.GetApplication();
 	app->mLoadingScene = &loading;

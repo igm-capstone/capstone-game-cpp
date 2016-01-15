@@ -1,6 +1,7 @@
 #pragma once
+#include "Scenes\BaseScene.h"
 
-class LoadingScreen : public Rig3D::IScene, public virtual Rig3D::IRendererDelegate
+class LoadingScreen : public BaseScene
 {
 public:
 	LoadingScreen() {};
@@ -11,8 +12,4 @@ public:
 	void VRender() override;
 	void VShutdown() override;
 	void VOnResize() override;
-
-private:
-	Rig3D::Renderer*		mRenderer;
-	ID3D11DeviceContext*	mDeviceContext;
 };

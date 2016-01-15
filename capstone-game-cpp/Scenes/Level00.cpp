@@ -41,15 +41,6 @@ void Level00::VInitialize()
 		}
 	}
 
-	mNetworkManager = &Singleton<NetworkManager>::SharedInstance();
-
-	mEngine = &Singleton<Engine>::SharedInstance();
-	mInput = mEngine->GetInput();
-	mRenderer = mEngine->GetRenderer();
-	mDeviceContext = mRenderer->GetDeviceContext();
-	mDevice = mRenderer->GetDevice();
-
-	mRenderer->SetDelegate(this);
 	VOnResize();
 
 	InitializeLevel();
@@ -1059,7 +1050,7 @@ void Level00::HandleInput(Input& input)
 
 	if (input.GetKeyDown(KEYCODE_1))
 	{
-		Singleton<Engine>::SharedInstance().GetApplication()->LoadScene<MainMenuScene>();
+		mEngine->GetApplication()->LoadScene<MainMenuScene>();
 	}
 
 	if (input.GetMouseButtonDown(MOUSEBUTTON_LEFT))

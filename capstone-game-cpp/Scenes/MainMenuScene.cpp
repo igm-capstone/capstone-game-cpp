@@ -1,35 +1,23 @@
 ﻿#include "stdafx.h"
 #include "MainMenuScene.h"
-#include <Rig3D/Singleton.h>
 #include "Level00.h"
-
-using namespace Rig3D;
 
 void MainMenuScene::VInitialize()
 {
-	Engine& engine = Singleton<Engine>::SharedInstance();
-	mRenderer = engine.GetRenderer();
-	mDeviceContext = mRenderer->GetDeviceContext();
 
-	mNetworkManager = &Singleton<NetworkManager>::SharedInstance();
-
-	mRenderer->SetDelegate(this);
 }
 
 void MainMenuScene::VUpdate(double milliseconds)
 {
-	Engine& engine = Singleton<Engine>::SharedInstance();
-	auto input = engine.GetInput();
-
-	if (input->GetKeyDown(KEYCODE_1))
+	if (mInput->GetKeyDown(KEYCODE_1))
 	{
 		mNetworkManager->StartServer();
-		engine.GetApplication()->LoadScene<Level00>();
+		mEngine->GetApplication()->LoadScene<Level00>();
 	}
-	if (input->GetKeyDown(KEYCODE_2))
+	if (mInput->GetKeyDown(KEYCODE_2))
 	{
 		mNetworkManager->StartClient();
-		engine.GetApplication()->LoadScene<Level00>();
+		mEngine->GetApplication()->LoadScene<Level00>();
 	}
 }
 

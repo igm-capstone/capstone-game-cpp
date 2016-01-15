@@ -1,14 +1,8 @@
 ﻿#pragma once
+#include "Scenes\BaseScene.h"
 
-#include "Network\NetworkManager.h"
-
-class MainMenuScene : public Rig3D::IScene, public virtual Rig3D::IRendererDelegate
+class MainMenuScene : public BaseScene
 {
-	Rig3D::Renderer*		mRenderer;
-	ID3D11DeviceContext*	mDeviceContext;
-
-	NetworkManager*			mNetworkManager;
-
 public:
 	MainMenuScene() {};
 	~MainMenuScene() override {}

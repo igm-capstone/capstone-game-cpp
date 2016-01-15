@@ -1,21 +1,14 @@
 #include "stdafx.h"
 #include "LoadingScreen.h"
-#include "Rig3D/Application.h"
 
 using namespace Rig3D;
 
 void LoadingScreen::VInitialize()
 {
-	Engine& engine = Singleton<Engine>::SharedInstance();
-	mRenderer = engine.GetRenderer();
-	mDeviceContext = mRenderer->GetDeviceContext();
-
-	mRenderer->SetDelegate(this);
 }
 
 void LoadingScreen::VUpdate(double milliseconds)
 {
-
 }
 
 void LoadingScreen::VRender()
