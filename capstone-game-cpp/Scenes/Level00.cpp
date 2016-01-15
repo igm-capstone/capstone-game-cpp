@@ -2,21 +2,13 @@
 #include "Level00.h"
 #include "MainMenuScene.h"
 
-#if defined _DEBUG
-__TraceFunction __gTraceLine;
-static const int gLineTraceMaxCount = 20000;
-static const int gLineTraceVertexCount = 2 * gLineTraceMaxCount;
-#else
-static const int gLineTraceVertexCount = 0;
-#endif
-
 static const vec4f gWallColor = { 1.0f, 0.0f, 1.0f, 1.0f };
 static const vec4f gCircleColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 static const vec4f gPlayerColor = { 0.0f, 0.0f, 1.0f, 1.0f };
 static const int gCircleVertexCount = 13;
 static const int gCircleIndexCount = 36;	// Indices = (vertices - 1) * 3
 
-static const int gSceneMemorySize = 20480 + (gLineTraceVertexCount * 8 * 4);
+static const int gSceneMemorySize = 20480;
 static const int gMeshMemorySize = 1024;
 
 char gSceneMemory[gSceneMemorySize];
@@ -33,12 +25,6 @@ Level00::Level00() :
 {
 	mStaticMeshLibrary.SetAllocator(&mStaticMeshAllocator);
 	mDynamicMeshLibrary.SetAllocator(&mDynamicMeshAllocator);
-
-#if defined _DEBUG
-	__gTraceLine = [this](const float& from_x, const float& from_y, const float& from_z, const float& to_x, const float& to_y, const float& to_z, const vec4f& color) {
-		TraceLine(from_x, from_y, from_z, to_x, to_y, to_z, color);
-	};
-#endif
 }
 
 void Level00::VInitialize()
@@ -70,7 +56,6 @@ void Level00::VInitialize()
 	InitializeGrid();
 	InitializeRobots();
 	InitializeGeometry();
-	InitializeLineTraceShaders();
 	InitializeWallShaders();
 	InitializeLightShaders();
 	InitializePlayerShaders();
@@ -142,7 +127,7 @@ void Level00::VRender()
 	RenderShadowMask();
 
 	// changes the primitive type to lines
-	RenderLineTrace();
+	RENDERTRACE()
 
 	mRenderer->VSwapBuffers();
 }
@@ -151,11 +136,6 @@ void Level00::VShutdown()
 {
 	mCircleMesh->~IMesh();
 	mWallMesh->~IMesh();
-
-#if defined _DEBUG
-	mLineTraceMesh->~IMesh();
-#endif // defined _DEBUG
-
 
 	ReleaseMacro(mQuadInputLayout);
 	ReleaseMacro(mQuadVertexShader);
@@ -170,11 +150,6 @@ void Level00::VShutdown()
 	ReleaseMacro(mColorWeightInstanceBuffer);
 
 	ReleaseMacro(mPlayerInstanceBuffer);
-
-	ReleaseMacro(mLineTraceInputLayout);
-	ReleaseMacro(mLineTraceVertexShader);
-	ReleaseMacro(mLineTracePixelShader);
-	ReleaseMacro(mLineTraceShaderBuffer);
 
 	ReleaseMacro(mShadowCastersRTV);
 	ReleaseMacro(mShadowCastersMap);
@@ -411,7 +386,7 @@ void Level00::RenderLightCircles()
 		mDeviceContext->CSSetShaderResources(1, 1, &mShadowsFinalSRV);
 		mDeviceContext->CSSetShaderResources(2, 1, &mShadowCastersSRV);
 		mDeviceContext->CSSetUnorderedAccessViews(0, 1, &mDestDataGPUBufferView, NULL);
-		mDeviceContext->CSSetConstantBuffers(0, 1, &mLineTraceShaderBuffer);
+		mDeviceContext->CSSetConstantBuffers(0, 1, &mQuadShaderBuffer);
 		for (int i = 0; i < 100; i++) {
 			mDeviceContext->Dispatch(34, 1, 1);
 			mDeviceContext->CopyResource(mSrcDataGPUBuffer, mDestDataGPUBuffer);
@@ -523,30 +498,6 @@ void Level00::RenderGrid()
 	}
 }
 
-void Level00::RenderLineTrace()
-{
-#if defined _DEBUG
-	mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_LINE);
-
-	mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
-
-	mDeviceContext->IASetInputLayout(mLineTraceInputLayout);
-	mDeviceContext->VSSetShader(mLineTraceVertexShader, nullptr, 0);
-	mDeviceContext->PSSetShader(mLineTracePixelShader, nullptr, 0);
-
-	mDeviceContext->UpdateSubresource(static_cast<DX11Mesh*>(mLineTraceMesh)->mVertexBuffer, 0, nullptr, mLineTraceVertices, 0, 0);
-	mDeviceContext->UpdateSubresource(mLineTraceShaderBuffer, 0, nullptr, &mLineTraceShaderData, 0, 0);
-	mDeviceContext->VSSetConstantBuffers(0, 1, &mLineTraceShaderBuffer);
-
-	mRenderer->VBindMesh(mLineTraceMesh);
-	mRenderer->VDrawIndexed(0, mLineTraceDrawCount);
-
-	// reset line trace count
-	mLineTraceDrawCount = 0;
-	mLineTraceOverflow = false;
-#endif // defined _DEBUG
-
-}
 #pragma endregion
 
 #pragma region Update
@@ -691,9 +642,6 @@ void Level00::InitializeCamera()
 
 	mQuadShaderData.View = mViewMatrix;
 	mQuadShaderData.Projection = mProjectionMatrix;
-
-	mLineTraceShaderData.View = mViewMatrix;
-	mLineTraceShaderData.Projection = mProjectionMatrix;
 }
 
 void Level00::InitializeLevel()
@@ -856,26 +804,8 @@ void Level00::SetAABBs(RectInfo rectInfo, AABB<Vector2>* aabb, int offset)
 
 void Level00::InitializeGeometry()
 {
-	InitializeLineTraceMesh();
 	InitializeQuadMesh();
 	InitializeCircleMesh();
-}
-
-void Level00::InitializeLineTraceMesh()
-{
-#if defined _DEBUG
-	mLineTraceVertices = reinterpret_cast<LineTraceVertex*>(mSceneAllocator.Allocate(sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex), 0));
-
-	uint16_t lineTraceIndices[gLineTraceVertexCount];
-	for (auto i = 0; i < gLineTraceVertexCount; i++)
-	{
-		lineTraceIndices[i] = i;
-	}
-
-	mStaticMeshLibrary.NewMesh(&mLineTraceMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mLineTraceMesh, mLineTraceVertices, sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex));
-	mRenderer->VSetDynamicMeshIndexBuffer(mLineTraceMesh, lineTraceIndices, gLineTraceVertexCount);
-#endif // defined _DEBUG
 }
 
 void Level00::InitializeQuadMesh()
@@ -918,52 +848,6 @@ void Level00::InitializeCircleMesh()
 	mStaticMeshLibrary.NewMesh(&mCircleMesh, mRenderer);
 	mRenderer->VSetStaticMeshVertexBuffer(mCircleMesh, circleVertices, sizeof(vec3f) * gCircleVertexCount, sizeof(vec3f));
 	mRenderer->VSetStaticMeshIndexBuffer(mCircleMesh, circleIndices, gCircleIndexCount);
-}
-
-void Level00::InitializeLineTraceShaders()
-{
-	D3D11_INPUT_ELEMENT_DESC inputDescription[] =
-	{
-		{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-	// Create the shader on the device
-	mDevice->CreateVertexShader(
-		gLineTraceVertexShader,
-		sizeof(gLineTraceVertexShader),
-		nullptr,
-		&mLineTraceVertexShader);
-
-	// Before cleaning up the data, create the input layout
-	if (inputDescription) {
-		mDevice->CreateInputLayout(
-			inputDescription,					// Reference to Description
-			2,									// Number of elments inside of Description
-			gLineTraceVertexShader,
-			sizeof(gLineTraceVertexShader),
-			&mLineTraceInputLayout);
-	}
-
-
-	// Create the shader on the device
-	mDevice->CreatePixelShader(
-		gLineTracePixelShader,
-		sizeof(gLineTracePixelShader),
-		nullptr,
-		&mLineTracePixelShader);
-
-
-	// Constant buffers ----------------------------------------
-	D3D11_BUFFER_DESC lineTraceBufferDataDesc;
-	lineTraceBufferDataDesc.ByteWidth = sizeof(LineTraceShaderData);
-	lineTraceBufferDataDesc.Usage = D3D11_USAGE_DEFAULT;
-	lineTraceBufferDataDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	lineTraceBufferDataDesc.CPUAccessFlags = 0;
-	lineTraceBufferDataDesc.MiscFlags = 0;
-	lineTraceBufferDataDesc.StructureByteStride = 0;
-
-	mDevice->CreateBuffer(&lineTraceBufferDataDesc, nullptr, &mLineTraceShaderBuffer);
 }
 
 void Level00::InitializeWallShaders()
@@ -1166,46 +1050,6 @@ void Level00::InitializePlayerShaders() {
 }
 
 #pragma endregion 
-
-#pragma region Line Trace
-
-void Level00::TraceLine(
-	const float& from_x,
-	const float& from_y,
-	const float& from_z,
-	const float& to_x,
-	const float& to_y,
-	const float& to_z,
-	const vec4f& color)
-{
-#if defined _DEBUG
-	if (mLineTraceOverflow)
-	{
-		return;
-	}
-
-	if (mLineTraceDrawCount >= gLineTraceVertexCount - 1)
-	{
-		TRACE("[WARNING] Reached maximum number of traced lines. Increase __gLineTraceMaxCount to trace more lines.");
-		mLineTraceOverflow = true;
-		return;
-	}
-
-	auto index = mLineTraceDrawCount++;
-	mLineTraceVertices[index].Position.x = from_x;
-	mLineTraceVertices[index].Position.y = from_y;
-	mLineTraceVertices[index].Position.z = from_z;
-	mLineTraceVertices[index].Color = color;
-
-	index = mLineTraceDrawCount++;
-	mLineTraceVertices[index].Position.x = to_x;
-	mLineTraceVertices[index].Position.y = to_y;
-	mLineTraceVertices[index].Position.z = to_z;
-	mLineTraceVertices[index].Color = color;
-#endif
-}
-
-#pragma endregion
 
 void Level00::HandleInput(Input& input)
 {

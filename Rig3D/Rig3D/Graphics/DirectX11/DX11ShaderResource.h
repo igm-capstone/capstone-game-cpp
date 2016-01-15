@@ -3,6 +3,8 @@
 #include <d3d11.h>
 #include <vector>
 
+#pragma warning(disable: 4251)
+
 #ifdef _WINDLL
 #define RIG3D __declspec(dllexport)
 #else
