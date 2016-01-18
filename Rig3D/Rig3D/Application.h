@@ -1,5 +1,6 @@
 #pragma once
 #include "Graphics/Interface/IScene.h"
+#include "Memory/Memory/Memory.h"
 
 #ifdef _WINDLL
 #define RIG3D __declspec(dllexport)
@@ -7,13 +8,33 @@
 #define RIG3D __declspec(dllimport)
 #endif
 
+#define STATIC_SCENE_MEMORY 1000000
+
 namespace Rig3D
 {
+	static char gApplicationMemory[4000000];	// 4mb
+
 	class RIG3D Application
 	{
+	private:
+		LinearAllocator mSceneAllocator;	// Not sure if this is the best guy for the job, but we will see.
+
 	protected:
-		Application();
-		~Application();
+		Application() : 
+			mSceneAllocator(gApplicationMemory, gApplicationMemory + STATIC_SCENE_MEMORY),	// 1 MB per scene
+			mLoadingScene(nullptr),
+			mCurrentScene(nullptr),
+			mSceneToLoad(nullptr),
+			unload(false)
+		{
+			
+		}
+		
+		~Application()
+		{
+			
+		}
+
 		Application(Application const&) = delete;
 		void operator=(Application const&) = delete;
 	public:
@@ -21,6 +42,7 @@ namespace Rig3D
 		IScene* mLoadingScene;
 		IScene* mCurrentScene;
 		IScene* mSceneToLoad;
+		bool unload;
 
 		void UpdateCurrentScene()
 		{
@@ -32,10 +54,8 @@ namespace Rig3D
 					if (mCurrentScene != nullptr)
 					{
 						mCurrentScene->VShutdown();
+						mSceneAllocator.Free();
 					}
-
-					// free current scene????
-					mCurrentScene = mSceneToLoad;
 				}
 
 				return;
@@ -44,6 +64,7 @@ namespace Rig3D
 			if (mCurrentScene != nullptr)
 			{
 				mCurrentScene->VShutdown();
+				mSceneAllocator.Free();
 			}
 
 			// free current scene????
@@ -56,10 +77,25 @@ namespace Rig3D
 		template <class TScene>
 		void LoadScene()
 		{
-			mSceneToLoad = new TScene();
+			// Verify our memory limits
+			assert(sizeof(TScene) < STATIC_SCENE_MEMORY);
+
+			union
+			{
+				TScene* asScene;
+				char*	asChar;
+			};
+			
+			// Allocate scene 
+			asScene = new (mSceneAllocator.Allocate(sizeof(TScene), alignof(TScene), 0)) TScene();
+
+			// Pass the remainer to the scene constructor
+			size_t size = (gApplicationMemory + STATIC_SCENE_MEMORY) - (asChar + sizeof(TScene));
+			asScene->SetStaticMemory(mSceneAllocator.Allocate(size, 2, 0), size);
+
+			mSceneToLoad = asScene;
 		}
 
-		bool unload;
 		void UnloadScene()
 		{
 			unload = true;

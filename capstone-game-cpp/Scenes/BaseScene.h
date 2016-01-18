@@ -17,8 +17,13 @@ protected:
 
 	NetworkManager*			mNetworkManager;
 
+	uint8_t*					mStaticMemory;
+	size_t					mStaticMemorySize;
+
 public:
 	BaseScene();
 	~BaseScene();
+
+	void SetStaticMemory(void* staticMemory, size_t size);
 };
 

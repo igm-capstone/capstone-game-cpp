@@ -185,9 +185,6 @@
     <ClCompile Include="Graphics\DirectX11\DX11ShaderResource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Application.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\DirectX11\DX11IMGUI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

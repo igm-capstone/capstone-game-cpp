@@ -110,7 +110,6 @@
     <ClInclude Include="Visibility.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Application.cpp" />
     <ClCompile Include="Common\Input.cpp" />
     <ClCompile Include="Common\Timer.cpp" />
     <ClCompile Include="Common\Transform.cpp" />
