@@ -12,16 +12,18 @@
 
 namespace Rig3D
 {
-	static char gApplicationMemory[4000000];	// 4mb
-
 	class RIG3D Application
 	{
 	private:
 		LinearAllocator mSceneAllocator;	// Not sure if this is the best guy for the job, but we will see.
+		char*			mStaticMemory;
+		size_t			mStaticMemorySize;
 
 	protected:
 		Application() : 
-			mSceneAllocator(gApplicationMemory, gApplicationMemory + STATIC_SCENE_MEMORY),	// 1 MB per scene
+			mSceneAllocator(),	
+			mStaticMemory(nullptr),
+			mStaticMemorySize(0),
 			mLoadingScene(nullptr),
 			mCurrentScene(nullptr),
 			mSceneToLoad(nullptr),
@@ -43,6 +45,13 @@ namespace Rig3D
 		IScene* mCurrentScene;
 		IScene* mSceneToLoad;
 		bool unload;
+
+		void SetStaticMemory(void* start, size_t size)
+		{
+			mStaticMemory = static_cast<char*>(start);
+			mStaticMemorySize = size;
+			mSceneAllocator.SetMemory(start, mStaticMemory + STATIC_SCENE_MEMORY);
+		}
 
 		void UpdateCurrentScene()
 		{
@@ -90,7 +99,7 @@ namespace Rig3D
 			asScene = new (mSceneAllocator.Allocate(sizeof(TScene), alignof(TScene), 0)) TScene();
 
 			// Pass the remainer to the scene constructor
-			size_t size = (gApplicationMemory + STATIC_SCENE_MEMORY) - (asChar + sizeof(TScene));
+			size_t size = (mStaticMemory + STATIC_SCENE_MEMORY) - (asChar + sizeof(TScene));
 			asScene->SetStaticMemory(mSceneAllocator.Allocate(size, 2, 0), size);
 
 			mSceneToLoad = asScene;

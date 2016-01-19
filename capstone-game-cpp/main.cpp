@@ -8,7 +8,12 @@
 #include "Scenes\LoadingScreen.h"
 #include "Scenes\MainMenuScene.h"
 
+#define STATIC_APP_MEMORY 4000000
+
+static char gApplicationMemory[STATIC_APP_MEMORY];	// 4mb
+
 Rig3D::IScene *gRig3DScene = 0;
+
 int CALLBACK WinMain(HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,
 	PSTR cmdLine,
@@ -34,6 +39,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 	LoadingScreen loading;
 
 	Application* app = engine.GetApplication();
+	app->SetStaticMemory(gApplicationMemory, STATIC_APP_MEMORY);
 	app->mLoadingScene = &loading;
 	app->LoadScene<MainMenuScene>();
 
