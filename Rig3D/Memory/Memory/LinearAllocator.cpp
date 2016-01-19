@@ -18,19 +18,23 @@ LinearAllocator::LinearAllocator(void* start, void* end) : mStart(static_cast<ui
 	mCurrent = mStart;
 }
 
-LinearAllocator::LinearAllocator()
+LinearAllocator::LinearAllocator() : mCurrent(nullptr), mStart(nullptr), mEnd(nullptr), mIsOwner(false)
 {
-	mStart		= nullptr;
-	mEnd		= nullptr;
-	mCurrent	= nullptr;
-}
 
+}
 
 LinearAllocator::~LinearAllocator()
 {
 	mStart		= nullptr;
 	mEnd		= nullptr;
 	mCurrent	= nullptr;
+}
+
+void LinearAllocator::SetMemory(void* start, void* end)
+{
+	mStart		= static_cast<uint8_t*>(start);
+	mEnd		= static_cast<uint8_t*>(end);
+	mCurrent	= mStart;
 }
 
 void* LinearAllocator::Allocate(size_t size, size_t alignment, size_t offset)
