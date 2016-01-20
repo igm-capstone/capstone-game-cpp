@@ -3,7 +3,8 @@
 
 BaseScene::BaseScene() : 
 	mStaticMemory(nullptr),
-	mStaticMemorySize(0)
+	mStaticMemorySize(0),
+	mState(BASE_SCENE_STATE_INITIAL)
 {
 	mEngine = &Singleton<Engine>::SharedInstance();
 
@@ -11,8 +12,6 @@ BaseScene::BaseScene() :
 	mDevice = mRenderer->GetDevice();
 	mDeviceContext = mRenderer->GetDeviceContext();
 	mRenderer->SetDelegate(this);
-
-	mApplication = mEngine->GetApplication();
 
 	mInput = mEngine->GetInput();
 

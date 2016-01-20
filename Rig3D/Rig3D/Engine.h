@@ -19,7 +19,7 @@ namespace Rig3D
 {
 	typedef IRenderer<DX3D11Renderer> Renderer;
 
-	class Application;
+	class IApplication;
 	class IScene;
 
 	class RIG3D Engine : public virtual IObserver
@@ -35,12 +35,11 @@ namespace Rig3D
 		void	HandleEvent(const IEvent& iEvent) override;
 
 		void	RunScene(IScene* iScene);
-		void	RunApplication(Application* app);
+		void	RunApplication(IApplication* app);
 
 		Renderer*		GetRenderer() const;
 		Input*			GetInput() const;
 		Timer*			GetTimer() const;
-		Application*	GetApplication() const;
 
 	protected:
 		HDC mHDC;
@@ -51,7 +50,6 @@ namespace Rig3D
 		Timer*			mTimer;
 		Input*			mInput;
 		Renderer*		mRenderer;
-		Application*	mApplication;
 		bool			mShouldQuit;
 
 		int InitializeMainWindow(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, int showCmd, Options options);

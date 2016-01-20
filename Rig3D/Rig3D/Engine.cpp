@@ -1,7 +1,7 @@
 #include "Engine.h"
 #include "rig_defines.h"
 #include "Rig3D\Graphics\Interface\IScene.h"
-#include "Rig3D\Application.h"
+#include "Rig3D\IApplication.h"
 
 using namespace Rig3D;
 
@@ -41,9 +41,6 @@ int Engine::Initialize(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine
 	{
 		return RIG_ERROR;
 	}
-
-	mApplication = &Singleton<Application>::SharedInstance();
-	mApplication->mOptions = options;
 
 	mTimer = &Singleton<Timer>::SharedInstance();
 
@@ -167,27 +164,23 @@ void Engine::RunScene(IScene* iScene)
 	Shutdown();
 }
 
-void Engine::RunApplication(Application* app)
+void Engine::RunApplication(IApplication* app)
 {
-	app->mLoadingScene->VInitialize();
+	app->VInitialize();
 
 	// The message loop
 	double deltaTime = 0.0;
 	mTimer->Reset();
 	while (!mShouldQuit)
 	{
-		app->UpdateCurrentScene();
-
 		mTimer->Update(&deltaTime);
 		mEventHandler->Update();
-		app->Update((float)deltaTime);
-		//app->mCurrentScene->VUpdate(deltaTime);
-		//app->mCurrentScene->VRender();
-
+		app->VUpdateCurrentScene();
+		app->VUpdate((float)deltaTime);
 		mInput->Flush();
 	}
 
-	app->mLoadingScene->VShutdown();
+	app->VShutdown();
 	Shutdown();
 }
 
@@ -204,9 +197,4 @@ Input* Engine::GetInput() const
 Timer* Engine::GetTimer() const
 {
 	return mTimer;
-}
-
-Application* Engine::GetApplication() const
-{
-	return mApplication;
 }

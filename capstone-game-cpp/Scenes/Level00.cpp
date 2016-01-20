@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "capstone-game-cpp/ScareTacticsApplication.h"
 #include "Level00.h"
 #include "MainMenuScene.h"
 
@@ -624,7 +625,7 @@ void Level00::UpdateRobots()
 
 void Level00::InitializeCamera()
 {
-	Options& opt = mEngine->GetApplication()->mOptions;
+	Options& opt = Application::SharedInstance().mOptions;
 	float aspectRatio = static_cast<float>(opt.mWindowWidth) / opt.mWindowHeight;
 	float halfHeight = 33.5f;
 	float halfWidth = 33.5f * aspectRatio;
@@ -1050,7 +1051,7 @@ void Level00::HandleInput(Input& input)
 
 	if (input.GetKeyDown(KEYCODE_1))
 	{
-		mEngine->GetApplication()->LoadScene<MainMenuScene>();
+		Application::SharedInstance().LoadScene<MainMenuScene>();
 	}
 
 	if (input.GetMouseButtonDown(MOUSEBUTTON_LEFT))

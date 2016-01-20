@@ -431,11 +431,13 @@ KeyCode Input::KeyCodeFromWParam(WPARAM wParam)
 {
 	// any exception from wParam value to keyCode value
 	// must be done here
-	switch (wParam)
-	{
-	default:
-		return static_cast<KeyCode>(wParam);
-	}
+	//switch (wParam)
+	//{
+	//default:
+	//	return static_cast<KeyCode>(wParam);
+	//}
+
+	return static_cast<KeyCode>(wParam);
 }
 
 void Input::OnKeyDown(WPARAM wParam, LPARAM lParam)
