@@ -22,7 +22,68 @@ char gDynamicMeshMemory[gMeshMemorySize];
 Level00::Level00() :
 	mSceneAllocator(static_cast<void*>(gSceneMemory), static_cast<void*>(gSceneMemory + gSceneMemorySize)),
 	mStaticMeshAllocator(static_cast<void*>(gStaticMeshMemory), static_cast<void*>(gStaticMeshMemory + gMeshMemorySize)),
-	mDynamicMeshAllocator(static_cast<void*>(gDynamicMeshMemory), static_cast<void*>(gDynamicMeshMemory + gMeshMemorySize))
+	mDynamicMeshAllocator(static_cast<void*>(gDynamicMeshMemory), static_cast<void*>(gDynamicMeshMemory + gMeshMemorySize)),
+	mWalls(nullptr),
+	mBlocks(nullptr),
+	mWaypoints(nullptr),
+	mLights(nullptr),
+	mPlayerNode(nullptr),
+	mFollowers(nullptr),
+	mAABBs(nullptr),
+	mLightColliders(nullptr),
+	mWallTransforms(nullptr),
+	mBlockTransforms(nullptr),
+	mCircleTransforms(nullptr),
+	mRobotTransforms(nullptr),
+	mCircleColorWeights(nullptr),
+	mWallColliders(nullptr),
+	mWallCount(0),
+	mBlockCount(0),
+	mCircleCount(0),
+	mRobotCount(0),
+	mAABBCount(0),
+	mWallMesh(nullptr),
+	mRobotMesh(nullptr),
+	mCircleMesh(nullptr),
+	mLightMesh(nullptr),
+	mPlayerMesh(nullptr),
+	mQuadInputLayout(nullptr),
+	mQuadVertexShader(nullptr),
+	mQuadPixelShader(nullptr),
+	mQuadShaderBuffer(nullptr),
+	mWallInstanceBuffer(nullptr),
+	mCircleInputLayout(nullptr),
+	mCircleVertexShader(nullptr),
+	mCirclePixelShader(nullptr),
+	mCircleInstanceBuffer(nullptr),
+	mColorWeightInstanceBuffer(nullptr),
+	mPlayerInstanceBuffer(nullptr),
+	mShadowCastersRTV(nullptr),
+	mShadowCastersMap(nullptr),
+	mShadowCastersSRV(nullptr),
+	mShadowsARTV(nullptr),
+	mShadowsAMap(nullptr),
+	mShadowsASRV(nullptr),
+	mShadowsBRTV(nullptr),
+	mShadowsBMap(nullptr),
+	mShadowsBSRV(nullptr),
+	mShadowsFinalRTV(nullptr),
+	mShadowsFinalMap(nullptr),
+	mShadowsFinalSRV(nullptr),
+	mShadowCasterPixelShader(nullptr),
+	mBillboardVertexShader(nullptr),
+	mBillboardPixelShader(nullptr),
+	mShadowPixelShader(nullptr),
+	mSamplerState(nullptr),
+	mBlendStateShadowMask(nullptr),
+	mBlendStateShadowCalc(nullptr),
+	mPointShaderBuffer(nullptr),
+	mShadowGridComputeShader(nullptr),
+	mSrcDataGPUBuffer(nullptr),
+	mSrcDataGPUBufferView(nullptr),
+	mDestDataGPUBuffer(nullptr),
+	mDestDataGPUBufferCPURead(nullptr),
+	mDestDataGPUBufferView(nullptr)
 {
 	mStaticMeshLibrary.SetAllocator(&mStaticMeshAllocator);
 	mDynamicMeshLibrary.SetAllocator(&mDynamicMeshAllocator);
@@ -30,6 +91,8 @@ Level00::Level00() :
 
 void Level00::VInitialize()
 {
+	mState = BASE_SCENE_STATE_INITIALIZING;
+
 	struct stat s;
 	if (stat("Assets", &s) != 0) {
 		_wchdir((LPCWSTR)L"..");
@@ -52,6 +115,8 @@ void Level00::VInitialize()
 	InitializeLightShaders();
 	InitializePlayerShaders();
 	InitializeCamera();
+
+	mState = BASE_SCENE_STATE_RUNNING;
 }
 
 void Level00::VUpdate(double milliseconds)

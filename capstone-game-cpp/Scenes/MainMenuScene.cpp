@@ -5,7 +5,7 @@
 
 void MainMenuScene::VInitialize()
 {
-	mState = BASE_SCENE_STATE_LOADING;
+	mState = BASE_SCENE_STATE_INITIALIZING;
 
 	// Initialization code here
 
@@ -42,7 +42,7 @@ void MainMenuScene::VRender()
 
 void MainMenuScene::VShutdown()
 {
-	mState = BASE_SCENE_STATE_UNLOADING;
+	mState = BASE_SCENE_STATE_SHUTDOWN;
 
 	// Shutdown code here
 }

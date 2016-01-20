@@ -5,12 +5,12 @@
 
 using namespace Rig3D;
 
-typedef enum BaseSceneState
+enum BaseSceneState
 {
-	BASE_SCENE_STATE_INITIAL,	// Upon Construction
-	BASE_SCENE_STATE_LOADING,	// Start of VInitialize()
-	BASE_SCENE_STATE_RUNNING,	// Completion of VInitialize()
-	BASE_SCENE_STATE_UNLOADING	// Start of VShutdown()
+	BASE_SCENE_STATE_CONSTRUCTED,	// Upon Construction
+	BASE_SCENE_STATE_INITIALIZING,	// Start of VInitialize()
+	BASE_SCENE_STATE_RUNNING,		// Completion of VInitialize()
+	BASE_SCENE_STATE_SHUTDOWN		// Start of VShutdown()
 };
 
 class BaseScene : public IScene, public virtual IRendererDelegate

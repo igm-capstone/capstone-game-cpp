@@ -36,7 +36,9 @@ public:
 		};
 
 		// Allocate scene 
-		asScene = new (mSceneAllocator.Allocate(sizeof(TScene), alignof(TScene), 0)) TScene();
+		asScene = new (_aligned_malloc(sizeof(TScene), alignof(TScene))) TScene();
+		
+		//asScene = new (mSceneAllocator.Allocate(sizeof(TScene), alignof(TScene), 0)) TScene();
 
 		// Pass the remainer to the scene constructor
 	//	size_t size = (mStaticMemory + STATIC_SCENE_MEMORY) - (asChar + sizeof(TScene));

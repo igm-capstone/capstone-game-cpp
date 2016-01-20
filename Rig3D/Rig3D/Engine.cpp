@@ -176,7 +176,7 @@ void Engine::RunApplication(IApplication* app)
 		mTimer->Update(&deltaTime);
 		mEventHandler->Update();
 		app->VUpdateCurrentScene();
-		app->VUpdate((float)deltaTime);
+		app->VUpdate(static_cast<float>(deltaTime));
 		mInput->Flush();
 	}
 

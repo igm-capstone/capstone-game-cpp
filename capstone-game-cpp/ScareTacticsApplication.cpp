@@ -30,6 +30,14 @@ void ScareTacticsApplication::SetStaticMemory(void* start, size_t size)
 void ScareTacticsApplication::UnloadScene()
 {
 	unload = true;
+
+	if (mCurrentScene)
+	{
+		mCurrentScene->VShutdown();
+		mCurrentScene->~BaseScene();
+		_aligned_free(mCurrentScene);
+		mCurrentScene = nullptr;
+	}
 }
 
 void ScareTacticsApplication::VInitialize()
@@ -39,24 +47,36 @@ void ScareTacticsApplication::VInitialize()
 
 void ScareTacticsApplication::VUpdateCurrentScene()
 {
-	if (mCurrentScene == nullptr)
+	// No scene to load: Keep running current scene
+	if (mSceneToLoad == nullptr)
 	{
 		return;
 	}
 
-	//if (mCurrentScene->mState == BASE_SCENE_STATE_RUNNING)
-	//{
-	//	mCurrentScene = mSceneToLoad;
-	//	mSceneToLoad = nullptr;
-	//}
+	if (mSceneToLoad->mState == BASE_SCENE_STATE_CONSTRUCTED)
+	{
+		UnloadScene();
+		
+		mSceneToLoad->VInitialize();	// Once asychronous this function should return immediately
+	}
+	else if (mSceneToLoad->mState == BASE_SCENE_STATE_RUNNING)
+	{
+		mCurrentScene = mSceneToLoad;
+		mSceneToLoad == nullptr;
+	}
 }
 
 void ScareTacticsApplication::VUpdate(float deltaTime)
 {
-	if (mCurrentScene->mState == BASE_SCENE_STATE_RUNNING)
+	if (mCurrentScene)
 	{
 		mCurrentScene->VUpdate(deltaTime);
 		mCurrentScene->VRender();
+	}
+	else
+	{
+		mLoadingScene->VUpdate(deltaTime);
+		mLoadingScene->VRender();
 	}
 		//BaseScene* scene = mCurrentScene;
 		//if (scene == nullptr)
@@ -70,9 +90,20 @@ void ScareTacticsApplication::VUpdate(float deltaTime)
 
 void ScareTacticsApplication::VShutdown()
 {
-	mCurrentScene->~BaseScene();
-	mLoadingScene->~BaseScene();
-	mSceneToLoad->~BaseScene();
+	if (mCurrentScene)
+	{
+		mCurrentScene->~BaseScene();
+	}
+
+	if (mLoadingScene)
+	{
+		mLoadingScene->~BaseScene();
+	}
+
+	if (mSceneToLoad)
+	{
+		mSceneToLoad->~BaseScene();
+	}
 
 	mSceneAllocator.Free();
 }

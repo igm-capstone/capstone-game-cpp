@@ -5,7 +5,7 @@ using namespace Rig3D;
 
 void LoadingScreen::VInitialize()
 {
-	mState = BASE_SCENE_STATE_LOADING;
+	mState = BASE_SCENE_STATE_INITIALIZING;
 
 	// Initialization code here
 
@@ -32,7 +32,7 @@ void LoadingScreen::VRender()
 
 void LoadingScreen::VShutdown()
 {
-	mState = BASE_SCENE_STATE_UNLOADING;
+	mState = BASE_SCENE_STATE_SHUTDOWN;
 
 	// Shutdown code here
 }

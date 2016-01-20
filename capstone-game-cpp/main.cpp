@@ -4,7 +4,7 @@
 //#include "Scenes\MainMenu.h"
 //#include "Scenes\Credits.h"
 #include <capstone-game-cpp/ScareTacticsApplication.h>
-//#include "Scenes\Level00.h"
+#include "Scenes\Level00.h"
 #include "Scenes\LoadingScreen.h"
 #include "Scenes\MainMenuScene.h"
 

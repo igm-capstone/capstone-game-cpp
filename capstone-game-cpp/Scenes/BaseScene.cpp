@@ -4,7 +4,7 @@
 BaseScene::BaseScene() : 
 	mStaticMemory(nullptr),
 	mStaticMemorySize(0),
-	mState(BASE_SCENE_STATE_INITIAL)
+	mState(BASE_SCENE_STATE_CONSTRUCTED)
 {
 	mEngine = &Singleton<Engine>::SharedInstance();
 
