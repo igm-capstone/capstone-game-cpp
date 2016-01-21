@@ -1,6 +1,7 @@
 #pragma once
 #include "Rig3D/IApplication.h"
 #include "capstone-game-cpp/Scenes/BaseScene.h"
+#include <Rig3D/Singleton.h>
 #include <assert.h>
 
 using namespace Rig3D;
@@ -11,7 +12,6 @@ public:
 	BaseScene* mLoadingScene;
 	BaseScene* mCurrentScene;
 	BaseScene* mSceneToLoad;
-	bool unload;
 
 	ScareTacticsApplication();
 	~ScareTacticsApplication();

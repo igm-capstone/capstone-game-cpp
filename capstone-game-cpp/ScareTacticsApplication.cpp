@@ -4,13 +4,12 @@
 using namespace Rig3D;
 
 ScareTacticsApplication::ScareTacticsApplication() :
-	mSceneAllocator(),
-	mStaticMemory(nullptr),
-	mStaticMemorySize(0),
 	mLoadingScene(nullptr),
 	mCurrentScene(nullptr),
 	mSceneToLoad(nullptr),
-	unload(false)
+	mSceneAllocator(),
+	mStaticMemory(nullptr),
+	mStaticMemorySize(0)
 {
 	
 }
@@ -29,12 +28,11 @@ void ScareTacticsApplication::SetStaticMemory(void* start, size_t size)
 
 void ScareTacticsApplication::UnloadScene()
 {
-	unload = true;
-
 	if (mCurrentScene)
 	{
 		mCurrentScene->VShutdown();
 		mCurrentScene->~BaseScene();
+		mSceneAllocator.Reset();
 		_aligned_free(mCurrentScene);
 		mCurrentScene = nullptr;
 	}
@@ -57,6 +55,7 @@ void ScareTacticsApplication::VUpdateCurrentScene()
 	{
 		UnloadScene();
 		
+		mSceneToLoad->SetStaticMemory(mSceneAllocator.Allocate(STATIC_SCENE_MEMORY, 2, 0), STATIC_SCENE_MEMORY);
 		mSceneToLoad->VInitialize();	// Once asychronous this function should return immediately
 	}
 	else if (mSceneToLoad->mState == BASE_SCENE_STATE_RUNNING)
@@ -78,14 +77,6 @@ void ScareTacticsApplication::VUpdate(float deltaTime)
 		mLoadingScene->VUpdate(deltaTime);
 		mLoadingScene->VRender();
 	}
-		//BaseScene* scene = mCurrentScene;
-		//if (scene == nullptr)
-		//{
-		//	scene = mLoadingScene;
-		//}
-
-		//scene->VUpdate(deltaTime);
-		//scene->VRender();
 }
 
 void ScareTacticsApplication::VShutdown()
