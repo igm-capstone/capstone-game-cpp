@@ -12,6 +12,9 @@ namespace cliqCity
 			StackAllocator();
 			~StackAllocator();
 		
+			void*	Allocate(size_t size, size_t alignment, size_t offset);
+			void	Free(void* ptr);
+
 		private:
 			uint8_t* mCurrent;
 			uint8_t* mStart;
