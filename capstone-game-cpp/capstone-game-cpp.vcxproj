@@ -83,6 +83,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Resource.cpp" />
     <ClCompile Include="ScareTacticsApplication.cpp" />
     <ClCompile Include="Scenes\BaseScene.cpp" />
     <ClCompile Include="Grid.cpp" />
@@ -94,6 +95,7 @@
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="Scenes\Level00.cpp" />
+    <ClCompile Include="Scenes\Level01.cpp" />
     <ClCompile Include="Scenes\LoadingScreen.cpp" />
     <ClCompile Include="Scenes\MainMenuScene.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -109,6 +111,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Resource.h" />
     <ClInclude Include="ScareTacticsApplication.h" />
     <ClInclude Include="Scenes\BaseScene.h" />
     <ClInclude Include="Colors.h" />
@@ -125,6 +128,7 @@
     <ClInclude Include="RayCast.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="Scenes\Level00.h" />
+    <ClInclude Include="Scenes\Level01.h" />
     <ClInclude Include="Scenes\LoadingScreen.h" />
     <ClInclude Include="Scenes\MainMenuScene.h" />
     <ClInclude Include="stdafx.h" />

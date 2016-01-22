@@ -9,14 +9,20 @@ using namespace Rig3D;
 class ScareTacticsApplication : public IApplication
 {
 public:
-	BaseScene* mLoadingScene;
-	BaseScene* mCurrentScene;
-	BaseScene* mSceneToLoad;
+	enum class Primitive
+	{
+		Quad,
+		Sphere,
+		Cube,
+	};
 
 	ScareTacticsApplication();
 	~ScareTacticsApplication();
 
+	void SetLoadingScreen(BaseScene* loading);
 	void SetStaticMemory(void* start, size_t size);
+
+	IMesh* GetPrimitive(Primitive primitive);
 
 	void VInitialize() override;
 	void VUpdateCurrentScene() override;
@@ -50,9 +56,20 @@ public:
 	void UnloadScene();
 
 private:
+	BaseScene*		mLoadingScreen;
+	BaseScene*		mCurrentScene;
+	BaseScene*		mSceneToLoad;
+	
+	// primitive meshes
+	IMesh*			mQuadMesh;
+	IMesh*			mSphereMesh;
+	IMesh*			mCubeMesh;
+
 	LinearAllocator mSceneAllocator;	// Not sure if this is the best guy for the job, but we will see.
 	char*			mStaticMemory;
 	size_t			mStaticMemorySize;
+
+	void CreatePrimitives();
 };
 
 typedef Singleton<ScareTacticsApplication> Application;

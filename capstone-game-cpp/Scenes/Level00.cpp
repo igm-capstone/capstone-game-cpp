@@ -93,18 +93,6 @@ void Level00::VInitialize()
 {
 	mState = BASE_SCENE_STATE_INITIALIZING;
 
-	struct stat s;
-	if (stat("Assets", &s) != 0) {
-		_wchdir((LPCWSTR)L"..");
-		if (stat("Assets", &s) != 0) {
-			_wchdir((LPCWSTR)L"..");
-			if (stat("Assets", &s) != 0) {
-				MessageBox(NULL, (LPCWSTR)L"Assets folder not found.", (LPCWSTR)L"Error", MB_ICONERROR | MB_OK);
-				exit(1);
-			}
-		}
-	}
-
 	VOnResize();
 
 	InitializeLevel();

@@ -20,6 +20,18 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 	int showCmd)
 {
 	using namespace Rig3D;
+	
+	struct stat s;
+	if (stat("Assets", &s) != 0) {
+		_wchdir((LPCWSTR)L"..");
+		if (stat("Assets", &s) != 0) {
+			_wchdir((LPCWSTR)L"..");
+			if (stat("Assets", &s) != 0) {
+				MessageBox(NULL, (LPCWSTR)L"Assets folder not found.", (LPCWSTR)L"Error", MB_ICONERROR | MB_OK);
+				exit(1);
+			}
+		}
+	}
 
 	Engine& engine = Singleton<Engine>::SharedInstance();
 
@@ -36,13 +48,14 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 		showCmd,
 		options);
 
-	LoadingScreen loading;
 
 	Application* app = &Application::SharedInstance();
 	app->mOptions = options;
 
+	LoadingScreen loading;
+	app->SetLoadingScreen(&loading);
+	
 	app->SetStaticMemory(gApplicationMemory, STATIC_APP_MEMORY);
-	app->mLoadingScene = &loading;
 	app->LoadScene<MainMenuScene>();
 
 	engine.RunApplication(app);

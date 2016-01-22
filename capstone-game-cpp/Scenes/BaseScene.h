@@ -15,6 +15,8 @@ enum BaseSceneState
 
 class BaseScene : public IScene, public virtual IRendererDelegate
 {
+	friend class ScareTacticsApplication;
+
 protected:
 	Engine*					mEngine;
 	Input*					mInput;

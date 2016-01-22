@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "MainMenuScene.h"
 #include "Level00.h"
+#include "Level01.h"
 #include <ScareTacticsApplication.h>
 
 void MainMenuScene::VInitialize()
@@ -23,6 +24,10 @@ void MainMenuScene::VUpdate(double milliseconds)
 	{
 		if (mNetworkManager->StartClient())
 			Application::SharedInstance().LoadScene<Level00>();
+	}
+	if (mInput->GetKeyDown(KEYCODE_3))
+	{
+		Application::SharedInstance().LoadScene<Level01>();
 	}
 }
 
