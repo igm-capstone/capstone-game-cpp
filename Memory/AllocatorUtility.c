@@ -16,4 +16,18 @@ void* AlignedPointer(void* buffer, unsigned int alignment)
 
 	return (void*)alignedPointer;
 }
+
+void* RawPointer(void* alignedPointer)
+{
+	char* asChar = alignedPointer;
+	char adjustment = asChar[-1];
+	void* rawPointer = asChar - adjustment;
+
+	return rawPointer;
+}
 	
+char  Adjustment(void* alignedPointer)
+{
+	char* asChar = alignedPointer;
+	return asChar[-1];
+}
