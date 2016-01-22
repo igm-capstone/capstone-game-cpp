@@ -61,7 +61,7 @@ void ScareTacticsApplication::VUpdateCurrentScene()
 	else if (mSceneToLoad->mState == BASE_SCENE_STATE_RUNNING)
 	{
 		mCurrentScene = mSceneToLoad;
-		mSceneToLoad == nullptr;
+		mSceneToLoad = nullptr;
 	}
 }
 

@@ -21,8 +21,8 @@ void MainMenuScene::VUpdate(double milliseconds)
 	}
 	if (mInput->GetKeyDown(KEYCODE_2))
 	{
-		mNetworkManager->StartClient();
-		Application::SharedInstance().LoadScene<Level00>();
+		if (mNetworkManager->StartClient())
+			Application::SharedInstance().LoadScene<Level00>();
 	}
 }
 

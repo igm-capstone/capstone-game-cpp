@@ -9,6 +9,7 @@
 
 class NetworkManager
 {
+public:
 	enum Mode {
 		IDLE,
 		SERVER,
@@ -16,11 +17,6 @@ class NetworkManager
 		BOTH
 	};
 
-public:
-	NetworkManager();
-	~NetworkManager();
-
-	static unsigned int mClientID;
 	Mode mMode;
 
 	NetworkServer mServer;
@@ -32,5 +28,18 @@ public:
 	bool StopClient();
 
 	void Update();
+
+	NetworkManager();
+	~NetworkManager();
 };
 
+
+
+
+class MyUUID {
+	static int currentID;
+public:
+	static int GenUUID() {
+		return currentID++;
+	}
+};

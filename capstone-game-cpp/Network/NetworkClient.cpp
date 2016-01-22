@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "NetworkClient.h"
 
+#include "ScareTacticsApplication.h"
+#include "Scenes/Level00.h"
+
 bool NetworkClient::Init(void)
 {
 	WSADATA wsaData;
@@ -74,7 +77,7 @@ void NetworkClient::Shutdown(void)
 
 int NetworkClient::ReceiveData(char * recvBuf)
 {
-	int ret = recv(mConnectSocket, recvBuf, MAX_PACKET_SIZE, 0);
+	int ret = recv(mConnectSocket, recvBuf, MAX_DATA_SIZE, 0);
 
 	if (ret == 0)
 	{
@@ -97,12 +100,27 @@ void NetworkClient::Update()
 	{
 		packet.Deserialize(&(mNetworkData[i]));
 		switch (packet.Type) {
-			case CHNAGE_COLOR:
+			case GIVE_ID:
+				mID = packet.ClientID;
+				break;
+			case SPAWN_EXPLORER:
 				printf("client received action event packet from server\n");
+				((Level00*)Application::SharedInstance().mCurrentScene)->SpawnExistingExplorer(packet.ClientID, packet.UUID);
+				break;
+			case GRANT_AUTHORITY:
+				printf("client received action event packet from server\n");
+				((Level00*)Application::SharedInstance().mCurrentScene)->GrantAuthority(packet.UUID);
 				break;
 			default:
 				printf("error in packet types\n");
 				break;
 		}
 	}
+}
+
+
+int NetworkClient::SendData(Packet p) {
+	p.Serialize(mPacketData);
+
+	return send(mConnectSocket, mPacketData, sizeof(mPacketData), 0);
 }

@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "NetworkServer.h"
 
+#include "ScareTacticsApplication.h"
+#include "Scenes/Level00.h"
+
 bool NetworkServer::Init(void) 
 {
 	WSADATA wsaData;
@@ -88,9 +91,9 @@ void NetworkServer::CheckForNewClients()
 	char value = 1; //disable nagle on the client's socket
 	setsockopt(mClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
 	
-	mClientID++;
 	mClientList[mClientID] = mClientSocket;
-	
+	mClientID++;
+
 	printf("client %d connected\n", mClientID);
 }
 
@@ -99,13 +102,12 @@ int NetworkServer::ReceiveData(unsigned int clientID, char* recvBuf)
 	if (mClientList.find(clientID) != mClientList.end())
 	{
 		SOCKET currentSocket = mClientList[clientID];
-		int ret = recv(currentSocket, recvBuf, MAX_PACKET_SIZE, 0);
+		int ret = recv(currentSocket, recvBuf, MAX_DATA_SIZE, 0);
 
 		if (ret == 0)
 		{
 			printf("client %d disconnected\n", clientID);
 			closesocket(currentSocket);
-			mClientList.erase(clientID);
 		}
 
 		return ret;
@@ -114,15 +116,16 @@ int NetworkServer::ReceiveData(unsigned int clientID, char* recvBuf)
 	return 0;
 }
 
-void NetworkServer::SendToAll(char* buf, int bufSize)
+void NetworkServer::SendToAll(Packet p)
 {
 	SOCKET currentSocket;
 	int iSendResult;
+	p.Serialize(mPacketData);
 
 	for each (auto client in mClientList)
 	{
 		currentSocket = client.second;
-		iSendResult = send(client.second, buf, bufSize, 0);
+		iSendResult = send(client.second, mPacketData, sizeof(mPacketData), 0);
 
 		if (iSendResult == SOCKET_ERROR)
 		{
@@ -130,6 +133,21 @@ void NetworkServer::SendToAll(char* buf, int bufSize)
 			closesocket(currentSocket);
 		}
 	}
+}
+
+void NetworkServer::Send(int id, Packet p)
+{
+	int iSendResult;
+	p.Serialize(mPacketData);
+
+	iSendResult = send(mClientList[id], mPacketData, sizeof(mPacketData), 0);
+
+	if (iSendResult == SOCKET_ERROR)
+	{
+		printf("send failed with error: %d\n", WSAGetLastError());
+		closesocket(mClientList[id]);
+	}
+
 }
 
 void NetworkServer::ReceiveFromClients()
@@ -147,7 +165,13 @@ void NetworkServer::ReceiveFromClients()
 			packet.Deserialize(&(mNetworkData[i]));
 			switch (packet.Type) {
 				case INIT_CONNECTION:
-					printf("server received init packet from client\n");
+					{
+						Packet p(PacketTypes::GIVE_ID);
+						p.ClientID = client.first;
+						Send(client.first, p);
+						((Level00*)Application::SharedInstance().mCurrentScene)->SpawnNewExplorer(client.first);
+						printf("server received init packet from client\n");
+					}
 					break;
 				default:
 					printf("error in packet types\n");

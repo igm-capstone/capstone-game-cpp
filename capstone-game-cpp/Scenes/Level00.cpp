@@ -117,6 +117,11 @@ void Level00::VInitialize()
 	InitializeCamera();
 
 	mState = BASE_SCENE_STATE_RUNNING;
+
+	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
+		Packet p(PacketTypes::INIT_CONNECTION);
+		mNetworkManager->mClient.SendData(p);
+	}
 }
 
 void Level00::VUpdate(double milliseconds)
@@ -124,40 +129,6 @@ void Level00::VUpdate(double milliseconds)
 	HandleInput(*mInput);
 	mNetworkManager->Update();
 
-	static int i = 0;
-	if (mInput->GetKeyDown(KEYCODE_SPACE)) i = (i + 1) % mRobotCount;
-
-	auto robot = mRobots[i].Transform;
-	auto player = mPlayer.mTransform;
-
-	auto target = mRobots[i];
-
-	auto start = mPlayer.mTransform->GetPosition(); //Vector3(10, 20, 0);
-	auto end = target.Transform.GetPosition();
-	//grid.GetPath(start, end);
-
-	if (magnitude(end - start) < 1)  i = (i + 1) % mRobotCount;
-	/*
-	auto from = mGrid.GetNodeAt(start);
-	auto to = mGrid.GetNodeAt(end);
-
-	auto result = mGrid.pathFinder.FindPath(to, from);
-	static TargetFollower follower(*mPlayer.mTransform, mAABBs, mAABBCount);
-	const vec3f zone{ 0, 0, 5 };
-	follower.MoveTowards(target.Transform);
-
-	if (result.path.size() > 0)
-	{
-		auto it = result.path.begin();
-		auto p1 = **it;
-		for (++it; it != result.path.end(); ++it)
-		{
-			auto p2 = **it;
-			TRACE_LINE(p1.worldPos + zone, p2.worldPos + zone, Colors::blue);
-			p1 = p2;
-		}
-	}
-	*/
 	UpdateGrid();
 	UpdateRobots();
 }
@@ -176,7 +147,7 @@ void Level00::VRender()
 	mDeviceContext->ClearDepthStencilView(mRenderer->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	RenderWalls();
-	RenderPlayer();
+	RenderExplorer();
 	RenderLightCircles();
 	RenderRobots();
 	//RenderGrid();
@@ -430,9 +401,10 @@ void Level00::RenderLightCircles()
 		mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
 	}
 
-	Node* newPlayerNode = mGrid.GetNodeAt(mPlayer.mTransform->GetPosition());
-	if (true || mPlayerNode != newPlayerNode) {
-		mPlayerNode = newPlayerNode;
+	//FIXME player stuff
+	//Node* newPlayerNode = mGrid.GetNodeAt(mExplorers.mTransform->GetPosition());
+	if (true/* || mPlayerNode != newPlayerNode*/) {
+		//mPlayerNode = newPlayerNode;
 
 		InitializeGrid();
 
@@ -486,7 +458,7 @@ void Level00::RenderShadowMask() {
 	mDeviceContext->OMSetBlendState(nullptr, nullptr, ~0);
 }
 
-void Level00::RenderPlayer()
+void Level00::RenderExplorer()
 {
 	const UINT stride = sizeof(mat4f);
 	const UINT offset = 0;
@@ -501,7 +473,7 @@ void Level00::RenderPlayer()
 	mRenderer->VBindMesh(mWallMesh);
 	mDeviceContext->IASetVertexBuffers(1, 1, &mPlayerInstanceBuffer, &stride, &offset);
 
-	mDeviceContext->DrawIndexedInstanced(mWallMesh->GetIndexCount(), 1, 0, 0, 0);
+	mDeviceContext->DrawIndexedInstanced(mWallMesh->GetIndexCount(), mExplorersCount, 0, 0, 0);
 }
 
 void Level00::RenderRobots()
@@ -558,13 +530,21 @@ void Level00::RenderGrid()
 #pragma endregion
 
 #pragma region Update
-void Level00::UpdatePlayer() {
-	mat4f playerWorldMatrix = mPlayer.mTransform->GetWorldMatrix().transpose();
+void Level00::UpdateExplorer() {
+	mat4f explorerWorldMatrix[MAX_CLIENTS];
+
+	int c = 0;
+	for each(auto explorer in mExplorer) {
+		if (explorer.mIsActive) {
+			explorerWorldMatrix[c] = explorer.mTransform->GetWorldMatrix().transpose();
+			c++;
+		}
+	}
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	mDeviceContext->Map(mPlayerInstanceBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	// Copy the instances array into the instance buffer.
-	memcpy(mappedResource.pData, &playerWorldMatrix, sizeof(mat4f));
+	memcpy(mappedResource.pData, &explorerWorldMatrix, mExplorersCount*sizeof(mat4f));
 	// Unlock the instance buffer.
 	mDeviceContext->Unmap(mPlayerInstanceBuffer, 0);
 }
@@ -615,7 +595,8 @@ void Level00::UpdateGrid()
 
 void Level00::UpdateRobots()
 {
-	auto player = mPlayer.mTransform;
+	if (!mExplorer[0].mTransform) return;
+	auto player = mExplorer[0].mTransform;
 
 	for (int i = 0; i < mRobotCount; i++)
 	{
@@ -744,19 +725,67 @@ void Level00::InitializeLevel()
 	mRobotCount = mRobots.size();
 	mRobotTransforms = reinterpret_cast<mat4f*>(mSceneAllocator.Allocate(sizeof(mat4f) * mRobotCount, alignof(mat4f), 0));
 
-	// Player
-	mPlayer.mTransform = &mPlayerTransform;
-	mPlayer.mTransform->SetPosition(levelReader.mPlayerPos + vec3f(45, -20, 0));
-	//mPlayer.mTransform->RotateYaw(PI);
-
-	mPlayer.mBoxCollider = &mPlayerCollider;
-	mPlayer.mBoxCollider->origin = mPlayerTransform.GetPosition();
-	mPlayer.mBoxCollider->halfSize = vec3f(UNITY_QUAD_RADIUS) * mPlayerTransform.GetScale();
+	// SpawnPoint
+	mSpawnPoint.mTransform = &mSpawnPointTransform;
+	mSpawnPoint.mTransform->SetPosition(levelReader.mPlayerPos + vec3f(45, -20, 0));
+	
+	// Disable explorers
+	mExplorersCount = 0;
+	for each(auto &explorer in mExplorer) {
+		explorer.mIsActive = false;
+		explorer.mHasAuthority = false;
+	}
 
 	// Goal
 	mGoal.mTransform = &mGoalTransform;
 	mGoal.mTransform->SetPosition(levelReader.mGoalPos);
 	mGoal.mTransform->RotateYaw(PI);
+}
+
+void Level00::SpawnNewExplorer(int id) {
+	mExplorer[id].mTransform = &mExplorerTransform[id];
+	mExplorer[id].mTransform->SetPosition(mSpawnPoint.mTransform->GetPosition());
+
+	mExplorer[id].mBoxCollider = &mPlayerCollider;
+	mExplorer[id].mBoxCollider->origin = mExplorerTransform[id].GetPosition();
+	mExplorer[id].mBoxCollider->halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorerTransform[id].GetScale();
+
+	mExplorer[id].mIsActive = true;
+	mExplorer[id].mUUID = MyUUID::GenUUID();
+	mExplorersCount++;
+
+	if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
+		Packet p(PacketTypes::SPAWN_EXPLORER);
+		p.UUID = mExplorer[id].mUUID;
+		p.ClientID = id;
+		mNetworkManager->mServer.SendToAll(p);
+
+		Packet p2(PacketTypes::GRANT_AUTHORITY);
+		p2.UUID = mExplorer[id].mUUID;
+		mNetworkManager->mServer.Send(id, p2);
+	}
+}
+
+void Level00::SpawnExistingExplorer(int id, int UUID) {
+	mExplorer[id].mTransform = &mExplorerTransform[id];
+	mExplorer[id].mTransform->SetPosition(mSpawnPoint.mTransform->GetPosition());
+
+	mExplorer[id].mBoxCollider = &mPlayerCollider;
+	mExplorer[id].mBoxCollider->origin = mExplorerTransform[id].GetPosition();
+	mExplorer[id].mBoxCollider->halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorerTransform[id].GetScale();
+
+	mExplorer[id].mIsActive = true;
+	mExplorer[id].mUUID = UUID;
+	mExplorersCount++;
+}
+
+
+void Level00::GrantAuthority(int UUID) {
+	// Player
+	for each(auto &explorer in mExplorer) {
+		if (explorer.mUUID == UUID)
+		explorer.mHasAuthority = true;
+	}
 }
 
 void Level00::InitializeGrid()
@@ -769,7 +798,11 @@ void Level00::InitializeGrid()
 			grid[i][j].weight = -10;
 		}
 	}
-	mGrid.GetNodeAt(mPlayer.mTransform->GetPosition())->weight = 0;
+	for each(auto explorer in mExplorer) {
+		if (explorer.mIsActive)
+			mGrid.GetNodeAt(explorer.mTransform->GetPosition())->weight = 0;
+	}
+	
 
 	for (int i = 0; i < numSpheresX; i++) {
 		for (int j = 0; j < numSpheresY; j++) {
@@ -1095,7 +1128,7 @@ void Level00::InitializePlayerShaders() {
 	//Mostly, re-using Walls shaders for now (or forever)
 	// Instance buffer
 	D3D11_BUFFER_DESC playerInstanceBufferDesc;
-	playerInstanceBufferDesc.ByteWidth = sizeof(mat4f);
+	playerInstanceBufferDesc.ByteWidth = MAX_CLIENTS * sizeof(mat4f);
 	playerInstanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	playerInstanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	playerInstanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -1138,39 +1171,45 @@ void Level00::HandleInput(Input& input)
 		}
 	}
 
-
 	// Player Movement
 	float mPlayerSpeed = 0.25f;
+	//FIXME
+	for each(auto explorer in mExplorer) {
+		if (explorer.mHasAuthority && explorer.mTransform) {
+			auto pos = explorer.mTransform->GetPosition();
+			if (input.GetKey(KEYCODE_LEFT))
+			{
+				pos.x -= mPlayerSpeed;
+			}
+			if (input.GetKey(KEYCODE_RIGHT))
+			{
+				pos.x += mPlayerSpeed;
+			}
+			if (input.GetKey(KEYCODE_UP))
+			{
+				pos.y += mPlayerSpeed;
+			}
+			if (input.GetKey(KEYCODE_DOWN))
+			{
+				pos.y -= mPlayerSpeed;
+			}
 
-	auto pos = mPlayer.mTransform->GetPosition();
-	if (input.GetKey(KEYCODE_LEFT))
-	{
-		pos.x -= mPlayerSpeed;
-	}
-	if (input.GetKey(KEYCODE_RIGHT))
-	{
-		pos.x += mPlayerSpeed;
-	}
-	if (input.GetKey(KEYCODE_UP))
-	{
-		pos.y += mPlayerSpeed;
-	}
-	if (input.GetKey(KEYCODE_DOWN))
-	{
-		pos.y -= mPlayerSpeed;
-	}
+			BoxCollider aabb = { pos, explorer.mBoxCollider->halfSize };
+			bool canMove = true;
+			for (int i = 0; i < mWallCount; i++)
+			{
+				if (IntersectAABBAABB(aabb, mWallColliders[i]))
+				{
+					canMove = false;
+					break;
+				}
+			}
 
-	BoxCollider aabb = { pos, mPlayer.mBoxCollider->halfSize };
-
-	for (int i = 0; i < mWallCount; i++)
-	{
-		if (IntersectAABBAABB(aabb, mWallColliders[i]))
-		{
-			return;
+			if (canMove) {
+				explorer.mTransform->SetPosition(pos);
+				explorer.mBoxCollider->origin = pos;
+			}
 		}
 	}
-
-	mPlayer.mTransform->SetPosition(pos);
-	mPlayer.mBoxCollider->origin = pos;
-	UpdatePlayer();
+	UpdateExplorer();
 }

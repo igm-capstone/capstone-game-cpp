@@ -58,6 +58,8 @@ void NetworkManager::Update()
 		mServer.Update();
 	} 
 	else if (mMode == CLIENT) {
-		mServer.Update();
+		mClient.Update();
 	}
 }
+
+int MyUUID::currentID = 0;

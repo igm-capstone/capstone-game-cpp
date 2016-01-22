@@ -3,7 +3,7 @@
 
 
 
-SceneObject::SceneObject() : mTransform(nullptr), mMesh(nullptr), mParent(nullptr)
+SceneObject::SceneObject() : mTransform(nullptr), mMesh(nullptr), mParent(nullptr), mIsActive(true), mHasAuthority(true)
 {
 }
 

@@ -17,11 +17,16 @@ class NetworkClient
 
 private:
 	SOCKET mConnectSocket;
-	char mNetworkData[MAX_PACKET_SIZE];
+	char mNetworkData[MAX_DATA_SIZE];
+	char mPacketData[sizeof(Packet)];
+
+	int mID;
 
 public:
 	NetworkClient(void) {};
 	~NetworkClient(void) {};
+
+	int SendData(Packet p);
 
 protected:
 	bool Init();

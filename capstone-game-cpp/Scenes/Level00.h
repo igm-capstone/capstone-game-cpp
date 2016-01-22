@@ -59,7 +59,8 @@ public:
 	mat4f							mViewMatrix;
 	mat4f							mProjectionMatrix;
 
-	Transform						mPlayerTransform;
+	Transform						mSpawnPointTransform;
+	Transform						mExplorerTransform[MAX_CLIENTS];
 	Transform						mGoalTransform;
 
 	LinearAllocator					mSceneAllocator;
@@ -73,8 +74,10 @@ public:
 	SceneObject*					mBlocks;
 	SceneObject*					mWaypoints;
 	SceneObject*					mLights;
+	SceneObject						mSpawnPoint;
 
-	SceneObject						mPlayer;
+	int								mExplorersCount;
+	SceneObject						mExplorer[MAX_CLIENTS];
 	SceneObject						mGoal;
 
 	Node*							mPlayerNode;
@@ -101,6 +104,7 @@ public:
 	int								mBlockCount;
 	int								mCircleCount;
 	int								mRobotCount;
+	int								mSpawnPointCount;
 	int								mAABBCount;
 
 	IMesh*							mWallMesh;
@@ -175,11 +179,11 @@ public:
 	void RenderWalls();
 	void RenderLightCircles();
 	void RenderShadowMask();
-	void RenderPlayer();
+	void RenderExplorer();
 	void RenderRobots();
 	void RenderGrid();
 	
-	void UpdatePlayer();
+	void UpdateExplorer();
 	void UpdateGrid();
 	void UpdateRobots();
 
@@ -197,6 +201,10 @@ public:
 	void InitializeWallShaders();
 	void InitializeLightShaders();
 	void InitializePlayerShaders();
+
+	void SpawnNewExplorer(int id);
+	void SpawnExistingExplorer(int id, int UUID);
+	void GrantAuthority(int UUID);
 
 	void HandleInput(Input& input);
 };

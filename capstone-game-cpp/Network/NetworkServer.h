@@ -16,8 +16,9 @@ class NetworkServer
 private:
 	SOCKET mListenSocket;
 	SOCKET mClientSocket;
-	char mNetworkData[MAX_PACKET_SIZE];
-	
+	char mNetworkData[MAX_DATA_SIZE];
+	char mPacketData[sizeof(Packet)];
+
 	unsigned int mClientID = 0;
 	std::map<unsigned int, SOCKET> mClientList;
 
@@ -25,7 +26,8 @@ public:
 	NetworkServer(void) {};
 	~NetworkServer(void) {};
 
-	void SendToAll(char* buf, int bufSize);
+	void SendToAll(Packet p);
+	void Send(int id, Packet p);
 	
 protected:
 	bool Init();

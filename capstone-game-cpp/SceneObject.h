@@ -8,6 +8,10 @@ using namespace Rig3D;
 class SceneObject
 {
 public:
+	int				mUUID;
+	bool			mIsActive;
+	bool			mHasAuthority;
+
 	vec4f			mColor;
 	IMesh*			mMesh;
 	SceneObject*	mParent;
