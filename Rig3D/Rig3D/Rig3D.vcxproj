@@ -70,7 +70,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Application.h" />
+    <ClInclude Include="IApplication.h" />
     <ClInclude Include="Common\Input.h" />
     <ClInclude Include="Common\Timer.h" />
     <ClInclude Include="Common\Transform.h" />
@@ -110,7 +110,6 @@
     <ClInclude Include="Visibility.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Application.cpp" />
     <ClCompile Include="Common\Input.cpp" />
     <ClCompile Include="Common\Timer.cpp" />
     <ClCompile Include="Common\Transform.cpp" />

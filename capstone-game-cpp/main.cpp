@@ -3,12 +3,17 @@
 
 //#include "Scenes\MainMenu.h"
 //#include "Scenes\Credits.h"
-#include <Rig3D\Application.h>
-//#include "Scenes\Level00.h"
+#include <capstone-game-cpp/ScareTacticsApplication.h>
+#include "Scenes\Level00.h"
 #include "Scenes\LoadingScreen.h"
 #include "Scenes\MainMenuScene.h"
 
+#define STATIC_APP_MEMORY 4000000
+
+static char gApplicationMemory[STATIC_APP_MEMORY];	// 4mb
+
 Rig3D::IScene *gRig3DScene = 0;
+
 int CALLBACK WinMain(HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,
 	PSTR cmdLine,
@@ -33,11 +38,15 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 
 	LoadingScreen loading;
 
-	Application* app = engine.GetApplication();
+	Application* app = &Application::SharedInstance();
+	app->mOptions = options;
+
+	app->SetStaticMemory(gApplicationMemory, STATIC_APP_MEMORY);
 	app->mLoadingScene = &loading;
 	app->LoadScene<MainMenuScene>();
 
 	engine.RunApplication(app);
+
 	return 0;
 
 	//Level00 scene;

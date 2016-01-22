@@ -5,6 +5,11 @@ using namespace Rig3D;
 
 void LoadingScreen::VInitialize()
 {
+	mState = BASE_SCENE_STATE_INITIALIZING;
+
+	// Initialization code here
+
+	mState = BASE_SCENE_STATE_RUNNING;
 }
 
 void LoadingScreen::VUpdate(double milliseconds)
@@ -27,7 +32,9 @@ void LoadingScreen::VRender()
 
 void LoadingScreen::VShutdown()
 {
+	mState = BASE_SCENE_STATE_SHUTDOWN;
 
+	// Shutdown code here
 }
 
 void LoadingScreen::VOnResize()

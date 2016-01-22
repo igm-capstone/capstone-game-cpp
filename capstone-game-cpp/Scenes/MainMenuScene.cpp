@@ -1,10 +1,15 @@
 ﻿#include "stdafx.h"
 #include "MainMenuScene.h"
 #include "Level00.h"
+#include <ScareTacticsApplication.h>
 
 void MainMenuScene::VInitialize()
 {
+	mState = BASE_SCENE_STATE_INITIALIZING;
 
+	// Initialization code here
+
+	mState = BASE_SCENE_STATE_RUNNING;
 }
 
 void MainMenuScene::VUpdate(double milliseconds)
@@ -12,12 +17,12 @@ void MainMenuScene::VUpdate(double milliseconds)
 	if (mInput->GetKeyDown(KEYCODE_1))
 	{
 		mNetworkManager->StartServer();
-		mEngine->GetApplication()->LoadScene<Level00>();
+		Application::SharedInstance().LoadScene<Level00>();
 	}
 	if (mInput->GetKeyDown(KEYCODE_2))
 	{
 		mNetworkManager->StartClient();
-		mEngine->GetApplication()->LoadScene<Level00>();
+		Application::SharedInstance().LoadScene<Level00>();
 	}
 }
 
@@ -37,6 +42,9 @@ void MainMenuScene::VRender()
 
 void MainMenuScene::VShutdown()
 {
+	mState = BASE_SCENE_STATE_SHUTDOWN;
+
+	// Shutdown code here
 }
 
 void MainMenuScene::VOnResize()

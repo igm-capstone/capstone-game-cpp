@@ -11,7 +11,7 @@
 #include "Grid.h"
 #include "Vertex.h"
 #include "TargetFollower.h"
-#include "Rig3D/Application.h"
+#include "Rig3D/IApplication.h"
 #include "Network\NetworkManager.h"
 
 //Shaders - Headers are output from compiler

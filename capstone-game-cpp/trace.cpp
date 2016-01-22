@@ -9,7 +9,7 @@
 #include "Rig3D/GraphicsMath/cgm.h"
 #include "Rig3D/Intersection.h"
 #include "Rig3D/Parametric.h"
-#include "Rig3D/Application.h"
+#include "Rig3D/IApplication.h"
 #include "Rig3D\Engine.h"
 
 #include "Memory\Memory\LinearAllocator.h"
