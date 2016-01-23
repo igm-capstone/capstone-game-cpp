@@ -26,7 +26,7 @@ public:
 	NetworkClient(void) {};
 	~NetworkClient(void) {};
 
-	int SendData(Packet p);
+	int SendData(Packet* p);
 
 protected:
 	bool Init();

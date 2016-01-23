@@ -54,6 +54,7 @@ public:
 	}
 
 	void UnloadScene();
+	BaseScene*	GetCurrentScene() const { return mCurrentScene; }
 
 private:
 	BaseScene*		mLoadingScreen;

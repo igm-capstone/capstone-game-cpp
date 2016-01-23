@@ -15,24 +15,24 @@ enum PacketTypes {
 };
 
 struct Packet {
-	unsigned char Type;
+	unsigned char Type = UNKNOWN;
 	
 	union {
-		unsigned int UUID;
+		unsigned int UUID = 0;
 	}; //Target GO 
 
 	union {
-		unsigned int ClientID;
+		unsigned int ClientID = 0;
 	}; // Data
 	
 	union {
-		float Position[4];
+		vec3f Position = { 0 };
 	}; // Float Data
 
-	Packet() : Type(PacketTypes::UNKNOWN) {};
+	Packet() : Type(UNKNOWN) {};
 	Packet(PacketTypes t) : Type(t) {};
 
-	void Serialize(char* data) {
+	void Serialize(char* data) const {
 		memcpy(data, this, sizeof(Packet));
 	}
 

@@ -104,12 +104,13 @@ void NetworkClient::Update()
 				mID = packet.ClientID;
 				break;
 			case SPAWN_EXPLORER:
-				printf("client received action event packet from server\n");
-				((Level00*)Application::SharedInstance().mCurrentScene)->SpawnExistingExplorer(packet.ClientID, packet.UUID);
+				((Level00*)Application::SharedInstance().GetCurrentScene())->SpawnExistingExplorer(packet.ClientID, packet.UUID);
 				break;
 			case GRANT_AUTHORITY:
-				printf("client received action event packet from server\n");
-				((Level00*)Application::SharedInstance().mCurrentScene)->GrantAuthority(packet.UUID);
+				((Level00*)Application::SharedInstance().GetCurrentScene())->GrantAuthority(packet.UUID);
+				break;
+			case SYNC_TRANSFORM:
+				((Level00*)Application::SharedInstance().GetCurrentScene())->SyncTransform(packet.UUID, packet.Position);
 				break;
 			default:
 				printf("error in packet types\n");
@@ -119,8 +120,8 @@ void NetworkClient::Update()
 }
 
 
-int NetworkClient::SendData(Packet p) {
-	p.Serialize(mPacketData);
+int NetworkClient::SendData(Packet* p) {
+	p->Serialize(mPacketData);
 
 	return send(mConnectSocket, mPacketData, sizeof(mPacketData), 0);
 }

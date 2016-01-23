@@ -26,8 +26,9 @@ public:
 	NetworkServer(void) {};
 	~NetworkServer(void) {};
 
-	void SendToAll(Packet p);
-	void Send(int id, Packet p);
+	void SendToAll(Packet* p);
+	void Send(int id, Packet* p);
+	void Retransmit(int originalSender, Packet* p);
 	
 protected:
 	bool Init();

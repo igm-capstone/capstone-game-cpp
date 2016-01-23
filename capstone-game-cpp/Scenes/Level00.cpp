@@ -108,7 +108,7 @@ void Level00::VInitialize()
 
 	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
 		Packet p(PacketTypes::INIT_CONNECTION);
-		mNetworkManager->mClient.SendData(p);
+		mNetworkManager->mClient.SendData(&p);
 	}
 }
 
@@ -746,11 +746,11 @@ void Level00::SpawnNewExplorer(int id) {
 		Packet p(PacketTypes::SPAWN_EXPLORER);
 		p.UUID = mExplorer[id].mUUID;
 		p.ClientID = id;
-		mNetworkManager->mServer.SendToAll(p);
+		mNetworkManager->mServer.SendToAll(&p);
 
 		Packet p2(PacketTypes::GRANT_AUTHORITY);
 		p2.UUID = mExplorer[id].mUUID;
-		mNetworkManager->mServer.Send(id, p2);
+		mNetworkManager->mServer.Send(id, &p2);
 	}
 }
 
@@ -773,6 +773,17 @@ void Level00::GrantAuthority(int UUID) {
 	for each(auto &explorer in mExplorer) {
 		if (explorer.mUUID == UUID)
 		explorer.mHasAuthority = true;
+	}
+}
+
+void Level00::SyncTransform(int UUID, vec3f pos)
+{
+	// Player
+	for each(auto &explorer in mExplorer) {
+		if (explorer.mUUID == UUID) {
+			explorer.mTransform->SetPosition(pos);
+			explorer.mBoxCollider->origin = pos;
+		}
 	}
 }
 
@@ -1196,6 +1207,11 @@ void Level00::HandleInput(Input& input)
 			if (canMove) {
 				explorer.mTransform->SetPosition(pos);
 				explorer.mBoxCollider->origin = pos;
+
+				Packet p(PacketTypes::SYNC_TRANSFORM);
+				p.UUID = explorer.mUUID;
+				p.Position = pos;
+				mNetworkManager->mClient.SendData(&p);
 			}
 		}
 	}

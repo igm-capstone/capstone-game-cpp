@@ -116,11 +116,11 @@ int NetworkServer::ReceiveData(unsigned int clientID, char* recvBuf)
 	return 0;
 }
 
-void NetworkServer::SendToAll(Packet p)
+void NetworkServer::SendToAll(Packet* p)
 {
 	SOCKET currentSocket;
 	int iSendResult;
-	p.Serialize(mPacketData);
+	p->Serialize(mPacketData);
 
 	for each (auto client in mClientList)
 	{
@@ -135,10 +135,30 @@ void NetworkServer::SendToAll(Packet p)
 	}
 }
 
-void NetworkServer::Send(int id, Packet p)
+void NetworkServer::Retransmit(int originalSender, Packet* p)
+{
+	SOCKET currentSocket;
+	int iSendResult;
+	p->Serialize(mPacketData);
+
+	for each (auto client in mClientList)
+	{
+		if (client.first == originalSender) continue;
+		currentSocket = client.second;
+		iSendResult = send(client.second, mPacketData, sizeof(mPacketData), 0);
+
+		if (iSendResult == SOCKET_ERROR)
+		{
+			printf("send failed with error: %d\n", WSAGetLastError());
+			closesocket(currentSocket);
+		}
+	}
+}
+
+void NetworkServer::Send(int id, Packet* p)
 {
 	int iSendResult;
-	p.Serialize(mPacketData);
+	p->Serialize(mPacketData);
 
 	iSendResult = send(mClientList[id], mPacketData, sizeof(mPacketData), 0);
 
@@ -168,10 +188,13 @@ void NetworkServer::ReceiveFromClients()
 					{
 						Packet p(PacketTypes::GIVE_ID);
 						p.ClientID = client.first;
-						Send(client.first, p);
-						((Level00*)Application::SharedInstance().mCurrentScene)->SpawnNewExplorer(client.first);
-						printf("server received init packet from client\n");
+						Send(client.first, &p);
+						((Level00*)Application::SharedInstance().GetCurrentScene())->SpawnNewExplorer(client.first);
 					}
+					break;
+				case SYNC_TRANSFORM:
+					Retransmit(client.first, &packet);
+					((Level00*)Application::SharedInstance().GetCurrentScene())->SyncTransform(packet.UUID, packet.Position);
 					break;
 				default:
 					printf("error in packet types\n");
