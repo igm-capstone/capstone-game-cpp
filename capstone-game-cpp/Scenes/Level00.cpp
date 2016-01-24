@@ -135,6 +135,7 @@ void Level00::VRender()
 	mDeviceContext->ClearRenderTargetView(*mRenderer->GetRenderTargetView(), black);
 	mDeviceContext->ClearRenderTargetView(mShadowCastersRTV, transp);
 	mDeviceContext->ClearDepthStencilView(mRenderer->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	mDeviceContext->OMSetBlendState(nullptr, nullptr, ~0);
 
 	RenderWalls();
 	RenderExplorer();
