@@ -485,6 +485,8 @@ bool DX11IMGUI::Init(void* hwnd, ID3D11Device* device, ID3D11DeviceContext* devi
 	io.RenderDrawListsFn = RenderDrawLists;  // Alternatively you can set this to NULL and call ImGui::GetDrawData() after ImGui::Render() to get the same ImDrawData pointer.
 	io.ImeWindowHandle = g_hWnd;
 
+	io.IniFilename = nullptr;
+	io.LogFilename = nullptr;
 	
 	return true;
 }

@@ -2,6 +2,8 @@
 #include "capstone-game-cpp/ScareTacticsApplication.h"
 #include "Level00.h"
 #include "MainMenuScene.h"
+#include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
+#include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 
 static const vec4f gWallColor = { 1.0f, 0.0f, 1.0f, 1.0f };
 static const vec4f gCircleColor = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -144,6 +146,11 @@ void Level00::VRender()
 
 	// changes the primitive type to lines
 	RENDER_TRACE()
+
+	//FPS
+	DX11IMGUI::NewFrame();
+	RenderFPSIndicator();
+	ImGui::Render();
 
 	mRenderer->VSwapBuffers();
 }

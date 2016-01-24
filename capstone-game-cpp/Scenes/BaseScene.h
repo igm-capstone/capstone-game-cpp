@@ -37,5 +37,8 @@ public:
 	virtual ~BaseScene();
 
 	void SetStaticMemory(void* staticMemory, size_t size);
+
+	// Common methods
+	void RenderFPSIndicator();
 };
 

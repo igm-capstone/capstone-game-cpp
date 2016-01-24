@@ -6,6 +6,7 @@
 #include "Rig3D\Graphics\DirectX11\DX11RenderContext.h"
 #include "Rig3D\Graphics\DirectX11\DirectXTK\Inc\WICTextureLoader.h"
 #include "Rig3D\Graphics\DirectX11\DirectXTK\Inc\DDSTextureLoader.h"
+#include "Rig3D\Graphics\DirectX11\DX11IMGUI.h"
 #include <WindowsX.h>
 #include <sstream>
 #include <d3dcompiler.h>
@@ -135,6 +136,8 @@ int DX3D11Renderer::InitializeD3D11(HWND hwnd, Options options)
 	// is resized, so just run the OnResize method
 	VOnResize(options.mWindowWidth, options.mWindowHeight);
 
+	DX11IMGUI::Init(hwnd, mDevice, mDeviceContext);
+
 	return 0;
 }
 
@@ -197,6 +200,8 @@ void DX3D11Renderer::VShutdown()
 	//HRESULT Result = mDevice->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&DebugDevice));
 	//DebugDevice->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 	//ReleaseMacro(DebugDevice);
+
+	DX11IMGUI::Shutdown();
 
 	ReleaseMacro(mDevice);
 	ReleaseMacro(mDeviceContext);
