@@ -83,6 +83,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Factory.cpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="ScareTacticsApplication.cpp" />
     <ClCompile Include="Scenes\BaseScene.cpp" />
@@ -111,6 +112,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Factory.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ScareTacticsApplication.h" />
     <ClInclude Include="Scenes\BaseScene.h" />
