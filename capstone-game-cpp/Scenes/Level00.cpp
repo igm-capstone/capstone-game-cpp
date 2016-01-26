@@ -89,6 +89,11 @@ Level00::Level00() :
 {
 	mStaticMeshLibrary.SetAllocator(&mStaticMeshAllocator);
 	mDynamicMeshLibrary.SetAllocator(&mDynamicMeshAllocator);
+
+	mExplorer[0] = FactoryPool<Explorer>::Create();
+	mExplorer[1] = FactoryPool<Explorer>::Create();
+	mExplorer[2] = FactoryPool<Explorer>::Create();
+	mExplorer[3] = FactoryPool<Explorer>::Create();
 }
 
 void Level00::VInitialize()
@@ -531,8 +536,8 @@ void Level00::UpdateExplorer() {
 
 	int c = 0;
 	for each(auto explorer in mExplorer) {
-		if (explorer.mNetworkID->mIsActive) {
-			explorerWorldMatrix[c] = explorer.mTransform->GetWorldMatrix().transpose();
+		if (explorer->mNetworkID->mIsActive) {
+			explorerWorldMatrix[c] = explorer->mTransform->GetWorldMatrix().transpose();
 			c++;
 		}
 	}
@@ -591,8 +596,8 @@ void Level00::UpdateGrid()
 
 void Level00::UpdateRobots()
 {
-	if (!mExplorer[0].mTransform) return;
-	auto player = mExplorer[0].mTransform;
+	if (!mExplorer[0]->mTransform) return;
+	auto player = mExplorer[0]->mTransform;
 
 	for (int i = 0; i < mRobotCount; i++)
 	{
@@ -728,8 +733,8 @@ void Level00::InitializeLevel()
 	// Disable explorers
 	mExplorersCount = 0;
 	for each(auto &explorer in mExplorer) {
-		explorer.mNetworkID->mIsActive = false;
-		explorer.mNetworkID->mHasAuthority = false;
+		explorer->mNetworkID->mIsActive = false;
+		explorer->mNetworkID->mHasAuthority = false;
 	}
 
 	// Goal
@@ -739,39 +744,39 @@ void Level00::InitializeLevel()
 }
 
 void Level00::SpawnNewExplorer(int id) {
-	mExplorer[id].mTransform = &mExplorerTransform[id];
-	mExplorer[id].mTransform->SetPosition(mSpawnPoint.mTransform->GetPosition());
-
-	mExplorer[id].mBoxCollider = &mPlayerCollider;
-	mExplorer[id].mBoxCollider->origin = mExplorerTransform[id].GetPosition();
-	mExplorer[id].mBoxCollider->halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorerTransform[id].GetScale();
-
-	mExplorer[id].mNetworkID->mIsActive = true;
-	mExplorer[id].mNetworkID->mUUID = MyUUID::GenUUID();
+	mExplorer[id]->mTransform = &mExplorerTransform[id];
+	mExplorer[id]->mTransform->SetPosition(mSpawnPoint.mTransform->GetPosition());
+				 
+	mExplorer[id]->mBoxCollider = &mPlayerCollider;
+	mExplorer[id]->mBoxCollider->origin = mExplorerTransform[id].GetPosition();
+	mExplorer[id]->mBoxCollider->halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorerTransform[id].GetScale();
+				 
+	mExplorer[id]->mNetworkID->mIsActive = true;
+	mExplorer[id]->mNetworkID->mUUID = MyUUID::GenUUID();
 	mExplorersCount++;
 
 	if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
 		Packet p(PacketTypes::SPAWN_EXPLORER);
-		p.UUID = mExplorer[id].mNetworkID->mUUID;
+		p.UUID = mExplorer[id]->mNetworkID->mUUID;
 		p.ClientID = id;
 		mNetworkManager->mServer.SendToAll(&p);
 
 		Packet p2(PacketTypes::GRANT_AUTHORITY);
-		p2.UUID = mExplorer[id].mNetworkID->mUUID;
+		p2.UUID = mExplorer[id]->mNetworkID->mUUID;
 		mNetworkManager->mServer.Send(id, &p2);
 	}
 }
 
 void Level00::SpawnExistingExplorer(int id, int UUID) {
-	mExplorer[id].mTransform = &mExplorerTransform[id];
-	mExplorer[id].mTransform->SetPosition(mSpawnPoint.mTransform->GetPosition());
+	mExplorer[id]->mTransform = &mExplorerTransform[id];
+	mExplorer[id]->mTransform->SetPosition(mSpawnPoint.mTransform->GetPosition());
 
-	mExplorer[id].mBoxCollider = &mPlayerCollider;
-	mExplorer[id].mBoxCollider->origin = mExplorerTransform[id].GetPosition();
-	mExplorer[id].mBoxCollider->halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorerTransform[id].GetScale();
+	mExplorer[id]->mBoxCollider = &mPlayerCollider;
+	mExplorer[id]->mBoxCollider->origin = mExplorerTransform[id].GetPosition();
+	mExplorer[id]->mBoxCollider->halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorerTransform[id].GetScale();
 
-	mExplorer[id].mNetworkID->mIsActive = true;
-	mExplorer[id].mNetworkID->mUUID = UUID;
+	mExplorer[id]->mNetworkID->mIsActive = true;
+	mExplorer[id]->mNetworkID->mUUID = UUID;
 	mExplorersCount++;
 }
 
@@ -779,8 +784,8 @@ void Level00::SpawnExistingExplorer(int id, int UUID) {
 void Level00::GrantAuthority(int UUID) {
 	// Player
 	for each(auto &explorer in mExplorer) {
-		if (explorer.mNetworkID->mUUID == UUID)
-		explorer.mNetworkID->mHasAuthority = true;
+		if (explorer->mNetworkID->mUUID == UUID)
+		explorer->mNetworkID->mHasAuthority = true;
 	}
 }
 
@@ -788,9 +793,9 @@ void Level00::SyncTransform(int UUID, vec3f pos)
 {
 	// Player
 	for each(auto &explorer in mExplorer) {
-		if (explorer.mNetworkID->mUUID == UUID) {
-			explorer.mTransform->SetPosition(pos);
-			explorer.mBoxCollider->origin = pos;
+		if (explorer->mNetworkID->mUUID == UUID) {
+			explorer->mTransform->SetPosition(pos);
+			explorer->mBoxCollider->origin = pos;
 		}
 	}
 }
@@ -806,8 +811,8 @@ void Level00::InitializeGrid()
 		}
 	}
 	for each(auto explorer in mExplorer) {
-		if (explorer.mNetworkID->mIsActive)
-			mGrid.GetNodeAt(explorer.mTransform->GetPosition())->weight = 0;
+		if (explorer->mNetworkID->mIsActive)
+			mGrid.GetNodeAt(explorer->mTransform->GetPosition())->weight = 0;
 	}
 	
 
@@ -1183,8 +1188,8 @@ void Level00::HandleInput(Input& input)
 	float mPlayerSpeed = 0.25f;
 	//FIXME
 	for each(auto explorer in mExplorer) {
-		if (explorer.mNetworkID->mHasAuthority && explorer.mTransform) {
-			auto pos = explorer.mTransform->GetPosition();
+		if (explorer->mNetworkID->mHasAuthority && explorer->mTransform) {
+			auto pos = explorer->mTransform->GetPosition();
 			if (input.GetKey(KEYCODE_LEFT))
 			{
 				pos.x -= mPlayerSpeed;
@@ -1202,7 +1207,7 @@ void Level00::HandleInput(Input& input)
 				pos.y -= mPlayerSpeed;
 			}
 
-			BoxCollider aabb = { pos, explorer.mBoxCollider->halfSize };
+			BoxCollider aabb = { pos, explorer->mBoxCollider->halfSize };
 			bool canMove = true;
 			for (int i = 0; i < mWallCount; i++)
 			{
@@ -1214,11 +1219,11 @@ void Level00::HandleInput(Input& input)
 			}
 
 			if (canMove) {
-				explorer.mTransform->SetPosition(pos);
-				explorer.mBoxCollider->origin = pos;
+				explorer->mTransform->SetPosition(pos);
+				explorer->mBoxCollider->origin = pos;
 
 				Packet p(PacketTypes::SYNC_TRANSFORM);
-				p.UUID = explorer.mNetworkID->mUUID;
+				p.UUID = explorer->mNetworkID->mUUID;
 				p.Position = pos;
 				mNetworkManager->mClient.SendData(&p);
 			}

@@ -7,10 +7,7 @@ using namespace Rig3D;
 
 class BaseSceneObject
 {
-
 public:
-	BaseSceneObject*	mParent;
-
 	union
 	{
 		Transform*		mTransform;
@@ -18,6 +15,6 @@ public:
 	};
 
 protected:
-	BaseSceneObject() : mTransform(nullptr), mParent(nullptr) {}
+	BaseSceneObject() : mTransform(nullptr) {}
 	~BaseSceneObject() {};
 };

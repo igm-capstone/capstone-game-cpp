@@ -1,24 +1,41 @@
 #pragma once
-class IComponent {};
-class CompA : public IComponent {};
-class CompB : public IComponent {};
 
-template<class ComponentType>
-class ComponentPool
+template<class T>
+class FactoryPool
 {
 	static PoolAllocator allocator;
 
-	void operator=(const ComponentPool&) = delete;
-	ComponentPool(const ComponentPool&) = delete;
-	ComponentPool() = delete;
-	~ComponentPool() = delete;
+	void operator=(const FactoryPool&) = delete;
+	FactoryPool(const FactoryPool&) = delete;
+	FactoryPool() = delete;
+	~FactoryPool() = delete;
 
 public:
-	static ComponentType* Create()
+	static T* Create()
 	{
-		return reinterpret_cast<ComponentType*>(allocator.Allocate());
+		auto ptr = reinterpret_cast<T*>(allocator.Allocate());
+		return new (ptr) T();
 	}
 };
+
+/*
+template<class SceneObjectType>
+class SceneObjectPool
+{
+	static PoolAllocator allocator;
+
+	void operator=(const SceneObjectPool&) = delete;
+	SceneObjectPool(const SceneObjectPool&) = delete;
+	SceneObjectPool() = delete;
+	~SceneObjectPool() = delete;
+
+public:
+	static SceneObjectType* Create()
+	{
+		auto ptr =  reinterpret_cast<SceneObjectType*>(allocator.Allocate());
+		return new (ptr) SceneObjectType();
+	}
+};*/
 
 class Factory
 {

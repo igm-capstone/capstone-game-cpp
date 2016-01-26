@@ -78,7 +78,7 @@ public:
 	LegacySceneObject				mSpawnPoint;
 
 	int								mExplorersCount;
-	Explorer						mExplorer[MAX_CLIENTS];
+	Explorer*						mExplorer[4];
 	LegacySceneObject				mGoal;
 
 	Node*							mPlayerNode;
