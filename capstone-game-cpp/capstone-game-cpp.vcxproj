@@ -94,7 +94,6 @@
     <ClCompile Include="Network\NetworkManager.cpp" />
     <ClCompile Include="Network\NetworkServer.cpp" />
     <ClCompile Include="Node.cpp" />
-    <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="Scenes\Level00.cpp" />
     <ClCompile Include="Scenes\Level01.cpp" />
     <ClCompile Include="Scenes\LoadingScreen.cpp" />
@@ -112,9 +111,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Components\BaseComponent.h" />
     <ClInclude Include="Factory.h" />
+    <ClInclude Include="Components\NetworkID.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ScareTacticsApplication.h" />
+    <ClInclude Include="SceneObjects\LegacySceneObject.h" />
+    <ClInclude Include="SceneObjects\Explorer.h" />
     <ClInclude Include="Scenes\BaseScene.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="Grid.h" />
@@ -128,7 +131,7 @@
     <ClInclude Include="PathFinder\Graph.h" />
     <ClInclude Include="PathFinder\Fringe.h" />
     <ClInclude Include="RayCast.h" />
-    <ClInclude Include="SceneObject.h" />
+    <ClInclude Include="SceneObjects\BaseSceneObject.h" />
     <ClInclude Include="Scenes\Level00.h" />
     <ClInclude Include="Scenes\Level01.h" />
     <ClInclude Include="Scenes\LoadingScreen.h" />

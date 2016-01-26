@@ -531,7 +531,7 @@ void Level00::UpdateExplorer() {
 
 	int c = 0;
 	for each(auto explorer in mExplorer) {
-		if (explorer.mIsActive) {
+		if (explorer.mNetworkID->mIsActive) {
 			explorerWorldMatrix[c] = explorer.mTransform->GetWorldMatrix().transpose();
 			c++;
 		}
@@ -728,8 +728,8 @@ void Level00::InitializeLevel()
 	// Disable explorers
 	mExplorersCount = 0;
 	for each(auto &explorer in mExplorer) {
-		explorer.mIsActive = false;
-		explorer.mHasAuthority = false;
+		explorer.mNetworkID->mIsActive = false;
+		explorer.mNetworkID->mHasAuthority = false;
 	}
 
 	// Goal
@@ -746,18 +746,18 @@ void Level00::SpawnNewExplorer(int id) {
 	mExplorer[id].mBoxCollider->origin = mExplorerTransform[id].GetPosition();
 	mExplorer[id].mBoxCollider->halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorerTransform[id].GetScale();
 
-	mExplorer[id].mIsActive = true;
-	mExplorer[id].mUUID = MyUUID::GenUUID();
+	mExplorer[id].mNetworkID->mIsActive = true;
+	mExplorer[id].mNetworkID->mUUID = MyUUID::GenUUID();
 	mExplorersCount++;
 
 	if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
 		Packet p(PacketTypes::SPAWN_EXPLORER);
-		p.UUID = mExplorer[id].mUUID;
+		p.UUID = mExplorer[id].mNetworkID->mUUID;
 		p.ClientID = id;
 		mNetworkManager->mServer.SendToAll(&p);
 
 		Packet p2(PacketTypes::GRANT_AUTHORITY);
-		p2.UUID = mExplorer[id].mUUID;
+		p2.UUID = mExplorer[id].mNetworkID->mUUID;
 		mNetworkManager->mServer.Send(id, &p2);
 	}
 }
@@ -770,8 +770,8 @@ void Level00::SpawnExistingExplorer(int id, int UUID) {
 	mExplorer[id].mBoxCollider->origin = mExplorerTransform[id].GetPosition();
 	mExplorer[id].mBoxCollider->halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorerTransform[id].GetScale();
 
-	mExplorer[id].mIsActive = true;
-	mExplorer[id].mUUID = UUID;
+	mExplorer[id].mNetworkID->mIsActive = true;
+	mExplorer[id].mNetworkID->mUUID = UUID;
 	mExplorersCount++;
 }
 
@@ -779,8 +779,8 @@ void Level00::SpawnExistingExplorer(int id, int UUID) {
 void Level00::GrantAuthority(int UUID) {
 	// Player
 	for each(auto &explorer in mExplorer) {
-		if (explorer.mUUID == UUID)
-		explorer.mHasAuthority = true;
+		if (explorer.mNetworkID->mUUID == UUID)
+		explorer.mNetworkID->mHasAuthority = true;
 	}
 }
 
@@ -788,7 +788,7 @@ void Level00::SyncTransform(int UUID, vec3f pos)
 {
 	// Player
 	for each(auto &explorer in mExplorer) {
-		if (explorer.mUUID == UUID) {
+		if (explorer.mNetworkID->mUUID == UUID) {
 			explorer.mTransform->SetPosition(pos);
 			explorer.mBoxCollider->origin = pos;
 		}
@@ -806,7 +806,7 @@ void Level00::InitializeGrid()
 		}
 	}
 	for each(auto explorer in mExplorer) {
-		if (explorer.mIsActive)
+		if (explorer.mNetworkID->mIsActive)
 			mGrid.GetNodeAt(explorer.mTransform->GetPosition())->weight = 0;
 	}
 	
@@ -858,10 +858,10 @@ void Level00::LoadTransforms(mat4f** transforms, vec3f* positions, vec3f* rotati
 	}
 }
 
-void Level00::LoadStaticSceneObjects(SceneObject** sceneObjects, mat4f** transforms, BoxCollider** colliders, vec3f* positions, vec3f* rotations, vec3f* scales, int size)
+void Level00::LoadStaticSceneObjects(LegacySceneObject** sceneObjects, mat4f** transforms, BoxCollider** colliders, vec3f* positions, vec3f* rotations, vec3f* scales, int size)
 {
 	// Allocate size SceneObjects
-	*sceneObjects = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject) * size, alignof(SceneObject), 0));
+	*sceneObjects = reinterpret_cast<LegacySceneObject*>(mSceneAllocator.Allocate(sizeof(LegacySceneObject) * size, alignof(BaseSceneObject), 0));
 	*transforms = reinterpret_cast<mat4f*>(mSceneAllocator.Allocate(sizeof(mat4f) * size, alignof(mat4f), 0));
 	*colliders = reinterpret_cast<BoxCollider*>(mSceneAllocator.Allocate(sizeof(BoxCollider) * size, alignof(BoxCollider), 0));
 
@@ -875,10 +875,10 @@ void Level00::LoadStaticSceneObjects(SceneObject** sceneObjects, mat4f** transfo
 	}
 }
 
-void Level00::LoadLights(SceneObject** sceneObjects, mat4f** transforms, SphereCollider** colliders, vec3f* positions, int size)
+void Level00::LoadLights(LegacySceneObject** sceneObjects, mat4f** transforms, SphereCollider** colliders, vec3f* positions, int size)
 {
 	// Allocate size SceneObjects
-	*sceneObjects = reinterpret_cast<SceneObject*>(mSceneAllocator.Allocate(sizeof(SceneObject) * size, alignof(SceneObject), 0));
+	*sceneObjects = reinterpret_cast<LegacySceneObject*>(mSceneAllocator.Allocate(sizeof(LegacySceneObject) * size, alignof(LegacySceneObject), 0));
 	*transforms = reinterpret_cast<mat4f*>(mSceneAllocator.Allocate(sizeof(mat4f) * size, alignof(mat4f), 0));
 	*colliders = reinterpret_cast<SphereCollider*>(mSceneAllocator.Allocate(sizeof(SphereCollider) * size, alignof(SphereCollider), 0));
 
@@ -1183,7 +1183,7 @@ void Level00::HandleInput(Input& input)
 	float mPlayerSpeed = 0.25f;
 	//FIXME
 	for each(auto explorer in mExplorer) {
-		if (explorer.mHasAuthority && explorer.mTransform) {
+		if (explorer.mNetworkID->mHasAuthority && explorer.mTransform) {
 			auto pos = explorer.mTransform->GetPosition();
 			if (input.GetKey(KEYCODE_LEFT))
 			{
@@ -1218,7 +1218,7 @@ void Level00::HandleInput(Input& input)
 				explorer.mBoxCollider->origin = pos;
 
 				Packet p(PacketTypes::SYNC_TRANSFORM);
-				p.UUID = explorer.mUUID;
+				p.UUID = explorer.mNetworkID->mUUID;
 				p.Position = pos;
 				mNetworkManager->mClient.SendData(&p);
 			}

@@ -40,6 +40,7 @@ class MyUUID {
 	static int currentID;
 public:
 	static int GenUUID() {
-		return currentID++;
+		return ++currentID;
 	}
 };
+

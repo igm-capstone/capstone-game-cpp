@@ -5,7 +5,6 @@
 #include "Rig3D/GraphicsMath/cgm.h"
 #include "Rig3D/Intersection.h"
 #include "Rig3D/Parametric.h"
-#include "SceneObject.h"
 #include "LevelReader.h"
 #include "Colors.h"
 #include "Grid.h"
@@ -13,6 +12,8 @@
 #include "TargetFollower.h"
 #include "Rig3D/IApplication.h"
 #include "Network\NetworkManager.h"
+#include "SceneObjects\Explorer.h"
+#include "SceneObjects\LegacySceneObject.h"
 
 //Shaders - Headers are output from compiler
 #include "Shaders/obj/BillboardPixelShader.h"
@@ -70,15 +71,15 @@ public:
 	MeshLibrary<LinearAllocator>	mStaticMeshLibrary;
 	MeshLibrary<LinearAllocator>	mDynamicMeshLibrary;
 
-	SceneObject*					mWalls;
-	SceneObject*					mBlocks;
-	SceneObject*					mWaypoints;
-	SceneObject*					mLights;
-	SceneObject						mSpawnPoint;
+	LegacySceneObject*				mWalls;
+	LegacySceneObject*				mBlocks;
+	LegacySceneObject*				mWaypoints;
+	LegacySceneObject*				mLights;
+	LegacySceneObject				mSpawnPoint;
 
 	int								mExplorersCount;
-	SceneObject						mExplorer[MAX_CLIENTS];
-	SceneObject						mGoal;
+	Explorer						mExplorer[MAX_CLIENTS];
+	LegacySceneObject				mGoal;
 
 	Node*							mPlayerNode;
 
@@ -192,8 +193,8 @@ public:
 	void InitializeGrid();
 	void InitializeRobots();
 	void LoadTransforms(mat4f** transforms, vec3f* positions, vec3f* rotations, vec3f* scales, int size, int TransformType);
-	void LoadStaticSceneObjects(SceneObject** sceneObjects, mat4f** transforms, BoxCollider** colliders, vec3f* positions, vec3f* rotations, vec3f* scales, int size);
-	void LoadLights(SceneObject** sceneObjects, mat4f** transforms, SphereCollider** colliders, vec3f* positions, int size);
+	void LoadStaticSceneObjects(LegacySceneObject** sceneObjects, mat4f** transforms, BoxCollider** colliders, vec3f* positions, vec3f* rotations, vec3f* scales, int size);
+	void LoadLights(LegacySceneObject** sceneObjects, mat4f** transforms, SphereCollider** colliders, vec3f* positions, int size);
 	static void SetAABBs(RectInfo rectInfo, AABB<Vector2>* aabb, int offset);
 	void InitializeGeometry();
 	void InitializeQuadMesh();
