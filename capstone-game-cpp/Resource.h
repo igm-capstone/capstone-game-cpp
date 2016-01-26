@@ -5,7 +5,9 @@ class Resource
 	struct LevelInfo
 	{
 		mat4f* walls;
-		mat4f* moveableBlocks;
+		Rig3D::Transform* moveableBlocks;
+
+		short wallCount;
 	};
 
 public:

@@ -18,6 +18,8 @@ void Level01::VInitialize()
 	mState = BASE_SCENE_STATE_INITIALIZING;
 
 	auto level = Resource::LoadLevel("Assets/Level01.json", allocator);
+	mWallCount = level.wallCount;
+	mWalls = level.walls;
 
 	InitializeShaderResources();
 
@@ -27,7 +29,18 @@ void Level01::VInitialize()
 
 void Level01::InitializeShaderResources()
 {
+	D3D11_BUFFER_DESC quadInstanceBufferDesc;
+	quadInstanceBufferDesc.ByteWidth = sizeof(mat4f) * mWallCount;
+	quadInstanceBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	quadInstanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	quadInstanceBufferDesc.CPUAccessFlags = 0;
+	quadInstanceBufferDesc.MiscFlags = 0;
+	quadInstanceBufferDesc.StructureByteStride = 0;
 
+	D3D11_SUBRESOURCE_DATA instanceData;
+	instanceData.pSysMem = mWalls;
+
+	mDevice->CreateBuffer(&quadInstanceBufferDesc, &instanceData, &mWallInstanceBuffer);
 }
 
 #pragma endregion

@@ -66,11 +66,15 @@ private:
 	IMesh*			mSphereMesh;
 	IMesh*			mCubeMesh;
 
+	std::unordered_map<std::string, Rig3D::IShader*> mShaders;
+
+	LinearAllocator mGameAllocator;
 	LinearAllocator mSceneAllocator;	// Not sure if this is the best guy for the job, but we will see.
 	char*			mStaticMemory;
 	size_t			mStaticMemorySize;
 
 	void CreatePrimitives();
+	void InitializeShaders();
 };
 
 typedef Singleton<ScareTacticsApplication> Application;

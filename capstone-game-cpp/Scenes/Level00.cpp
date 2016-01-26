@@ -967,6 +967,7 @@ void Level00::InitializeWallShaders()
 		NULL,
 		&mQuadVertexShader);
 
+
 	// Before cleaning up the data, create the input layout
 	if (inputDescription) {
 		mDevice->CreateInputLayout(

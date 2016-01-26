@@ -3,6 +3,10 @@
 
 class Level01 : public BaseScene
 {
+	mat4f* mWalls;
+	short mWallCount;
+	ID3D11Buffer*					mWallInstanceBuffer;
+
 public:
 	void VOnResize() override;
 	
