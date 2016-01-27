@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Rig3D/Engine.h"
 #include "capstone-game-cpp/ScareTacticsApplication.h"
+#include "Rig3D/Graphics/DirectX11/DX11Shader.h"
 
 //Shaders - Headers are output from compiler
 #include "Shaders/obj/BillboardPixelShader.h"
@@ -69,49 +70,21 @@ void ScareTacticsApplication::InitializeShaders()
 		{ "WORLD",    3, 1, 48, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE, },
 	};
 
-	IShader* vertexShader;
+	IShader* vertexShader,* pixelShader;
 	renderer->VCreateShader(&vertexShader, &mGameAllocator);
-
-	// TODO create overload to replace block
-	// renderer->VLoadPixelShader(vertexShader, gQuadVertexShader, sizeof(gQuadVertexShader), inputElements, 5);
-	{
-		auto dxVertexShader = static_cast<DX11Shader*>(vertexShader);
-
-		device->CreateVertexShader(gQuadVertexShader, sizeof(gQuadVertexShader), nullptr,
-			&dxVertexShader->mVertexShader);
-
-		D3D11_INPUT_ELEMENT_DESC inputDescription[] =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "WORLD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-			{ "WORLD", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-			{ "WORLD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-			{ "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1 }
-		};
-
-		device->CreateInputLayout(inputDescription, 5, gQuadVertexShader,
-			sizeof(gQuadVertexShader), &dxVertexShader->mInputLayout);
-	}
-	mShaders["QuadVertex"] = vertexShader;
-
-	IShader* pixelShader;
 	renderer->VCreateShader(&pixelShader, &mGameAllocator);
 
-	// TODO create overload to replace block
-	// renderer->VLoadPixelShader(pixelShader, gQuadPixelShader, sizeof(gQuadPixelShader));
-	{
-		device->CreatePixelShader(gQuadPixelShader, sizeof(gQuadPixelShader), nullptr,
-			&static_cast<DX11Shader*>(pixelShader)->mPixelShader);
-	}
-	mShaders["QuadPixel"] = pixelShader;
+	renderer->LoadVertexShader(vertexShader, gQuadVertexShader, sizeof(gQuadVertexShader), inputElements, 5);
+	renderer->VLoadPixelShader(pixelShader, gQuadPixelShader, sizeof(gQuadPixelShader));
+
+	mShaderMap["QuadVertex"] = vertexShader;
+	mShaderMap["QuadPixel"] = pixelShader;
 }
 
 void ScareTacticsApplication::VInitialize()
 {
 	auto memory = static_cast<char*>(malloc(sizeof(char) * 1000));
 	mGameAllocator.SetMemory(memory, memory + 1000);
-
-	Renderer* renderer = Singleton<Engine>::SharedInstance().GetRenderer();
 
 	InitializeShaders();
 
@@ -172,5 +145,9 @@ void ScareTacticsApplication::VShutdown()
 		mSceneToLoad->~BaseScene();
 	}
 
+	mShaderMap["QuadVertex"]->~IShader();
+	mShaderMap["QuadPixel"]->~IShader();
+
 	mSceneAllocator.Free();
+	mGameAllocator.Free();
 }

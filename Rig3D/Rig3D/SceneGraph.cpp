@@ -16,7 +16,7 @@ SceneGraphNode* SceneGraph::GetNode(Transform* transform)
 }
 
 SceneGraph::SceneGraph(void* memoryBuffer, size_t size)
-	: mAllocator(memoryBuffer, reinterpret_cast<char*>(memoryBuffer) + size, sizeof(SceneGraphNode)) { }
+	: mAllocator(memoryBuffer, reinterpret_cast<char*>(memoryBuffer) + size, sizeof(SceneGraphNode), alignof(SceneGraphNode)) { }
 
 
 SceneGraph::~SceneGraph() { }
