@@ -35,6 +35,8 @@ namespace cliqCity
 			uint8_t* mStart;
 			uint8_t* mEnd;
 			bool     mIsOwner;
+
+			LinearAllocator(const LinearAllocator& other) = delete;
 		};
 	}
 }
