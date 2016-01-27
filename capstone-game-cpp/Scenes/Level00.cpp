@@ -90,10 +90,43 @@ Level00::Level00() :
 	mStaticMeshLibrary.SetAllocator(&mStaticMeshAllocator);
 	mDynamicMeshLibrary.SetAllocator(&mDynamicMeshAllocator);
 
-	mExplorer[0] = FactoryPool<Explorer>::Create();
-	mExplorer[1] = FactoryPool<Explorer>::Create();
-	mExplorer[2] = FactoryPool<Explorer>::Create();
-	mExplorer[3] = FactoryPool<Explorer>::Create();
+	mExplorer[0] = Pool<Explorer>::Create();
+	mExplorer[1] = Pool<Explorer>::Create();
+	mExplorer[2] = Pool<Explorer>::Create();
+	mExplorer[3] = Pool<Explorer>::Create();
+
+	auto a = Pool<Explorer>();
+	auto it = a.begin();
+	auto end = a.end();
+	Explorer& e0 = *it;
+	++it;
+	Explorer& e1 = *it;
+	Explorer& e2 = *++it;
+	it++;
+	Explorer& e3 = *it;
+
+	int n = 0;
+	if(it == end)
+	{
+		n = 1;
+	}
+	++it;
+	if (it == end)
+	{
+		n = 2;
+	}
+
+	auto j = a.begin();
+	auto j1 = j++;
+	auto j2 = ++j;
+
+	int sizeofex = sizeof(Explorer);
+	int sizeofex1 = alignof(Explorer);
+
+	for (auto& o : Pool<NetworkID>())
+	{
+		std::cout << o.mIsActive;
+	}
 }
 
 void Level00::VInitialize()

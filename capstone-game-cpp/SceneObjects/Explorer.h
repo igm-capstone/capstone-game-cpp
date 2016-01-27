@@ -1,11 +1,11 @@
 #pragma once
 #include "SceneObjects\BaseSceneObject.h"
 #include "Components\NetworkID.h"
-#include "Factory.h"
+#include "Pool.h"
 
 class Explorer : public BaseSceneObject
 {
-	friend class FactoryPool<Explorer>;
+	friend class Pool<Explorer>;
 public:
 	IMesh*		mMesh;
 	NetworkID*	mNetworkID;
@@ -17,7 +17,7 @@ public:
 
 private:
 	Explorer() : mMesh(nullptr), mNetworkID(nullptr) {
-		mNetworkID = FactoryPool<NetworkID>::Create();
+		mNetworkID = Pool<NetworkID>::Create();
 		mNetworkID->mSceneObject = this;
 	}
 	~Explorer() {};

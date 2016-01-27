@@ -7,7 +7,9 @@ using namespace Rig3D;
 
 class BaseSceneObject
 {
+	const int __pool_padding = 0xBABACACA;
 public:
+
 	union
 	{
 		Transform*		mTransform;

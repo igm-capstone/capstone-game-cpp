@@ -7,6 +7,7 @@
 #include "Scenes\Level00.h"
 #include "Scenes\LoadingScreen.h"
 #include "Scenes\MainMenuScene.h"
+#include "Pool.h"
 
 #define STATIC_APP_MEMORY 4000000
 
@@ -32,6 +33,8 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 			}
 		}
 	}
+
+//	auto a = ComponentPool<CompA>::Create();
 
 	Engine& engine = Singleton<Engine>::SharedInstance();
 
