@@ -4,7 +4,7 @@ using namespace cliqCity::multicore;
 
 TaskDispatcher::TaskDispatcher(Thread* threads, uint8_t threadCount, void* memory, size_t size) :
 	mTaskGeneration(0),
-	mAllocator(memory, reinterpret_cast<char*>(memory) + size, sizeof(Task)),
+	mAllocator(memory, reinterpret_cast<char*>(memory) + size, sizeof(Task), alignof(Task)),
 	mMemory(memory),
 	mThreads(threads),
 	mThreadCount(threadCount),

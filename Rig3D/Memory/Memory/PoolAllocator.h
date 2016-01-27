@@ -15,12 +15,18 @@ namespace cliqCity
 		public:
 			typedef PoolAllocator Node;
 
-			PoolAllocator(void* start, void* end, size_t elementSize);
-			void* Allocate();
-			void  Free(void* pointer);
+			PoolAllocator(void* start, void* end, size_t elementSize, size_t alignment, size_t offset = 0);
+			PoolAllocator();
+
+			void	SetMemory(void* start, void* end, size_t elementSize, size_t alignment, size_t offset = 0);
+			
+			void*	Allocate();
+			void	Free(void* pointer);
 
 		private:
 			Node* mNext;
+
+			PoolAllocator(const PoolAllocator& other) = delete;
 		};
 	}
 }
