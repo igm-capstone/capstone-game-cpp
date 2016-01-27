@@ -1,9 +1,16 @@
 #include "stdafx.h"
+#include "Rig3D/Engine.h"
 #include "capstone-game-cpp/ScareTacticsApplication.h"
-#include "Rig3D/Graphics/DirectX11/DX11Shader.h"
 
-#include <Shaders/obj/QuadVertexShader.h>
-#include <Shaders/obj/QuadPixelShader.h>
+//Shaders - Headers are output from compiler
+#include "Shaders/obj/BillboardPixelShader.h"
+#include "Shaders/obj/BillboardVertexShader.h"
+#include "Shaders/obj/CircleVertexShader.h"
+#include "Shaders/obj/QuadPixelShader.h"
+#include "Shaders/obj/QuadVertexShader.h"
+#include "Shaders/obj/ShadowCasterPixelShader.h"
+#include "Shaders/obj/ShadowGridComputeShader.h"
+#include "Shaders/obj/ShadowPixelShader.h"
 
 using namespace Rig3D;
 
@@ -32,22 +39,7 @@ void ScareTacticsApplication::SetStaticMemory(void* start, size_t size)
 {
 	mStaticMemory = static_cast<char*>(start);
 	mStaticMemorySize = size;
-	mSceneAllocator.SetMemory(start, mStaticMemory + STATIC_SCENE_MEMORY + 6);
-}
-
-IMesh* ScareTacticsApplication::GetPrimitive(Primitive primitive)
-{
-	switch (primitive)
-	{
-	case Primitive::Quad:
-		return mQuadMesh;
-	case Primitive::Sphere:
-		return mSphereMesh;
-	case Primitive::Cube:
-		return mCubeMesh;
-	default:
-		return nullptr;
-	}
+	mSceneAllocator.SetMemory(start, mStaticMemory + STATIC_SCENE_MEMORY + 6);	// Extra padding for alignment
 }
 
 void ScareTacticsApplication::UnloadScene()
@@ -60,32 +52,6 @@ void ScareTacticsApplication::UnloadScene()
 		_aligned_free(mCurrentScene);
 		mCurrentScene = nullptr;
 	}
-}
-
-void ScareTacticsApplication::CreatePrimitives()
-{
-	// TODO create mesh library
-	MeshLibrary<LinearAllocator> meshLibrary;
-
-	// Quad
-	vec3f quadVertices[4] = {
-		{ +1.0f, -1.0f, 0.0f },
-		{ +1.0f, +1.0f, 0.0f },
-		{ -1.0f, -1.0f, 0.0f },
-		{ -1.0f, +1.0f, 0.0f }
-	};
-
-	uint16_t quadIndices[6] = { 
-		0, 2, 1, 
-		3, 2, 0
-	};
-
-	auto engine = &Singleton<Engine>::SharedInstance();
-	auto renderer = engine->GetRenderer();
-
-	meshLibrary.NewMesh(&mQuadMesh, renderer);
-	renderer->VSetStaticMeshVertexBuffer(mQuadMesh, quadVertices, sizeof(vec3f) * 4, sizeof(vec3f));
-	renderer->VSetStaticMeshIndexBuffer(mQuadMesh, quadIndices, 6);
 }
 
 void ScareTacticsApplication::InitializeShaders()
@@ -145,8 +111,10 @@ void ScareTacticsApplication::VInitialize()
 	auto memory = static_cast<char*>(malloc(sizeof(char) * 1000));
 	mGameAllocator.SetMemory(memory, memory + 1000);
 
-	//CreatePrimitives();
+	Renderer* renderer = Singleton<Engine>::SharedInstance().GetRenderer();
+
 	InitializeShaders();
+
 	mLoadingScreen->VInitialize();
 }
 

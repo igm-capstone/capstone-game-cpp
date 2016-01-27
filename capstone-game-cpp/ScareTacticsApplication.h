@@ -3,18 +3,15 @@
 #include "capstone-game-cpp/Scenes/BaseScene.h"
 #include <Rig3D/Singleton.h>
 #include <assert.h>
+#include <unordered_map>
+#include <Rig3D/Graphics/Interface/IShader.h>
 
 using namespace Rig3D;
 
 class ScareTacticsApplication : public IApplication
 {
 public:
-	enum class Primitive
-	{
-		Quad,
-		Sphere,
-		Cube,
-	};
+	std::unordered_map<const char*, IShader*> mShaderMap;
 
 	ScareTacticsApplication();
 	~ScareTacticsApplication();
@@ -22,12 +19,12 @@ public:
 	void SetLoadingScreen(BaseScene* loading);
 	void SetStaticMemory(void* start, size_t size);
 
-	IMesh* GetPrimitive(Primitive primitive);
-
 	void VInitialize() override;
 	void VUpdateCurrentScene() override;
 	void VUpdate(float deltaTime) override;
 	void VShutdown() override;
+
+	void InitializeShaders();
 
 	template<class TScene>
 	void LoadScene()
@@ -60,21 +57,16 @@ private:
 	BaseScene*		mLoadingScreen;
 	BaseScene*		mCurrentScene;
 	BaseScene*		mSceneToLoad;
-	
-	// primitive meshes
-	IMesh*			mQuadMesh;
-	IMesh*			mSphereMesh;
-	IMesh*			mCubeMesh;
 
 	std::unordered_map<std::string, Rig3D::IShader*> mShaders;
 
 	LinearAllocator mGameAllocator;
 	LinearAllocator mSceneAllocator;	// Not sure if this is the best guy for the job, but we will see.
+	PoolAllocator	mShaderAllocator;
+	PoolAllocator	mMeshAllocator;
+
 	char*			mStaticMemory;
 	size_t			mStaticMemorySize;
-
-	void CreatePrimitives();
-	void InitializeShaders();
 };
 
 typedef Singleton<ScareTacticsApplication> Application;
