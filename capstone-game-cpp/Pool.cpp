@@ -16,5 +16,6 @@ PoolAllocator Pool<##type##>::sAllocator(__g##type##Buffer, __g##type##Buffer + 
 // create scene object pools
 CREATE_POOL(Explorer, 5)
 
+CREATE_POOL(Transform, 50)
 // create component pools
 CREATE_POOL(NetworkID, 10)
