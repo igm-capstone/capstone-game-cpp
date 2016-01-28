@@ -89,44 +89,6 @@ Level00::Level00() :
 {
 	mStaticMeshLibrary.SetAllocator(&mStaticMeshAllocator);
 	mDynamicMeshLibrary.SetAllocator(&mDynamicMeshAllocator);
-
-	mExplorer[0] = Factory<Explorer>::Create();
-	mExplorer[1] = Factory<Explorer>::Create();
-	mExplorer[2] = Factory<Explorer>::Create();
-	mExplorer[3] = Factory<Explorer>::Create();
-
-	auto a = Factory<Explorer>();
-	auto it = a.begin();
-	auto end = a.end();
-	Explorer& e0 = *it;
-	++it;
-	Explorer& e1 = *it;
-	Explorer& e2 = *++it;
-	it++;
-	Explorer& e3 = *it;
-
-	int n = 0;
-	if(it == end)
-	{
-		n = 1;
-	}
-	++it;
-	if (it == end)
-	{
-		n = 2;
-	}
-
-	auto j = a.begin();
-	auto j1 = j++;
-	auto j2 = ++j;
-
-	int sizeofex = sizeof(Explorer);
-	int sizeofex1 = alignof(Explorer);
-
-	for (auto& o : Factory<NetworkID>())
-	{
-		std::cout << o.mIsActive;
-	}
 }
 
 void Level00::VInitialize()
@@ -157,8 +119,10 @@ void Level00::VUpdate(double milliseconds)
 	HandleInput(*mInput);
 	mNetworkManager->Update();
 
+	UpdateExplorers();
 	UpdateGrid();
 	UpdateRobots();
+
 }
 
 void Level00::VRender()
@@ -564,12 +528,13 @@ void Level00::RenderGrid()
 #pragma endregion
 
 #pragma region Update
-void Level00::UpdateExplorer() {
+void Level00::UpdateExplorers() {
 	mat4f explorerWorldMatrix[MAX_CLIENTS];
 
 	int c = 0;
 	for each(auto explorer in mExplorer) {
-		if (explorer->mNetworkID->mIsActive) {
+		if (explorer->mNetworkID->mIsActive) { // player is connected
+			explorer->mController->Move();
 			explorerWorldMatrix[c] = explorer->mTransform->GetWorldMatrix().transpose();
 			c++;
 		}
@@ -763,12 +728,12 @@ void Level00::InitializeLevel()
 	mSpawnPoint.mTransform = &mSpawnPointTransform;
 	mSpawnPoint.mTransform->SetPosition(levelReader.mPlayerPos + vec3f(45, -20, 0));
 	
-	// Disable explorers
+	// Create explorers
+	mExplorer[0] = Factory<Explorer>::Create();
+	mExplorer[1] = Factory<Explorer>::Create();
+	mExplorer[2] = Factory<Explorer>::Create();
+	mExplorer[3] = Factory<Explorer>::Create();
 	mExplorersCount = 0;
-	for each(auto &explorer in mExplorer) {
-		explorer->mNetworkID->mIsActive = false;
-		explorer->mNetworkID->mHasAuthority = false;
-	}
 
 	// Goal
 	mGoal.mTransform = &mGoalTransform;
@@ -777,15 +742,15 @@ void Level00::InitializeLevel()
 }
 
 void Level00::SpawnNewExplorer(int id) {
-	mExplorer[id]->mTransform = &mExplorerTransform[id];
 	mExplorer[id]->mTransform->SetPosition(mSpawnPoint.mTransform->GetPosition());
 				 
-	mExplorer[id]->mBoxCollider = &mPlayerCollider;
-	mExplorer[id]->mBoxCollider->mCollider.origin = mExplorerTransform[id].GetPosition();
-	mExplorer[id]->mBoxCollider->mCollider.halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorerTransform[id].GetScale();
-				 
+	mExplorer[id]->mCollider->mIsActive = true;
+	mExplorer[id]->mCollider->mCollider.origin = mExplorer[id]->mTransform->GetPosition();
+	mExplorer[id]->mCollider->mCollider.halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorer[id]->mTransform->GetScale();
+
 	mExplorer[id]->mNetworkID->mIsActive = true;
 	mExplorer[id]->mNetworkID->mUUID = MyUUID::GenUUID();
+
 	mExplorersCount++;
 
 	if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
@@ -801,15 +766,15 @@ void Level00::SpawnNewExplorer(int id) {
 }
 
 void Level00::SpawnExistingExplorer(int id, int UUID) {
-	mExplorer[id]->mTransform = &mExplorerTransform[id];
 	mExplorer[id]->mTransform->SetPosition(mSpawnPoint.mTransform->GetPosition());
 
-	mExplorer[id]->mBoxCollider = &mPlayerCollider;
-	mExplorer[id]->mBoxCollider->mCollider.origin = mExplorerTransform[id].GetPosition();
-	mExplorer[id]->mBoxCollider->mCollider.halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorerTransform[id].GetScale();
+	mExplorer[id]->mCollider->mIsActive = true;
+	mExplorer[id]->mCollider->mCollider.origin = mExplorer[id]->mTransform->GetPosition();
+	mExplorer[id]->mCollider->mCollider.halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorer[id]->mTransform->GetScale();
 
 	mExplorer[id]->mNetworkID->mIsActive = true;
 	mExplorer[id]->mNetworkID->mUUID = UUID;
+
 	mExplorersCount++;
 }
 
@@ -819,6 +784,7 @@ void Level00::GrantAuthority(int UUID) {
 	for each(auto &explorer in mExplorer) {
 		if (explorer->mNetworkID->mUUID == UUID)
 		explorer->mNetworkID->mHasAuthority = true;
+		explorer->mController->mIsActive = true;
 	}
 }
 
@@ -828,7 +794,7 @@ void Level00::SyncTransform(int UUID, vec3f pos)
 	for each(auto &explorer in mExplorer) {
 		if (explorer->mNetworkID->mUUID == UUID) {
 			explorer->mTransform->SetPosition(pos);
-			explorer->mBoxCollider->mCollider.origin = pos;
+			explorer->mCollider->mCollider.origin = pos;
 		}
 	}
 }
@@ -1216,51 +1182,4 @@ void Level00::HandleInput(Input& input)
 			mCircleColorWeights[hit.index] = mCircleColorWeights[hit.index] > 0 ? 0.0f : 1.0f;
 		}
 	}
-
-	// Player Movement
-	float mPlayerSpeed = 0.25f;
-	//FIXME
-	for each(auto explorer in mExplorer) {
-		if (explorer->mNetworkID->mHasAuthority && explorer->mTransform) {
-			auto pos = explorer->mTransform->GetPosition();
-			if (input.GetKey(KEYCODE_LEFT))
-			{
-				pos.x -= mPlayerSpeed;
-			}
-			if (input.GetKey(KEYCODE_RIGHT))
-			{
-				pos.x += mPlayerSpeed;
-			}
-			if (input.GetKey(KEYCODE_UP))
-			{
-				pos.y += mPlayerSpeed;
-			}
-			if (input.GetKey(KEYCODE_DOWN))
-			{
-				pos.y -= mPlayerSpeed;
-			}
-
-			BoxCollider aabb = { pos, explorer->mBoxCollider->mCollider.halfSize };
-			bool canMove = true;
-			for (int i = 0; i < mWallCount; i++)
-			{
-				if (IntersectAABBAABB(aabb, mWallColliders[i].mCollider))
-				{
-					canMove = false;
-					break;
-				}
-			}
-
-			if (canMove) {
-				explorer->mTransform->SetPosition(pos);
-				explorer->mBoxCollider->mCollider.origin = pos;
-
-				Packet p(PacketTypes::SYNC_TRANSFORM);
-				p.UUID = explorer->mNetworkID->mUUID;
-				p.Position = pos;
-				mNetworkManager->mClient.SendData(&p);
-			}
-		}
-	}
-	UpdateExplorer();
 }
