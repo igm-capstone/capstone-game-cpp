@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Pool.h"
+#include "Factory.h"
 #include "Components\NetworkID.h"
 #include "SceneObjects\Explorer.h"
 #include "SceneObjects\Wall.h"

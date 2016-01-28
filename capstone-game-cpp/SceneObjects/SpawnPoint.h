@@ -1,7 +1,7 @@
 #pragma once
 #pragma once
 #include "BaseSceneObject.h"
-#include <Pool.h>
+#include "Factory.h"
 
 class SpawnPoint : public BaseSceneObject
 {

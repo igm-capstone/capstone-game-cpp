@@ -1,6 +1,6 @@
 #pragma once
 #include "Rig3D/Graphics/Interface/IMesh.h"
-#include <Pool.h>
+#include "Factory.h"
 
 using namespace Rig3D;
 

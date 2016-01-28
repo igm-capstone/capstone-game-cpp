@@ -1,6 +1,6 @@
 #pragma once
 #include "BaseSceneObject.h"
-#include <Pool.h>
+#include "Factory.h"
 #include <Components/ColliderComponent.h>
 
 class Wall : public BaseSceneObject

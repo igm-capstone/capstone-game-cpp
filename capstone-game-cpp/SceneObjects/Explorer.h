@@ -1,7 +1,7 @@
 #pragma once
 #include "SceneObjects\BaseSceneObject.h"
 #include "Components\NetworkID.h"
-#include "Pool.h"
+#include "Factory.h"
 #include <Components/ColliderComponent.h>
 #include <Components/ExplorerController.h>
 
