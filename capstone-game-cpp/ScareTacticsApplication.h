@@ -11,8 +11,6 @@ using namespace Rig3D;
 class ScareTacticsApplication : public IApplication
 {
 public:
-	std::unordered_map<const char*, IShader*> mShaderMap;
-
 	ScareTacticsApplication();
 	~ScareTacticsApplication();
 
@@ -57,6 +55,11 @@ private:
 	BaseScene*		mLoadingScreen;
 	BaseScene*		mCurrentScene;
 	BaseScene*		mSceneToLoad;
+
+	// Shaders
+
+	IShader* mQuadVertexShader;
+	IShader* mQuadPixelShader;
 
 	LinearAllocator mGameAllocator;
 	LinearAllocator mSceneAllocator;	// Not sure if this is the best guy for the job, but we will see.

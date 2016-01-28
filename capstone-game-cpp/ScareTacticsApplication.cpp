@@ -59,7 +59,6 @@ void ScareTacticsApplication::InitializeShaders()
 {
 	auto engine = &Singleton<Engine>::SharedInstance();
 	auto renderer = engine->GetRenderer();
-	auto device = renderer->GetDevice();
 
 	InputElement inputElements[] =
 	{
@@ -70,15 +69,11 @@ void ScareTacticsApplication::InitializeShaders()
 		{ "WORLD",    3, 1, 48, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE, },
 	};
 
-	IShader* vertexShader,* pixelShader;
-	renderer->VCreateShader(&vertexShader, &mGameAllocator);
-	renderer->VCreateShader(&pixelShader, &mGameAllocator);
+	renderer->VCreateShader(&mQuadVertexShader, &mGameAllocator);
+	renderer->VCreateShader(&mQuadPixelShader, &mGameAllocator);
 
-	renderer->LoadVertexShader(vertexShader, gQuadVertexShader, sizeof(gQuadVertexShader), inputElements, 5);
-	renderer->VLoadPixelShader(pixelShader, gQuadPixelShader, sizeof(gQuadPixelShader));
-
-	mShaderMap["QuadVertex"] = vertexShader;
-	mShaderMap["QuadPixel"] = pixelShader;
+	renderer->LoadVertexShader(mQuadVertexShader, gQuadVertexShader, sizeof(gQuadVertexShader), inputElements, 5);
+	renderer->VLoadPixelShader(mQuadPixelShader, gQuadPixelShader, sizeof(gQuadPixelShader));
 }
 
 void ScareTacticsApplication::VInitialize()
@@ -145,8 +140,8 @@ void ScareTacticsApplication::VShutdown()
 		mSceneToLoad->~BaseScene();
 	}
 
-	mShaderMap["QuadVertex"]->~IShader();
-	mShaderMap["QuadPixel"]->~IShader();
+	mQuadVertexShader->~IShader();
+	mQuadPixelShader->~IShader();
 
 	mSceneAllocator.Free();
 	mGameAllocator.Free();
