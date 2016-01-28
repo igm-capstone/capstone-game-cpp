@@ -90,12 +90,12 @@ Level00::Level00() :
 	mStaticMeshLibrary.SetAllocator(&mStaticMeshAllocator);
 	mDynamicMeshLibrary.SetAllocator(&mDynamicMeshAllocator);
 
-	mExplorer[0] = Pool<Explorer>::Create();
-	mExplorer[1] = Pool<Explorer>::Create();
-	mExplorer[2] = Pool<Explorer>::Create();
-	mExplorer[3] = Pool<Explorer>::Create();
+	mExplorer[0] = Factory<Explorer>::Create();
+	mExplorer[1] = Factory<Explorer>::Create();
+	mExplorer[2] = Factory<Explorer>::Create();
+	mExplorer[3] = Factory<Explorer>::Create();
 
-	auto a = Pool<Explorer>();
+	auto a = Factory<Explorer>();
 	auto it = a.begin();
 	auto end = a.end();
 	Explorer& e0 = *it;
@@ -123,7 +123,7 @@ Level00::Level00() :
 	int sizeofex = sizeof(Explorer);
 	int sizeofex1 = alignof(Explorer);
 
-	for (auto& o : Pool<NetworkID>())
+	for (auto& o : Factory<NetworkID>())
 	{
 		std::cout << o.mIsActive;
 	}

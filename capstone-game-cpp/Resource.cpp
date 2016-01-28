@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Resource.h"
 #include "json.h"
+#include "SceneObjects/Wall.h"
 
 using namespace std;
 using namespace Rig3D;
@@ -46,6 +47,22 @@ Transform* loadTransforms(jarr_t objs, LinearAllocator& allocator)
 
 	return transforms;
 }
+
+void loadWalls(jarr_t objs)
+{
+	for (auto obj : *objs)
+	{
+		auto position = parseVec3f(obj["position"]);
+		auto rotation = parseQuatf(obj["rotation"]);
+		auto scale    = parseVec3f(obj["scale"]);
+		
+		auto wall = Factory<Wall>::Create();
+		wall->mTransform->SetPosition(position);
+		wall->mTransform->SetRotation(rotation);
+		wall->mTransform->SetScale(scale);
+	}
+}
+
 
 mat4f* loadMatrices(jarr_t objs, LinearAllocator& allocator)
 {
@@ -109,7 +126,7 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	auto walls = obj["wall"].get_ptr<jarr_t>();
 	if (walls != nullptr)
 	{
-		level.walls = loadMatrices(walls, allocator);
+		level.walls = loadGameObjects(walls);
 		level.wallCount = walls->size();
 	}
 

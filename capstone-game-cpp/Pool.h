@@ -1,7 +1,7 @@
 #pragma once
 
 template<class ObjectType>
-class Pool
+class Factory
 {
 	using value_type      = ObjectType;
 	using reference       = value_type&;
@@ -12,9 +12,9 @@ public:
 	class iterator {
 	public:
 		typedef typename ptrdiff_t difference_type;
-		typedef typename Pool::value_type value_type;
-		typedef typename Pool::reference  reference;
-		typedef typename Pool::pointer    pointer;
+		typedef typename Factory::value_type value_type;
+		typedef typename Factory::reference  reference;
+		typedef typename Factory::pointer    pointer;
 		typedef std::input_iterator_tag iterator_category;
 
 	private:
@@ -92,8 +92,8 @@ public:
 	//	bool operator==(const Container& other) const { return true; }
 	//	bool operator!=(const Container& other) const { return false; }
 
-	//	iterator begin() { return Pool::BeginIterator(); }
-	//	iterator end() { return Pool::EndIterator(); }
+	//	iterator begin() { return Factory::BeginIterator(); }
+	//	iterator end() { return Factory::EndIterator(); }
 	//};
 
 private:
@@ -101,10 +101,10 @@ private:
 	static pointer sBuffer;
 	static size_t sCount;
 
-	//void operator=(const Pool&) = delete;
-	//Pool(const Pool&) = delete;
-	//Pool() = delete;
-	//~Pool() = delete;
+	//void operator=(const Factory&) = delete;
+	//Factory(const Factory&) = delete;
+	//Factory() = delete;
+	//~Factory() = delete;
 
 public:
 	static pointer Create()
@@ -133,7 +133,7 @@ public:
 		return iterator(sBuffer + sCount);
 	}
 
-	iterator begin() { return Pool::BeginIterator(); }
-	iterator end() { return Pool::EndIterator(); }
+	iterator begin() { return Factory::BeginIterator(); }
+	iterator end() { return Factory::EndIterator(); }
 };
 
