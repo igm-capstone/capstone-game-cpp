@@ -121,8 +121,11 @@
     <ClInclude Include="Components\NetworkID.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ScareTacticsApplication.h" />
+    <ClInclude Include="SceneObjects\SpawnPoint.h" />
     <ClInclude Include="SceneObjects\LegacySceneObject.h" />
     <ClInclude Include="SceneObjects\Explorer.h" />
+    <ClInclude Include="SceneObjects\MoveableBlock.h" />
+    <ClInclude Include="SceneObjects\Lamp.h" />
     <ClInclude Include="SceneObjects\Wall.h" />
     <ClInclude Include="Scenes\BaseScene.h" />
     <ClInclude Include="Colors.h" />
