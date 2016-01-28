@@ -126,8 +126,7 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	auto walls = obj["wall"].get_ptr<jarr_t>();
 	if (walls != nullptr)
 	{
-		level.walls = loadGameObjects(walls);
-		level.wallCount = walls->size();
+		loadWalls(walls);
 	}
 
 	return level;

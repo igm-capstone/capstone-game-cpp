@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseSceneObject.h"
 #include <Pool.h>
+#include <Components/ColliderComponent.h>
 
 class Wall : public BaseSceneObject
 {
@@ -8,14 +9,13 @@ class Wall : public BaseSceneObject
 
 public:
 	IMesh*		mMesh;
-
-	union {
-		BoxCollider*	mBoxCollider;
-		SphereCollider* mSphereCollider;
-	};
+	BoxColliderComponent*	mBoxCollider;
 
 private:
 	Wall() : mMesh(nullptr) {
+		mBoxCollider = Factory<BoxColliderComponent>::Create();
+		mBoxCollider->mSceneObject = this;
+
 		//mNetworkID = Factory<NetworkID>::Create();
 		//mNetworkID->mSceneObject = this;
 	}

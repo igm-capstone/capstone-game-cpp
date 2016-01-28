@@ -2,6 +2,7 @@
 #include "SceneObjects\BaseSceneObject.h"
 #include "Components\NetworkID.h"
 #include "Pool.h"
+#include <Components/ColliderComponent.h>
 
 class Explorer : public BaseSceneObject
 {
@@ -11,8 +12,8 @@ public:
 	NetworkID*	mNetworkID;
 	
 	union {
-		BoxCollider*	mBoxCollider;
-		SphereCollider* mSphereCollider;
+		BoxColliderComponent*	mBoxCollider;
+		SphereColliderComponent* mSphereCollider;
 	};
 
 private:

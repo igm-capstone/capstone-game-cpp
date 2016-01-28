@@ -52,6 +52,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Rig3D;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;XInput9_1_0.lib;%(AdditionalDependencies)</AdditionalDependencies>

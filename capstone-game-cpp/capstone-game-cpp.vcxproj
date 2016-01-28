@@ -54,6 +54,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Rig3D\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Rig3D.lib;Memory.lib;GraphicsMath.lib;EventHandler.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -83,6 +84,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Components\ColliderComponent.cpp" />
     <ClCompile Include="Pool.cpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="ScareTacticsApplication.cpp" />
@@ -112,6 +114,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\BaseComponent.h" />
+    <ClInclude Include="Components\ColliderComponent.h" />
     <ClInclude Include="Pool.h" />
     <ClInclude Include="Components\NetworkID.h" />
     <ClInclude Include="Resource.h" />

@@ -734,7 +734,7 @@ void Level00::InitializeLevel()
 
 	// Note: We are allocating aabbs twice!!! Maybe we should allocate our data structures before filling them out with level data?
 	mAABBCount = mWallCount + mBlockCount;
-	mAABBs = reinterpret_cast<AABB<vec2f>*>(mSceneAllocator.Allocate(sizeof(AABB<vec2f>) * (mAABBCount), alignof(AABB<vec2f>), 0));
+	mAABBs = reinterpret_cast<QuadColliderComponent*>(mSceneAllocator.Allocate(sizeof(QuadColliderComponent) * (mAABBCount), alignof(QuadColliderComponent), 0));
 	SetAABBs(levelReader.mWalls, mAABBs, 0);
 	SetAABBs(levelReader.mBlocks, mAABBs, mWallCount);
 
@@ -781,8 +781,8 @@ void Level00::SpawnNewExplorer(int id) {
 	mExplorer[id]->mTransform->SetPosition(mSpawnPoint.mTransform->GetPosition());
 				 
 	mExplorer[id]->mBoxCollider = &mPlayerCollider;
-	mExplorer[id]->mBoxCollider->origin = mExplorerTransform[id].GetPosition();
-	mExplorer[id]->mBoxCollider->halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorerTransform[id].GetScale();
+	mExplorer[id]->mBoxCollider->mCollider.origin = mExplorerTransform[id].GetPosition();
+	mExplorer[id]->mBoxCollider->mCollider.halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorerTransform[id].GetScale();
 				 
 	mExplorer[id]->mNetworkID->mIsActive = true;
 	mExplorer[id]->mNetworkID->mUUID = MyUUID::GenUUID();
@@ -805,8 +805,8 @@ void Level00::SpawnExistingExplorer(int id, int UUID) {
 	mExplorer[id]->mTransform->SetPosition(mSpawnPoint.mTransform->GetPosition());
 
 	mExplorer[id]->mBoxCollider = &mPlayerCollider;
-	mExplorer[id]->mBoxCollider->origin = mExplorerTransform[id].GetPosition();
-	mExplorer[id]->mBoxCollider->halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorerTransform[id].GetScale();
+	mExplorer[id]->mBoxCollider->mCollider.origin = mExplorerTransform[id].GetPosition();
+	mExplorer[id]->mBoxCollider->mCollider.halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorerTransform[id].GetScale();
 
 	mExplorer[id]->mNetworkID->mIsActive = true;
 	mExplorer[id]->mNetworkID->mUUID = UUID;
@@ -828,7 +828,7 @@ void Level00::SyncTransform(int UUID, vec3f pos)
 	for each(auto &explorer in mExplorer) {
 		if (explorer->mNetworkID->mUUID == UUID) {
 			explorer->mTransform->SetPosition(pos);
-			explorer->mBoxCollider->origin = pos;
+			explorer->mBoxCollider->mCollider.origin = pos;
 		}
 	}
 }
@@ -896,46 +896,46 @@ void Level00::LoadTransforms(mat4f** transforms, vec3f* positions, vec3f* rotati
 	}
 }
 
-void Level00::LoadStaticSceneObjects(LegacySceneObject** sceneObjects, mat4f** transforms, BoxCollider** colliders, vec3f* positions, vec3f* rotations, vec3f* scales, int size)
+void Level00::LoadStaticSceneObjects(LegacySceneObject** sceneObjects, mat4f** transforms, BoxColliderComponent** colliders, vec3f* positions, vec3f* rotations, vec3f* scales, int size)
 {
 	// Allocate size SceneObjects
 	*sceneObjects = reinterpret_cast<LegacySceneObject*>(mSceneAllocator.Allocate(sizeof(LegacySceneObject) * size, alignof(BaseSceneObject), 0));
 	*transforms = reinterpret_cast<mat4f*>(mSceneAllocator.Allocate(sizeof(mat4f) * size, alignof(mat4f), 0));
-	*colliders = reinterpret_cast<BoxCollider*>(mSceneAllocator.Allocate(sizeof(BoxCollider) * size, alignof(BoxCollider), 0));
+	*colliders = reinterpret_cast<BoxColliderComponent*>(mSceneAllocator.Allocate(sizeof(BoxColliderComponent) * size, alignof(BoxColliderComponent), 0));
 
 	for (int i = 0; i < size; i++)
 	{
 		(*transforms)[i] = (mat4f::scale(scales[i]) * mat4f::translate(positions[i])).transpose();
-		(*colliders)[i] = BoxCollider({ positions[i], vec3f(0.85f) * scales[i] });
+		(*colliders)[i].mCollider = BoxCollider({ positions[i], vec3f(0.85f) * scales[i] });
 
 		(*sceneObjects)[i].mWorldMatrix = transforms[i];
 		(*sceneObjects)[i].mBoxCollider = colliders[i];
 	}
 }
 
-void Level00::LoadLights(LegacySceneObject** sceneObjects, mat4f** transforms, SphereCollider** colliders, vec3f* positions, int size)
+void Level00::LoadLights(LegacySceneObject** sceneObjects, mat4f** transforms, SphereColliderComponent** colliders, vec3f* positions, int size)
 {
 	// Allocate size SceneObjects
 	*sceneObjects = reinterpret_cast<LegacySceneObject*>(mSceneAllocator.Allocate(sizeof(LegacySceneObject) * size, alignof(LegacySceneObject), 0));
 	*transforms = reinterpret_cast<mat4f*>(mSceneAllocator.Allocate(sizeof(mat4f) * size, alignof(mat4f), 0));
-	*colliders = reinterpret_cast<SphereCollider*>(mSceneAllocator.Allocate(sizeof(SphereCollider) * size, alignof(SphereCollider), 0));
+	*colliders = reinterpret_cast<SphereColliderComponent*>(mSceneAllocator.Allocate(sizeof(SphereColliderComponent) * size, alignof(SphereColliderComponent), 0));
 
 	for (int i = 0; i < size; i++)
 	{
 		(*transforms)[i] = mat4f::translate(positions[i]).transpose();
-		(*colliders)[i] = SphereCollider({ positions[i], 1.0f });
+		(*colliders)[i].mCollider = SphereCollider({ positions[i], 1.0f });
 
 		(*sceneObjects)[i].mWorldMatrix = transforms[i];
 		(*sceneObjects)[i].mSphereCollider = colliders[i];
 	}
 }
 
-void Level00::SetAABBs(RectInfo rectInfo, AABB<Vector2>* aabb, int offset)
+void Level00::SetAABBs(RectInfo rectInfo, QuadColliderComponent* aabb, int offset)
 {
 	for (size_t i = 0; i < rectInfo.Position.size(); i++)
 	{
-		aabb[i + offset].origin = rectInfo.Position[i];
-		aabb[i + offset].halfSize = rectInfo.Scale[i];
+		aabb[i + offset].mCollider.origin = rectInfo.Position[i];
+		aabb[i + offset].mCollider.halfSize = rectInfo.Scale[i];
 	}
 }
 
@@ -1240,11 +1240,11 @@ void Level00::HandleInput(Input& input)
 				pos.y -= mPlayerSpeed;
 			}
 
-			BoxCollider aabb = { pos, explorer->mBoxCollider->halfSize };
+			BoxCollider aabb = { pos, explorer->mBoxCollider->mCollider.halfSize };
 			bool canMove = true;
 			for (int i = 0; i < mWallCount; i++)
 			{
-				if (IntersectAABBAABB(aabb, mWallColliders[i]))
+				if (IntersectAABBAABB(aabb, mWallColliders[i].mCollider))
 				{
 					canMove = false;
 					break;
@@ -1253,7 +1253,7 @@ void Level00::HandleInput(Input& input)
 
 			if (canMove) {
 				explorer->mTransform->SetPosition(pos);
-				explorer->mBoxCollider->origin = pos;
+				explorer->mBoxCollider->mCollider.origin = pos;
 
 				Packet p(PacketTypes::SYNC_TRANSFORM);
 				p.UUID = explorer->mNetworkID->mUUID;

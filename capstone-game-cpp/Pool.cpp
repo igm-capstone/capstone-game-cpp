@@ -2,6 +2,7 @@
 #include "Pool.h"
 #include "Components\NetworkID.h"
 #include "SceneObjects\Explorer.h"
+#include "SceneObjects\Wall.h"
 
 #pragma region Create Pool Macro
 
@@ -15,6 +16,10 @@ PoolAllocator Factory<##type##>::sAllocator(__g##type##Buffer, __g##type##Buffer
 
 // create scene object Factorys
 CREATE_POOL(Explorer, 5)
+CREATE_POOL(Wall, 100)
+
+CREATE_POOL(Transform, 105)
 
 // create component pools
 CREATE_POOL(NetworkID, 10)
+CREATE_POOL(BoxColliderComponent, 100)
