@@ -1,6 +1,6 @@
 #pragma once
-#include "D:\Users\go4113\Capstone\capstone-game-cpp\Components\BaseComponent.h"
 #include "Rig3D/Parametric.h"
+#include "BaseComponent.h"
 
 class BoxColliderComponent :
 	public BaseComponent

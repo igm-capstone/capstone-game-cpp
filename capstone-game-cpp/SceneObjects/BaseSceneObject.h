@@ -18,7 +18,7 @@ public:
 protected:
 	BaseSceneObject() : mTransform(nullptr)
 	{
-		mTransform = Pool<Transform>::Create();
+		mTransform = Factory<Transform>::Create();
 	}
 	~BaseSceneObject() {};
 };
