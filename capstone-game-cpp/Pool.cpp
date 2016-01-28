@@ -5,6 +5,7 @@
 #include "SceneObjects\Wall.h"
 #include "SceneObjects\MoveableBlock.h"
 #include "SceneObjects\SpawnPoint.h"
+#include "SceneObjects\Pickup.h"
 
 #pragma region Create Pool Macro
 
@@ -21,6 +22,7 @@ CREATE_POOL ( Explorer,			5	)
 CREATE_POOL ( Wall,				100	)
 CREATE_POOL ( MoveableBlock,	10	)
 CREATE_POOL ( SpawnPoint,		5	)
+CREATE_POOL ( Pickup,			5	)
 
 CREATE_POOL ( Transform,		105 )
 

@@ -4,6 +4,7 @@
 #include "SceneObjects/Wall.h"
 #include "SceneObjects/MoveableBlock.h"
 #include "SceneObjects/SpawnPoint.h"
+#include "SceneObjects/Pickup.h"
 
 using namespace std;
 using namespace Rig3D;
@@ -26,29 +27,30 @@ inline quatf parseQuatf(json js)
 }
 
 
-Transform* loadTransforms(jarr_t objs, LinearAllocator& allocator)
+void loadPickups(jarr_t objs)
 {
-	auto size = sizeof(Transform) * objs->size();
-	auto transforms = reinterpret_cast<Transform*>
-		(allocator.Allocate(size, alignof(Transform), 0));
-	memset(transforms, 0, size);
-
-	auto transform = transforms;
 	for (auto obj : *objs)
 	{
 		auto position = parseVec3f(obj["position"]);
-		auto rotation = parseQuatf(obj["rotation"]);
-		auto scale = parseVec3f(obj["scale"]);
-		
-		transform->SetPosition(position);
-		transform->SetRotation(rotation);
-		transform->SetScale(scale);
 
-		transform++;
+		auto pickup = Factory<Pickup>::Create();
+		pickup->mTransform->SetPosition(position);
+		pickup->mSkill = obj["skillName"].get<string>();
 	}
-
-	return transforms;
 }
+
+
+void loadSpawnPoints(jarr_t objs)
+{
+	for (auto obj : *objs)
+	{
+		auto position = parseVec3f(obj["position"]);
+
+		auto spawnPoint = Factory<SpawnPoint>::Create();
+		spawnPoint->mTransform->SetPosition(position);
+	}
+}
+
 
 void loadWalls(jarr_t objs)
 {
@@ -62,18 +64,6 @@ void loadWalls(jarr_t objs)
 		wall->mTransform->SetPosition(position);
 		wall->mTransform->SetRotation(rotation);
 		wall->mTransform->SetScale(scale);
-	}
-}
-
-
-void loadSpawnPoints(jarr_t objs)
-{
-	for (auto obj : *objs)
-	{
-		auto position = parseVec3f(obj["position"]);
-
-		auto spawnPoint = Factory<SpawnPoint>::Create();
-		spawnPoint->mTransform->SetPosition(position);
 	}
 }
 
@@ -93,26 +83,6 @@ void loadBlocks(jarr_t objs)
 	}
 }
 
-
-mat4f* loadMatrices(jarr_t objs, LinearAllocator& allocator)
-{
-	auto transforms = reinterpret_cast<mat4f*>
-		(allocator.Allocate(sizeof(mat4f) * objs->size(), alignof(mat4f), 0));
-
-	auto transform = transforms;
-	for (auto obj : *objs)
-	{
-		mat4f translation = mat4f::translate(parseVec3f(obj["position"]));
-		mat4f rotation = parseQuatf(obj["rotation"]).toMatrix4();
-		mat4f scale = mat4f::scale(parseVec3f(obj["scale"]));
-
-		*transform = scale * rotation * translation;
-
-		transform++;
-	}
-
-	return transforms;
-}
 
 Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 {
@@ -135,16 +105,16 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		
 	}
 
-	auto pickup = obj["pickup"].get_ptr<jarr_t>();
-	if (pickup != nullptr)
+	auto pickups = obj["pickup"].get_ptr<jarr_t>();
+	if (pickups != nullptr)
 	{
-		
+		loadPickups(pickups);
 	}
 
-	auto spawnPoint = obj["spawnPoint"].get_ptr<jarr_t>();
-	if (spawnPoint != nullptr)
+	auto spawnPoints = obj["spawnPoint"].get_ptr<jarr_t>();
+	if (spawnPoints != nullptr)
 	{
-		loadSpawnPoints(spawnPoint);
+		loadSpawnPoints(spawnPoints);
 	}
 
 	auto moveableBlocks = obj["moveableBlock"].get_ptr<jarr_t>();

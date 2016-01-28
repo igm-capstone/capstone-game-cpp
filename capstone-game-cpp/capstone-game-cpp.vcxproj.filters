@@ -182,6 +182,9 @@
     <ClInclude Include="SceneObjects\SpawnPoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SceneObjects\Pickup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\QuadVertexShader.hlsl">

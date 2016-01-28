@@ -115,6 +115,7 @@
   <ItemGroup>
     <ClInclude Include="Components\BaseComponent.h" />
     <ClInclude Include="Components\ColliderComponent.h" />
+    <ClInclude Include="SceneObjects\Pickup.h" />
     <ClInclude Include="Pool.h" />
     <ClInclude Include="Components\NetworkID.h" />
     <ClInclude Include="Resource.h" />
