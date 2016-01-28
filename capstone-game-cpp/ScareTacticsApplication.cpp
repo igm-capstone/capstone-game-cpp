@@ -59,7 +59,6 @@ void ScareTacticsApplication::InitializeShaders()
 {
 	auto engine = &Singleton<Engine>::SharedInstance();
 	auto renderer = engine->GetRenderer();
-	auto device = renderer->GetDevice();
 
 	InputElement inputElements[] =
 	{
@@ -75,7 +74,6 @@ void ScareTacticsApplication::InitializeShaders()
 
 	renderer->LoadVertexShader(mQuadVertexShader, gQuadVertexShader, sizeof(gQuadVertexShader), inputElements, 5);
 	renderer->VLoadPixelShader(mQuadPixelShader, gQuadPixelShader, sizeof(gQuadPixelShader));
-
 }
 
 void ScareTacticsApplication::VInitialize()
