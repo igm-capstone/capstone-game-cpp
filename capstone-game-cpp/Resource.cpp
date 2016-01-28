@@ -2,6 +2,8 @@
 #include "Resource.h"
 #include "json.h"
 #include "SceneObjects/Wall.h"
+#include "SceneObjects/MoveableBlock.h"
+#include "SceneObjects/SpawnPoint.h"
 
 using namespace std;
 using namespace Rig3D;
@@ -54,12 +56,40 @@ void loadWalls(jarr_t objs)
 	{
 		auto position = parseVec3f(obj["position"]);
 		auto rotation = parseQuatf(obj["rotation"]);
-		auto scale    = parseVec3f(obj["scale"]);
-		
+		auto scale = parseVec3f(obj["scale"]);
+
 		auto wall = Factory<Wall>::Create();
 		wall->mTransform->SetPosition(position);
 		wall->mTransform->SetRotation(rotation);
 		wall->mTransform->SetScale(scale);
+	}
+}
+
+
+void loadSpawnPoints(jarr_t objs)
+{
+	for (auto obj : *objs)
+	{
+		auto position = parseVec3f(obj["position"]);
+
+		auto spawnPoint = Factory<SpawnPoint>::Create();
+		spawnPoint->mTransform->SetPosition(position);
+	}
+}
+
+
+void loadBlocks(jarr_t objs)
+{
+	for (auto obj : *objs)
+	{
+		auto position = parseVec3f(obj["position"]);
+		auto rotation = parseQuatf(obj["rotation"]);
+		auto scale = parseVec3f(obj["scale"]);
+
+		auto block = Factory<MoveableBlock>::Create();
+		block->mTransform->SetPosition(position);
+		block->mTransform->SetRotation(rotation);
+		block->mTransform->SetScale(scale);
 	}
 }
 
@@ -114,13 +144,13 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	auto spawnPoint = obj["spawnPoint"].get_ptr<jarr_t>();
 	if (spawnPoint != nullptr)
 	{
-		
+		loadSpawnPoints(spawnPoint);
 	}
 
 	auto moveableBlocks = obj["moveableBlock"].get_ptr<jarr_t>();
 	if (moveableBlocks != nullptr)
 	{
-		level.moveableBlocks = loadTransforms(moveableBlocks, allocator);
+		loadBlocks(moveableBlocks);
 	}
 
 	auto walls = obj["wall"].get_ptr<jarr_t>();

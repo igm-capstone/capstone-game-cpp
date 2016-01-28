@@ -3,21 +3,21 @@
 #include <Pool.h>
 #include <Components/ColliderComponent.h>
 
-class Wall : public BaseSceneObject
+class MoveableBlock : public BaseSceneObject
 {
-	friend class Factory<Wall>;
+	friend class Factory<MoveableBlock>;
 
 public:
 	IMesh*		mMesh;
 	BoxColliderComponent*	mBoxCollider;
 
 private:
-	Wall() : 
-		mMesh(nullptr),
+	MoveableBlock() : 
+		mMesh(nullptr), 
 		mBoxCollider(Factory<BoxColliderComponent>::Create())
 	{
 		mBoxCollider->mSceneObject = this;
 	}
 
-	~Wall() {};
+	~MoveableBlock() {};
 };
