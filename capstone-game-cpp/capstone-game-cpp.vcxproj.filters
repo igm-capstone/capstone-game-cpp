@@ -75,6 +75,9 @@
     <ClCompile Include="Components\ColliderComponent.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="Components\ExplorerController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PathFinder\Fringe.h">
@@ -168,6 +171,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SceneObjects\Wall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\ExplorerController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

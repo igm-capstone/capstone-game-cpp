@@ -23,3 +23,4 @@ CREATE_POOL(Transform, 105)
 // create component pools
 CREATE_POOL(NetworkID, 10)
 CREATE_POOL(BoxColliderComponent, 100)
+CREATE_POOL(ExplorerController, 5)

@@ -61,7 +61,6 @@ public:
 	mat4f							mProjectionMatrix;
 
 	Transform						mSpawnPointTransform;
-	Transform						mExplorerTransform[MAX_CLIENTS];
 	Transform						mGoalTransform;
 
 	LinearAllocator					mSceneAllocator;
@@ -82,8 +81,6 @@ public:
 	LegacySceneObject				mGoal;
 
 	Node*							mPlayerNode;
-
-	BoxColliderComponent			mPlayerCollider;
 
 	vector<RobotInfo>				mRobots;
 	TargetFollower*					mFollowers;
@@ -184,7 +181,7 @@ public:
 	void RenderRobots();
 	void RenderGrid();
 	
-	void UpdateExplorer();
+	void UpdateExplorers();
 	void UpdateGrid();
 	void UpdateRobots();
 
