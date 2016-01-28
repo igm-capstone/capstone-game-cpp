@@ -1,5 +1,6 @@
 #pragma once
 #include "SceneObjects\BaseSceneObject.h"
+#include "Components/ColliderComponent.h"
 
 class LegacySceneObject : public BaseSceneObject
 {
@@ -8,8 +9,8 @@ public:
 	IMesh*			mMesh;
 
 	union {
-		BoxCollider*	mBoxCollider;
-		SphereCollider* mSphereCollider;
+		BoxColliderComponent*		mBoxCollider;
+		SphereColliderComponent*	mSphereCollider;
 	};
 
 	LegacySceneObject() : mMesh(nullptr), mBoxCollider(nullptr) {}

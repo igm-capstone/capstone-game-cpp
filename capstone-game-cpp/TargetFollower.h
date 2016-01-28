@@ -34,13 +34,13 @@ namespace Rig3D
 		Grid&				mGrid;
 		Transform&			mTransform;
 		SearchResult<Node>	mSearchResult;
-		AABB<vec2f>*		mAABBs;
+		QuadColliderComponent*		mAABBs;
 		int					mAABBCount;
 
 		float				mReverseTime = 0;
 		float				mRepel = 0;
 
-		TargetFollower(Transform& transform, AABB<vec2f>* aabbs, int aabbbCount) :
+		TargetFollower(Transform& transform, QuadColliderComponent* aabbs, int aabbbCount) :
 			mGrid(Grid::SharedInstance()),
 			mTransform(transform),
 			mAABBs(aabbs),

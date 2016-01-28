@@ -1,5 +1,6 @@
 #pragma once
 #include "Rig3D/Intersection.h"
+#include "Components/ColliderComponent.h"
 #include <vector>
 #include <utility>
 
@@ -13,8 +14,8 @@ struct RayCastHit
 	uint32_t		index;		// Index of collider
 };
 
-template <class Vector>
-int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, uint32_t count)
+template <class Vector, class AABB>
+int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB* aabbs, uint32_t count)
 {
 	std::vector<RayCastHit<Vector>> hits;
 	hits.reserve(count);
@@ -23,7 +24,7 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, u
 	{
 		Vector poi;
 		float t;
-		if (IntersectRayAABB(ray, aabbs[i], poi, t))
+		if (IntersectRayAABB(ray, aabbs[i].mCollider, poi, t))
 		{
 			hits.push_back({ poi , 0.0f, i });	// Temp store zero for distance to save on calculations
 		}
@@ -36,10 +37,10 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, u
 
 	int minIndex = 0;
 
-	float prevDistance = cliqCity::graphicsMath::magnitudeSquared(aabbs[hits.at(0).index].origin - ray.origin);
+	float prevDistance = cliqCity::graphicsMath::magnitudeSquared(aabbs[hits.at(0).index].mCollider.origin - ray.origin);
 	for (uint32_t i = 1; i < hits.size(); i++)
 	{
-		float distance = cliqCity::graphicsMath::magnitudeSquared(aabbs[hits.at(i).index].origin - ray.origin);
+		float distance = cliqCity::graphicsMath::magnitudeSquared(aabbs[hits.at(i).index].mCollider.origin - ray.origin);
 		if (distance < prevDistance)
 		{
 			hits.at(i).distance = sqrt(distance);
@@ -53,8 +54,8 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, u
 	return 1;
 }
 
-template <class Vector>
-int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, uint32_t count, float maxDistance)
+template <class Vector, class AABB>
+int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB* aabbs, uint32_t count, float maxDistance)
 {
 	std::vector<RayCastHit<Vector>> hits;
 	hits.reserve(count);
@@ -65,7 +66,7 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, u
 	{
 		Vector poi;
 		float t;
-		if (IntersectLineAABB(line, aabbs[i], poi, t))
+		if (IntersectLineAABB(line, aabbs[i].mCollider, poi, t))
 		{
 			hits.push_back({ poi , 0.0f, i });	// Temp store zero for distance to save on calculations
 		}
@@ -78,10 +79,10 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, u
 
 	uint32_t minIndex = 0;
 
-	float prevDistance = cliqCity::graphicsMath::magnitudeSquared(aabbs[hits.at(0).index].origin - ray.origin);
+	float prevDistance = cliqCity::graphicsMath::magnitudeSquared(aabbs[hits.at(0).index].mCollider.origin - ray.origin);
 	for (uint32_t i = 1; i < hits.size(); i++)
 	{
-		float distance = cliqCity::graphicsMath::magnitudeSquared(aabbs[hits.at(i).index].origin - ray.origin);
+		float distance = cliqCity::graphicsMath::magnitudeSquared(aabbs[hits.at(i).index].mCollider.origin - ray.origin);
 		if (distance < prevDistance)
 		{
 			hits.at(i).distance = sqrt(distance);
@@ -96,7 +97,7 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, AABB<Vector>* aabbs, u
 }
 
 template<class Vector>
-int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, Sphere<Vector>* spheres, uint32_t count)
+int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, SphereColliderComponent* spheres, uint32_t count)
 {
 	uint32_t	minIndex = 0;
 	float		tMin = FLT_MAX;
@@ -105,7 +106,7 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, Sphere<Vector>* sphere
 	{
 		Vector poi;
 		float t;
-		if (IntersectRaySphere(ray, spheres[i], poi, t))
+		if (IntersectRaySphere(ray, spheres[i].mCollider, poi, t))
 		{
 			if (t < tMin) {
 				tMin = t;
@@ -124,7 +125,7 @@ int RayCast(RayCastHit<Vector>* hitInfo, Ray<Vector> ray, Sphere<Vector>* sphere
 	// Calculate stats for hit
 	hitInfo->index = minIndex;
 	hitInfo->poi = ray.origin + ray.normal * tMin;
-	hitInfo->distance = cliqCity::graphicsMath::magnitude(spheres[minIndex].origin - ray.origin);
+	hitInfo->distance = cliqCity::graphicsMath::magnitude(spheres[minIndex].mCollider.origin - ray.origin);
 
 	return 1;
 }

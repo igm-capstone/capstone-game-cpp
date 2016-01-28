@@ -4,7 +4,7 @@
 #include "PathFinder/Fringe.h"
 #include "Rig3D/GraphicsMath/cgm.h"
 #include "Rig3D/Intersection.h"
-#include "Rig3D/Parametric.h"
+#include "Components/ColliderComponent.h"
 #include "LevelReader.h"
 #include "Colors.h"
 #include "Grid.h"
@@ -83,13 +83,13 @@ public:
 
 	Node*							mPlayerNode;
 
-	BoxCollider						mPlayerCollider;
+	BoxColliderComponent			mPlayerCollider;
 
 	vector<RobotInfo>				mRobots;
 	TargetFollower*					mFollowers;
 
-	AABB<vec2f>*					mAABBs;
-	Sphere<vec3f>*					mLightColliders;
+	QuadColliderComponent*			mAABBs;
+	SphereColliderComponent*		mLightColliders;
 
 	mat4f*							mWallTransforms;
 	mat4f*							mBlockTransforms;
@@ -99,7 +99,7 @@ public:
 
 	std::vector<vec3f>				mLightPos;
 
-	BoxCollider*					mWallColliders;
+	BoxColliderComponent*					mWallColliders;
 
 	int								mWallCount;
 	int								mBlockCount;
@@ -193,9 +193,9 @@ public:
 	void InitializeGrid();
 	void InitializeRobots();
 	void LoadTransforms(mat4f** transforms, vec3f* positions, vec3f* rotations, vec3f* scales, int size, int TransformType);
-	void LoadStaticSceneObjects(LegacySceneObject** sceneObjects, mat4f** transforms, BoxCollider** colliders, vec3f* positions, vec3f* rotations, vec3f* scales, int size);
-	void LoadLights(LegacySceneObject** sceneObjects, mat4f** transforms, SphereCollider** colliders, vec3f* positions, int size);
-	static void SetAABBs(RectInfo rectInfo, AABB<Vector2>* aabb, int offset);
+	void LoadStaticSceneObjects(LegacySceneObject** sceneObjects, mat4f** transforms, BoxColliderComponent** colliders, vec3f* positions, vec3f* rotations, vec3f* scales, int size);
+	void LoadLights(LegacySceneObject** sceneObjects, mat4f** transforms, SphereColliderComponent** colliders, vec3f* positions, int size);
+	static void SetAABBs(RectInfo rectInfo, QuadColliderComponent* aabb, int offset);
 	void InitializeGeometry();
 	void InitializeQuadMesh();
 	void InitializeCircleMesh();
