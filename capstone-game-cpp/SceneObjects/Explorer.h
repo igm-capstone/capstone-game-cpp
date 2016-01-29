@@ -11,10 +11,10 @@ class Explorer : public BaseSceneObject
 {
 	friend class Factory<Explorer>;
 public:
-	IMesh*					mMesh;
-	NetworkID*				mNetworkID;
-	ExplorerController*		mController;
-	BoxColliderComponent*	mCollider;
+	IMesh*						mMesh;
+	NetworkID*					mNetworkID;
+	ExplorerController*			mController;
+	SphereColliderComponent*	mCollider;
 
 
 private:
@@ -27,7 +27,7 @@ private:
 		mController->mSceneObject = this;
 		mController->mIsActive = false;
 
-		mCollider = Factory<BoxColliderComponent>::Create();
+		mCollider = Factory<SphereColliderComponent>::Create();
 		mCollider->mSceneObject = this;
 		mCollider->mIsActive = false;
 	}

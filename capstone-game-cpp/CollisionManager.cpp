@@ -38,10 +38,16 @@ void CollisionManager::DetectCollisions()
 	{
 		for (int j = i + 1; j < mExplorers.size(); j++)
 		{
-			if (IntersectAABBAABB(mExplorers[i]->mCollider->mCollider, mExplorers[j]->mCollider->mCollider))
+			if (IntersectSphereSphere(mExplorers[i]->mCollider->mCollider, mExplorers[j]->mCollider->mCollider))
 			{
-				pCollisions[collisionsCount].colliderA.BoxCollider = mExplorers[i]->mCollider;
-				pCollisions[collisionsCount].colliderB.BoxCollider = mExplorers[j]->mCollider;
+				pCollisions[collisionsCount].colliderA.SphereCollider = mExplorers[i]->mCollider;
+				pCollisions[collisionsCount].colliderB.SphereCollider = mExplorers[j]->mCollider;
+
+				float overlap = (mExplorers[i]->mCollider->mCollider.radius + mExplorers[j]->mCollider->mCollider.radius)
+					- cliqCity::graphicsMath::magnitude(mExplorers[i]->mCollider->mCollider.origin - mExplorers[j]->mCollider->mCollider.origin);
+				vec3f AtoB = (mExplorers[j]->mCollider->mCollider.origin - mExplorers[i]->mCollider->mCollider.origin);
+				pCollisions[collisionsCount].minimumOverlap = AtoB * overlap;
+
 				collisionsCount++;
 			}
 		}
@@ -57,10 +63,16 @@ void CollisionManager::DetectCollisions()
 	{
 		for (int j = 0; j < mWalls.size(); j++)
 		{
-			if (IntersectAABBAABB(mExplorers[i]->mCollider->mCollider, mWalls[j]->mBoxCollider->mCollider))
+			vec3f cp;
+			if (IntersectSphereAABB(mExplorers[i]->mCollider->mCollider, mWalls[j]->mBoxCollider->mCollider, cp))
 			{
-				pCollisions[collisionsCount].colliderA.BoxCollider = mExplorers[i]->mCollider;
-				pCollisions[collisionsCount].colliderB.BoxCollider = mWalls[j]->mBoxCollider;
+				pCollisions[collisionsCount].colliderA.SphereCollider	= mExplorers[i]->mCollider;
+				pCollisions[collisionsCount].colliderB.BoxCollider		= mWalls[j]->mBoxCollider;
+
+				vec3f d = cp - mExplorers[i]->mCollider->mCollider.origin;
+				vec3f r = cliqCity::graphicsMath::normalize(d) * mExplorers[i]->mCollider->mCollider.radius;
+				pCollisions[collisionsCount].minimumOverlap = r - d;
+
 				collisionsCount++;
 			}
 		}
@@ -71,9 +83,31 @@ void CollisionManager::DetectCollisions()
 
 void CollisionManager::ResolveCollisions()
 {
+	Collision*	pCollisions = mCollisions;
+
 	for (int i = 0; i < mCollisionsCount; i++)
 	{
-		// Push out via MTV
+		// If object A and B are dynamic move both. If only A or B is dynamic only move A or B.
+		if (pCollisions[i].colliderA.SphereCollider->mTraits.isDynamic && pCollisions[i].colliderB.SphereCollider->mTraits.isDynamic)
+		{
+			vec3f halfOverlap = pCollisions[i].minimumOverlap * 0.5f;
+			vec3f posA = pCollisions[i].colliderA.SphereCollider->mSceneObject->mTransform->GetPosition() + halfOverlap;
+			vec3f posB = pCollisions[i].colliderB.SphereCollider->mSceneObject->mTransform->GetPosition() - halfOverlap;
+
+			pCollisions[i].colliderA.SphereCollider->mSceneObject->mTransform->SetPosition(posA);
+			pCollisions[i].colliderB.SphereCollider->mSceneObject->mTransform->SetPosition(posB);
+		}
+		else if (pCollisions[i].colliderA.SphereCollider->mTraits.isDynamic && !pCollisions[i].colliderB.SphereCollider->mTraits.isDynamic)
+		{
+			vec3f posA = pCollisions[i].colliderA.SphereCollider->mSceneObject->mTransform->GetPosition() + pCollisions[i].minimumOverlap;
+			pCollisions[i].colliderA.SphereCollider->mSceneObject->mTransform->SetPosition(posA);
+
+		}
+		else if (!pCollisions[i].colliderA.SphereCollider->mTraits.isDynamic && pCollisions[i].colliderB.SphereCollider->mTraits.isDynamic)
+		{
+			vec3f posB = pCollisions[i].colliderB.SphereCollider->mSceneObject->mTransform->GetPosition() - pCollisions[i].minimumOverlap;
+			pCollisions[i].colliderB.SphereCollider->mSceneObject->mTransform->SetPosition(posB);
+		}
 	}
 
 	// Last thing

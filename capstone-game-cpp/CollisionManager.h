@@ -12,6 +12,8 @@ struct Collision
 		SphereColliderComponent*	SphereCollider;
 		QuadColliderComponent*		QuadCollider;
 	} colliderA, colliderB;
+
+	vec3f minimumOverlap;	// This is a vector in colliderA frame of reference
 };
 
 class Explorer;
