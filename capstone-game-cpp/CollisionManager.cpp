@@ -34,9 +34,9 @@ void CollisionManager::DetectCollisions()
 
 	Collision*	pCollisions = mCollisions;
 	uint32_t	collisionsCount = 0;
-	for (int i = 0; i < mExplorers.size(); i++)
+	for (uint32_t i = 0; i < mExplorers.size(); i++)
 	{
-		for (int j = i + 1; j < mExplorers.size(); j++)
+		for (uint32_t j = i + 1; j < mExplorers.size(); j++)
 		{
 			if (IntersectSphereSphere(mExplorers[i]->mCollider->mCollider, mExplorers[j]->mCollider->mCollider))
 			{
@@ -59,9 +59,9 @@ void CollisionManager::DetectCollisions()
 
 	// Explorer / Wall Collisions
 
-	for (int i = 0; i < mExplorers.size(); i++)
+	for (uint32_t i = 0; i < mExplorers.size(); i++)
 	{
-		for (int j = 0; j < mWalls.size(); j++)
+		for (uint32_t j = 0; j < mWalls.size(); j++)
 		{
 			vec3f cp;
 			if (IntersectSphereAABB(mExplorers[i]->mCollider->mCollider, mWalls[j]->mBoxCollider->mCollider, cp))
@@ -85,7 +85,7 @@ void CollisionManager::ResolveCollisions()
 {
 	Collision*	pCollisions = mCollisions;
 
-	for (int i = 0; i < mCollisionsCount; i++)
+	for (uint32_t i = 0; i < mCollisionsCount; i++)
 	{
 		// If object A and B are dynamic move both. If only A or B is dynamic only move A or B.
 		if (pCollisions[i].colliderA.SphereCollider->mTraits.isDynamic && pCollisions[i].colliderB.SphereCollider->mTraits.isDynamic)

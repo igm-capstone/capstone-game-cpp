@@ -32,4 +32,5 @@ REGISTER_FACTORY ( Transform,	105 )
 // register component factories
 REGISTER_FACTORY ( NetworkID,				10	)
 REGISTER_FACTORY ( BoxColliderComponent,	100	)
+REGISTER_FACTORY ( SphereColliderComponent, 100 )
 REGISTER_FACTORY ( ExplorerController,		5	)
