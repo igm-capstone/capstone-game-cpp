@@ -2,6 +2,8 @@
 #include <Components/ColliderComponent.h>
 #include <Config.h>
 
+#define MAX_COLLISIONS 128
+
 struct Collision
 {
 	union Collider
@@ -10,6 +12,8 @@ struct Collision
 		SphereColliderComponent*	SphereCollider;
 		QuadColliderComponent*		QuadCollider;
 	} colliderA, colliderB;
+
+	vec3f minimumOverlap;	// This is a vector in colliderA frame of reference
 };
 
 class Explorer;
@@ -26,9 +30,8 @@ public:
 	void ResolveCollisions();
 
 private:
-	PoolAllocator mAllocator;
-	Collision*	  mCollisions;
-	uint32_t	  mCollisionCount;
+	Collision mCollisions[MAX_COLLISIONS];
+	uint32_t  mCollisionsCount;
 
 	std::vector<Explorer*>  mExplorers;
 	std::vector<Wall*>		mWalls;
