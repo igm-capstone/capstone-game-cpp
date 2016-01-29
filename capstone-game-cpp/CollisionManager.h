@@ -2,6 +2,8 @@
 #include <Components/ColliderComponent.h>
 #include <Config.h>
 
+#define MAX_COLLISIONS 128
+
 struct Collision
 {
 	union Collider
@@ -26,9 +28,8 @@ public:
 	void ResolveCollisions();
 
 private:
-	PoolAllocator mAllocator;
-	Collision*	  mCollisions;
-	uint32_t	  mCollisionCount;
+	Collision mCollisions[MAX_COLLISIONS];
+	uint32_t  mCollisionsCount;
 
 	std::vector<Explorer*>  mExplorers;
 	std::vector<Wall*>		mWalls;

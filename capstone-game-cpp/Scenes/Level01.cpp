@@ -23,6 +23,8 @@ void Level01::VInitialize()
 
 	InitializeShaderResources();
 
+	mCollisionManager.Initialize();
+
 	mState = BASE_SCENE_STATE_RUNNING;
 }
 

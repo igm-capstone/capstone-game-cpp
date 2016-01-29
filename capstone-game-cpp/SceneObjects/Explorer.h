@@ -5,6 +5,8 @@
 #include <Components/ColliderComponent.h>
 #include <Components/ExplorerController.h>
 
+#define MAX_EXPLORERS 4
+
 class Explorer : public BaseSceneObject
 {
 	friend class Factory<Explorer>;
