@@ -11,6 +11,8 @@ CollisionManager::CollisionManager() : mCollisionsCount(0)
 
 CollisionManager::~CollisionManager()
 {
+	mExplorers.clear();
+	mWalls.clear();
 }
 
 void CollisionManager::Initialize()
