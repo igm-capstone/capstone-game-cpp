@@ -46,6 +46,7 @@ public:
 
 	void VRender() override;
 	void RenderWalls();
+	void RenderExplorers();
 
 	void VShutdown() override;
 };

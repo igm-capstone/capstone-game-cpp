@@ -143,6 +143,12 @@ void Level01::RenderWalls()
 	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mWallMesh0->GetIndexCount(), mWallCount0, 0, 0, 0);
 }
 
+void Level01::RenderExplorers()
+{
+	
+}
+
+
 #pragma endregion
 
 void Level01::VShutdown()
