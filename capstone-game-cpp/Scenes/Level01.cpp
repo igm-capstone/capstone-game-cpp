@@ -25,7 +25,7 @@ Level01::~Level01()
 
 void Level01::VOnResize()
 {
-	mMainCamera.SetProjectionMatrix(mat4f::normalizedPerspectiveLH(0.25f * PI, mRenderer->GetAspectRatio(), 0.1f, 100.0f));
+	mMainCamera.SetProjectionMatrix(mat4f::normalizedPerspectiveLH(0.25f * PI, mRenderer->GetAspectRatio(), 0.1f, 1000.0f));
 }
 
 #pragma region Initialization
@@ -35,6 +35,7 @@ void Level01::VInitialize()
 	mState = BASE_SCENE_STATE_INITIALIZING;
 
 	mAllocator.SetMemory(mStaticMemory, mStaticMemory + mStaticMemorySize);
+	mRenderer->SetDelegate(this);
 
 	auto level = Resource::LoadLevel("Assets/Level01.json", mAllocator);
 	mWallCount0 = level.wallCount;
@@ -45,6 +46,8 @@ void Level01::VInitialize()
 	InitializeMainCamera();
 
 	mCollisionManager.Initialize();
+
+	VOnResize();
 
 	mState = BASE_SCENE_STATE_RUNNING;
 }
@@ -58,6 +61,8 @@ void Level01::InitializeGeometry()
 	std::vector<uint16_t> indices;
 
 	Geometry::Cube(vertices, indices, 2);
+
+	
 
 	mRenderer->VSetMeshVertexBuffer(mWallMesh0, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
 	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
@@ -90,7 +95,7 @@ void Level01::InitializeShaderResources()
 void Level01::InitializeMainCamera()
 {
 	// Use to set view based on network logic
-	mMainCamera.SetViewMatrix(mat4f::lookAtLH(kVectorZero, vec3f(0.0f, 0.0f, -20.0f), kVectorUp));
+	mMainCamera.SetViewMatrix(mat4f::lookAtLH(kVectorZero, vec3f(10.0f, 0.0f, -100.0f), kVectorUp));
 }
 #pragma endregion
 
@@ -129,10 +134,11 @@ void Level01::RenderWalls()
 	mRenderer->VSetVertexShader(mApplication->mQuadVertexShader);
 	mRenderer->VSetPixelShader(mApplication->mQuadPixelShader);
 
-	mRenderer->VSetPixelShaderConstantBuffer(mWallShaderResource, 0, 0);
+	mRenderer->VUpdateShaderConstantBuffer(mWallShaderResource, &mPVM.camera, 0);
 
 	mRenderer->VBindMesh(mWallMesh0);
 	mRenderer->VSetVertexShaderInstanceBuffer(mWallShaderResource, 0, 1);
+	mRenderer->VSetVertexShaderConstantBuffer(mWallShaderResource, 0, 0);
 
 	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mWallMesh0->GetIndexCount(), mWallCount0, 0, 0, 0);
 }
