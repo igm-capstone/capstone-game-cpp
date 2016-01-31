@@ -140,11 +140,13 @@ namespace Rig3D
 		static void Cube(std::vector<Vertex>& vertices, std::vector<Index>& indices, uint32_t subdivisions)
 		{
 			vertices.reserve(sizeof(Vertex) * subdivisions * subdivisions * 6);
-			indices.reserve(sizeof(Index) * (subdivisions - 1) * (subdivisions - 1) * 6 * 6);
+			indices.reserve(sizeof(Index) * (subdivisions - 1) * (subdivisions - 1) * 36);
 
 			float halfExtents = 0.5f;
 
 			float step = 1.0f / static_cast<float>(subdivisions - 1);
+
+			uint32_t faceOffset = 0;
 
 			// Top
 			for (uint32_t z = 0; z < subdivisions; z++)
@@ -164,14 +166,16 @@ namespace Rig3D
 				for (uint32_t x = 0; x < subdivisions - 1; x++)
 				{
 					indices.push_back((z * subdivisions) + x);
-					indices.push_back(((z + 1) * subdivisions) + x);
-					indices.push_back(((z + 1) * subdivisions) + x + 1);
-					indices.push_back(((z + 1) * subdivisions) + x + 1);
 					indices.push_back((z * subdivisions) + x + 1);
+					indices.push_back(((z + 1) * subdivisions) + x + 1);
+					indices.push_back(((z + 1) * subdivisions) + x + 1);
+					indices.push_back(((z + 1) * subdivisions) + x);
 					indices.push_back((z * subdivisions) + x);
 				}
 			}
 		
+			faceOffset += 4;
+
 			// Bottom
 			for (uint32_t z = 0; z < subdivisions; z++)
 			{
@@ -179,7 +183,7 @@ namespace Rig3D
 				{
 					Vertex v0;
 					v0.Position = { x * step - halfExtents, -halfExtents, z * step - halfExtents };
-					v0.Normal = { 0.0f, 1.0f, 0.0f };
+					v0.Normal = { 0.0f, -1.0f, 0.0f };
 					v0.UV = { static_cast<float>(x) / (subdivisions - 1), 1.0f - (static_cast<float>(z) / (subdivisions - 1)) };
 					vertices.push_back(v0);
 				}
@@ -189,66 +193,72 @@ namespace Rig3D
 			{
 				for (uint32_t x = 0; x < subdivisions - 1; x++)
 				{
-					indices.push_back((z * subdivisions) + x);
-					indices.push_back((z * subdivisions) + x + 1);
-					indices.push_back(((z + 1) * subdivisions) + x + 1);
-					indices.push_back(((z + 1) * subdivisions) + x + 1);
-					indices.push_back(((z + 1) * subdivisions) + x);
-					indices.push_back((z * subdivisions) + x);
+					indices.push_back((z * subdivisions) + x + faceOffset);
+					indices.push_back(((z + 1) * subdivisions) + x + 1 + faceOffset);
+					indices.push_back(((z + 1) * subdivisions) + x + faceOffset);
+					indices.push_back((z * subdivisions) + x + 1 + faceOffset);
+					indices.push_back(((z + 1) * subdivisions) + x + 1 + faceOffset);
+					indices.push_back((z * subdivisions) + x + faceOffset);
 				}
 			}
 			
+			faceOffset += 4;
+
 			// Right
-			for (uint32_t z = 0; z < subdivisions; z++)
+			for (uint32_t y = 0; y < subdivisions; y++)
 			{
-				for (uint32_t y = 0; y < subdivisions; y++)
+				for (uint32_t z = 0; z < subdivisions; z++)
 				{
 					Vertex v0;
-					v0.Position = {halfExtents, y * step - halfExtents, z * step - halfExtents };
-					v0.Normal = { 0.0f, 1.0f, 0.0f };
+					v0.Position = { halfExtents, y * step - halfExtents, z * step - halfExtents };
+					v0.Normal = { 1.0f, 0.0f, 0.0f };
 					v0.UV = { static_cast<float>(y) / (subdivisions - 1), 1.0f - (static_cast<float>(z) / (subdivisions - 1)) };
 					vertices.push_back(v0);
 				}
 			}
 
-			for (uint32_t z = 0; z < subdivisions - 1; z++)
+			for (uint32_t y = 0; y < subdivisions - 1; y++)
 			{
-				for (uint32_t y = 0; y < subdivisions - 1; y++)
+				for (uint32_t z = 0; z < subdivisions - 1; z++)
 				{
-					indices.push_back((z * subdivisions) + y);
-					indices.push_back(((z + 1) * subdivisions) + y);
-					indices.push_back(((z + 1) * subdivisions) + y + 1);
-					indices.push_back(((z + 1) * subdivisions) + y + 1);
-					indices.push_back((z * subdivisions) + y + 1);
-					indices.push_back((z * subdivisions) + y);
+					indices.push_back((z * subdivisions) + y + faceOffset);
+					indices.push_back(((z + 1) * subdivisions) + y + faceOffset);
+					indices.push_back(((z + 1) * subdivisions) + y + 1 + faceOffset);
+					indices.push_back(((z + 1) * subdivisions) + y + 1 + faceOffset);
+					indices.push_back((z * subdivisions) + y + 1 + faceOffset);
+					indices.push_back((z * subdivisions) + y + faceOffset);
 				}
 			}
 
+			faceOffset += 4;
+
 			// Left
-			for (uint32_t z = 0; z < subdivisions; z++)
+			for (uint32_t y = 0; y < subdivisions; y++)
 			{
-				for (uint32_t y = 0; y < subdivisions; y++)
+				for (uint32_t z = 0; z < subdivisions; z++)
 				{
 					Vertex v0;
 					v0.Position = { -halfExtents, y * step - halfExtents, z * step - halfExtents };
-					v0.Normal = { 0.0f, 1.0f, 0.0f };
+					v0.Normal = { -1.0f, 0.0f, 0.0f };
 					v0.UV = { static_cast<float>(y) / (subdivisions - 1), 1.0f - (static_cast<float>(z) / (subdivisions - 1)) };
 					vertices.push_back(v0);
 				}
 			}
 
-			for (uint32_t z = 0; z < subdivisions - 1; z++)
+			for (uint32_t y = 0; y < subdivisions - 1; y++)
 			{
-				for (uint32_t y = 0; y < subdivisions - 1; y++)
+				for (uint32_t z = 0; z < subdivisions - 1; z++)
 				{
-					indices.push_back((z * subdivisions) + y);
-					indices.push_back((z * subdivisions) + y + 1);
-					indices.push_back(((z + 1) * subdivisions) + y + 1);
-					indices.push_back(((z + 1) * subdivisions) + y + 1);
-					indices.push_back(((z + 1) * subdivisions) + y);
-					indices.push_back((z * subdivisions) + y);
+					indices.push_back((z * subdivisions) + y + faceOffset);
+					indices.push_back(((z + 1) * subdivisions) + y + 1 + faceOffset);
+					indices.push_back((z * subdivisions) + y + 1 + faceOffset);
+					indices.push_back(((z + 1) * subdivisions) + y + faceOffset);
+					indices.push_back(((z + 1) * subdivisions) + y + 1 + faceOffset);
+					indices.push_back((z * subdivisions) + y + faceOffset);
 				}
 			}
+
+			faceOffset += 4;
 
 			// Front
 			for (uint32_t y = 0; y < subdivisions; y++)
@@ -257,7 +267,7 @@ namespace Rig3D
 				{
 					Vertex v0;
 					v0.Position = { x * step - halfExtents, y * step - halfExtents, -halfExtents};
-					v0.Normal = { 0.0f, 1.0f, 0.0f };
+					v0.Normal = { 0.0f, 0.0f, -1.0f };
 					v0.UV = { static_cast<float>(x) / (subdivisions - 1), 1.0f - (static_cast<float>(y) / (subdivisions - 1)) };
 					vertices.push_back(v0);
 				}
@@ -267,14 +277,16 @@ namespace Rig3D
 			{
 				for (uint32_t x = 0; x < subdivisions - 1; x++)
 				{
-					indices.push_back((y * subdivisions) + x);
-					indices.push_back(((y + 1) * subdivisions) + x);
-					indices.push_back(((y + 1) * subdivisions) + x + 1);
-					indices.push_back(((y + 1) * subdivisions) + x + 1);
-					indices.push_back((y * subdivisions) + x + 1);
-					indices.push_back((y * subdivisions) + x);
+					indices.push_back((y * subdivisions) + x + faceOffset);
+					indices.push_back(((y + 1) * subdivisions) + x + faceOffset);
+					indices.push_back(((y + 1) * subdivisions) + x + 1 + faceOffset);
+					indices.push_back(((y + 1) * subdivisions) + x + 1 + faceOffset);
+					indices.push_back((y * subdivisions) + x + 1 + faceOffset);
+					indices.push_back((y * subdivisions) + x + faceOffset);
 				}
 			}
+
+			faceOffset += 4;
 
 			// Back
 			for (uint32_t y = 0; y < subdivisions; y++)
@@ -283,7 +295,7 @@ namespace Rig3D
 				{
 					Vertex v0;
 					v0.Position = { x * step - halfExtents, y * step - halfExtents, halfExtents };
-					v0.Normal = { 0.0f, 1.0f, 0.0f };
+					v0.Normal = { 0.0f, 0.0f, 1.0f };
 					v0.UV = { static_cast<float>(x) / (subdivisions - 1), 1.0f - (static_cast<float>(y) / (subdivisions - 1)) };
 					vertices.push_back(v0);
 				}
@@ -293,12 +305,12 @@ namespace Rig3D
 			{
 				for (uint32_t x = 0; x < subdivisions - 1; x++)
 				{
-					indices.push_back((y * subdivisions) + x);
-					indices.push_back((y * subdivisions) + x + 1);
-					indices.push_back(((y + 1) * subdivisions) + x + 1);
-					indices.push_back(((y + 1) * subdivisions) + x + 1);
-					indices.push_back(((y + 1) * subdivisions) + x);
-					indices.push_back((y * subdivisions) + x);
+					indices.push_back((y * subdivisions) + x + faceOffset);
+					indices.push_back(((y + 1) * subdivisions) + x + 1 + faceOffset);
+					indices.push_back((y * subdivisions) + x + 1 + faceOffset);
+					indices.push_back(((y + 1) * subdivisions) + x + faceOffset);
+					indices.push_back(((y + 1) * subdivisions) + x + 1 + faceOffset);
+					indices.push_back((y * subdivisions) + x + faceOffset);
 				}
 			}
 		}
