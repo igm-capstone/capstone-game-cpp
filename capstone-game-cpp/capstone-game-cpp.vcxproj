@@ -153,6 +153,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TargetFollower.h" />
     <ClInclude Include="trace.h" />
+    <ClInclude Include="Uniforms.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
