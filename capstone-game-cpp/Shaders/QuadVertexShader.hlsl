@@ -1,30 +1,29 @@
 struct Vertex
 {
-	float3		mPosition	: POSITION;
-	float4x4	mWorld		: WORLD;
+	float3		position	: POSITION;
+	float3		normal		: NORMAL;
+	float2		uv			: TEXCOORD;
+	float4x4	world		: WORLD;
 //	uint		mInstanceID	: SV_InstanceID;
 };
 
 struct Pixel
 {
-	float4 mPositionH	: SV_POSITION;
-	float4 mColor		: COLOR;
+	float4 positionH	: SV_POSITION;
 };
 
 cbuffer transform : register(b0)
 {
-	matrix view;
 	matrix projection;
-	float4 color;
+	matrix view;
 }
 
 Pixel main(Vertex vertex)
 {
-	matrix clip = mul(mul(vertex.mWorld, view), projection);
+	matrix clip = mul(mul(vertex.world, view), projection);
 
 	Pixel pixel;
-	pixel.mPositionH = mul(float4(vertex.mPosition, 1.0f), clip);
-	pixel.mColor = color;
+	pixel.positionH = mul(float4(vertex.position, 1.0f), clip);
 
 	return pixel;
 }
