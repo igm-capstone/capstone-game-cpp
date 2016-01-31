@@ -60,7 +60,7 @@ void MainMenuScene::RenderUI()
 	if (ImGui::Button("Start Server"))
 	{
 		mNetworkManager->StartServer();
-		Application::SharedInstance().LoadScene<Level00>();
+		Application::SharedInstance().LoadScene<Level01>();
 	}
 	if (ImGui::Button("Start Client"))
 	{

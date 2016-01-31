@@ -165,6 +165,15 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		loadWalls(walls);
 	}
 
+	level.wallCount = static_cast<short>(walls->size());
+	level.walls = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.wallCount, alignof(mat4f), 0));
+
+	int i = 0;
+	for (Wall& w : Factory<Wall>())
+	{
+		level.walls[i++] = w.mTransform->GetWorldMatrix().transpose();
+	}
+
 	return level;
 }
 

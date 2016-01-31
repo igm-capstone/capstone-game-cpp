@@ -1,5 +1,5 @@
 #pragma once
-//#include "Rig3D/Memory/Memory/AllocatorUtility.h"
+#include <Memory/Memory/AllocatorUtility.h>
 
 template<class ObjectType>
 class Factory
@@ -126,35 +126,15 @@ public:
 
 	static iterator BeginIterator()
 	{
-		return iterator(Aligned());
+		return iterator(reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type))));
 	}
 
 	static iterator EndIterator()
 	{
-		return iterator(Aligned() + sCount);
+		return iterator(reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type))) + sCount);
 	}
 
 	iterator begin() { return Factory::BeginIterator(); }
 	iterator end() { return Factory::EndIterator(); }
-
-private:
-	static pointer Aligned()
-	{
-		unsigned int alignment = alignof(value_type);
-
-		// Create mask to round down.
-		char mask = (alignment - 1);
-		char* rawPointer = reinterpret_cast<char*>(sBuffer);
-
-		char misalignment = char(rawPointer) & mask;
-		char adjustment = alignment - misalignment;
-		char* alignedPointer = rawPointer + adjustment;
-
-		assert(adjustment < 256);
-		alignedPointer[-1] = adjustment;
-
-		return reinterpret_cast<pointer>(alignedPointer);
-		//return reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type)));
-	}
 };
 

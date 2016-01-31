@@ -62,17 +62,19 @@ void ScareTacticsApplication::InitializeShaders()
 
 	InputElement inputElements[] =
 	{
-		{ "POSITION", 0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX,   },
-		{ "WORLD",    0, 1, 0,  1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE, },
-		{ "WORLD",    1, 1, 16, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE, },
-		{ "WORLD",    2, 1, 32, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE, },
-		{ "WORLD",    3, 1, 48, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE, },
+		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX   },
+		{ "NORMAL",		0, 0, 12,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "TEXCOORD",	0, 0, 24,  0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "WORLD",		0, 1, 0,  1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
+		{ "WORLD",		1, 1, 16, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
+		{ "WORLD",		2, 1, 32, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
+		{ "WORLD",		3, 1, 48, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
 	};
 
 	renderer->VCreateShader(&mQuadVertexShader, &mGameAllocator);
 	renderer->VCreateShader(&mQuadPixelShader, &mGameAllocator);
 
-	renderer->LoadVertexShader(mQuadVertexShader, gQuadVertexShader, sizeof(gQuadVertexShader), inputElements, 5);
+	renderer->LoadVertexShader(mQuadVertexShader, gQuadVertexShader, sizeof(gQuadVertexShader), inputElements, 7);
 	renderer->VLoadPixelShader(mQuadPixelShader, gQuadPixelShader, sizeof(gQuadPixelShader));
 }
 
