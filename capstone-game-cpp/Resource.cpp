@@ -111,6 +111,8 @@ void loadWalls(jarr_t objs)
 	{
 		auto wall = Factory<Wall>::Create();
 		parseTransform(obj, wall->mTransform);
+		wall->mBoxCollider->mCollider.origin = wall->mTransform->GetPosition();
+		wall->mBoxCollider->mCollider.halfSize = wall->mTransform->GetScale() * 0.5f;
 	}
 }
 

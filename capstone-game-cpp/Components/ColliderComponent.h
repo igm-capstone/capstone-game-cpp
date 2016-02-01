@@ -5,15 +5,14 @@
 struct ColliderTraits
 {
 	bool isDynamic = true;
-
 };
 
 class BoxColliderComponent :
 	public BaseComponent
 {
 public:
-	BoxCollider		mCollider;
 	ColliderTraits	mTraits;
+	BoxCollider		mCollider;
 
 	BoxColliderComponent();
 	~BoxColliderComponent();
@@ -23,8 +22,8 @@ class QuadColliderComponent :
 	public BaseComponent
 {
 public:
-	BoxCollider2D mCollider;
 	ColliderTraits	mTraits;
+	BoxCollider2D mCollider;
 
 	QuadColliderComponent();
 	~QuadColliderComponent();
@@ -34,8 +33,8 @@ class SphereColliderComponent :
 	public BaseComponent
 {
 public:
-	SphereCollider mCollider;
 	ColliderTraits	mTraits;
+	SphereCollider mCollider;
 
 	SphereColliderComponent();
 	~SphereColliderComponent();

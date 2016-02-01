@@ -71,7 +71,7 @@ void CollisionManager::DetectCollisions()
 
 				vec3f d = cp - mExplorers[i]->mCollider->mCollider.origin;
 				vec3f r = cliqCity::graphicsMath::normalize(d) * mExplorers[i]->mCollider->mCollider.radius;
-				pCollisions[collisionsCount].minimumOverlap = r - d;
+				pCollisions[collisionsCount].minimumOverlap = d - r;
 
 				collisionsCount++;
 			}
@@ -96,17 +96,22 @@ void CollisionManager::ResolveCollisions()
 
 			pCollisions[i].colliderA.SphereCollider->mSceneObject->mTransform->SetPosition(posA);
 			pCollisions[i].colliderB.SphereCollider->mSceneObject->mTransform->SetPosition(posB);
+
+			pCollisions[i].colliderA.SphereCollider->mCollider.origin = posA;
+			pCollisions[i].colliderB.SphereCollider->mCollider.origin = posB;
 		}
 		else if (pCollisions[i].colliderA.SphereCollider->mTraits.isDynamic && !pCollisions[i].colliderB.SphereCollider->mTraits.isDynamic)
 		{
 			vec3f posA = pCollisions[i].colliderA.SphereCollider->mSceneObject->mTransform->GetPosition() + pCollisions[i].minimumOverlap;
 			pCollisions[i].colliderA.SphereCollider->mSceneObject->mTransform->SetPosition(posA);
+			pCollisions[i].colliderA.SphereCollider->mCollider.origin = posA;
 
 		}
 		else if (!pCollisions[i].colliderA.SphereCollider->mTraits.isDynamic && pCollisions[i].colliderB.SphereCollider->mTraits.isDynamic)
 		{
 			vec3f posB = pCollisions[i].colliderB.SphereCollider->mSceneObject->mTransform->GetPosition() - pCollisions[i].minimumOverlap;
 			pCollisions[i].colliderB.SphereCollider->mSceneObject->mTransform->SetPosition(posB);
+			pCollisions[i].colliderB.SphereCollider->mCollider.origin = posB;
 		}
 	}
 

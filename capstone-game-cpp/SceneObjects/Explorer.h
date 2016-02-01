@@ -28,6 +28,7 @@ private:
 		mController->mIsActive = true;
 
 		mCollider = Factory<SphereColliderComponent>::Create();
+		mCollider->mTraits.isDynamic = true;
 		mCollider->mSceneObject = this;
 		mCollider->mIsActive = false;
 	}

@@ -137,13 +137,15 @@ void Level01::InitializeMainCamera()
 
 void Level01::VUpdate(double milliseconds)
 {
-	UpdateCamera();
-
 	for (ExplorerController& ec : Factory<ExplorerController>())
 	{
 		ec.Move();
 	}
 
+	UpdateCamera();
+
+	mCollisionManager.DetectCollisions();
+	mCollisionManager.ResolveCollisions();
 }
 
 void Level01::UpdateCamera()
