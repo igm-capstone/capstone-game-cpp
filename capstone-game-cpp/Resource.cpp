@@ -113,6 +113,11 @@ void loadWalls(jarr_t objs)
 		parseTransform(obj, wall->mTransform);
 		wall->mBoxCollider->mCollider.origin = wall->mTransform->GetPosition();
 		wall->mBoxCollider->mCollider.halfSize = wall->mTransform->GetScale() * 0.5f;
+		
+		mat3f axis = wall->mTransform->GetRotationMatrix();
+		wall->mBoxCollider->mCollider.axis[0] = axis.pRows[0];
+		wall->mBoxCollider->mCollider.axis[1] = axis.pRows[1];
+		wall->mBoxCollider->mCollider.axis[2] = axis.pRows[2];
 	}
 }
 

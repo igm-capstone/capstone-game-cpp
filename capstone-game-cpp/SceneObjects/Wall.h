@@ -8,13 +8,13 @@ class Wall : public BaseSceneObject
 	friend class Factory<Wall>;
 
 public:
-	IMesh*		mMesh;
-	BoxColliderComponent*	mBoxCollider;
+	IMesh*							mMesh;
+	OrientedBoxColliderComponent*	mBoxCollider;
 
 private:
 	Wall() : 
 		mMesh(nullptr),
-		mBoxCollider(Factory<BoxColliderComponent>::Create())
+		mBoxCollider(Factory<OrientedBoxColliderComponent>::Create())
 	{
 		mBoxCollider->mTraits.isDynamic = false;	// Walls don't move :)
 		mBoxCollider->mSceneObject = this;

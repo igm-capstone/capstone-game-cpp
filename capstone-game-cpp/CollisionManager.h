@@ -8,9 +8,10 @@ struct Collision
 {
 	union Collider
 	{
-		BoxColliderComponent*		BoxCollider;
-		SphereColliderComponent*	SphereCollider;
-		QuadColliderComponent*		QuadCollider;
+		BoxColliderComponent*			BoxCollider;
+		OrientedBoxColliderComponent*	OBBCollider;
+		SphereColliderComponent*		SphereCollider;
+		QuadColliderComponent*			QuadCollider;
 	} colliderA, colliderB;
 
 	vec3f minimumOverlap;	// This is a vector in colliderA frame of reference

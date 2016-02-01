@@ -27,6 +27,29 @@ namespace Rig3D
 		}
 	}
 
+	template<class Vector>
+	void ClosestOBBPointToPoint(const OBB<Vector>& obb, const Vector& point, Vector& cp)
+	{
+		Vector d = point - obb.origin;
+
+		// Start result @ obb origin
+		cp = obb.origin;
+
+		int numAxis = sizeof(Vector) / sizeof(float);
+
+		for (int i = 0; i < numAxis; i++)
+		{
+			// Project d onto axis to get distance along axis to obb origin
+			float distance = cliqCity::graphicsMath::dot(d, obb.axis[i]);
+
+			// Clamp to obb extents
+			if (distance >	obb.halfSize.pCols[i]) distance =	obb.halfSize.pCols[i];
+			if (distance < -obb.halfSize.pCols[i]) distance =	-obb.halfSize.pCols[i];
+		
+			cp += distance * obb.axis[i];
+		}
+	}
+
 #pragma endregion 
 
 #pragma region Ray - Primitive Tests
@@ -289,6 +312,16 @@ namespace Rig3D
 		return cliqCity::graphicsMath::dot(d, d) <= sphere.radius * sphere.radius;
 	}
 
+	template<class Vector>
+	int IntersectSphereOBB(const Sphere<Vector>& sphere, const OBB<Vector>& obb, Vector& cp)
+	{
+		// Get closest point on AABB to sphere center
+		ClosestOBBPointToPoint(obb, sphere.origin, cp);
+
+		Vector d = cp - sphere.origin;
+		return cliqCity::graphicsMath::dot(d, d) <= sphere.radius * sphere.radius;
+	}
+
 #pragma endregion 
 
 #pragma region AABB - Primitive Tests
@@ -313,6 +346,12 @@ namespace Rig3D
 
 		return 1;
 	}
+
+#pragma endregion 
+
+#pragma region OBB - Primitive Tests
+
+	
 
 #pragma endregion 
 }

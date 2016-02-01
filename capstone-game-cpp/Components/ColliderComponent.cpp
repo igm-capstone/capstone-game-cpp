@@ -15,6 +15,24 @@ BoxColliderComponent::~BoxColliderComponent()
 
 #pragma endregion 
 
+#pragma region OrientedBoxColliderComponent
+
+OrientedBoxColliderComponent::OrientedBoxColliderComponent()
+{
+	mCollider.axis[0] = { 1.0f, 0.0f, 0.0f };
+	mCollider.axis[1] = { 0.0f, 1.0f, 0.0f };
+	mCollider.axis[2] = { 0.0f, 0.0f, 1.0f };
+
+	mCollider.origin = { 0.0f, 0.0f, 0.0f };
+	mCollider.halfSize = { 0.5f, 0.5f, 0.5f };
+}
+
+OrientedBoxColliderComponent::~OrientedBoxColliderComponent()
+{
+}
+
+#pragma endregion 
+
 #pragma region QuadColliderComponent
 
 QuadColliderComponent::QuadColliderComponent()

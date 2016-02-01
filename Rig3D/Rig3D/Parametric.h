@@ -25,6 +25,14 @@ namespace Rig3D
 	};
 
 	template<class Vector>
+	struct OBB
+	{
+		Vector origin;
+		Vector halfSize;
+		Vector axis[3];
+	};
+
+	template<class Vector>
 	struct Sphere
 	{
 		Vector	origin;
@@ -43,3 +51,4 @@ typedef Rig3D::AABB<vec2f>		BoxCollider2D;
 typedef Rig3D::AABB<vec3f>		BoxCollider;
 typedef Rig3D::Sphere<vec2f>	CircleCollider;
 typedef Rig3D::Sphere<vec3f>	SphereCollider;
+typedef Rig3D::OBB<vec3f>		OrientedBoxCollider;

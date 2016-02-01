@@ -64,10 +64,10 @@ void CollisionManager::DetectCollisions()
 		for (uint32_t j = 0; j < mWalls.size(); j++)
 		{
 			vec3f cp;
-			if (IntersectSphereAABB(mExplorers[i]->mCollider->mCollider, mWalls[j]->mBoxCollider->mCollider, cp))
+			if (IntersectSphereOBB(mExplorers[i]->mCollider->mCollider, mWalls[j]->mBoxCollider->mCollider, cp))
 			{
 				pCollisions[collisionsCount].colliderA.SphereCollider	= mExplorers[i]->mCollider;
-				pCollisions[collisionsCount].colliderB.BoxCollider		= mWalls[j]->mBoxCollider;
+				pCollisions[collisionsCount].colliderB.OBBCollider		= mWalls[j]->mBoxCollider;
 
 				vec3f d = cp - mExplorers[i]->mCollider->mCollider.origin;
 				vec3f r = cliqCity::graphicsMath::normalize(d) * mExplorers[i]->mCollider->mCollider.radius;

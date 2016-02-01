@@ -18,6 +18,17 @@ public:
 	~BoxColliderComponent();
 };
 
+class OrientedBoxColliderComponent : 
+	public BaseComponent
+{
+public:
+	ColliderTraits		mTraits;
+	OrientedBoxCollider mCollider;
+
+	OrientedBoxColliderComponent();
+	~OrientedBoxColliderComponent();
+};
+
 class QuadColliderComponent :
 	public BaseComponent
 {
