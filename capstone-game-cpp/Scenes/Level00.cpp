@@ -152,6 +152,7 @@ void Level00::VRender()
 
 	//FPS
 	DX11IMGUI::NewFrame();
+	mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
 	RenderFPSIndicator();
 	ImGui::Render();
 
