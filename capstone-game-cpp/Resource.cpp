@@ -55,7 +55,7 @@ void parseTransform(json obj, Transform* transform)
 
 void loadLamps(jarr_t objs)
 {
-	TRACE("Loading " << int(objs->size()) << " domination points...");
+	TRACE("Loading " << int(objs->size()) << " lamps...");
 	for (auto obj : *objs)
 	{
 		auto lamp = Factory<Lamp>::Create();

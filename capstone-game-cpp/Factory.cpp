@@ -7,6 +7,7 @@
 #include "SceneObjects\SpawnPoint.h"
 #include "SceneObjects\Pickup.h"
 #include "SceneObjects\DominationPoint.h"
+#include "SceneObjects\Lamp.h"
 
 #pragma region REGISTER_FACTORY Macro
 
@@ -25,9 +26,10 @@ REGISTER_FACTORY ( MoveableBlock,	10	)
 REGISTER_FACTORY ( SpawnPoint,		5	)
 REGISTER_FACTORY ( Pickup,			7	)
 REGISTER_FACTORY ( DominationPoint,	6	)
+REGISTER_FACTORY ( Lamp,			17	)
 
 // register transform factory
-REGISTER_FACTORY ( Transform,	105 )
+REGISTER_FACTORY ( Transform,	200 )
 
 // register component factories
 REGISTER_FACTORY ( NetworkID,				10	)
