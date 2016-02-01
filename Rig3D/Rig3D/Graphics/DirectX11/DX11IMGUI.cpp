@@ -502,7 +502,7 @@ void DX11IMGUI::Shutdown()
 
 void DX11IMGUI::NewFrame()
 {
-	if (!g_pVB)
+	if (!g_pFontSampler)
 		CreateDeviceObjects();
 
 	ImGuiIO& io = ImGui::GetIO();
