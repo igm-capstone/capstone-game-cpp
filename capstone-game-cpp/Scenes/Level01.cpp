@@ -8,6 +8,8 @@
 #include <Rig3D/Geometry.h>
 #include <Rig3D/Graphics/Interface/IShaderResource.h>
 #include <SceneObjects/Explorer.h>
+#include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
+#include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 
 #define PI 3.14159265359f
 
@@ -167,6 +169,13 @@ void Level01::VRender()
 
 	RenderWalls();
 	RenderExplorers();
+
+	//FPS
+	DX11IMGUI::NewFrame();
+	mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
+	RenderFPSIndicator();
+	ImGui::Render();
+
 
 	mRenderer->VSwapBuffers();
 }

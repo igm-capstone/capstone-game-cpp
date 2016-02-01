@@ -46,6 +46,7 @@ void MainMenuScene::VRender()
 	mDeviceContext->ClearDepthStencilView(mRenderer->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	DX11IMGUI::NewFrame();
+	mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
 	RenderUI();
 	RenderFPSIndicator();
 	ImGui::Render();
