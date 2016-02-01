@@ -746,7 +746,7 @@ void Level00::SpawnNewExplorer(int id) {
 				 
 	mExplorer[id]->mCollider->mIsActive = true;
 	mExplorer[id]->mCollider->mCollider.origin = mExplorer[id]->mTransform->GetPosition();
-	mExplorer[id]->mCollider->mCollider.halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorer[id]->mTransform->GetScale();
+	mExplorer[id]->mCollider->mCollider.radius = UNITY_QUAD_RADIUS;
 
 	mExplorer[id]->mNetworkID->mIsActive = true;
 	mExplorer[id]->mNetworkID->mUUID = MyUUID::GenUUID();
@@ -770,7 +770,7 @@ void Level00::SpawnExistingExplorer(int id, int UUID) {
 
 	mExplorer[id]->mCollider->mIsActive = true;
 	mExplorer[id]->mCollider->mCollider.origin = mExplorer[id]->mTransform->GetPosition();
-	mExplorer[id]->mCollider->mCollider.halfSize = vec3f(UNITY_QUAD_RADIUS) * mExplorer[id]->mTransform->GetScale();
+	mExplorer[id]->mCollider->mCollider.radius = UNITY_QUAD_RADIUS;
 
 	mExplorer[id]->mNetworkID->mIsActive = true;
 	mExplorer[id]->mNetworkID->mUUID = UUID;

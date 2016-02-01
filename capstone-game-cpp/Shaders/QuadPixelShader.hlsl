@@ -1,10 +1,9 @@
 struct Pixel
 {
-	float4 mPositionH	: SV_POSITION;
-	float4 mColor		: COLOR;
+	float4 positionH	: SV_POSITION;
 };
 
 float4 main(Pixel pixel) : SV_TARGET
 {
-	return pixel.mColor;
+	return float4(1.0f, 1.0f, 1.0f, 1.0f);
 }

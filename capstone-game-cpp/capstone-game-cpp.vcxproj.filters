@@ -69,13 +69,16 @@
     <ClCompile Include="Resource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Components\ColliderComponent.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="Components\ExplorerController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Factory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\ColliderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -191,7 +194,16 @@
     <ClInclude Include="Factory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CollisionManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="SceneObjects\DominationPoint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Uniforms.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

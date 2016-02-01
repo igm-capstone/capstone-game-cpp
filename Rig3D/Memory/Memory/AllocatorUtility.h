@@ -2,17 +2,23 @@
 #ifndef ALLOCATOR_UTILITY
 #define ALLOCATOR_UTILITY
 
-#define EXTERN_C(function) extern "C" { function }
+#ifdef _WINDLL
+#define MEMORY_API __declspec(dllexport)
+#else
+#define MEMORY_API __declspec(dllimport)
+#endif
+
+#define CLIQ_EXTERN_C(function) extern "C" { function }
 
 #ifdef __cplusplus
-EXTERN_C(void*	AlignedPointer(void* buffer, unsigned int alignment););
-EXTERN_C(void*	RawPointer(void* alignedPointer););
-EXTERN_C(char	Adjustment(void* alignedPointer););
+CLIQ_EXTERN_C(MEMORY_API void*	AlignedPointer(void* buffer, unsigned int alignment););
+CLIQ_EXTERN_C(MEMORY_API void*	RawPointer(void* alignedPointer););
+CLIQ_EXTERN_C(MEMORY_API char	Adjustment(void* alignedPointer););
 
 #else
-void* AlignedPointer(void* buffer, unsigned int alignment);
-void* RawPointer(void* alignedPointer);
-char  Adjustment(void* alignedPointer);
+MEMORY_API void*  AlignedPointer(void* buffer, unsigned int alignment);
+MEMORY_API void* RawPointer(void* alignedPointer);
+MEMORY_API char  Adjustment(void* alignedPointer);
 #endif // cplusplus
 
 

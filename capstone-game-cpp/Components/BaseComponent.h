@@ -4,10 +4,10 @@
 class BaseComponent {
 	const int __pool_padding = 0xBABACACA;
 public:
-	bool mIsActive;
 	BaseSceneObject*	mSceneObject;
+	bool mIsActive;
 
 protected:
-	BaseComponent() : mIsActive(true) {}
+	BaseComponent() : mSceneObject(nullptr), mIsActive(true) {}
 	~BaseComponent() {};
 };

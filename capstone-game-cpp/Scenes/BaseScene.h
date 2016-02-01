@@ -18,20 +18,20 @@ class BaseScene : public IScene, public virtual IRendererDelegate
 	friend class ScareTacticsApplication;
 
 protected:
-	Engine*					mEngine;
-	Input*					mInput;
-	Renderer*				mRenderer;
-	IApplication*			mApplication;
-	ID3D11Device*			mDevice;
-	ID3D11DeviceContext*	mDeviceContext;
+	Engine*						mEngine;
+	Input*						mInput;
+	Renderer*					mRenderer;
+	ScareTacticsApplication*	mApplication;
+	ID3D11Device*				mDevice;
+	ID3D11DeviceContext*		mDeviceContext;
 
-	NetworkManager*			mNetworkManager;
+	NetworkManager*				mNetworkManager;
 
-	uint8_t*				mStaticMemory;
-	size_t					mStaticMemorySize;
+	uint8_t*					mStaticMemory;
+	size_t						mStaticMemorySize;
 
 public:
-	BaseSceneState			mState;
+	BaseSceneState				mState;
 
 	BaseScene();
 	virtual ~BaseScene();

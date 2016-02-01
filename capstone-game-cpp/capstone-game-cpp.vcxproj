@@ -84,6 +84,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="Components\ColliderComponent.cpp" />
     <ClCompile Include="Components\ExplorerController.cpp" />
     <ClCompile Include="Factory.cpp" />
@@ -114,8 +115,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CollisionManager.h" />
     <ClInclude Include="Components\BaseComponent.h" />
     <ClInclude Include="Components\ColliderComponent.h" />
+    <ClInclude Include="Config.h" />
     <ClInclude Include="SceneObjects\DominationPoint.h" />
     <ClInclude Include="SceneObjects\Pickup.h" />
     <ClInclude Include="Components\ExplorerController.h" />
@@ -150,6 +153,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TargetFollower.h" />
     <ClInclude Include="trace.h" />
+    <ClInclude Include="Uniforms.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>

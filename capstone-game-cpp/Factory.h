@@ -1,4 +1,5 @@
 #pragma once
+#include <Memory/Memory/AllocatorUtility.h>
 
 template<class ObjectType>
 class Factory
@@ -125,12 +126,12 @@ public:
 
 	static iterator BeginIterator()
 	{
-		return iterator(sBuffer);
+		return iterator(reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type))));
 	}
 
 	static iterator EndIterator()
 	{
-		return iterator(sBuffer + sCount);
+		return iterator(reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type))) + sCount);
 	}
 
 	iterator begin() { return Factory::BeginIterator(); }

@@ -17,7 +17,7 @@ namespace Rig3D
 
 		for (int i = 0; i < numElements; i++)
 		{
-			float v = point[i];
+			float v = point.pCols[i];
 			Vector min = aabb.origin - aabb.halfSize;
 			Vector max = aabb.origin + aabb.halfSize;
 		
