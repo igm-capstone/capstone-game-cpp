@@ -4,7 +4,10 @@
 class ExplorerController : public BaseComponent
 {
 public:
-	float mSpeed = 0.25f;
+	float mSpeed;
 	
+	ExplorerController();
+	~ExplorerController();
+
 	bool Move();
 };

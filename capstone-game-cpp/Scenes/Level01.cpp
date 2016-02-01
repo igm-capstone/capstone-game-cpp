@@ -7,13 +7,20 @@
 #include <Vertex.h>
 #include <Rig3D/Geometry.h>
 #include <Rig3D/Graphics/Interface/IShaderResource.h>
+#include <SceneObjects/Explorer.h>
 
 #define PI 3.14159265359f
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 
-Level01::Level01() : mWallCount0(0), mWallWorldMatrices0(nullptr), mWallMesh0(nullptr), mWallShaderResource(nullptr)
+Level01::Level01() : 
+	mWallCount0(0), 
+	mExplorerCount(0),
+	mWallWorldMatrices0(nullptr), 
+	mWallMesh0(nullptr), 
+	mWallShaderResource(nullptr),
+	mExplorerShaderResource(nullptr)
 {
 	
 }
@@ -21,7 +28,14 @@ Level01::Level01() : mWallCount0(0), mWallWorldMatrices0(nullptr), mWallMesh0(nu
 Level01::~Level01()
 {
 	mWallMesh0->~IMesh();
+
+	for (Explorer& e : Factory<Explorer>())
+	{
+		e.mMesh->~IMesh();
+	}
+
 	mWallShaderResource->~IShaderResource();
+	mExplorerShaderResource->~IShaderResource();
 
 	mAllocator.Free();
 }
@@ -65,34 +79,51 @@ void Level01::InitializeGeometry()
 
 	Geometry::Cube(vertices, indices, 2);
 
-	
-
 	mRenderer->VSetMeshVertexBuffer(mWallMesh0, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
 	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
+
+	Factory<Explorer>::Create();
+
+	for (Explorer& e : Factory<Explorer>())
+	{
+		meshLibrary.NewMesh(&e.mMesh, mRenderer);
+		mRenderer->VSetMeshVertexBuffer(e.mMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
+		mRenderer->VSetMeshIndexBuffer(e.mMesh, &indices[0], indices.size());
+		e.mTransform->SetPosition(0.0f, 0.0f, -0.5f);
+	}
 }
 
 void Level01::InitializeShaderResources()
 {
-	// Allocate shader resource
+	// Allocate wall shader resource
 	mRenderer->VCreateShaderResource(&mWallShaderResource, &mAllocator);
 
 	// Instance buffer data
-	void*	ibData[]		= { &mWallWorldMatrices0 };
-	size_t	ibSizes[]		= { sizeof(mat4f) * mWallCount0 };
-	size_t	ibStrides[]		= { sizeof(mat4f) };
-	size_t	ibOffsets[]		= { 0 };
+	void*	ibWallData[] = { mWallWorldMatrices0 };
+	size_t	ibWallSizes[] = { sizeof(mat4f) * mWallCount0 };
+	size_t	ibWallStrides[] = { sizeof(mat4f) };
+	size_t	ibWallOffsets[] = { 0 };
 
 	// Create the instance buffer
-	mRenderer->VCreateDynamicShaderInstanceBuffers(mWallShaderResource, ibData, ibSizes, ibStrides, ibOffsets, 1);
-	
+	mRenderer->VCreateDynamicShaderInstanceBuffers(mWallShaderResource, ibWallData, ibWallSizes, ibWallStrides, ibWallOffsets, 1);
+
 	// Set data for instance buffer once
-	mRenderer->VUpdateShaderInstanceBuffer(mWallShaderResource, mWallWorldMatrices0, ibSizes[0], 0);
+	mRenderer->VUpdateShaderInstanceBuffer(mWallShaderResource, mWallWorldMatrices0, ibWallSizes[0], 0);
 
 	// Constant buffer data
-	void*	cbData[] = { &mPVM.camera };
-	size_t	cbSizes[] = { sizeof(CbufferPVM::CameraData) };
+	void*	cbWallData[] = { &mPVM.camera };
+	size_t	cbWallSizes[] = { sizeof(CbufferPVM::CameraData) };
 
-	mRenderer->VCreateShaderConstantBuffers(mWallShaderResource, cbData, cbSizes, 1);
+	mRenderer->VCreateShaderConstantBuffers(mWallShaderResource, cbWallData, cbWallSizes, 1);
+
+	// Explorers
+
+	mRenderer->VCreateShaderResource(&mExplorerShaderResource, &mAllocator);
+
+	void* cbExplorerData[] = { &mPVM };
+	size_t cbExplorerSizes[] = { sizeof(CbufferPVM) };
+
+	mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 1);
 }
 
 void Level01::InitializeMainCamera()
@@ -107,6 +138,12 @@ void Level01::InitializeMainCamera()
 void Level01::VUpdate(double milliseconds)
 {
 	UpdateCamera();
+
+	for (ExplorerController& ec : Factory<ExplorerController>())
+	{
+		ec.Move();
+	}
+
 }
 
 void Level01::UpdateCamera()
@@ -127,6 +164,7 @@ void Level01::VRender()
 	mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_TRIANGLE);
 
 	RenderWalls();
+	RenderExplorers();
 
 	mRenderer->VSwapBuffers();
 }
@@ -148,7 +186,19 @@ void Level01::RenderWalls()
 
 void Level01::RenderExplorers()
 {
-	
+	mRenderer->VSetInputLayout(mApplication->mExplorerVertexShader);
+	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
+	mRenderer->VSetPixelShader(mApplication->mExplorerPixelShader);
+
+	for (Explorer& e : Factory<Explorer>())
+	{
+		mPVM.world = e.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mPVM, 0);
+
+		mRenderer->VBindMesh(e.mMesh);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+		mRenderer->VDrawIndexed(0, e.mMesh->GetIndexCount());
+	}
 }
 
 

@@ -17,6 +17,7 @@ class Level01 : public BaseScene
 
 	// Counts
 	uint32_t			mWallCount0;
+	uint32_t			mExplorerCount;
 
 	// Wall Data
 	mat4f*				mWallWorldMatrices0;
@@ -26,6 +27,7 @@ class Level01 : public BaseScene
 
 	// ShaderResource
 	IShaderResource*	mWallShaderResource;
+	IShaderResource*	mExplorerShaderResource;
 
 	// Managers
 	CollisionManager	mCollisionManager;

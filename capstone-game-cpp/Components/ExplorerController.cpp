@@ -4,6 +4,16 @@
 #include <ScareTacticsApplication.h>
 #include <Rig3D/Intersection.h>
 
+ExplorerController::ExplorerController() : mSpeed(0.01f)
+{
+	
+}
+
+ExplorerController::~ExplorerController()
+{
+	
+}
+
 bool ExplorerController::Move()
 {
 	if (!mIsActive) return false;

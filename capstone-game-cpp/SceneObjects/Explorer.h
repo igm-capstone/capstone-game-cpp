@@ -25,7 +25,7 @@ private:
 
 		mController = Factory<ExplorerController>::Create();
 		mController->mSceneObject = this;
-		mController->mIsActive = false;
+		mController->mIsActive = true;
 
 		mCollider = Factory<SphereColliderComponent>::Create();
 		mCollider->mSceneObject = this;

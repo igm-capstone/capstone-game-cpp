@@ -15,6 +15,8 @@ public:
 
 	IShader* mQuadVertexShader;
 	IShader* mQuadPixelShader;
+	IShader* mExplorerVertexShader;
+	IShader* mExplorerPixelShader;
 
 	ScareTacticsApplication();
 	~ScareTacticsApplication();

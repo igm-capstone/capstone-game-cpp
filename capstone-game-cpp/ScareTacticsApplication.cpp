@@ -9,6 +9,8 @@
 #include "Shaders/obj/CircleVertexShader.h"
 #include "Shaders/obj/QuadPixelShader.h"
 #include "Shaders/obj/QuadVertexShader.h"
+#include "Shaders/obj/ExplorerVertexShader.h"
+#include "Shaders/obj/ExplorerPixelShader.h"
 #include "Shaders/obj/ShadowCasterPixelShader.h"
 #include "Shaders/obj/ShadowGridComputeShader.h"
 #include "Shaders/obj/ShadowPixelShader.h"
@@ -16,6 +18,10 @@
 using namespace Rig3D;
 
 ScareTacticsApplication::ScareTacticsApplication() :
+	mQuadVertexShader(nullptr),
+	mQuadPixelShader(nullptr),
+	mExplorerVertexShader(nullptr),
+	mExplorerPixelShader(nullptr),
 	mLoadingScreen(nullptr),
 	mCurrentScene(nullptr),
 	mSceneToLoad(nullptr),
@@ -60,7 +66,9 @@ void ScareTacticsApplication::InitializeShaders()
 	auto engine = &Singleton<Engine>::SharedInstance();
 	auto renderer = engine->GetRenderer();
 
-	InputElement inputElements[] =
+	// Wall shaders
+
+	InputElement wallInputElements[] =
 	{
 		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX   },
 		{ "NORMAL",		0, 0, 12,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
@@ -68,14 +76,29 @@ void ScareTacticsApplication::InitializeShaders()
 		{ "WORLD",		0, 1, 0,  1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
 		{ "WORLD",		1, 1, 16, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
 		{ "WORLD",		2, 1, 32, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
-		{ "WORLD",		3, 1, 48, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
+		{ "WORLD",		3, 1, 48, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE }
 	};
 
 	renderer->VCreateShader(&mQuadVertexShader, &mGameAllocator);
 	renderer->VCreateShader(&mQuadPixelShader, &mGameAllocator);
 
-	renderer->LoadVertexShader(mQuadVertexShader, gQuadVertexShader, sizeof(gQuadVertexShader), inputElements, 7);
+	renderer->LoadVertexShader(mQuadVertexShader, gQuadVertexShader, sizeof(gQuadVertexShader), wallInputElements, 7);
 	renderer->VLoadPixelShader(mQuadPixelShader, gQuadPixelShader, sizeof(gQuadPixelShader));
+
+	// Explorer Shaders
+
+	InputElement explorerInputElements[] =
+	{
+		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "NORMAL",		0, 0, 12,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "TEXCOORD",	0, 0, 24,  0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX }
+	};
+
+	renderer->VCreateShader(&mExplorerVertexShader, &mGameAllocator);
+	renderer->VCreateShader(&mExplorerPixelShader, &mGameAllocator);
+
+	renderer->LoadVertexShader(mExplorerVertexShader, gExplorerVertexShader, sizeof(gExplorerVertexShader), explorerInputElements, 3);
+	renderer->VLoadPixelShader(mExplorerPixelShader, gExplorerPixelShader, sizeof(gExplorerPixelShader));
 }
 
 void ScareTacticsApplication::VInitialize()
@@ -144,6 +167,8 @@ void ScareTacticsApplication::VShutdown()
 
 	mQuadVertexShader->~IShader();
 	mQuadPixelShader->~IShader();
+	mExplorerVertexShader->~IShader();
+	mExplorerPixelShader->~IShader();
 
 	mSceneAllocator.Free();
 	mGameAllocator.Free();
