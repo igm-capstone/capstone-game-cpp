@@ -20,5 +20,7 @@ protected:
 	{
 		mTransform = Factory<Transform>::Create();
 	}
+
+	// All COM objects should be released in destructor
 	~BaseSceneObject() {};
 };

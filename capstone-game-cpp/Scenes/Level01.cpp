@@ -20,7 +20,10 @@ Level01::Level01() : mWallCount0(0), mWallWorldMatrices0(nullptr), mWallMesh0(nu
 
 Level01::~Level01()
 {
-	
+	mWallMesh0->~IMesh();
+	mWallShaderResource->~IShaderResource();
+
+	mAllocator.Free();
 }
 
 void Level01::VOnResize()
@@ -153,8 +156,5 @@ void Level01::RenderExplorers()
 
 void Level01::VShutdown()
 {
-	mWallMesh0->~IMesh();
-	mWallShaderResource->~IShaderResource();
-
-	mAllocator.Free();
+	
 }
