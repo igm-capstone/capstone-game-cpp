@@ -7,6 +7,7 @@
 #include "SceneObjects/Pickup.h"
 #include "SceneObjects/DominationPoint.h"
 #include "trace.h"
+#include "SceneObjects/Lamp.h"
 
 using namespace std;
 using namespace Rig3D;
@@ -48,6 +49,19 @@ void parseTransform(json obj, Transform* transform)
 	if (!scale.empty())
 	{
 		transform->SetScale(parseVec3f(scale));
+	}
+}
+
+
+void loadLamps(jarr_t objs)
+{
+	TRACE("Loading " << int(objs->size()) << " domination points...");
+	for (auto obj : *objs)
+	{
+		auto lamp = Factory<Lamp>::Create();
+		parseTransform(obj, lamp->mTransform);
+
+		lamp->mLightRadius = obj["lightRadius"].get<float>();
 	}
 }
 
@@ -129,10 +143,10 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	LevelInfo level;
 	memset(&level, 0, sizeof(level));
 	
-	auto light = obj["light"].get_ptr<jarr_t>();
-	if (light != nullptr)
+	auto lamps = obj["lamp"].get_ptr<jarr_t>();
+	if (lamps != nullptr)
 	{
-		//level.lights = loadTransforms(light, allocator);
+		loadLamps(lamps);
 	}
 
 	auto domination = obj["domination"].get_ptr<jarr_t>();
