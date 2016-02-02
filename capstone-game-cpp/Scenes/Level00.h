@@ -200,9 +200,5 @@ public:
 	void InitializeLightShaders();
 	void InitializePlayerShaders();
 
-	void SpawnNewExplorer(int id);
-	void SpawnExistingExplorer(int id, int UUID);
-	void GrantAuthority(int UUID);
-	void SyncTransform(int UUID, vec3f pos);
 	void HandleInput(Input& input);
 };

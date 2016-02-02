@@ -25,7 +25,7 @@ private:
 
 		mController = Factory<ExplorerController>::Create();
 		mController->mSceneObject = this;
-		mController->mIsActive = true;
+		mController->mIsActive = false;
 
 		mCollider = Factory<SphereColliderComponent>::Create();
 		mCollider->mTraits.isDynamic = true;
@@ -33,4 +33,26 @@ private:
 		mCollider->mIsActive = false;
 	}
 	~Explorer() {};
+
+public:
+	void Spawn(vec3f pos, int UUID)
+	{
+		mTransform->SetPosition(pos);
+
+		mCollider->mIsActive = true;
+
+		mNetworkID->mIsActive = true;
+		mNetworkID->mUUID = UUID;
+	};
+
+	void OnNetAuthorityChange(bool newAuth)
+	{
+		mController->mIsActive = newAuth;
+	}
+
+	void OnNetSyncTransform(vec3f newPos)
+	{
+		mTransform->SetPosition(pos);
+		mCollider->mCollider.origin = pos;
+	}
 };

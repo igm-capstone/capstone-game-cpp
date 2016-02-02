@@ -14,7 +14,7 @@ ExplorerController::~ExplorerController()
 	
 }
 
-bool ExplorerController::Move()
+bool ExplorerController::Update()
 {
 	if (!mIsActive) return false;
 

@@ -2,6 +2,7 @@
 #include "stdafx.h"
 
 #include "Network\NetworkManager.h"
+#include <SceneObjects/Explorer.h>
 
 using namespace Rig3D;
 
@@ -30,6 +31,9 @@ protected:
 	uint8_t*					mStaticMemory;
 	size_t						mStaticMemorySize;
 
+	static Explorer*			mExplorer[MAX_EXPLORERS];
+	//static Ghost*				mGhost;
+
 public:
 	BaseSceneState				mState;
 
@@ -40,5 +44,18 @@ public:
 
 	// Common methods
 	void RenderFPSIndicator();
+
+#pragma region Network Callbacks
+public:
+	//Server
+	void CmdSpawnNewExplorer(int clientID);
+
+	//Client
+	void RpcSpawnExistingExplorer(int UUID, vec3f pos);
+	
+	//Both
+	void GrantAuthority(int UUID);
+	void SyncTransform(int UUID, vec3f pos);
+#pragma endregion
 };
 
