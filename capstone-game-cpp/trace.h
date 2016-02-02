@@ -3,20 +3,21 @@
 
 #include <sstream>
 
-#define TRACE(message)							Trace::GetTrace() << message << Trace::endl
-#define TRACE_LINE(from, to, color)				Trace::TraceLine			(from, to, color)
-#define TRACE_BOX(position, color)				Trace::TraceBox			(position, color)
-#define TRACE_DIAMOND(position, color)			Trace::TraceDiamond		(position, color)
-#define TRACE_CROSS(position, color)			Trace::TraceCross		(position, color)
-#define TRACE_XCROSS(position, color)			Trace::TraceXCross		(position, color)
-#define TRACE_SMALL_BOX(position, color)		Trace::TraceSmallBox		(position, color)
-#define TRACE_SMALL_DIAMOND(position, color)	Trace::TraceSmallDiamond	(position, color)
-#define TRACE_SMALL_CROSS(position, color)		Trace::TraceSmallCross	(position, color)
-#define TRACE_SMALL_XCROSS(position, color)		Trace::TraceSmallXCross	(position, color)
+#define TRACE(message)                          Trace::GetTrace() << message << Trace::endl
+#define TRACE_LINE(from, to, color)             Trace::TraceLine          (from, to, color)
+#define TRACE_BOX(position, color)              Trace::TraceBox           (position, color)
+#define TRACE_DIAMOND(position, color)          Trace::TraceDiamond       (position, color)
+#define TRACE_CROSS(position, color)            Trace::TraceCross         (position, color)
+#define TRACE_XCROSS(position, color)           Trace::TraceXCross        (position, color)
+#define TRACE_SMALL_BOX(position, color)        Trace::TraceSmallBox      (position, color)
+#define TRACE_SMALL_DIAMOND(position, color)    Trace::TraceSmallDiamond  (position, color)
+#define TRACE_SMALL_CROSS(position, color)      Trace::TraceSmallCross    (position, color)
+#define TRACE_SMALL_XCROSS(position, color)     Trace::TraceSmallXCross   (position, color)
 
-#define RENDER_TRACE()							Trace::GetTrace().Render();
+#define RENDER_TRACE()                          Trace::GetTrace().Render();
 
 #define TRACE_SET_VIEW_PROJ(mViewMatrix, mProjectionMatrix)		Trace::GetTrace().mLineTraceShaderData = { mViewMatrix, mProjectionMatrix };
+#include "Console.h"
 
 typedef std::function<void(const float&, const float&, const float&, const float&, const float&, const float&, const cliqCity::graphicsMath::Vector4& color)> __TraceFunction;
 
@@ -54,6 +55,7 @@ private:
 	std::stringstream ss;
 	char buff[128];
 
+	Console*						mConsole;
 	Renderer*						mRenderer;
 	ID3D11Device*					mDevice;
 	ID3D11DeviceContext*			mDeviceContext;

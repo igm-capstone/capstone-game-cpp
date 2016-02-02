@@ -32,6 +32,8 @@ Trace::Trace() :
 {
 	mStaticMeshLibrary.SetAllocator(&mStaticMeshAllocator);
 
+	mConsole = &Singleton<Console>::SharedInstance();
+
 	auto mEngine = &Singleton<Engine>::SharedInstance();
 	mRenderer = mEngine->GetRenderer();
 	mDeviceContext = mRenderer->GetDeviceContext();
@@ -172,7 +174,10 @@ Trace& Trace::endl(Trace &trace)
 			break;
 		}
 		
+		trace.mConsole->AddLog(str.c_str());
+		
 		std::wstring wstr = std::wstring(str.begin(), str.end());
+
 		OutputDebugString(wstr.c_str());
 		OutputDebugString(L"\n");
 	}

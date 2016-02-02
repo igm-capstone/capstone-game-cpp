@@ -874,11 +874,11 @@ struct ImGuiTextFilter
     ImVector<TextRange> Filters;
     int                 CountGrep;
 
-    ImGuiTextFilter(const char* default_filter = "");
-    void                Clear() { InputBuf[0] = 0; Build(); }
-    bool                Draw(const char* label = "Filter (inc,-exc)", float width = 0.0f);    // Helper calling InputText+Build
-    bool                PassFilter(const char* text, const char* text_end = NULL) const;
-    bool                IsActive() const { return !Filters.empty(); }
+	IMGUI_API           ImGuiTextFilter(const char* default_filter = "");
+	IMGUI_API void      Clear() { InputBuf[0] = 0; Build(); }
+	IMGUI_API bool      Draw(const char* label = "Filter (inc,-exc)", float width = 0.0f);    // Helper calling InputText+Build
+	IMGUI_API bool      PassFilter(const char* text, const char* text_end = NULL) const;
+	IMGUI_API bool      IsActive() const { return !Filters.empty(); }
     IMGUI_API void      Build();
 };
 
@@ -944,7 +944,7 @@ struct ImGuiStorage
 };
 
 // Shared state of InputText(), passed to callback when a ImGuiInputTextFlags_Callback* flag is used.
-struct ImGuiTextEditCallbackData
+IMGUI_API struct ImGuiTextEditCallbackData
 {
     ImGuiInputTextFlags EventFlag;      // One of ImGuiInputTextFlags_Callback* // Read-only
     ImGuiInputTextFlags Flags;          // What user passed to InputText()      // Read-only
@@ -964,9 +964,9 @@ struct ImGuiTextEditCallbackData
     int                 SelectionEnd;   //                                      // Read-write
 
     // NB: calling those function loses selection.
-    void    DeleteChars(int pos, int bytes_count);
-    void    InsertChars(int pos, const char* text, const char* text_end = NULL);
-    bool    HasSelection() const { return SelectionStart != SelectionEnd; }
+    IMGUI_API void    DeleteChars(int pos, int bytes_count);
+    IMGUI_API void    InsertChars(int pos, const char* text, const char* text_end = NULL);
+    IMGUI_API bool    HasSelection() const { return SelectionStart != SelectionEnd; }
 };
 
 // ImColor() is just a helper that implicity converts to either ImU32 (packed 4x1 byte) or ImVec4 (4x1 float)
