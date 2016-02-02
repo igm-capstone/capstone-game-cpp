@@ -21,12 +21,12 @@ void MainMenuScene::VUpdate(double milliseconds)
 	if (mInput->GetKeyDown(KEYCODE_1))
 	{
 		mNetworkManager->StartServer();
-		Application::SharedInstance().LoadScene<Level00>();
+		Application::SharedInstance().LoadScene<Level01>();
 	}
 	if (mInput->GetKeyDown(KEYCODE_2))
 	{
 		if (mNetworkManager->StartClient())
-			Application::SharedInstance().LoadScene<Level00>();
+			Application::SharedInstance().LoadScene<Level01>();
 	}
 	if (mInput->GetKeyDown(KEYCODE_3))
 	{
@@ -66,7 +66,7 @@ void MainMenuScene::RenderUI()
 	if (ImGui::Button("Start Client"))
 	{
 		if (mNetworkManager->StartClient())
-			Application::SharedInstance().LoadScene<Level00>();
+			Application::SharedInstance().LoadScene<Level01>();
 		else
 			failedClient = true;
 	}

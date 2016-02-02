@@ -107,11 +107,6 @@ void Level00::VInitialize()
 	InitializeCamera();
 
 	mState = BASE_SCENE_STATE_RUNNING;
-
-	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
-		Packet p(PacketTypes::INIT_CONNECTION);
-		mNetworkManager->mClient.SendData(&p);
-	}
 }
 
 void Level00::VUpdate(double milliseconds)
@@ -535,7 +530,7 @@ void Level00::UpdateExplorers() {
 	int c = 0;
 	for each(auto explorer in mExplorer) {
 		if (explorer->mNetworkID->mIsActive) { // player is connected
-			explorer->mController->Move();
+			explorer->mController->Update();
 			explorerWorldMatrix[c] = explorer->mTransform->GetWorldMatrix().transpose();
 			c++;
 		}

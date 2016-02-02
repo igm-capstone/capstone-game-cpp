@@ -7,7 +7,7 @@
 
 enum PacketTypes {
 	INIT_CONNECTION = '0',
-	GIVE_ID = '1',
+	SET_CLIENT_ID = '1',
 	SPAWN_EXPLORER = 'E',
 	GRANT_AUTHORITY = 'A',
 	SYNC_TRANSFORM = 'T',

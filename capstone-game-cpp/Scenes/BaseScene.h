@@ -2,7 +2,6 @@
 #include "stdafx.h"
 
 #include "Network\NetworkManager.h"
-#include <SceneObjects/Explorer.h>
 
 using namespace Rig3D;
 
@@ -30,9 +29,6 @@ protected:
 
 	uint8_t*					mStaticMemory;
 	size_t						mStaticMemorySize;
-
-	static Explorer*			mExplorer[MAX_EXPLORERS];
-	//static Ghost*				mGhost;
 
 public:
 	BaseSceneState				mState;

@@ -186,7 +186,7 @@ void NetworkServer::ReceiveFromClients()
 			switch (packet.Type) {
 				case INIT_CONNECTION:
 					{
-						//Inform the clinet ID
+						//Inform the client ID
 						Packet p(PacketTypes::SET_CLIENT_ID);
 						p.ClientID = client.first;
 						Send(client.first, &p);

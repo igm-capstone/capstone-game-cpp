@@ -26,6 +26,6 @@ protected:
 
 public:
 	//External Callbacks
-	inline void OnNetSyncTransform(vec3f newPos) {};
-	inline void OnNetAuthorityChange(bool newAuth) {};
+	void OnNetSyncTransform(vec3f newPos) {};
+	void OnNetAuthorityChange(bool newAuth) {};
 };

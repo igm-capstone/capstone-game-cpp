@@ -2,6 +2,7 @@
 #include "BaseScene.h"
 #include "Rig3D/Graphics/DirectX11/imgui/imgui.h"
 #include <SceneObjects/SpawnPoint.h>
+#include <SceneObjects/Explorer.h>
 
 BaseScene::BaseScene() : 
 	mStaticMemory(nullptr),
@@ -18,6 +19,11 @@ BaseScene::BaseScene() :
 	mInput = mEngine->GetInput();
 
 	mNetworkManager = &Singleton<NetworkManager>::SharedInstance();
+
+	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
+		Packet p(PacketTypes::INIT_CONNECTION);
+		mNetworkManager->mClient.SendData(&p);
+	}
 }
 
 BaseScene::~BaseScene()
@@ -41,7 +47,7 @@ void BaseScene::RenderFPSIndicator()
 
 #pragma region Network Callbacks
 void BaseScene::CmdSpawnNewExplorer(int clientID) {
-	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER, "Cmd being called on non-server");
+	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER);
 	// Get a spawn point
 	// FIMXE: logic to select spawn point
 	SpawnPoint& sp = *(Factory<SpawnPoint>().begin());
@@ -51,6 +57,7 @@ void BaseScene::CmdSpawnNewExplorer(int clientID) {
 
 	Packet p(PacketTypes::SPAWN_EXPLORER);
 	p.UUID = e->mNetworkID->mUUID;
+	p.Position = sp.mTransform->GetPosition();
 	mNetworkManager->mServer.SendToAll(&p);
 
 	Packet p2(PacketTypes::GRANT_AUTHORITY);
@@ -59,7 +66,7 @@ void BaseScene::CmdSpawnNewExplorer(int clientID) {
 }
 
 void BaseScene::RpcSpawnExistingExplorer(int UUID, vec3f pos) {
-	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER, "Rpc being called on non-client");
+	assert(mNetworkManager->mMode == NetworkManager::Mode::CLIENT);
 	auto e = Factory<Explorer>::Create();
 	e->Spawn(pos, UUID);
 }
@@ -69,7 +76,7 @@ void BaseScene::GrantAuthority(int UUID) {
 	for each(auto &netID in Factory<NetworkID>()) {
 		if (netID.mIsActive && netID.mUUID == UUID) {
 			netID.mHasAuthority = true;
-			((Explorer*)netID.mSceneObject)->mController->mIsActive = true;
+			((Explorer*)netID.mSceneObject)->OnNetAuthorityChange(true);
 		}
 	}
 }
@@ -78,7 +85,8 @@ void BaseScene::SyncTransform(int UUID, vec3f pos)
 {
 	for each(auto &netID in Factory<NetworkID>()) {
 		if (netID.mUUID == UUID) {
-			netID.mSceneObject->MoveTo(pos);
+			((Explorer*)netID.mSceneObject)->OnNetSyncTransform(pos);
+		}
 	}
 }
 #pragma endregion

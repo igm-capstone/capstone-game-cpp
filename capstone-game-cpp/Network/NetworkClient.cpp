@@ -100,11 +100,11 @@ void NetworkClient::Update()
 	{
 		packet.Deserialize(&(mNetworkData[i]));
 		switch (packet.Type) {
-			case GIVE_ID:
+			case SET_CLIENT_ID:
 				mID = packet.ClientID;
 				break;
 			case SPAWN_EXPLORER:
-				Application::SharedInstance().GetCurrentScene()->RpcSpawnExistingExplorer(packet.ClientID, packet.UUID, packet.Position);
+				Application::SharedInstance().GetCurrentScene()->RpcSpawnExistingExplorer(packet.UUID, packet.Position);
 				break;
 			case GRANT_AUTHORITY:
 				Application::SharedInstance().GetCurrentScene()->GrantAuthority(packet.UUID);

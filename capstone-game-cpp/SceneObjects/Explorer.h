@@ -37,7 +37,7 @@ private:
 public:
 	void Spawn(vec3f pos, int UUID)
 	{
-		mTransform->SetPosition(pos);
+		mTransform->SetPosition(0,0,0.5f);
 
 		mCollider->mIsActive = true;
 
@@ -52,7 +52,7 @@ public:
 
 	void OnNetSyncTransform(vec3f newPos)
 	{
-		mTransform->SetPosition(pos);
-		mCollider->mCollider.origin = pos;
+		mTransform->SetPosition(newPos);
+		mCollider->mCollider.origin = newPos;
 	}
 };
