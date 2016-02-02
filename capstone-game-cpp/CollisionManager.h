@@ -33,8 +33,5 @@ public:
 private:
 	Collision mCollisions[MAX_COLLISIONS];
 	uint32_t  mCollisionsCount;
-
-	std::vector<Explorer*>  mExplorers;
-	std::vector<Wall*>		mWalls;
 };
 

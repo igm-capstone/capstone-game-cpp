@@ -37,9 +37,10 @@ private:
 public:
 	void Spawn(vec3f pos, int UUID)
 	{
-		mTransform->SetPosition(0,0,0.5f);
+		mTransform->SetPosition(pos);
 
 		mCollider->mIsActive = true;
+		mCollider->mCollider.origin = pos;
 
 		mNetworkID->mIsActive = true;
 		mNetworkID->mUUID = UUID;

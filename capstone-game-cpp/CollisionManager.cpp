@@ -11,21 +11,10 @@ CollisionManager::CollisionManager() : mCollisionsCount(0)
 
 CollisionManager::~CollisionManager()
 {
-	mExplorers.clear();
-	mWalls.clear();
 }
 
 void CollisionManager::Initialize()
 {
-	for (Explorer& e : Factory<Explorer>())
-	{
-		mExplorers.push_back(&e);
-	}
-
-	for (Wall& w : Factory<Wall>())
-	{
-		mWalls.push_back(&w);
-	}
 }
 
 void CollisionManager::DetectCollisions()
@@ -34,18 +23,20 @@ void CollisionManager::DetectCollisions()
 
 	Collision*	pCollisions = mCollisions;
 	uint32_t	collisionsCount = 0;
-	for (uint32_t i = 0; i < mExplorers.size(); i++)
+	for (Explorer& e1 : Factory<Explorer>())
 	{
-		for (uint32_t j = i + 1; j < mExplorers.size(); j++)
+		for (Explorer& e2 : Factory<Explorer>())
 		{
-			if (IntersectSphereSphere(mExplorers[i]->mCollider->mCollider, mExplorers[j]->mCollider->mCollider))
-			{
-				pCollisions[collisionsCount].colliderA.SphereCollider = mExplorers[i]->mCollider;
-				pCollisions[collisionsCount].colliderB.SphereCollider = mExplorers[j]->mCollider;
+			if (&e1 == &e2) continue;
 
-				float overlap = (mExplorers[i]->mCollider->mCollider.radius + mExplorers[j]->mCollider->mCollider.radius)
-					- cliqCity::graphicsMath::magnitude(mExplorers[i]->mCollider->mCollider.origin - mExplorers[j]->mCollider->mCollider.origin);
-				vec3f AtoB = (mExplorers[j]->mCollider->mCollider.origin - mExplorers[i]->mCollider->mCollider.origin);
+			if (IntersectSphereSphere(e1.mCollider->mCollider, e2.mCollider->mCollider))
+			{
+				pCollisions[collisionsCount].colliderA.SphereCollider = e1.mCollider;
+				pCollisions[collisionsCount].colliderB.SphereCollider = e2.mCollider;
+
+				float overlap = (e1.mCollider->mCollider.radius + e2.mCollider->mCollider.radius)
+					- cliqCity::graphicsMath::magnitude(e1.mCollider->mCollider.origin - e2.mCollider->mCollider.origin);
+				vec3f AtoB = (e2.mCollider->mCollider.origin - e1.mCollider->mCollider.origin);
 				pCollisions[collisionsCount].minimumOverlap = AtoB * overlap;
 
 				collisionsCount++;
@@ -59,18 +50,18 @@ void CollisionManager::DetectCollisions()
 
 	// Explorer / Wall Collisions
 
-	for (uint32_t i = 0; i < mExplorers.size(); i++)
+	for (Explorer& e : Factory<Explorer>())
 	{
-		for (uint32_t j = 0; j < mWalls.size(); j++)
+		for (Wall& w : Factory<Wall>())
 		{
 			vec3f cp;
-			if (IntersectSphereOBB(mExplorers[i]->mCollider->mCollider, mWalls[j]->mBoxCollider->mCollider, cp))
+			if (IntersectSphereOBB(e.mCollider->mCollider, w.mBoxCollider->mCollider, cp))
 			{
-				pCollisions[collisionsCount].colliderA.SphereCollider	= mExplorers[i]->mCollider;
-				pCollisions[collisionsCount].colliderB.OBBCollider		= mWalls[j]->mBoxCollider;
+				pCollisions[collisionsCount].colliderA.SphereCollider	= e.mCollider;
+				pCollisions[collisionsCount].colliderB.OBBCollider		= w.mBoxCollider;
 
-				vec3f d = cp - mExplorers[i]->mCollider->mCollider.origin;
-				vec3f r = cliqCity::graphicsMath::normalize(d) * mExplorers[i]->mCollider->mCollider.radius;
+				vec3f d = cp - e.mCollider->mCollider.origin;
+				vec3f r = cliqCity::graphicsMath::normalize(d) * e.mCollider->mCollider.radius;
 				pCollisions[collisionsCount].minimumOverlap = d - r;
 
 				collisionsCount++;
