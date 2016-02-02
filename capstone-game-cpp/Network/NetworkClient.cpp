@@ -100,17 +100,17 @@ void NetworkClient::Update()
 	{
 		packet.Deserialize(&(mNetworkData[i]));
 		switch (packet.Type) {
-			case GIVE_ID:
+			case SET_CLIENT_ID:
 				mID = packet.ClientID;
 				break;
 			case SPAWN_EXPLORER:
-				((Level00*)Application::SharedInstance().GetCurrentScene())->SpawnExistingExplorer(packet.ClientID, packet.UUID);
+				Application::SharedInstance().GetCurrentScene()->RpcSpawnExistingExplorer(packet.UUID, packet.Position);
 				break;
 			case GRANT_AUTHORITY:
-				((Level00*)Application::SharedInstance().GetCurrentScene())->GrantAuthority(packet.UUID);
+				Application::SharedInstance().GetCurrentScene()->GrantAuthority(packet.UUID);
 				break;
 			case SYNC_TRANSFORM:
-				((Level00*)Application::SharedInstance().GetCurrentScene())->SyncTransform(packet.UUID, packet.Position);
+				Application::SharedInstance().GetCurrentScene()->SyncTransform(packet.UUID, packet.Position);
 				break;
 			default:
 				printf("error in packet types\n");

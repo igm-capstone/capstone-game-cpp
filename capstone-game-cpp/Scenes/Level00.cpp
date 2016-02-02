@@ -107,11 +107,6 @@ void Level00::VInitialize()
 	InitializeCamera();
 
 	mState = BASE_SCENE_STATE_RUNNING;
-
-	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
-		Packet p(PacketTypes::INIT_CONNECTION);
-		mNetworkManager->mClient.SendData(&p);
-	}
 }
 
 void Level00::VUpdate(double milliseconds)
@@ -535,7 +530,7 @@ void Level00::UpdateExplorers() {
 	int c = 0;
 	for each(auto explorer in mExplorer) {
 		if (explorer->mNetworkID->mIsActive) { // player is connected
-			explorer->mController->Move();
+			explorer->mController->Update();
 			explorerWorldMatrix[c] = explorer->mTransform->GetWorldMatrix().transpose();
 			c++;
 		}
@@ -742,63 +737,7 @@ void Level00::InitializeLevel()
 	mGoal.mTransform->RotateYaw(PI);
 }
 
-void Level00::SpawnNewExplorer(int id) {
-	mExplorer[id]->mTransform->SetPosition(mSpawnPoint.mTransform->GetPosition());
-				 
-	mExplorer[id]->mCollider->mIsActive = true;
-	mExplorer[id]->mCollider->mCollider.origin = mExplorer[id]->mTransform->GetPosition();
-	mExplorer[id]->mCollider->mCollider.radius = UNITY_QUAD_RADIUS;
 
-	mExplorer[id]->mNetworkID->mIsActive = true;
-	mExplorer[id]->mNetworkID->mUUID = MyUUID::GenUUID();
-
-	mExplorersCount++;
-
-	if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
-		Packet p(PacketTypes::SPAWN_EXPLORER);
-		p.UUID = mExplorer[id]->mNetworkID->mUUID;
-		p.ClientID = id;
-		mNetworkManager->mServer.SendToAll(&p);
-
-		Packet p2(PacketTypes::GRANT_AUTHORITY);
-		p2.UUID = mExplorer[id]->mNetworkID->mUUID;
-		mNetworkManager->mServer.Send(id, &p2);
-	}
-}
-
-void Level00::SpawnExistingExplorer(int id, int UUID) {
-	mExplorer[id]->mTransform->SetPosition(mSpawnPoint.mTransform->GetPosition());
-
-	mExplorer[id]->mCollider->mIsActive = true;
-	mExplorer[id]->mCollider->mCollider.origin = mExplorer[id]->mTransform->GetPosition();
-	mExplorer[id]->mCollider->mCollider.radius = UNITY_QUAD_RADIUS;
-
-	mExplorer[id]->mNetworkID->mIsActive = true;
-	mExplorer[id]->mNetworkID->mUUID = UUID;
-
-	mExplorersCount++;
-}
-
-
-void Level00::GrantAuthority(int UUID) {
-	// Player
-	for each(auto &explorer in mExplorer) {
-		if (explorer->mNetworkID->mUUID == UUID)
-		explorer->mNetworkID->mHasAuthority = true;
-		explorer->mController->mIsActive = true;
-	}
-}
-
-void Level00::SyncTransform(int UUID, vec3f pos)
-{
-	// Player
-	for each(auto &explorer in mExplorer) {
-		if (explorer->mNetworkID->mUUID == UUID) {
-			explorer->mTransform->SetPosition(pos);
-			explorer->mCollider->mCollider.origin = pos;
-		}
-	}
-}
 
 void Level00::InitializeGrid()
 {

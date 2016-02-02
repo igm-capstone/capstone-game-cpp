@@ -9,5 +9,5 @@ public:
 	ExplorerController();
 	~ExplorerController();
 
-	bool Move();
+	bool Update();
 };

@@ -84,15 +84,9 @@ void Level01::InitializeGeometry()
 	mRenderer->VSetMeshVertexBuffer(mWallMesh0, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
 	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
 
-	Factory<Explorer>::Create();
-
-	for (Explorer& e : Factory<Explorer>())
-	{
-		meshLibrary.NewMesh(&e.mMesh, mRenderer);
-		mRenderer->VSetMeshVertexBuffer(e.mMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
-		mRenderer->VSetMeshIndexBuffer(e.mMesh, &indices[0], indices.size());
-		e.mTransform->SetPosition(0.0f, 0.0f, -0.5f);
-	}
+	meshLibrary.NewMesh(&mExplorerCubeMesh, mRenderer);
+	mRenderer->VSetMeshVertexBuffer(mExplorerCubeMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
+	mRenderer->VSetMeshIndexBuffer(mExplorerCubeMesh, &indices[0], indices.size());
 }
 
 void Level01::InitializeShaderResources()
@@ -141,13 +135,15 @@ void Level01::VUpdate(double milliseconds)
 {
 	for (ExplorerController& ec : Factory<ExplorerController>())
 	{
-		ec.Move();
+		ec.Update();
 	}
 
 	UpdateCamera();
 
 	mCollisionManager.DetectCollisions();
 	mCollisionManager.ResolveCollisions();
+
+	mNetworkManager->Update();
 }
 
 void Level01::UpdateCamera()
@@ -206,9 +202,9 @@ void Level01::RenderExplorers()
 		mPVM.world = e.mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mPVM, 0);
 
-		mRenderer->VBindMesh(e.mMesh);
+		mRenderer->VBindMesh(mExplorerCubeMesh);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
-		mRenderer->VDrawIndexed(0, e.mMesh->GetIndexCount());
+		mRenderer->VDrawIndexed(0, mExplorerCubeMesh->GetIndexCount());
 	}
 }
 

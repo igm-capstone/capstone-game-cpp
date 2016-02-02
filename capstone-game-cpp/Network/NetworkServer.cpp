@@ -186,15 +186,18 @@ void NetworkServer::ReceiveFromClients()
 			switch (packet.Type) {
 				case INIT_CONNECTION:
 					{
-						Packet p(PacketTypes::GIVE_ID);
+						//Inform the client ID
+						Packet p(PacketTypes::SET_CLIENT_ID);
 						p.ClientID = client.first;
 						Send(client.first, &p);
-						((Level00*)Application::SharedInstance().GetCurrentScene())->SpawnNewExplorer(client.first);
+
+						//Spawn on the server
+						Application::SharedInstance().GetCurrentScene()->CmdSpawnNewExplorer(client.first);
 					}
 					break;
 				case SYNC_TRANSFORM:
 					Retransmit(client.first, &packet);
-					((Level00*)Application::SharedInstance().GetCurrentScene())->SyncTransform(packet.UUID, packet.Position);
+					Application::SharedInstance().GetCurrentScene()->SyncTransform(packet.UUID, packet.Position);
 					break;
 				default:
 					printf("error in packet types\n");
