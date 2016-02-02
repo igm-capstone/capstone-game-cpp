@@ -31,6 +31,9 @@ private:
 		mCollider->mTraits.isDynamic = true;
 		mCollider->mSceneObject = this;
 		mCollider->mIsActive = false;
+
+		mNetworkID->RegisterCallback(&OnNetAuthorityChange);
+		mNetworkID->RegisterCallback(&OnNetSyncTransform);
 	}
 	~Explorer() {};
 
@@ -46,14 +49,16 @@ public:
 		mNetworkID->mUUID = UUID;
 	};
 
-	void OnNetAuthorityChange(bool newAuth)
+	static void OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	{
-		mController->mIsActive = newAuth;
+		auto e = static_cast<Explorer*>(obj);
+		e->mController->mIsActive = newAuth;
 	}
 
-	void OnNetSyncTransform(vec3f newPos)
+	static void OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos)
 	{
-		mTransform->SetPosition(newPos);
-		mCollider->mCollider.origin = newPos;
+		auto e = static_cast<Explorer*>(obj);
+		e->mTransform->SetPosition(newPos);
+		e->mCollider->mCollider.origin = newPos;
 	}
 };

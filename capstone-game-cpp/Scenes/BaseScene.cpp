@@ -84,7 +84,7 @@ void BaseScene::GrantAuthority(int UUID) {
 	for each(auto &netID in Factory<NetworkID>()) {
 		if (netID.mIsActive && netID.mUUID == UUID) {
 			netID.mHasAuthority = true;
-			((Explorer*)netID.mSceneObject)->OnNetAuthorityChange(true);
+			netID.OnNetAuthorityChange(true);
 		}
 	}
 }
@@ -93,7 +93,7 @@ void BaseScene::SyncTransform(int UUID, vec3f pos)
 {
 	for each(auto &netID in Factory<NetworkID>()) {
 		if (netID.mUUID == UUID) {
-			((Explorer*)netID.mSceneObject)->OnNetSyncTransform(pos);
+			netID.OnNetSyncTransform(pos);
 		}
 	}
 }

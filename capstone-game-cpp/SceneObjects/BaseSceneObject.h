@@ -23,9 +23,4 @@ protected:
 
 	// All COM objects should be released in destructor
 	~BaseSceneObject() {};
-
-public:
-	//External Callbacks
-	void OnNetSyncTransform(vec3f newPos) {};
-	void OnNetAuthorityChange(bool newAuth) {};
 };
