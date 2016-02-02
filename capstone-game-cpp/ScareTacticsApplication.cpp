@@ -11,6 +11,10 @@
 #include "Shaders/obj/QuadVertexShader.h"
 #include "Shaders/obj/ExplorerVertexShader.h"
 #include "Shaders/obj/ExplorerPixelShader.h"
+#include "Shaders/obj/PointLightVolumeVertexShader.h"
+#include "Shaders/obj/PointLightVolumePixelShader.h"
+#include "Shaders/obj/NDSQuadVertexShader.h"
+#include "Shaders/obj/NDSQuadPixelShader.h"
 #include "Shaders/obj/ShadowCasterPixelShader.h"
 #include "Shaders/obj/ShadowGridComputeShader.h"
 #include "Shaders/obj/ShadowPixelShader.h"
@@ -22,6 +26,10 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mQuadPixelShader(nullptr),
 	mExplorerVertexShader(nullptr),
 	mExplorerPixelShader(nullptr),
+	mPLVolumeVertexShader(nullptr),
+	mPLVolumePixelShader(nullptr),
+	mNDSQuadVertexShader(nullptr),
+	mNDSQuadPixelShader(nullptr),
 	mLoadingScreen(nullptr),
 	mCurrentScene(nullptr),
 	mSceneToLoad(nullptr),
@@ -46,7 +54,8 @@ void ScareTacticsApplication::SetStaticMemory(void* start, size_t size)
 {
 	mStaticMemory = static_cast<char*>(start);
 	mStaticMemorySize = size;
-	mSceneAllocator.SetMemory(start, mStaticMemory + STATIC_SCENE_MEMORY + 6);	// Extra padding for alignment
+	mSceneAllocator.SetMemory(start, mStaticMemory + STATIC_SCENE_MEMORY + SCENE_ALIGNMENT_PADDING);				// Extra padding for alignment
+	mGameAllocator.SetMemory(mStaticMemory + STATIC_SCENE_MEMORY + SCENE_ALIGNMENT_PADDING, mStaticMemory + size);	
 }
 
 void ScareTacticsApplication::UnloadScene()
@@ -99,13 +108,43 @@ void ScareTacticsApplication::InitializeShaders()
 
 	renderer->LoadVertexShader(mExplorerVertexShader, gExplorerVertexShader, sizeof(gExplorerVertexShader), explorerInputElements, 3);
 	renderer->VLoadPixelShader(mExplorerPixelShader, gExplorerPixelShader, sizeof(gExplorerPixelShader));
+
+	// Point Light Shaders
+
+	InputElement plvInputElements[] = 
+	{
+		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "TEXCOORD",	0, 0, 12,  0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "COLOR",		0, 1, 0, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
+		{ "WORLD",		0, 2, 0,  1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
+		{ "WORLD",		1, 2, 16, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
+		{ "WORLD",		2, 2, 32, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
+		{ "WORLD",		3, 2, 48, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE }
+	};
+
+	renderer->VCreateShader(&mPLVolumeVertexShader, &mGameAllocator);
+	renderer->VCreateShader(&mPLVolumePixelShader, &mGameAllocator);
+
+	renderer->LoadVertexShader(mPLVolumeVertexShader, gPointLightVolumeVertexShader, sizeof(gPointLightVolumeVertexShader), plvInputElements, 7);
+	renderer->VLoadPixelShader(mPLVolumePixelShader, gPointLightVolumePixelShader, sizeof(gPointLightVolumePixelShader));
+
+	// Normalized Device Quad Shaders
+
+	InputElement ndsqInputElements[] =
+	{
+		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "TEXCOORD",	0, 0, 12,  0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX }
+	};
+
+	renderer->VCreateShader(&mNDSQuadVertexShader, &mGameAllocator);
+	renderer->VCreateShader(&mNDSQuadPixelShader, &mGameAllocator);
+
+	renderer->LoadVertexShader(mNDSQuadVertexShader, gNDSQuadVertexShader, sizeof(gNDSQuadVertexShader), ndsqInputElements, 2);
+	renderer->VLoadPixelShader(mNDSQuadPixelShader, gNDSQuadPixelShader, sizeof(gNDSQuadPixelShader));
 }
 
 void ScareTacticsApplication::VInitialize()
 {
-	auto memory = static_cast<char*>(malloc(sizeof(char) * 1000));
-	mGameAllocator.SetMemory(memory, memory + 1000);
-
 	InitializeShaders();
 
 	mLoadingScreen->VInitialize();
@@ -169,6 +208,10 @@ void ScareTacticsApplication::VShutdown()
 	mQuadPixelShader->~IShader();
 	mExplorerVertexShader->~IShader();
 	mExplorerPixelShader->~IShader();
+	mPLVolumeVertexShader->~IShader();
+	mPLVolumePixelShader->~IShader();
+	mNDSQuadVertexShader->~IShader();
+	mNDSQuadPixelShader->~IShader();
 
 	mSceneAllocator.Free();
 	mGameAllocator.Free();

@@ -104,6 +104,12 @@ namespace Rig3D
 
 #pragma endregion 
 
+#pragma region BlendState
+
+		void CreateAdditiveBlendState(ID3D11BlendState** blendState);
+
+#pragma endregion 
+
 #pragma region Mesh
 
 		void	VSetMeshVertexBuffer(IMesh* mesh, void* vertices, const size_t& size, const size_t& stride);
@@ -185,6 +191,10 @@ namespace Rig3D
 
 		void	VSetVertexShaderSamplerStates(IShaderResource* shaderResource);
 		void	VSetPixelShaderSamplerStates(IShaderResource* shaderResource);
+
+		void	AddAdditiveBlendState(IShaderResource* shaderResource);
+
+		void	SetBlendState(IShaderResource* shaderResource, const uint32_t& atIndex, float* color, uint32_t sampleMask);
 
 #pragma endregion 
 

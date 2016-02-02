@@ -17,18 +17,27 @@ class Level01 : public BaseScene
 
 	// Counts
 	uint32_t			mWallCount0;
+	uint32_t			mPointLightCount;
 	uint32_t			mExplorerCount;
 
 	// Wall Data
 	mat4f*				mWallWorldMatrices0;
-	
+	mat4f*				mPointLightWorldMatrices;
+	vec4f*				mPointLightColors;
+
 	// Mesh
 	IMesh*				mWallMesh0;
 	IMesh*				mExplorerCubeMesh; //better solution when will come when we start to handle models
+	IMesh*				mPLVMesh;
+	IMesh*				mNDSQuadMesh;
+
+	// RenderContext
+	IRenderContext*		mGBufferContext;
 
 	// ShaderResource
 	IShaderResource*	mWallShaderResource;
 	IShaderResource*	mExplorerShaderResource;
+	IShaderResource*	mPLVShaderResource;
 
 	// Managers
 	CollisionManager	mCollisionManager;
@@ -49,8 +58,14 @@ public:
 	void UpdateCamera();
 
 	void VRender() override;
+	void SetGBufferRenderTargets();
+	void SetDefaultTarget();
 	void RenderWalls();
 	void RenderExplorers();
+	void RenderPointLightVolumes();
+	void RenderFullScreenQuad();
+
+	
 
 	void VShutdown() override;
 };

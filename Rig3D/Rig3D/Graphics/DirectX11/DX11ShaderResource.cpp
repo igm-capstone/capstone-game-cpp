@@ -39,6 +39,13 @@ DX11ShaderResource::~DX11ShaderResource()
 	mInstanceBuffers.clear();
 	mInstanceBufferStrides.clear();
 	mInstanceBufferOffsets.clear();
+
+	for (uint32_t i = 0; i < mBlendStates.size(); i++)
+	{
+		ReleaseMacro(mBlendStates[i]);
+	}
+
+	mBlendStates.clear();
 }
 
 ID3D11ShaderResourceView** DX11ShaderResource::GetShaderResourceViews()
@@ -71,6 +78,11 @@ UINT* DX11ShaderResource::GetInstanceBufferOffsets()
 	return &mInstanceBufferOffsets[0];
 }
 
+ID3D11BlendState** DX11ShaderResource::GetBlendStates()
+{
+	return &mBlendStates[0];
+}
+
 uint32_t DX11ShaderResource::GetShaderResourceViewCount() const
 {
 	return mShaderResourceViews.size();
@@ -89,6 +101,11 @@ uint32_t DX11ShaderResource::GetConstantBufferCount() const
 uint32_t DX11ShaderResource::GetInstanceBufferCount() const
 {
 	return mInstanceBuffers.size();
+}
+
+uint32_t DX11ShaderResource::GetBlendStateCount() const
+{
+	return mBlendStates.size();
 }
 
 void DX11ShaderResource::SetShaderResourceViews(std::vector<ID3D11ShaderResourceView*>& shaderResourceViews)
@@ -121,6 +138,13 @@ void DX11ShaderResource::SetInstanceBuffers(std::vector<ID3D11Buffer*>& buffers,
 	mInstanceBufferOffsets = offsets;
 }
 
+void DX11ShaderResource::SetBlendStates(std::vector<ID3D11BlendState*>& blendStates)
+{
+	VClearBlendStates();
+
+	mBlendStates = blendStates;
+}
+
 void DX11ShaderResource::AddShaderResourceViews(std::vector<ID3D11ShaderResourceView*>& shaderResourceViews)
 {
 	mShaderResourceViews.insert(std::end(mShaderResourceViews), std::begin(shaderResourceViews), std::end(shaderResourceViews));
@@ -129,6 +153,11 @@ void DX11ShaderResource::AddShaderResourceViews(std::vector<ID3D11ShaderResource
 void DX11ShaderResource::AddSamplerState(ID3D11SamplerState* samplerState)
 {
 	mSamplerStates.push_back(samplerState);
+}
+
+void DX11ShaderResource::AddBlendState(ID3D11BlendState* blendState)
+{
+	mBlendStates.push_back(blendState);
 }
 
 void DX11ShaderResource::VClearShaderResourceViews()
@@ -171,4 +200,14 @@ void DX11ShaderResource::VClearInstanceBuffers()
 	mInstanceBuffers.clear();
 	mInstanceBufferStrides.clear();
 	mInstanceBufferOffsets.clear();
+}
+
+void DX11ShaderResource::VClearBlendStates()
+{
+	for (uint32_t i = 0; i < mBlendStates.size(); i++)
+	{
+		ReleaseMacro(mBlendStates[i]);
+	}
+
+	mBlendStates.clear();
 }

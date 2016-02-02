@@ -154,6 +154,17 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	if (lamps != nullptr)
 	{
 		loadLamps(lamps);
+
+		level.lampCount = static_cast<short>(lamps->size());
+		level.lamps = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.lampCount, alignof(mat4f), 0));
+		level.lampColors = reinterpret_cast<vec4f*>(allocator.Allocate(sizeof(vec4f) * level.lampCount, alignof(vec4f), 0));
+		
+		int i = 0;
+		for (Lamp& l : Factory<Lamp>())
+		{
+			level.lampColors[i] = { 0.6f, 0.6f, 0.0f, 1.0f };
+			level.lamps[i++] = l.mTransform->GetWorldMatrix().transpose();
+		}
 	}
 
 	auto domination = obj["domination"].get_ptr<jarr_t>();
@@ -184,15 +195,15 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	if (walls != nullptr)
 	{
 		loadWalls(walls);
-	}
 
-	level.wallCount = static_cast<short>(walls->size());
-	level.walls = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.wallCount, alignof(mat4f), 0));
+		level.wallCount = static_cast<short>(walls->size());
+		level.walls = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.wallCount, alignof(mat4f), 0));
 
-	int i = 0;
-	for (Wall& w : Factory<Wall>())
-	{
-		level.walls[i++] = w.mTransform->GetWorldMatrix().transpose();
+		int i = 0;
+		for (Wall& w : Factory<Wall>())
+		{
+			level.walls[i++] = w.mTransform->GetWorldMatrix().transpose();
+		}
 	}
 
 	return level;

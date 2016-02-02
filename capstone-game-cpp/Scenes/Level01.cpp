@@ -10,6 +10,7 @@
 #include <SceneObjects/Explorer.h>
 #include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
+#include <Rig3D/Graphics/Interface/IRenderContext.h>
 
 #define PI 3.14159265359f
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
@@ -19,20 +20,32 @@
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 
-Level01::Level01() : 
-	mWallCount0(0), 
+Level01::Level01() :
+	mWallCount0(0),
+	mPointLightCount(0),
 	mExplorerCount(0),
-	mWallWorldMatrices0(nullptr), 
-	mWallMesh0(nullptr), 
+	mWallWorldMatrices0(nullptr),
+	mPointLightWorldMatrices(nullptr),
+	mPointLightColors(nullptr),
+	mWallMesh0(nullptr),
+	mExplorerCubeMesh(nullptr),
+	mPLVMesh(nullptr),
+	mNDSQuadMesh(nullptr),
+	mGBufferContext(nullptr),
 	mWallShaderResource(nullptr),
-	mExplorerShaderResource(nullptr)
+	mExplorerShaderResource(nullptr),
+	mPLVShaderResource(nullptr)
 {
-	
+	auto e = Factory<Explorer>::Create();
+	e->mController->mIsActive = true;
 }
 
 Level01::~Level01()
 {
 	mWallMesh0->~IMesh();
+	mExplorerCubeMesh->~IMesh();
+	mPLVMesh->~IMesh();
+	mNDSQuadMesh->~IMesh();
 
 	for (Explorer& e : Factory<Explorer>())
 	{
@@ -41,6 +54,9 @@ Level01::~Level01()
 
 	mWallShaderResource->~IShaderResource();
 	mExplorerShaderResource->~IShaderResource();
+	mPLVShaderResource->~IShaderResource();
+
+	mGBufferContext->~IRenderContext();
 
 	mAllocator.Free();
 }
@@ -48,6 +64,10 @@ Level01::~Level01()
 void Level01::VOnResize()
 {
 	mMainCamera.SetProjectionMatrix(mat4f::normalizedPerspectiveLH(0.25f * PI, mRenderer->GetAspectRatio(), 0.1f, 1000.0f));
+
+	// 0: Position, 1: Normal, 2: Color 3: Albedo
+	mRenderer->VCreateContextResourceTargets(mGBufferContext, 4, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
+	mRenderer->VCreateContextDepthResourceTarget(mGBufferContext, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
 }
 
 #pragma region Initialization
@@ -60,8 +80,13 @@ void Level01::VInitialize()
 	mRenderer->SetDelegate(this);
 
 	auto level = Resource::LoadLevel("Assets/Level01.json", mAllocator);
+
 	mWallCount0 = level.wallCount;
 	mWallWorldMatrices0 = level.walls;
+
+	mPointLightCount = level.lampCount;
+	mPointLightWorldMatrices = level.lamps;
+	mPointLightColors = level.lampColors;
 
 	InitializeGeometry();
 	InitializeShaderResources();
@@ -76,6 +101,8 @@ void Level01::VInitialize()
 
 void Level01::InitializeGeometry()
 {
+	// Wall Mesh
+
 	MeshLibrary<LinearAllocator> meshLibrary(&mAllocator);
 	meshLibrary.NewMesh(&mWallMesh0, mRenderer);
 
@@ -87,13 +114,41 @@ void Level01::InitializeGeometry()
 	mRenderer->VSetMeshVertexBuffer(mWallMesh0, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
 	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
 
+	// Explorer Mesh
+
 	meshLibrary.NewMesh(&mExplorerCubeMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mExplorerCubeMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
 	mRenderer->VSetMeshIndexBuffer(mExplorerCubeMesh, &indices[0], indices.size());
+
+	vertices.clear();
+	indices.clear();
+
+	// Point Light Volume 
+
+	Geometry::Sphere(vertices, indices, 6, 6, 5.0f);
+
+	meshLibrary.NewMesh(&mPLVMesh, mRenderer);
+	mRenderer->VSetMeshVertexBuffer(mPLVMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
+	mRenderer->VSetMeshIndexBuffer(mPLVMesh, &indices[0], indices.size());
+
+	// Full Screen Quad
+
+	indices.clear();
+
+	std::vector<NDSVertex> ndsVertices;
+
+	Geometry::NDSQuad(ndsVertices, indices);
+
+	meshLibrary.NewMesh(&mNDSQuadMesh, mRenderer);
+	mRenderer->VSetMeshVertexBuffer(mNDSQuadMesh, &ndsVertices[0], sizeof(NDSVertex) * ndsVertices.size(), sizeof(NDSVertex));
+	mRenderer->VSetMeshIndexBuffer(mNDSQuadMesh, &indices[0], indices.size());
 }
 
 void Level01::InitializeShaderResources()
 {
+	// Allocate render context
+	mRenderer->VCreateRenderContext(&mGBufferContext, &mAllocator);
+
 	// Allocate wall shader resource
 	mRenderer->VCreateShaderResource(&mWallShaderResource, &mAllocator);
 
@@ -123,6 +178,24 @@ void Level01::InitializeShaderResources()
 	size_t cbExplorerSizes[] = { sizeof(CbufferPVM) };
 
 	mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 1);
+
+	// PLV
+
+	mRenderer->VCreateShaderResource(&mPLVShaderResource, &mAllocator);
+
+	// Instance buffer data
+	void*	ibLampData[] = { mPointLightColors, mPointLightWorldMatrices};
+	size_t	ibLampSizes[] = {  sizeof(vec4f) * mPointLightCount, sizeof(mat4f) * mPointLightCount };
+	size_t	ibLampStrides[] = { sizeof(vec4f), sizeof(mat4f) };
+	size_t	ibLampOffsets[] = { 0, 0 };
+
+	mRenderer->VCreateDynamicShaderInstanceBuffers(mPLVShaderResource, ibLampData, ibLampSizes, ibLampStrides, ibLampOffsets, 2);
+
+	mRenderer->VUpdateShaderInstanceBuffer(mPLVShaderResource, mPointLightColors, ibLampSizes[0], 0);
+	mRenderer->VUpdateShaderInstanceBuffer(mPLVShaderResource, mPointLightWorldMatrices, ibLampSizes[1], 1);
+
+	mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_CLAMP);
+	mRenderer->AddAdditiveBlendState(mPLVShaderResource);
 }
 
 void Level01::InitializeMainCamera()
@@ -161,18 +234,26 @@ void Level01::UpdateCamera()
 
 void Level01::VRender()
 {
-	mRenderer->VSetContextTargetWithDepth();
-	mRenderer->VClearContext(Colors::magenta.pCols, 1.0f, 0);
-
 	mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_TRIANGLE);
 
 	mDeviceContext->RSSetViewports(1, &mRenderer->GetViewport());
 
+	SetGBufferRenderTargets();
+
 	RenderWalls();
 	RenderExplorers();
-	mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
+	RenderPointLightVolumes();
+
+	SetDefaultTarget();
+
+	RenderFullScreenQuad();
+
+	ID3D11ShaderResourceView* nullSRV[4] = { 0, 0, 0, 0 };
+	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, nullSRV);
 
 	//FPS
+	mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
+
 	DX11IMGUI::NewFrame();
 	RenderFPSIndicator();
 	Console::Draw();
@@ -182,12 +263,29 @@ void Level01::VRender()
 	mRenderer->VSwapBuffers();
 }
 
+void Level01::SetGBufferRenderTargets()
+{
+	mRenderer->VSetRenderContextTargetsWithDepth(mGBufferContext);
+
+	mRenderer->VClearContextTarget(mGBufferContext, 0, Colors::magenta.pCols);	// Position
+	mRenderer->VClearContextTarget(mGBufferContext, 1, Colors::magenta.pCols);	// Normal
+	mRenderer->VClearContextTarget(mGBufferContext, 2, Colors::magenta.pCols);	// Color
+	mRenderer->VClearDepthStencil(mGBufferContext, 1.0f, 0);					// Depth
+}
+
+void Level01::SetDefaultTarget()
+{
+	mRenderer->VSetContextTargetWithDepth();
+	mRenderer->VClearContext(Colors::magenta.pCols, 1.0f, 0);
+}
+
 void Level01::RenderWalls()
 {
 	mRenderer->VSetInputLayout(mApplication->mQuadVertexShader);
 	mRenderer->VSetVertexShader(mApplication->mQuadVertexShader);
 	mRenderer->VSetPixelShader(mApplication->mQuadPixelShader);
 
+	// This can probably go into the render method...
 	mRenderer->VUpdateShaderConstantBuffer(mWallShaderResource, &mPVM.camera, 0);
 
 	mRenderer->VBindMesh(mWallMesh0);
@@ -214,6 +312,46 @@ void Level01::RenderExplorers()
 	}
 }
 
+void Level01::RenderPointLightVolumes()
+{
+	mRenderer->VSetRenderContextTarget(mGBufferContext, 3);
+	mRenderer->VClearContextTarget(mGBufferContext, 3, Colors::magenta.pCols);	// Albedo
+
+	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	mRenderer->SetBlendState(mPLVShaderResource, 0, color, 0xffffffff);
+
+	mRenderer->VSetInputLayout(mApplication->mPLVolumeVertexShader);
+	mRenderer->VSetVertexShader(mApplication->mPLVolumeVertexShader);
+	mRenderer->VSetPixelShader(mApplication->mPLVolumePixelShader);
+
+	mRenderer->VBindMesh(mPLVMesh);
+	mRenderer->VSetVertexShaderInstanceBuffer(mPLVShaderResource, 0, 1);	// Colors
+	mRenderer->VSetVertexShaderInstanceBuffer(mPLVShaderResource, 1, 2);	// World Matrices
+	mRenderer->VSetVertexShaderConstantBuffer(mWallShaderResource, 0, 0);
+	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);	// Position
+	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);	// Normal
+	mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
+
+	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPLVMesh->GetIndexCount(), mPointLightCount, 0, 0, 0);
+
+	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
+}
+
+void Level01::RenderFullScreenQuad()
+{
+	mRenderer->VSetInputLayout(mApplication->mNDSQuadVertexShader);
+	mRenderer->VSetVertexShader(mApplication->mNDSQuadVertexShader);
+	mRenderer->VSetPixelShader(mApplication->mNDSQuadPixelShader);
+
+	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 2, 0);		// Color
+	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 3, 1);		// Albedo
+	mRenderer->VSetPixelShaderDepthResourceView(mGBufferContext, 3);	// Depth
+	mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
+
+	mRenderer->VBindMesh(mNDSQuadMesh);
+	mRenderer->VDrawIndexed(0, mNDSQuadMesh->GetIndexCount());
+}
 
 #pragma endregion
 

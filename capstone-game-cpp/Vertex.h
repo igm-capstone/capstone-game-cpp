@@ -13,3 +13,9 @@ struct Vertex3
 	vec3f Normal;
 	vec2f UV;
 };
+
+struct NDSVertex
+{
+	vec3f Position;
+	vec2f UV;
+};

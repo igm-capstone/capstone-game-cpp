@@ -25,5 +25,6 @@ namespace Rig3D
 		virtual void VClearInstanceBuffers() = 0;
 		virtual void VClearShaderResourceViews() = 0;
 		virtual void VClearSamplerStates() = 0;
+		virtual void VClearBlendStates() = 0;
 	};
 }

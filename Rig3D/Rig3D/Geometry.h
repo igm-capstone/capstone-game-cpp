@@ -314,5 +314,35 @@ namespace Rig3D
 				}
 			}
 		}
-	}
+	
+		template <class Vertex, class Index>
+		static void NDSQuad(std::vector<Vertex>& vertices, std::vector<Index>& indices)
+		{
+			vertices.reserve(sizeof(Vertex) * 4);
+			indices.reserve(sizeof(Index) * 6);
+
+			Vertex v0, v1, v2, v3;
+			v0.Position = { -1.0f, +1.0f, 0.0f };
+			v1.Position = { +1.0f, +1.0f, 0.0f };
+			v2.Position = { +1.0f, -1.0f, 0.0f };
+			v3.Position = { -1.0f, -1.0f, 0.0f };
+
+			v0.UV = { 0.0f, 0.0f };
+			v1.UV = { 1.0f, 0.0f };
+			v2.UV = { 1.0f, 1.0f };
+			v3.UV = { 0.0f, 1.0f };
+
+			vertices.push_back(v0);
+			vertices.push_back(v1);
+			vertices.push_back(v2);
+			vertices.push_back(v3);
+
+			indices.push_back(0);
+			indices.push_back(1);
+			indices.push_back(2);
+			indices.push_back(2);
+			indices.push_back(3);
+			indices.push_back(0);
+		}
+}
 }

@@ -7,7 +7,9 @@ struct Vertex
 
 struct Pixel
 {
-	float4 positionH : SV_POSITION;
+	float4 positionH	: SV_POSITION;
+	float3 positionT	: POSITIONT;
+	float3 normal		: NORMAL;
 };
 
 cbuffer transform : register(b0)
@@ -21,8 +23,12 @@ Pixel main( Vertex vertex )
 {
 	matrix clip = mul(mul(world, view), projection);
 
+	float4 vertexPos = float4(vertex.position, 1.0f);
+
 	Pixel pixel;
-	pixel.positionH = mul(float4(vertex.position, 1.0f), clip);
+	pixel.positionH = mul(vertexPos, clip);
+	pixel.positionT = mul(vertexPos, world).xyz;
+	pixel.normal = mul(float4(vertex.normal, 0.0f), world).xyz;
 
 	return pixel;
 }

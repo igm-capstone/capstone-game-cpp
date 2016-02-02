@@ -13,7 +13,7 @@
 
 static char gApplicationMemory[STATIC_APP_MEMORY];	// 4mb
 
-Rig3D::IScene *gRig3DScene = 0;
+Rig3D::IScene *gRig3DScene = nullptr;
 
 int CALLBACK WinMain(HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,

@@ -746,6 +746,28 @@ void DX3D11Renderer::VCreateLinearBorderSamplerState(void* samplerState, float* 
 
 #pragma endregion 
 
+#pragma region BlendState
+
+void DX3D11Renderer::CreateAdditiveBlendState(ID3D11BlendState** blendState)
+{
+	D3D11_BLEND_DESC blendDesc;
+	ZeroMemory(&blendDesc, sizeof(D3D11_BLEND_DESC));
+	blendDesc.AlphaToCoverageEnable = 0;
+	blendDesc.IndependentBlendEnable = 0;
+	blendDesc.RenderTarget[0].BlendEnable = 1;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	mDevice->CreateBlendState(&blendDesc, blendState);
+}
+
+#pragma endregion 
+
 #pragma region Mesh
 
 void DX3D11Renderer::VSetMeshVertexBuffer(IMesh* mesh, void* vertices, const size_t& size, const size_t& stride)
@@ -1369,6 +1391,22 @@ void DX3D11Renderer::VSetPixelShaderSamplerStates(IShaderResource* shaderResourc
 	{
 		mDeviceContext->PSSetSamplers(0, samplerStateCount, resource->GetSamplerStates());
 	}
+}
+
+void DX3D11Renderer::AddAdditiveBlendState(IShaderResource* shaderResource)
+{
+	ID3D11BlendState* blendState = nullptr;
+
+	CreateAdditiveBlendState(&blendState);
+
+	static_cast<DX11ShaderResource*>(shaderResource)->AddBlendState(blendState);
+}
+
+void DX3D11Renderer::SetBlendState(IShaderResource* shaderResource, const uint32_t& atIndex, float* color, uint32_t sampleMask)
+{
+	ID3D11BlendState** blendStates = static_cast<DX11ShaderResource*>(shaderResource)->GetBlendStates();
+
+	mDeviceContext->OMSetBlendState(blendStates[atIndex], color, sampleMask);
 }
 
 #pragma endregion 
