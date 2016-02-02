@@ -126,7 +126,17 @@ public:
 
 	static iterator BeginIterator()
 	{
-		return iterator(reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type))));
+		const int PADDING_VALUE = 0xBABACACA;
+
+		pointer start = reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type)));
+		pointer end = reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type))) + sCount;
+
+		while (start != end && *reinterpret_cast<int*>(start) != PADDING_VALUE)
+		{
+			++start;
+		}
+
+		return iterator(start);
 	}
 
 	static iterator EndIterator()
