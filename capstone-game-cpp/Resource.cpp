@@ -55,7 +55,7 @@ void parseTransform(json obj, Transform* transform)
 
 void loadLamps(jarr_t objs)
 {
-	TRACE("Loading " << int(objs->size()) << " lamps...");
+	TRACE_LOG("Loading " << int(objs->size()) << " lamps...");
 	for (auto obj : *objs)
 	{
 		auto lamp = Factory<Lamp>::Create();
@@ -68,7 +68,7 @@ void loadLamps(jarr_t objs)
 
 void loadDomPoints(jarr_t objs)
 {
-	TRACE("Loading " << int(objs->size()) << " domination points...");
+	TRACE_LOG("Loading " << int(objs->size()) << " domination points...");
 	for (auto obj : *objs)
 	{
 		auto dom = Factory<DominationPoint>::Create();
@@ -82,7 +82,7 @@ void loadDomPoints(jarr_t objs)
 
 void loadPickups(jarr_t objs)
 {
-	TRACE("Loading " << int(objs->size()) << " pickups...");
+	TRACE_LOG("Loading " << int(objs->size()) << " pickups...");
 	for (auto obj : *objs)
 	{
 		auto pickup = Factory<Pickup>::Create();
@@ -95,7 +95,7 @@ void loadPickups(jarr_t objs)
 
 void loadSpawnPoints(jarr_t objs)
 {
-	TRACE("Loading " << int(objs->size()) << " spawn points...");
+	TRACE_LOG("Loading " << int(objs->size()) << " spawn points...");
 	for (auto obj : *objs)
 	{
 		auto spawnPoint = Factory<SpawnPoint>::Create();
@@ -106,7 +106,7 @@ void loadSpawnPoints(jarr_t objs)
 
 void loadWalls(jarr_t objs)
 {
-	TRACE("Loading " << int(objs->size()) << " walls...");
+	TRACE_LOG("Loading " << int(objs->size()) << " walls...");
 	for (auto obj : *objs)
 	{
 		auto wall = Factory<Wall>::Create();
@@ -124,7 +124,7 @@ void loadWalls(jarr_t objs)
 
 void loadBlocks(jarr_t objs)
 {
-	TRACE("Loading " << int(objs->size()) << " moveable blocks...");
+	TRACE_LOG("Loading " << int(objs->size()) << " moveable blocks...");
 	for (auto obj : *objs)
 	{
 		auto position = parseVec3f(obj["position"]);

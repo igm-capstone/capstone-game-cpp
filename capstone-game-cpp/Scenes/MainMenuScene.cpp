@@ -3,6 +3,7 @@
 #include "Level00.h"
 #include "Level01.h"
 #include <ScareTacticsApplication.h>
+#include <Console.h>
 
 #include "Rig3D/Graphics/DirectX11/DX11IMGUI.h"
 #include "Rig3D/Graphics/DirectX11/imgui/imgui.h"
@@ -49,6 +50,7 @@ void MainMenuScene::VRender()
 	mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
 	RenderUI();
 	RenderFPSIndicator();
+	Console::Draw();
 	ImGui::Render();
 
 	mRenderer->VSwapBuffers();

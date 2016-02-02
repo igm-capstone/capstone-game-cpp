@@ -3,18 +3,21 @@
 
 #include <sstream>
 
-#define TRACE(message)							Trace::GetTrace() << message << Trace::endl
-#define TRACE_LINE(from, to, color)				Trace::TraceLine			(from, to, color)
-#define TRACE_BOX(position, color)				Trace::TraceBox			(position, color)
-#define TRACE_DIAMOND(position, color)			Trace::TraceDiamond		(position, color)
-#define TRACE_CROSS(position, color)			Trace::TraceCross		(position, color)
-#define TRACE_XCROSS(position, color)			Trace::TraceXCross		(position, color)
-#define TRACE_SMALL_BOX(position, color)		Trace::TraceSmallBox		(position, color)
-#define TRACE_SMALL_DIAMOND(position, color)	Trace::TraceSmallDiamond	(position, color)
-#define TRACE_SMALL_CROSS(position, color)		Trace::TraceSmallCross	(position, color)
-#define TRACE_SMALL_XCROSS(position, color)		Trace::TraceSmallXCross	(position, color)
+#define TRACE(message)                          Trace::GetTrace() << message << Trace::endl
+#define TRACE_ERROR(message)                    Trace::GetTrace() << "[Error] " << message << Trace::endl
+#define TRACE_WARN(message)                     Trace::GetTrace() << "[Warning] " << message << Trace::endl
+#define TRACE_LOG(message)                      Trace::GetTrace() << "[Log] " << message << Trace::endl
+#define TRACE_LINE(from, to, color)             Trace::TraceLine          (from, to, color)
+#define TRACE_BOX(position, color)              Trace::TraceBox           (position, color)
+#define TRACE_DIAMOND(position, color)          Trace::TraceDiamond       (position, color)
+#define TRACE_CROSS(position, color)            Trace::TraceCross         (position, color)
+#define TRACE_XCROSS(position, color)           Trace::TraceXCross        (position, color)
+#define TRACE_SMALL_BOX(position, color)        Trace::TraceSmallBox      (position, color)
+#define TRACE_SMALL_DIAMOND(position, color)    Trace::TraceSmallDiamond  (position, color)
+#define TRACE_SMALL_CROSS(position, color)      Trace::TraceSmallCross    (position, color)
+#define TRACE_SMALL_XCROSS(position, color)     Trace::TraceSmallXCross   (position, color)
 
-#define RENDER_TRACE()							Trace::GetTrace().Render();
+#define RENDER_TRACE()                          Trace::GetTrace().Render();
 
 #define TRACE_SET_VIEW_PROJ(mViewMatrix, mProjectionMatrix)		Trace::GetTrace().mLineTraceShaderData = { mViewMatrix, mProjectionMatrix };
 
@@ -73,7 +76,6 @@ private:
 	void InitializeLineTraceShaders();
 
 public:
-	void TraceLine(const float& from_x, const float& from_y, const float& from_z, const float& to_x, const float& to_y, const float& to_z, const vec4f& color);
 
 	LineTraceShaderData	mLineTraceShaderData;
 
@@ -95,25 +97,16 @@ public:
 	static Trace &endl(Trace &trace);
 
 	static void TraceBox(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceSmallBox(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceXCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceSmallXCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceSmallCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceDiamond(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceSmallDiamond(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceLine(const cliqCity::graphicsMath::Vector3& from, const cliqCity::graphicsMath::Vector3& to, const cliqCity::graphicsMath::Vector4& color);
-
+	void TraceLine(const float& from_x, const float& from_y, const float& from_z, const float& to_x, const float& to_y, const float& to_z, const vec4f& color);
 };
-
 
 
 #else

@@ -12,6 +12,9 @@
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 
 #define PI 3.14159265359f
+#include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
+#include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
+#include <Console.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -163,15 +166,18 @@ void Level01::VRender()
 
 	mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_TRIANGLE);
 
+	mDeviceContext->RSSetViewports(1, &mRenderer->GetViewport());
+
 	RenderWalls();
 	RenderExplorers();
+	mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
 
 	//FPS
 	DX11IMGUI::NewFrame();
-	mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
 	RenderFPSIndicator();
+	Console::Draw();
+	//ImGui::ShowTestWindow();
 	ImGui::Render();
-
 
 	mRenderer->VSwapBuffers();
 }

@@ -87,6 +87,7 @@
     <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="Components\ColliderComponent.cpp" />
     <ClCompile Include="Components\ExplorerController.cpp" />
+    <ClCompile Include="Console.cpp" />
     <ClCompile Include="Factory.cpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="ScareTacticsApplication.cpp" />
@@ -120,6 +121,7 @@
     <ClInclude Include="Components\ColliderComponent.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="capstone-game-cpp.rc.h" />
+    <ClInclude Include="Console.h" />
     <ClInclude Include="SceneObjects\DominationPoint.h" />
     <ClInclude Include="SceneObjects\Pickup.h" />
     <ClInclude Include="Components\ExplorerController.h" />
