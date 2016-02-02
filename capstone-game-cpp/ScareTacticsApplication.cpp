@@ -15,6 +15,7 @@
 #include "Shaders/obj/PointLightVolumePixelShader.h"
 #include "Shaders/obj/NDSQuadVertexShader.h"
 #include "Shaders/obj/NDSQuadPixelShader.h"
+#include "Shaders/obj/DebugTexturePixelShader.h"
 #include "Shaders/obj/ShadowCasterPixelShader.h"
 #include "Shaders/obj/ShadowGridComputeShader.h"
 #include "Shaders/obj/ShadowPixelShader.h"
@@ -141,6 +142,10 @@ void ScareTacticsApplication::InitializeShaders()
 
 	renderer->LoadVertexShader(mNDSQuadVertexShader, gNDSQuadVertexShader, sizeof(gNDSQuadVertexShader), ndsqInputElements, 2);
 	renderer->VLoadPixelShader(mNDSQuadPixelShader, gNDSQuadPixelShader, sizeof(gNDSQuadPixelShader));
+
+	renderer->VCreateShader(&mDBGPixelShader, &mGameAllocator);
+	renderer->VLoadPixelShader(mDBGPixelShader, gDebugTexturePixelShader, sizeof(gDebugTexturePixelShader));
+
 }
 
 void ScareTacticsApplication::VInitialize()

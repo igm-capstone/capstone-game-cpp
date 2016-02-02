@@ -25,6 +25,8 @@ public:
 	IShader* mNDSQuadVertexShader;
 	IShader* mNDSQuadPixelShader;
 
+	IShader* mDBGPixelShader;
+
 	ScareTacticsApplication();
 	~ScareTacticsApplication();
 
