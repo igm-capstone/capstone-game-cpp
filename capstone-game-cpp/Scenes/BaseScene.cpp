@@ -63,6 +63,14 @@ void BaseScene::CmdSpawnNewExplorer(int clientID) {
 	Packet p2(PacketTypes::GRANT_AUTHORITY);
 	p2.UUID = e->mNetworkID->mUUID;
 	mNetworkManager->mServer.Send(clientID, &p2);
+
+	//Send existing elements
+	for each(Explorer &exp in Factory<Explorer>()) {
+		if (&exp == e) continue;
+		p.UUID = exp.mNetworkID->mUUID;
+		p.Position = exp.mTransform->GetPosition();
+		mNetworkManager->mServer.Send(clientID, &p);
+	}
 }
 
 void BaseScene::RpcSpawnExistingExplorer(int UUID, vec3f pos) {
