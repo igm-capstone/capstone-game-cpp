@@ -1,6 +1,8 @@
 #include <stdafx.h>
 #if defined _DEBUG
+
 #include <trace.h>
+#include "Console.h"
 
 #include <string>
 #include <debugapi.h>
@@ -31,8 +33,6 @@ Trace::Trace() :
 	mStaticMeshAllocator(static_cast<void*>(gStaticMeshMemory), static_cast<void*>(gStaticMeshMemory + gMeshMemorySize))
 {
 	mStaticMeshLibrary.SetAllocator(&mStaticMeshAllocator);
-
-	mConsole = &Singleton<Console>::SharedInstance();
 
 	auto mEngine = &Singleton<Engine>::SharedInstance();
 	mRenderer = mEngine->GetRenderer();
@@ -174,8 +174,7 @@ Trace& Trace::endl(Trace &trace)
 			break;
 		}
 		
-		trace.mConsole->AddLog(str.c_str());
-		
+		Console::Log(str.c_str());
 		std::wstring wstr = std::wstring(str.begin(), str.end());
 
 		OutputDebugString(wstr.c_str());
@@ -189,15 +188,6 @@ Trace& Trace::endl(Trace &trace)
 
 void Trace::TraceBox(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
 {
-	//const auto pone = cliqCity::graphicsMath::Vector3( 1.0f, 1.0f, 0);
-	//const auto none = cliqCity::graphicsMath::Vector3(-1.0f, 1.0f, 0);
-
-	// box
-	//__gTraceLine(pos + pone, pos + none, color);
-	//__gTraceLine(pos - pone, pos - none, color);
-	//__gTraceLine(pos + pone, pos - none, color);
-	//__gTraceLine(pos - pone, pos + none, color);
-
 	const auto halfSize = 1.0f;
 
 	auto xmin = pos.x - halfSize;
@@ -206,23 +196,15 @@ void Trace::TraceBox(const cliqCity::graphicsMath::Vector3& pos, const cliqCity:
 	auto ymax = pos.y + halfSize;
 	auto z = pos.z;
 
-	Trace::GetTrace().TraceLine(xmax, ymax, z, xmin, ymax, z, color);
-	Trace::GetTrace().TraceLine(xmin, ymin, z, xmax, ymin, z, color);
-	Trace::GetTrace().TraceLine(xmax, ymax, z, xmax, ymin, z, color);
-	Trace::GetTrace().TraceLine(xmin, ymin, z, xmin, ymax, z, color);
+	Trace& trace = Trace::GetTrace();
+	trace.TraceLine(xmax, ymax, z, xmin, ymax, z, color);
+	trace.TraceLine(xmin, ymin, z, xmax, ymin, z, color);
+	trace.TraceLine(xmax, ymax, z, xmax, ymin, z, color);
+	trace.TraceLine(xmin, ymin, z, xmin, ymax, z, color);
 }
 
 void Trace::TraceSmallBox(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
 {
-	//const auto pone = cliqCity::graphicsMath::Vector3( .5f, .5f, 0);
-	//const auto none = cliqCity::graphicsMath::Vector3(-.5f, .5f, 0);
-
-	//// box
-	//__gTraceLine(pos + pone, pos + none, color);
-	//__gTraceLine(pos - pone, pos - none, color);
-	//__gTraceLine(pos + pone, pos - none, color);
-	//__gTraceLine(pos - pone, pos + none, color);
-
 	const auto halfSize = 0.5f;
 
 	auto xmin = pos.x - halfSize;
@@ -231,21 +213,15 @@ void Trace::TraceSmallBox(const cliqCity::graphicsMath::Vector3& pos, const cliq
 	auto ymax = pos.y + halfSize;
 	auto z = pos.z;
 
-	Trace::GetTrace().TraceLine(xmax, ymax, z, xmin, ymax, z, color);
-	Trace::GetTrace().TraceLine(xmin, ymin, z, xmax, ymin, z, color);
-	Trace::GetTrace().TraceLine(xmax, ymax, z, xmax, ymin, z, color);
-	Trace::GetTrace().TraceLine(xmin, ymin, z, xmin, ymax, z, color);
+	Trace& trace = Trace::GetTrace();
+	trace.TraceLine(xmax, ymax, z, xmin, ymax, z, color);
+	trace.TraceLine(xmin, ymin, z, xmax, ymin, z, color);
+	trace.TraceLine(xmax, ymax, z, xmax, ymin, z, color);
+	trace.TraceLine(xmin, ymin, z, xmin, ymax, z, color);
 }
 
 void Trace::TraceXCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
 {
-	//const auto pone = cliqCity::graphicsMath::Vector3( 1.0f, 1.0f, 0);
-	//const auto none = cliqCity::graphicsMath::Vector3(-1.0f, 1.0f, 0);
-
-	//// cross
-	//__gTraceLine(pos + pone, pos - pone, color);
-	//__gTraceLine(pos + none, pos - none, color);
-
 	const auto halfSize = 1.0f;
 
 	auto xmin = pos.x - halfSize;
@@ -254,19 +230,13 @@ void Trace::TraceXCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCi
 	auto ymax = pos.y + halfSize;
 	auto z = pos.z;
 
-	Trace::GetTrace().TraceLine(xmin, ymin, z, xmax, ymax, z, color);
-	Trace::GetTrace().TraceLine(xmin, ymax, z, xmax, ymin, z, color);
+	Trace& trace = Trace::GetTrace();
+	trace.TraceLine(xmin, ymin, z, xmax, ymax, z, color);
+	trace.TraceLine(xmin, ymax, z, xmax, ymin, z, color);
 }
 
 void Trace::TraceSmallXCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
 {
-	//const auto pone = cliqCity::graphicsMath::Vector3( .5f, .5f, 0);
-	//const auto none = cliqCity::graphicsMath::Vector3(-.5f, .5f, 0);
-
-	//// cross
-	//__gTraceLine(pos + pone, pos - pone, color);
-	//__gTraceLine(pos + none, pos - none, color);
-
 	const auto halfSize = 0.5f;
 
 	auto xmin = pos.x - halfSize;
@@ -275,19 +245,13 @@ void Trace::TraceSmallXCross(const cliqCity::graphicsMath::Vector3& pos, const c
 	auto ymax = pos.y + halfSize;
 	auto z = pos.z;
 
-	Trace::GetTrace().TraceLine(xmin, ymin, z, xmax, ymax, z, color);
-	Trace::GetTrace().TraceLine(xmin, ymax, z, xmax, ymin, z, color);
+	Trace& trace = Trace::GetTrace();
+	trace.TraceLine(xmin, ymin, z, xmax, ymax, z, color);
+	trace.TraceLine(xmin, ymax, z, xmax, ymin, z, color);
 }
 
 void Trace::TraceCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
 {
-	//const auto hone = cliqCity::graphicsMath::Vector3(1.0f, 0.0f, 0);
-	//const auto vone = cliqCity::graphicsMath::Vector3(0.0f, 1.0f, 0);
-
-	//// cross
-	//__gTraceLine(pos + vone, pos - vone, color);
-	//__gTraceLine(pos + hone, pos - hone, color);
-
 	const auto halfSize = 1.0f;
 
 	auto xmin = pos.x - halfSize;
@@ -298,19 +262,13 @@ void Trace::TraceCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCit
 	auto y = pos.y;
 	auto z = pos.z;
 
-	Trace::GetTrace().TraceLine(x, ymin, z, x, ymax, z, color);
-	Trace::GetTrace().TraceLine(xmin, y, z, xmax, y, z, color);
+	Trace& trace = Trace::GetTrace();
+	trace.TraceLine(x, ymin, z, x, ymax, z, color);
+	trace.TraceLine(xmin, y, z, xmax, y, z, color);
 }
 
 void Trace::TraceSmallCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
 {
-	//const auto hone = cliqCity::graphicsMath::Vector3(1.0f, 0.0f, 0);
-	//const auto vone = cliqCity::graphicsMath::Vector3(0.0f, 1.0f, 0);
-
-	//// cross
-	//__gTraceLine(pos + vone, pos - vone, color);
-	//__gTraceLine(pos + hone, pos - hone, color);
-
 	const auto halfSize = 0.5f;
 
 	auto xmin = pos.x - halfSize;
@@ -321,28 +279,13 @@ void Trace::TraceSmallCross(const cliqCity::graphicsMath::Vector3& pos, const cl
 	auto y = pos.y;
 	auto z = pos.z;
 
-	Trace::GetTrace().TraceLine(x, ymin, z, x, ymax, z, color);
-	Trace::GetTrace().TraceLine(xmin, y, z, xmax, y, z, color);
+	Trace& trace = Trace::GetTrace();
+	trace.TraceLine(x, ymin, z, x, ymax, z, color);
+	trace.TraceLine(xmin, y, z, xmax, y, z, color);
 }
 
 void Trace::TraceDiamond(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
 {
-	//const auto hone = cliqCity::graphicsMath::Vector3(1.0f, 0.0f, 0);
-	//const auto vone = cliqCity::graphicsMath::Vector3(0.0f, 1.0f, 0);
-
-	//// diamond
-	//__gTraceLine(pos + vone, pos + hone, color);
-	//__gTraceLine(pos + hone, pos - vone, color);
-	//__gTraceLine(pos - vone, pos - hone, color);
-	//__gTraceLine(pos - hone, pos + vone, color);
-
-	//const auto hone = cliqCity::graphicsMath::Vector3(1.0f, 0.0f, 0);
-	//const auto vone = cliqCity::graphicsMath::Vector3(0.0f, 1.0f, 0);
-
-	//// cross
-	//__gTraceLine(pos + vone, pos - vone, color);
-	//__gTraceLine(pos + hone, pos - hone, color);
-
 	const auto halfSize = 1.0f;
 
 	auto xmin = pos.x - halfSize;
@@ -353,23 +296,15 @@ void Trace::TraceDiamond(const cliqCity::graphicsMath::Vector3& pos, const cliqC
 	auto y = pos.y;
 	auto z = pos.z;
 
-	Trace::GetTrace().TraceLine(xmin, y, z, x, ymax, z, color);
-	Trace::GetTrace().TraceLine(x, ymax, z, xmax, y, z, color);
-	Trace::GetTrace().TraceLine(xmax, y, z, x, ymin, z, color);
-	Trace::GetTrace().TraceLine(x, ymin, z, xmin, y, z, color);
+	Trace& trace = Trace::GetTrace();
+	trace.TraceLine(xmin, y, z, x, ymax, z, color);
+	trace.TraceLine(x, ymax, z, xmax, y, z, color);
+	trace.TraceLine(xmax, y, z, x, ymin, z, color);
+	trace.TraceLine(x, ymin, z, xmin, y, z, color);
 }
 
 void Trace::TraceSmallDiamond(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
 {
-	//const auto hone = cliqCity::graphicsMath::Vector3(.5f,   0, 0);
-	//const auto vone = cliqCity::graphicsMath::Vector3(  0, .5f, 0);
-
-	//// diamond
-	//__gTraceLine(pos + vone, pos + hone, color);
-	//__gTraceLine(pos + hone, pos - vone, color);
-	//__gTraceLine(pos - vone, pos - hone, color);
-	//__gTraceLine(pos - hone, pos + vone, color);
-
 	const auto halfSize = 0.5f;
 
 	auto xmin = pos.x - halfSize;
@@ -380,10 +315,11 @@ void Trace::TraceSmallDiamond(const cliqCity::graphicsMath::Vector3& pos, const 
 	auto y = pos.y;
 	auto z = pos.z;
 
-	Trace::GetTrace().TraceLine(xmin, y, z, x, ymax, z, color);
-	Trace::GetTrace().TraceLine(x, ymax, z, xmax, y, z, color);
-	Trace::GetTrace().TraceLine(xmax, y, z, x, ymin, z, color);
-	Trace::GetTrace().TraceLine(x, ymin, z, xmin, y, z, color);
+	Trace& trace = Trace::GetTrace();
+	trace.TraceLine(xmin, y, z, x, ymax, z, color);
+	trace.TraceLine(x, ymax, z, xmax, y, z, color);
+	trace.TraceLine(xmax, y, z, x, ymin, z, color);
+	trace.TraceLine(x, ymin, z, xmin, y, z, color);
 }
 
 void Trace::TraceLine(const cliqCity::graphicsMath::Vector3& from, const cliqCity::graphicsMath::Vector3& to, const cliqCity::graphicsMath::Vector4& color)

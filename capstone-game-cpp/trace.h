@@ -4,6 +4,9 @@
 #include <sstream>
 
 #define TRACE(message)                          Trace::GetTrace() << message << Trace::endl
+#define TRACE_ERROR(message)                    Trace::GetTrace() << "[Error] " << message << Trace::endl
+#define TRACE_WARN(message)                     Trace::GetTrace() << "[Warning] " << message << Trace::endl
+#define TRACE_LOG(message)                      Trace::GetTrace() << "[Log] " << message << Trace::endl
 #define TRACE_LINE(from, to, color)             Trace::TraceLine          (from, to, color)
 #define TRACE_BOX(position, color)              Trace::TraceBox           (position, color)
 #define TRACE_DIAMOND(position, color)          Trace::TraceDiamond       (position, color)
@@ -17,7 +20,6 @@
 #define RENDER_TRACE()                          Trace::GetTrace().Render();
 
 #define TRACE_SET_VIEW_PROJ(mViewMatrix, mProjectionMatrix)		Trace::GetTrace().mLineTraceShaderData = { mViewMatrix, mProjectionMatrix };
-#include "Console.h"
 
 typedef std::function<void(const float&, const float&, const float&, const float&, const float&, const float&, const cliqCity::graphicsMath::Vector4& color)> __TraceFunction;
 
@@ -55,7 +57,6 @@ private:
 	std::stringstream ss;
 	char buff[128];
 
-	Console*						mConsole;
 	Renderer*						mRenderer;
 	ID3D11Device*					mDevice;
 	ID3D11DeviceContext*			mDeviceContext;
@@ -75,7 +76,6 @@ private:
 	void InitializeLineTraceShaders();
 
 public:
-	void TraceLine(const float& from_x, const float& from_y, const float& from_z, const float& to_x, const float& to_y, const float& to_z, const vec4f& color);
 
 	LineTraceShaderData	mLineTraceShaderData;
 
@@ -97,25 +97,16 @@ public:
 	static Trace &endl(Trace &trace);
 
 	static void TraceBox(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceSmallBox(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceXCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceSmallXCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceSmallCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceDiamond(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceSmallDiamond(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-
 	static void TraceLine(const cliqCity::graphicsMath::Vector3& from, const cliqCity::graphicsMath::Vector3& to, const cliqCity::graphicsMath::Vector4& color);
-
+	void TraceLine(const float& from_x, const float& from_y, const float& from_z, const float& to_x, const float& to_y, const float& to_z, const vec4f& color);
 };
-
 
 
 #else

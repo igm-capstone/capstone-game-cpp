@@ -28,7 +28,7 @@ int Console::Strnicmp(const char* str1, const char* str2, int count)
 
 void Console::ExecCommand(const char* command_line)
 {
-	AddLog("# %s\n", command_line);
+	AddLog("$ %s\n", command_line);
 
 	// Insert into history. First find match and delete it so it can be pushed to the back. This isn't trying to be smart or optimal.
 	mHistoryPos = -1;
@@ -75,102 +75,108 @@ int Console::TextEditCallback(ImGuiTextEditCallbackData* data)
 	switch (data->EventFlag)
 	{
 	case ImGuiInputTextFlags_CallbackCompletion:
-		{
-			// Example of TEXT COMPLETION
+	{
+		// Example of TEXT COMPLETION
 
-			// Locate beginning of current word
-			const char* word_end = data->Buf + data->CursorPos;
-			const char* word_start = word_end;
-			while (word_start > data->Buf)
+		// Locate beginning of current word
+		const char* word_end = data->Buf + data->CursorPos;
+		const char* word_start = word_end;
+		while (word_start > data->Buf)
+		{
+			const char c = word_start[-1];
+			if (c == ' ' || c == '\t' || c == ',' || c == ';')
+				break;
+			word_start--;
+		}
+
+		// Build a list of candidates
+		ImVector<const char*> candidates;
+		for (int i = 0; i < mCommands.Size; i++)
+			if (Strnicmp(mCommands[i], word_start, (int)(word_end - word_start)) == 0)
+				candidates.push_back(mCommands[i]);
+
+		if (candidates.Size == 0)
+		{
+			// No match
+			AddLog("No match for \"%.*s\"!\n", (int)(word_end - word_start), word_start);
+		}
+		else if (candidates.Size == 1)
+		{
+			// Single match. Delete the beginning of the word and replace it entirely so we've got nice casing
+			data->DeleteChars((int)(word_start - data->Buf), (int)(word_end - word_start));
+			data->InsertChars(data->CursorPos, candidates[0]);
+			data->InsertChars(data->CursorPos, " ");
+		}
+		else
+		{
+			// Multiple matches. Complete as much as we can, so inputing "C" will complete to "CL" and display "CLEAR" and "CLASSIFY"
+			int match_len = (int)(word_end - word_start);
+			for (;;)
 			{
-				const char c = word_start[-1];
-				if (c == ' ' || c == '\t' || c == ',' || c == ';')
+				int c = 0;
+				bool all_candidates_matches = true;
+				for (int i = 0; i < candidates.Size && all_candidates_matches; i++)
+					if (i == 0)
+						c = toupper(candidates[i][match_len]);
+					else if (c != toupper(candidates[i][match_len]))
+						all_candidates_matches = false;
+				if (!all_candidates_matches)
 					break;
-				word_start--;
+				match_len++;
 			}
 
-			// Build a list of candidates
-			ImVector<const char*> candidates;
-			for (int i = 0; i < mCommands.Size; i++)
-				if (Strnicmp(mCommands[i], word_start, (int)(word_end - word_start)) == 0)
-					candidates.push_back(mCommands[i]);
-
-			if (candidates.Size == 0)
+			if (match_len > 0)
 			{
-				// No match
-				AddLog("No match for \"%.*s\"!\n", (int)(word_end - word_start), word_start);
-			}
-			else if (candidates.Size == 1)
-			{
-				// Single match. Delete the beginning of the word and replace it entirely so we've got nice casing
 				data->DeleteChars((int)(word_start - data->Buf), (int)(word_end - word_start));
-				data->InsertChars(data->CursorPos, candidates[0]);
-				data->InsertChars(data->CursorPos, " ");
-			}
-			else
-			{
-				// Multiple matches. Complete as much as we can, so inputing "C" will complete to "CL" and display "CLEAR" and "CLASSIFY"
-				int match_len = (int)(word_end - word_start);
-				for (;;)
-				{
-					int c = 0;
-					bool all_candidates_matches = true;
-					for (int i = 0; i < candidates.Size && all_candidates_matches; i++)
-						if (i == 0)
-							c = toupper(candidates[i][match_len]);
-						else if (c != toupper(candidates[i][match_len]))
-							all_candidates_matches = false;
-					if (!all_candidates_matches)
-						break;
-					match_len++;
-				}
-
-				if (match_len > 0)
-				{
-					data->DeleteChars((int)(word_start - data->Buf), (int)(word_end - word_start));
-					data->InsertChars(data->CursorPos, candidates[0], candidates[0] + match_len);
-				}
-
-				// List matches
-				AddLog("Possible matches:\n");
-				for (int i = 0; i < candidates.Size; i++)
-					AddLog("- %s\n", candidates[i]);
+				data->InsertChars(data->CursorPos, candidates[0], candidates[0] + match_len);
 			}
 
-			break;
+			// List matches
+			AddLog("Possible matches:\n");
+			for (int i = 0; i < candidates.Size; i++)
+				AddLog("- %s\n", candidates[i]);
 		}
+
+		break;
+	}
 	case ImGuiInputTextFlags_CallbackHistory:
+	{
+		// Example of HISTORY
+		const int prev_history_pos = mHistoryPos;
+		if (data->EventKey == ImGuiKey_UpArrow)
 		{
-			// Example of HISTORY
-			const int prev_history_pos = mHistoryPos;
-			if (data->EventKey == ImGuiKey_UpArrow)
-			{
-				if (mHistoryPos == -1)
-					mHistoryPos = mHistory.Size - 1;
-				else if (mHistoryPos > 0)
-					mHistoryPos--;
-			}
-			else if (data->EventKey == ImGuiKey_DownArrow)
-			{
-				if (mHistoryPos != -1)
-					if (++mHistoryPos >= mHistory.Size)
-						mHistoryPos = -1;
-			}
-
-			// A better implementation would preserve the data on the current input line along with cursor position.
-			if (prev_history_pos != mHistoryPos)
-			{
-				snprintf(data->Buf, data->BufSize, "%s", (mHistoryPos >= 0) ? mHistory[mHistoryPos] : "");
-				data->BufDirty = true;
-				data->CursorPos = data->SelectionStart = data->SelectionEnd = (int)strlen(data->Buf);
-			}
+			if (mHistoryPos == -1)
+				mHistoryPos = mHistory.Size - 1;
+			else if (mHistoryPos > 0)
+				mHistoryPos--;
 		}
+		else if (data->EventKey == ImGuiKey_DownArrow)
+		{
+			if (mHistoryPos != -1)
+				if (++mHistoryPos >= mHistory.Size)
+					mHistoryPos = -1;
+		}
+
+		// A better implementation would preserve the data on the current input line along with cursor position.
+		if (prev_history_pos != mHistoryPos)
+		{
+			snprintf(data->Buf, data->BufSize, "%s", (mHistoryPos >= 0) ? mHistory[mHistoryPos] : "");
+			data->BufDirty = true;
+			data->CursorPos = data->SelectionStart = data->SelectionEnd = (int)strlen(data->Buf);
+		}
+	}
 	}
 	return 0;
 }
 
-void Console::Draw()
+void Console::DrawConsole()
 {
+	auto input = Rig3D::Singleton<Rig3D::Engine>::SharedInstance().GetInput();
+
+	if (input->GetKeyDown(Rig3D::KEYCODE_F2)) {
+		Toggle();
+	}
+
 	if (!mVisible)
 		return;
 
@@ -190,7 +196,11 @@ void Console::Draw()
 
 	if (ImGui::SmallButton("Add Dummy Text")) { AddLog("%d some text", mItems.Size); AddLog("some more text"); AddLog("display very important message here!"); }
 	ImGui::SameLine();
-	if (ImGui::SmallButton("Add Dummy Error")) AddLog("[error] something went wrong");
+	if (ImGui::SmallButton("Add Dummy Error")) AddLog("[Error] something went wrong");
+	ImGui::SameLine();
+	if (ImGui::SmallButton("Add Dummy Warning")) AddLog("[Warning] something might go wrong");
+	ImGui::SameLine();
+	if (ImGui::SmallButton("Add Dummy Log")) AddLog("[Log] something went fine");
 	ImGui::SameLine();
 	if (ImGui::SmallButton("Clear")) ClearLog();
 	//static float t = 0.0f; if (ImGui::GetTime() - t > 0.02f) { t = ImGui::GetTime(); AddLog("Spam %f", t); }
@@ -213,8 +223,10 @@ void Console::Draw()
 		if (!filter.PassFilter(item))
 			continue;
 		ImVec4 col = ImColor(255, 255, 255); // A better implementation may store a type per-item. For the sample let's just parse the text.
-		if (strstr(item, "[error]")) col = ImColor(255, 100, 100);
-		else if (strncmp(item, "# ", 2) == 0) col = ImColor(255, 200, 150);
+		if (strstr(item, "[Error]"))          col = ImColor(255, 100, 100);
+		else if (strstr(item, "[Warning]"))   col = ImColor(255, 255, 100);
+		else if (strstr(item, "[Log]"))	      col = ImColor(100, 255, 255);
+		else if (strncmp(item, "$ ", 2) == 0) col = ImColor(255, 200, 150);
 		ImGui::PushStyleColor(ImGuiCol_Text, col);
 		ImGui::TextUnformatted(item);
 		ImGui::PopStyleColor();
@@ -269,17 +281,36 @@ void Console::AddLog(const char* fmt, ...)
 	mScrollToBottom = true;
 }
 
+void Console::Clear()
+{
+	Rig3D::Singleton<Console>::SharedInstance().ClearLog();
+}
+
+void Console::Log(const char* fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	Rig3D::Singleton<Console>::SharedInstance().AddLog(fmt, args);
+	va_end(args);
+}
+
+void Console::Draw()
+{
+	Rig3D::Singleton<Console>::SharedInstance().DrawConsole();
+}
+
 void Console::Show()
 {
-	mVisible = true;
+	Rig3D::Singleton<Console>::SharedInstance().mVisible = true;
 }
 
 void Console::Hide()
 {
-	mVisible = false;
+	Rig3D::Singleton<Console>::SharedInstance().mVisible = false;
 }
 
 void Console::Toggle()
 {
-	mVisible = !mVisible;
+	Console& c = Rig3D::Singleton<Console>::SharedInstance();
+	c.mVisible = !c.mVisible;
 }

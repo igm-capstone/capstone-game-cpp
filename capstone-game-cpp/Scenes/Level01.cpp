@@ -179,12 +179,9 @@ void Level01::VRender()
 	//FPS
 	DX11IMGUI::NewFrame();
 	RenderFPSIndicator();
-	auto console = &Singleton<Console>::SharedInstance();
-	console->Show();
-	console->Draw();
-	ImGui::ShowTestWindow();
+	Console::Draw();
+	//ImGui::ShowTestWindow();
 	ImGui::Render();
-
 
 	mRenderer->VSwapBuffers();
 }
