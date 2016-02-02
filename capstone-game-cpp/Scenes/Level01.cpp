@@ -176,7 +176,6 @@ void Level01::VRender()
 	DX11IMGUI::NewFrame();
 	RenderFPSIndicator();
 	Console::Draw();
-	//ImGui::ShowTestWindow();
 	ImGui::Render();
 
 	mRenderer->VSwapBuffers();
