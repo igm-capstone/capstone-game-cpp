@@ -39,7 +39,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 	Engine& engine = Singleton<Engine>::SharedInstance();
 
 	Options options;
-	options.mWindowCaption = "Shutter - Remix";
+	options.mWindowCaption = "Scare Tactics";
 	options.mWindowWidth = 1600;
 	options.mWindowHeight = 1000;
 	options.mGraphicsAPI = GRAPHICS_API_DIRECTX11;

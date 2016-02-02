@@ -119,6 +119,7 @@
     <ClInclude Include="Components\BaseComponent.h" />
     <ClInclude Include="Components\ColliderComponent.h" />
     <ClInclude Include="Config.h" />
+    <ClInclude Include="capstone-game-cpp.rc.h" />
     <ClInclude Include="SceneObjects\DominationPoint.h" />
     <ClInclude Include="SceneObjects\Pickup.h" />
     <ClInclude Include="Components\ExplorerController.h" />
@@ -328,6 +329,12 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ObjectFileOutput>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="capstone-game-cpp.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\Assets\icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
