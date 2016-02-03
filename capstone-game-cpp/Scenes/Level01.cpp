@@ -12,7 +12,6 @@
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 #include <Rig3D/Graphics/Interface/IRenderContext.h>
 
-#define PI 3.14159265359f
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 #include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
 #include <Console.h>
@@ -25,6 +24,8 @@ Level01::Level01() :
 	mPlaneCount(0),
 	mPointLightCount(0),
 	mExplorerCount(0),
+	mPlaneWidth(0.0f),
+	mPlaneHeight(0.0f),
 	mWallWorldMatrices0(nullptr),
 	mPlaneWorldMatrices(nullptr),
 	mPointLightWorldMatrices(nullptr),
@@ -97,20 +98,14 @@ void Level01::InitializeResource()
 	mWallCount0 = level.wallCount;
 	mWallWorldMatrices0 = level.walls;
 
+	mPlaneCount = level.tileCount;
+	mPlaneWorldMatrices = level.tiles;
+	mPlaneWidth = level.tileWidth;
+	mPlaneHeight = level.tileHeight;
+
 	mPointLightCount = level.lampCount;
 	mPointLightWorldMatrices = level.lamps;
 	mPointLightColors = level.lampColors;
-
-	mPlaneCount = 4;
-	mPlaneWorldMatrices = reinterpret_cast<mat4f*>(mAllocator.Allocate(sizeof(mat4f) * mPlaneCount, alignof(mat4f), 0));
-
-	for (int y = 0; y < 2; y++)
-	{
-		for (int x = 0; x < 2; x++)
-		{
-			mPlaneWorldMatrices[y * 2 + x] = (mat4f::rotateX(-PI * 0.5f) * mat4f::translate({ x * 50.0f - 25.0f, 25.0f - y * 50.0f, 0.0f })).transpose();
-		}
-	}
 }
 
 void Level01::InitializeGeometry()
@@ -137,7 +132,7 @@ void Level01::InitializeGeometry()
 	vertices.clear();
 	indices.clear();
 
-	Geometry::Plane(vertices, indices, 50.0f, 50.0f, 5.0f, 5.0f);
+	Geometry::Plane(vertices, indices, mPlaneWidth, mPlaneHeight, 5.0f, 5.0f);
 
 	meshLibrary.NewMesh(&mPlaneMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mPlaneMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));

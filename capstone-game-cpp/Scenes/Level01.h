@@ -21,6 +21,9 @@ class Level01 : public BaseScene
 	uint32_t			mPointLightCount;
 	uint32_t			mExplorerCount;
 
+	float				mPlaneWidth;
+	float				mPlaneHeight;
+
 	// Wall Data
 	mat4f*				mWallWorldMatrices0;
 	mat4f*				mPlaneWorldMatrices;
