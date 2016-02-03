@@ -188,22 +188,9 @@ void Console::DrawConsole()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
 	ImGui::Begin("Console", nullptr, ImVec2(1600, 300), 0.80f, flags);
-	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+	
 	static ImGuiTextFilter filter;
-	filter.Draw("Filter (\"incl,-excl\") (\"error\")", 180);
-	ImGui::PopStyleVar();
-	ImGui::SameLine();
-
-	if (ImGui::SmallButton("Add Dummy Text")) { AddLog("%d some text", mItems.Size); AddLog("some more text"); AddLog("display very important message here!"); }
-	ImGui::SameLine();
-	if (ImGui::SmallButton("Add Dummy Error")) AddLog("[Error] something went wrong");
-	ImGui::SameLine();
-	if (ImGui::SmallButton("Add Dummy Warning")) AddLog("[Warning] something might go wrong");
-	ImGui::SameLine();
-	if (ImGui::SmallButton("Add Dummy Log")) AddLog("[Log] something went fine");
-	ImGui::SameLine();
-	if (ImGui::SmallButton("Clear")) ClearLog();
-	//static float t = 0.0f; if (ImGui::GetTime() - t > 0.02f) { t = ImGui::GetTime(); AddLog("Spam %f", t); }
+	filter.Draw("Filter (\"incl,-excl\") (\"error\")", 0);
 
 	ImGui::Separator();
 
@@ -211,11 +198,16 @@ void Console::DrawConsole()
 	// NB- if you have thousands of entries this approach may be too inefficient. You can seek and display only the lines that are visible - CalcListClipping() is a helper to compute this information.
 	// If your items are of variable size you may want to implement code similar to what CalcListClipping() does. Or split your data into fixed height items to allow random-seeking into your list.
 	ImGui::BeginChild("ScrollingRegion", ImVec2(0, -ImGui::GetItemsLineHeightWithSpacing()), false, ImGuiWindowFlags_HorizontalScrollbar);
+	bool copy = false;
 	if (ImGui::BeginPopupContextWindow())
 	{
 		if (ImGui::Selectable("Clear")) ClearLog();
+		copy = ImGui::Selectable("Copy");
 		ImGui::EndPopup();
 	}
+
+	if (copy) ImGui::LogToClipboard();
+
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
 	for (int i = 0; i < mItems.Size; i++)
 	{
