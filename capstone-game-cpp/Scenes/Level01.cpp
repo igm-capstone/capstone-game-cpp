@@ -22,12 +22,15 @@ static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 
 Level01::Level01() :
 	mWallCount0(0),
+	mPlaneCount(0),
 	mPointLightCount(0),
 	mExplorerCount(0),
 	mWallWorldMatrices0(nullptr),
+	mPlaneWorldMatrices(nullptr),
 	mPointLightWorldMatrices(nullptr),
 	mPointLightColors(nullptr),
 	mWallMesh0(nullptr),
+	mPlaneMesh(nullptr),
 	mExplorerCubeMesh(nullptr),
 	mPLVMesh(nullptr),
 	mNDSQuadMesh(nullptr),
@@ -43,6 +46,7 @@ Level01::Level01() :
 Level01::~Level01()
 {
 	mWallMesh0->~IMesh();
+	mPlaneMesh->~IMesh();
 	mExplorerCubeMesh->~IMesh();
 	mPLVMesh->~IMesh();
 	mNDSQuadMesh->~IMesh();
@@ -50,7 +54,7 @@ Level01::~Level01()
 	mWallShaderResource->~IShaderResource();
 	mExplorerShaderResource->~IShaderResource();
 	mPLVShaderResource->~IShaderResource();
-
+	
 	mGBufferContext->~IRenderContext();
 
 	mAllocator.Free();
@@ -74,15 +78,7 @@ void Level01::VInitialize()
 	mAllocator.SetMemory(mStaticMemory, mStaticMemory + mStaticMemorySize);
 	mRenderer->SetDelegate(this);
 
-	auto level = Resource::LoadLevel("Assets/Level01.json", mAllocator);
-
-	mWallCount0 = level.wallCount;
-	mWallWorldMatrices0 = level.walls;
-
-	mPointLightCount = level.lampCount;
-	mPointLightWorldMatrices = level.lamps;
-	mPointLightColors = level.lampColors;
-
+	InitializeResource();
 	InitializeGeometry();
 	InitializeShaderResources();
 	InitializeMainCamera();
@@ -92,6 +88,29 @@ void Level01::VInitialize()
 	VOnResize();
 
 	mState = BASE_SCENE_STATE_RUNNING;
+}
+
+void Level01::InitializeResource()
+{
+	auto level = Resource::LoadLevel("Assets/Level01.json", mAllocator);
+
+	mWallCount0 = level.wallCount;
+	mWallWorldMatrices0 = level.walls;
+
+	mPointLightCount = level.lampCount;
+	mPointLightWorldMatrices = level.lamps;
+	mPointLightColors = level.lampColors;
+
+	mPlaneCount = 4;
+	mPlaneWorldMatrices = reinterpret_cast<mat4f*>(mAllocator.Allocate(sizeof(mat4f) * mPlaneCount, alignof(mat4f), 0));
+
+	for (int y = 0; y < 2; y++)
+	{
+		for (int x = 0; x < 2; x++)
+		{
+			mPlaneWorldMatrices[y * 2 + x] = (mat4f::rotateX(-PI * 0.5f) * mat4f::translate({ x * 50.0f - 25.0f, 25.0f - y * 50.0f, 0.0f })).transpose();
+		}
+	}
 }
 
 void Level01::InitializeGeometry()
@@ -114,6 +133,15 @@ void Level01::InitializeGeometry()
 	meshLibrary.NewMesh(&mExplorerCubeMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mExplorerCubeMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
 	mRenderer->VSetMeshIndexBuffer(mExplorerCubeMesh, &indices[0], indices.size());
+
+	vertices.clear();
+	indices.clear();
+
+	Geometry::Plane(vertices, indices, 50.0f, 50.0f, 5.0f, 5.0f);
+
+	meshLibrary.NewMesh(&mPlaneMesh, mRenderer);
+	mRenderer->VSetMeshVertexBuffer(mPlaneMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
+	mRenderer->VSetMeshIndexBuffer(mPlaneMesh, &indices[0], indices.size());
 
 	vertices.clear();
 	indices.clear();
@@ -148,16 +176,17 @@ void Level01::InitializeShaderResources()
 	mRenderer->VCreateShaderResource(&mWallShaderResource, &mAllocator);
 
 	// Instance buffer data
-	void*	ibWallData[] = { mWallWorldMatrices0 };
-	size_t	ibWallSizes[] = { sizeof(mat4f) * mWallCount0 };
-	size_t	ibWallStrides[] = { sizeof(mat4f) };
-	size_t	ibWallOffsets[] = { 0 };
+	void*	ibWallData[] = { mWallWorldMatrices0, mPlaneWorldMatrices };
+	size_t	ibWallSizes[] = { sizeof(mat4f) * mWallCount0, sizeof(mat4f) * mPlaneCount };
+	size_t	ibWallStrides[] = { sizeof(mat4f), sizeof(mat4f) };
+	size_t	ibWallOffsets[] = { 0, 0 };
 
 	// Create the instance buffer
-	mRenderer->VCreateDynamicShaderInstanceBuffers(mWallShaderResource, ibWallData, ibWallSizes, ibWallStrides, ibWallOffsets, 1);
+	mRenderer->VCreateDynamicShaderInstanceBuffers(mWallShaderResource, ibWallData, ibWallSizes, ibWallStrides, ibWallOffsets, 2);
 
 	// Set data for instance buffer once
 	mRenderer->VUpdateShaderInstanceBuffer(mWallShaderResource, mWallWorldMatrices0, ibWallSizes[0], 0);
+	mRenderer->VUpdateShaderInstanceBuffer(mWallShaderResource, mPlaneWorldMatrices, ibWallSizes[1], 1);
 
 	// Constant buffer data
 	void*	cbWallData[] = { &mPVM.camera };
@@ -288,6 +317,11 @@ void Level01::RenderWalls()
 	mRenderer->VSetVertexShaderConstantBuffer(mWallShaderResource, 0, 0);
 
 	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mWallMesh0->GetIndexCount(), mWallCount0, 0, 0, 0);
+
+	mRenderer->VBindMesh(mPlaneMesh);
+	mRenderer->VSetVertexShaderInstanceBuffer(mWallShaderResource, 1, 1);
+
+	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPlaneMesh->GetIndexCount(), mPlaneCount, 0, 0, 0);
 }
 
 void Level01::RenderExplorers()

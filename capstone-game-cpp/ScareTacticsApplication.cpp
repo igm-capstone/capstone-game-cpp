@@ -31,6 +31,7 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mPLVolumePixelShader(nullptr),
 	mNDSQuadVertexShader(nullptr),
 	mNDSQuadPixelShader(nullptr),
+	mDBGPixelShader(nullptr),
 	mLoadingScreen(nullptr),
 	mCurrentScene(nullptr),
 	mSceneToLoad(nullptr),
@@ -217,6 +218,7 @@ void ScareTacticsApplication::VShutdown()
 	mPLVolumePixelShader->~IShader();
 	mNDSQuadVertexShader->~IShader();
 	mNDSQuadPixelShader->~IShader();
+	mDBGPixelShader->~IShader();
 
 	mSceneAllocator.Free();
 	mGameAllocator.Free();

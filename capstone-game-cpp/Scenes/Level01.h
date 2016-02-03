@@ -17,16 +17,19 @@ class Level01 : public BaseScene
 
 	// Counts
 	uint32_t			mWallCount0;
+	uint32_t			mPlaneCount;
 	uint32_t			mPointLightCount;
 	uint32_t			mExplorerCount;
 
 	// Wall Data
 	mat4f*				mWallWorldMatrices0;
+	mat4f*				mPlaneWorldMatrices;
 	mat4f*				mPointLightWorldMatrices;
 	vec4f*				mPointLightColors;
 
 	// Mesh
 	IMesh*				mWallMesh0;
+	IMesh*				mPlaneMesh;
 	IMesh*				mExplorerCubeMesh; //better solution when will come when we start to handle models
 	IMesh*				mPLVMesh;
 	IMesh*				mNDSQuadMesh;
@@ -49,6 +52,7 @@ public:
 	void VOnResize() override;
 
 	void VInitialize() override;
+	void InitializeResource();
 	void InitializeGeometry();
 	void InitializeShaderResources();
 	void InitializeMainCamera();
