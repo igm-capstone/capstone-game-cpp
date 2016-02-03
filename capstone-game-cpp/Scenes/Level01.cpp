@@ -15,10 +15,13 @@
 #include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
 #include <Console.h>
 #include <SceneObjects/Minion.h>
+#include <trace.h>
 
 Level01::Level01() : 
 	mWallCount0(0), 
 	mExplorerCount(0),
+	mPlaneWidth(0.0f),
+	mPlaneHeight(0.0f),
 	mWallWorldMatrices0(nullptr), 
 	mWallMesh0(nullptr),
 	mExplorerCubeMesh(nullptr),
@@ -69,10 +72,11 @@ void Level01::VInitialize()
 	mWallCount0 = level.wallCount;
 	mWallWorldMatrices0 = level.walls;
 
+	mFloorCollider.halfSize = level.extents;
+	mFloorCollider.origin = level.center;
+
 	InitializeGeometry();
 	InitializeShaderResources();
-	vec3f dir = vec3f(10.0f, 0.0f, -100.0f);
-	cliqCity::graphicsMath::normalize(dir);
 	mCamera.SetViewMatrix(mat4f::lookAtLH(vec3f(0, 0, 0), vec3f(10.0f, 0.0f, -100.0f), vec3f(0, 1, 0))); //Temporary until Ghost get a controller.
 
 	mCollisionManager.Initialize();
@@ -81,6 +85,17 @@ void Level01::VInitialize()
 
 	mState = BASE_SCENE_STATE_RUNNING;
 }
+
+	// Dear Gabe,
+	// if you see this message it means that i charry picked successfully
+	// but you need to disregard the following changes when you merge
+	// this conflict.
+	// Best,
+	// Lucas
+	//mPlaneCount = level.tileCount;
+	//mPlaneWorldMatrices = level.tiles;
+	//mPlaneWidth = level.tileWidth;
+	//mPlaneHeight = level.tileHeight;
 
 void Level01::InitializeGeometry()
 {
@@ -102,6 +117,7 @@ void Level01::InitializeGeometry()
 	meshLibrary.NewMesh(&mMinionCubeMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mMinionCubeMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
 	mRenderer->VSetMeshIndexBuffer(mMinionCubeMesh, &indices[0], indices.size());
+	Geometry::Plane(vertices, indices, mPlaneWidth, mPlaneHeight, 5.0f, 5.0f);
 }
 
 void Level01::InitializeShaderResources()
@@ -198,6 +214,9 @@ void Level01::VRender()
 	RenderExplorers();
 	RenderMinions();
 	mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
+
+
+	RENDER_TRACE();
 
 	//FPS
 	DX11IMGUI::NewFrame();

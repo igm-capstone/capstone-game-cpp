@@ -8,6 +8,7 @@
 #include "SceneObjects/DominationPoint.h"
 #include "trace.h"
 #include "SceneObjects/Lamp.h"
+#include <GraphicsMath/cgm.h>
 
 using namespace std;
 using namespace Rig3D;
@@ -150,6 +151,38 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	LevelInfo level;
 	memset(&level, 0, sizeof(level));
 	
+	auto center = obj["metadata"]["bounds"]["center"];
+	if (center != nullptr)
+	{
+		level.center = parseVec3f(center);
+	}
+
+	auto extents = obj["metadata"]["bounds"]["extents"];
+	if (extents != nullptr)
+	{
+		level.extents = parseVec3f(extents);
+	}
+
+	level.tileCount = TILE_COUNT_X * TILE_COUNT_Y;
+	level.tiles = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.tileCount, alignof(mat4f), 0));
+
+	float levelWidth	= level.extents.x * 2.0f;
+	float levelHeight	= level.extents.x * 2.0f;
+
+	level.tileWidth		=	levelWidth / static_cast<float>(TILE_COUNT_X);
+	level.tileHeight	=	levelHeight / static_cast<float>(TILE_COUNT_Y);
+	
+	float halfWidth		= (levelWidth - level.tileWidth) * 0.5f;
+	float halfHeight	= (levelHeight - level.tileHeight) * 0.5f;
+
+	for (int y = 0; y < TILE_COUNT_Y; y++)
+	{
+		for (int x = 0; x < TILE_COUNT_X; x++)
+		{
+			level.tiles[y * TILE_COUNT_X + x] = (mat4f::rotateX(-PI * 0.5f) * mat4f::translate({ x * level.tileWidth - halfWidth, halfHeight - y * level.tileHeight, 0.0f })).transpose();
+		}
+	}
+
 	auto lamps = obj["lamp"].get_ptr<jarr_t>();
 	if (lamps != nullptr)
 	{

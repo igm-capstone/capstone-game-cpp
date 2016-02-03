@@ -4,6 +4,7 @@
 #include "Network\NetworkManager.h"
 #include <Rig3D/Graphics/Camera.h>
 #include <SceneObjects/BaseSceneObject.h>
+#include <Components/ColliderComponent.h>
 
 #define PI 3.14159265359f
 
@@ -38,7 +39,9 @@ protected:
 public:
 	BaseSceneState				mState;
 	Camera						mCamera;
-	vec3f						mCameraDirection;
+
+	// Miscelanious
+	BoxCollider					mFloorCollider;
 
 	BaseScene();
 	virtual ~BaseScene();

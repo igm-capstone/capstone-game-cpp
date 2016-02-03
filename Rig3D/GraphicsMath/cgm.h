@@ -6,6 +6,8 @@
 #include "SIMDVector.hpp"
 #include "SIMDMatrix.hpp"
 
+#define PI 3.14159265359f
+
 typedef cliqCity::graphicsMath::SIMDMatrix		fast_mat;
 typedef cliqCity::graphicsMath::SIMDVector		fast_vec;
 typedef cliqCity::graphicsMath::Matrix4			mat4f;
