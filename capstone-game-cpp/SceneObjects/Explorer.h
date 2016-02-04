@@ -94,5 +94,8 @@ public:
 		auto e = static_cast<Explorer*>(obj);
 		e->mTransform->SetPosition(newPos);
 		e->mCollider->mCollider.origin = newPos;
+
+		if (e->mNetworkID->mHasAuthority) 
+			e->mCamera->SetViewMatrix(mat4f::lookAtLH(newPos, newPos - vec3f(0.0f, 0.0f, 20.0f), vec3f(0.0f, 1.0f, 0.0f)));
 	}
 };

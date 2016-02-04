@@ -37,7 +37,7 @@ void CollisionManager::DetectCollisions()
 				float overlap = (e1.mCollider->mCollider.radius + e2.mCollider->mCollider.radius)
 					- cliqCity::graphicsMath::magnitude(e1.mCollider->mCollider.origin - e2.mCollider->mCollider.origin);
 				vec3f AtoB = (e2.mCollider->mCollider.origin - e1.mCollider->mCollider.origin);
-				pCollisions[collisionsCount].minimumOverlap = AtoB * overlap;
+				pCollisions[collisionsCount].minimumOverlap = - AtoB * overlap;
 
 				collisionsCount++;
 			}
