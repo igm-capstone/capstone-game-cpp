@@ -13,6 +13,8 @@
 
 #include "Rig3D\Common\Transform.h"
 
+#include "Network\NetworkManager.h"
+
 
 
 

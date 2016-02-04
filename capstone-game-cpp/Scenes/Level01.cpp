@@ -11,13 +11,9 @@
 #include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 
-#define PI 3.14159265359f
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 #include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
 #include <Console.h>
-
-static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
-static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 
 Level01::Level01() : 
 	mWallCount0(0), 
@@ -27,7 +23,6 @@ Level01::Level01() :
 	mWallShaderResource(nullptr),
 	mExplorerShaderResource(nullptr)
 {
-	
 }
 
 Level01::~Level01()
@@ -36,8 +31,9 @@ Level01::~Level01()
 
 	for (Explorer& e : Factory<Explorer>())
 	{
-		e.mMesh->~IMesh();
+		//e.mMesh->~IMesh();
 	}
+	mExplorerCubeMesh->~IMesh();
 
 	mWallShaderResource->~IShaderResource();
 	mExplorerShaderResource->~IShaderResource();
@@ -47,7 +43,7 @@ Level01::~Level01()
 
 void Level01::VOnResize()
 {
-	mMainCamera.SetProjectionMatrix(mat4f::normalizedPerspectiveLH(0.25f * PI, mRenderer->GetAspectRatio(), 0.1f, 1000.0f));
+	mCamera.SetProjectionMatrix(mat4f::normalizedPerspectiveLH(0.25f * PI, mRenderer->GetAspectRatio(), 0.1f, 1000.0f));
 }
 
 #pragma region Initialization
@@ -65,7 +61,7 @@ void Level01::VInitialize()
 
 	InitializeGeometry();
 	InitializeShaderResources();
-	InitializeMainCamera();
+	mCamera.SetViewMatrix(mat4f::lookAtLH(vec3f(0, 0, 0), vec3f(10.0f, 0.0f, -100.0f), vec3f(0, 1, 0))); //Temporary until Ghost get a controller.
 
 	mCollisionManager.Initialize();
 
@@ -124,12 +120,6 @@ void Level01::InitializeShaderResources()
 
 	mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 1);
 }
-
-void Level01::InitializeMainCamera()
-{
-	// Use to set view based on network logic
-	mMainCamera.SetViewMatrix(mat4f::lookAtLH(kVectorZero, vec3f(10.0f, 0.0f, -100.0f), kVectorUp));
-}
 #pragma endregion
 
 #pragma region Update
@@ -151,8 +141,8 @@ void Level01::VUpdate(double milliseconds)
 
 void Level01::UpdateCamera()
 {
-	mPVM.camera.projection	= mMainCamera.GetProjectionMatrix().transpose();
-	mPVM.camera.view		= mMainCamera.GetViewMatrix().transpose();
+	mPVM.camera.projection	= mCamera.GetProjectionMatrix().transpose();
+	mPVM.camera.view		= mCamera.GetViewMatrix().transpose();
 }
 
 #pragma endregion

@@ -12,9 +12,6 @@ class Level01 : public BaseScene
 	// Allocators
 	LinearAllocator		mAllocator;
 	
-	// Camera
-	Camera				mMainCamera;
-
 	// Counts
 	uint32_t			mWallCount0;
 	uint32_t			mExplorerCount;
@@ -42,7 +39,6 @@ public:
 	void VInitialize() override;
 	void InitializeGeometry();
 	void InitializeShaderResources();
-	void InitializeMainCamera();
 	void InitializePlayers();
 	
 	void VUpdate(double milliseconds) override;

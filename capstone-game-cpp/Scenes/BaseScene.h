@@ -2,6 +2,10 @@
 #include "stdafx.h"
 
 #include "Network\NetworkManager.h"
+#include <Rig3D/Graphics/Camera.h>
+#include <SceneObjects/BaseSceneObject.h>
+
+#define PI 3.14159265359f
 
 using namespace Rig3D;
 
@@ -26,12 +30,14 @@ protected:
 	ID3D11DeviceContext*		mDeviceContext;
 
 	NetworkManager*				mNetworkManager;
+	BaseSceneObject*			mMe;
 
 	uint8_t*					mStaticMemory;
 	size_t						mStaticMemorySize;
 
 public:
 	BaseSceneState				mState;
+	Camera						mCamera;
 
 	BaseScene();
 	virtual ~BaseScene();

@@ -8,6 +8,7 @@
 #include "SceneObjects\Pickup.h"
 #include "SceneObjects\DominationPoint.h"
 #include "SceneObjects\Lamp.h"
+#include "SceneObjects\Ghost.h"
 
 #pragma region REGISTER_FACTORY Macro
 
@@ -20,6 +21,7 @@ PoolAllocator Factory<##type##>::sAllocator(__g##type##Buffer, __g##type##Buffer
 #pragma endregion
 
 // register scene object factories
+REGISTER_FACTORY ( Ghost,			1	)
 REGISTER_FACTORY ( Explorer,		5	)
 REGISTER_FACTORY ( Wall,			100	)
 REGISTER_FACTORY ( MoveableBlock,	10	)

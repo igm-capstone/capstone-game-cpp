@@ -119,6 +119,7 @@
     <ClInclude Include="CollisionManager.h" />
     <ClInclude Include="Components\BaseComponent.h" />
     <ClInclude Include="Components\ColliderComponent.h" />
+    <ClInclude Include="SceneObjects\Ghost.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="capstone-game-cpp.rc.h" />
     <ClInclude Include="Console.h" />

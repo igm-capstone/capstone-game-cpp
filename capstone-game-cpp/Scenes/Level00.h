@@ -25,7 +25,6 @@
 #include "Shaders/obj/ShadowGridComputeShader.h"
 #include "Shaders/obj/ShadowPixelShader.h"
 
-#define PI					3.1415926535f
 #define UNITY_QUAD_RADIUS	0.85f
 
 class Level00 : public BaseScene
