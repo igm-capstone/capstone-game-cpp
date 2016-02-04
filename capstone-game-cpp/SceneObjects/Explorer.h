@@ -33,17 +33,18 @@ private:
 		mController = Factory<ExplorerController>::Create();
 		mController->mSceneObject = this;
 		mController->mIsActive = false;
-		mController->RegisterCallback(&OnControllerMove);
+		mController->RegisterMoveCallback(&OnMove);
 
 		mCollider = Factory<SphereColliderComponent>::Create();
-		mCollider->mTraits.isDynamic = true;
+		mCollider->isDynamic = true;
 		mCollider->mSceneObject = this;
 		mCollider->mIsActive = false;
+		mCollider->RegisterCollisionExitCallback(&OnCollisionExit);
 
-		memset(mSkills, 0, sizeof(Skill) * MAX_SKILLS);
+		memset(mSkills, 0, sizeof(Skill*) * MAX_SKILLS);
 	
-		mNetworkID->RegisterCallback(&OnNetAuthorityChange);
-		mNetworkID->RegisterCallback(&OnNetSyncTransform);
+		mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
+		mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
 
 		mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
 		mCamera = &Application::SharedInstance().GetCurrentScene()->mCamera;
@@ -66,14 +67,14 @@ public:
 		mNetworkID->mUUID = UUID;
 	};
 
-	static void OnControllerMove(BaseSceneObject* obj, vec3f newPos)
+	static void OnMove(BaseSceneObject* obj, vec3f newPos)
 	{
 		auto e = static_cast<Explorer*>(obj);
 		e->mTransform->SetPosition(newPos);
 		e->mCollider->mCollider.origin = newPos;
-		e->mCamera->SetViewMatrix(mat4f::lookAtLH(newPos, newPos - vec3f(0.0f, 0.0f, 20.0f), vec3f(0.0f, 1.0f, 0.0f)));
 		
 		if (e->mNetworkID->mHasAuthority) {
+			e->mCamera->SetViewMatrix(mat4f::lookAtLH(newPos, newPos - vec3f(0.0f, 0.0f, 20.0f), vec3f(0.0f, 1.0f, 0.0f)));
 			Packet p(PacketTypes::SYNC_TRANSFORM);
 			p.UUID = e->mNetworkID->mUUID;
 			p.Position = newPos;
@@ -94,8 +95,13 @@ public:
 		auto e = static_cast<Explorer*>(obj);
 		e->mTransform->SetPosition(newPos);
 		e->mCollider->mCollider.origin = newPos;
+	}
 
-		if (e->mNetworkID->mHasAuthority) 
-			e->mCamera->SetViewMatrix(mat4f::lookAtLH(newPos, newPos - vec3f(0.0f, 0.0f, 20.0f), vec3f(0.0f, 1.0f, 0.0f)));
+	static void OnCollisionExit(BaseSceneObject* obj, Collision*)
+	{
+		auto e = static_cast<Explorer*>(obj);
+		if (e->mNetworkID->mHasAuthority) {
+			e->mCamera->SetViewMatrix(mat4f::lookAtLH(e->mTransform->GetPosition(), e->mTransform->GetPosition() - vec3f(0.0f, 0.0f, 20.0f), vec3f(0.0f, 1.0f, 0.0f)));
+		}
 	}
 };

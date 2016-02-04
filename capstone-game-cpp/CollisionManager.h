@@ -8,6 +8,7 @@ struct Collision
 {
 	union Collider
 	{
+		BaseColliderComponent*			BaseCollider;
 		BoxColliderComponent*			BoxCollider;
 		OrientedBoxColliderComponent*	OBBCollider;
 		SphereColliderComponent*		SphereCollider;

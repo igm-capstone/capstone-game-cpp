@@ -43,8 +43,8 @@ bool ExplorerController::Update()
 		hasMoved = true;
 	}
 
-	if (hasMoved && mOnControllerMove)
-		mOnControllerMove(mSceneObject, pos);
+	if (hasMoved)
+		OnMove(pos);
 
 	return hasMoved;
 }
