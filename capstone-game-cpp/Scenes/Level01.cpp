@@ -131,6 +131,11 @@ void Level01::VUpdate(double milliseconds)
 		ec.Update();
 	}
 
+	for (Skill& skill : Factory<Skill>())
+	{
+		skill.Update();
+	}
+
 	UpdateCamera();
 
 	mCollisionManager.DetectCollisions();

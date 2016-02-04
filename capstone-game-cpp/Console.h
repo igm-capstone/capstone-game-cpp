@@ -1,5 +1,6 @@
 #pragma once
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
+#include <time.h>
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4996) // 'This function or variable may be unsafe': strcpy, strdup, sprintf, vsnprintf, sscanf, fopen
@@ -11,8 +12,14 @@
 // For the console example, here we are using a more C++ like approach of declaring a class to hold the data and the functions.
 class Console
 {
+	struct ConsoleItem
+	{
+		char* text;
+		time_t timestamp;
+	};
+
 	char                  mInputBuf[256];
-	ImVector<char*>       mItems;
+	ImVector<ConsoleItem> mItems;
 	bool                  mScrollToBottom;
 	ImVector<char*>       mHistory;
 	int                   mHistoryPos;    // -1: new line, 0..History.Size-1 browsing history.
@@ -32,6 +39,7 @@ protected:
 	int TextEditCallback(ImGuiTextEditCallbackData* data);
 
 	void DrawConsole();
+	void DrawConsoleItems(ImGuiTextFilter& filter, double timespan);
 	void AddLog(const char* fmt, ...) IM_PRINTFARGS(2);
 	void ClearLog();
 

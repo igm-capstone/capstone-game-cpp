@@ -3,6 +3,7 @@
 #include <SceneObjects/Explorer.h>
 #include <ScareTacticsApplication.h>
 #include <Rig3D/Intersection.h>
+#include <trace.h>
 
 ExplorerController::ExplorerController() : mSpeed(0.01f)
 {
@@ -46,4 +47,9 @@ bool ExplorerController::Update()
 		mOnControllerMove(mSceneObject, pos);
 
 	return hasMoved;
+}
+
+void ExplorerController::DoSprint(Skill* skill, BaseSceneObject* target, vec3f worldPosition)
+{
+	TRACE_LOG("Sprint!!");
 }
