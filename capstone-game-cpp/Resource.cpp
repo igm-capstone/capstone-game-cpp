@@ -196,7 +196,7 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		for (Lamp& l : Factory<Lamp>())
 		{
 			level.lampColors[i] = { 0.6f, 0.6f, 0.0f, 1.0f };
-			level.lamps[i++] = l.mTransform->GetWorldMatrix().transpose();
+			level.lamps[i++] = (mat4f::scale(l.mLightRadius) * mat4f::translate(l.mTransform->GetPosition())).transpose();
 		}
 	}
 

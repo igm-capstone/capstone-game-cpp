@@ -143,7 +143,7 @@ void Level01::InitializeGeometry()
 
 	// Point Light Volume 
 
-	Geometry::Sphere(vertices, indices, 6, 6, 30.0f);
+	Geometry::Sphere(vertices, indices, 6, 6, 1.0f);
 
 	meshLibrary.NewMesh(&mPLVMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mPLVMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
@@ -356,47 +356,47 @@ void Level01::RenderPointLightVolumes()
 	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);	// Normal
 	mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
 
-	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPLVMesh->GetIndexCount(), mPointLightCount, 0, 0, 0);
+	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPLVMesh->GetIndexCount(), 3, 0, 0, 0);
 
-	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
+//	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
 }
 
 void Level01::RenderFullScreenQuad()
 {
-	mRenderer->VSetInputLayout(mApplication->mNDSQuadVertexShader);
-	mRenderer->VSetVertexShader(mApplication->mNDSQuadVertexShader);
-	mRenderer->VSetPixelShader(mApplication->mDBGPixelShader);
-
-	static uint32_t index = 0;
-	if (mEngine->GetInput()->GetKeyDown(KEYCODE_0))
-	{
-		index = 0;
-	}
-	else if (mEngine->GetInput()->GetKeyDown(KEYCODE_1))
-	{
-		index = 1;
-	}
-	else if (mEngine->GetInput()->GetKeyDown(KEYCODE_2))
-	{
-		index = 2;
-	}
-	else if (mEngine->GetInput()->GetKeyDown(KEYCODE_3))
-	{
-		index = 3;
-	}
-
-	mRenderer->VSetPixelShaderResourceView(mGBufferContext, index, 0);		// Color
-	mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
-
-
 	//mRenderer->VSetInputLayout(mApplication->mNDSQuadVertexShader);
 	//mRenderer->VSetVertexShader(mApplication->mNDSQuadVertexShader);
-	//mRenderer->VSetPixelShader(mApplication->mNDSQuadPixelShader);
+	//mRenderer->VSetPixelShader(mApplication->mDBGPixelShader);
 
-	//mRenderer->VSetPixelShaderResourceView(mGBufferContext, 2, 0);		// Color
-	//mRenderer->VSetPixelShaderResourceView(mGBufferContext, 3, 1);		// Albedo
-	//mRenderer->VSetPixelShaderDepthResourceView(mGBufferContext, 3);	// Depth
+	//static uint32_t index = 0;
+	//if (mEngine->GetInput()->GetKeyDown(KEYCODE_0))
+	//{
+	//	index = 0;
+	//}
+	//else if (mEngine->GetInput()->GetKeyDown(KEYCODE_1))
+	//{
+	//	index = 1;
+	//}
+	//else if (mEngine->GetInput()->GetKeyDown(KEYCODE_2))
+	//{
+	//	index = 2;
+	//}
+	//else if (mEngine->GetInput()->GetKeyDown(KEYCODE_3))
+	//{
+	//	index = 3;
+	//}
+
+	//mRenderer->VSetPixelShaderResourceView(mGBufferContext, index, 0);		// Color
 	//mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
+
+
+	mRenderer->VSetInputLayout(mApplication->mNDSQuadVertexShader);
+	mRenderer->VSetVertexShader(mApplication->mNDSQuadVertexShader);
+	mRenderer->VSetPixelShader(mApplication->mNDSQuadPixelShader);
+
+	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 2, 0);		// Color
+	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 3, 1);		// Albedo
+	mRenderer->VSetPixelShaderDepthResourceView(mGBufferContext, 3);	// Depth
+	mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
 
 	mRenderer->VBindMesh(mNDSQuadMesh);
 	mRenderer->VDrawIndexed(0, mNDSQuadMesh->GetIndexCount());

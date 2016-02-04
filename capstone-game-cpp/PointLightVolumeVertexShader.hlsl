@@ -12,6 +12,7 @@ struct Pixel
 	float4 lightColor	:	COLOR;
 	float3 lightPos		:	POSITIONT;
 	float2 uv			:	TEXCOORD;
+	float  radius		: TEXCOORD1;
 };
 
 cbuffer transform : register (b0)
@@ -28,6 +29,7 @@ Pixel main( Vertex vertex )
 	pixel.positionH = mul(float4(vertex.position, 1.0f), clip);
 	pixel.lightColor = vertex.color;
 	pixel.lightPos = float3(vertex.world[3][0], vertex.world[3][1], vertex.world[3][2]);
+	pixel.radius = vertex.world[0][0];
 	pixel.uv = float2((pixel.positionH.x / pixel.positionH.w + 1.0f) * 0.5f, (1.0f - pixel.positionH.y / pixel.positionH.w) * 0.5f);
 
 	return pixel;
