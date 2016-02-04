@@ -145,9 +145,13 @@ void Level01::InitializeGeometry()
 
 	Geometry::Sphere(vertices, indices, 6, 6, 1.0f);
 
-	meshLibrary.NewMesh(&mPLVMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mPLVMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
-	mRenderer->VSetMeshIndexBuffer(mPLVMesh, &indices[0], indices.size());
+	OBJBasicResource<Vertex3> sphereResource("D:/Users/go4113/Capstone/Bin/Debug/sphere.obj");
+	sphereResource.Load();
+	meshLibrary.LoadMesh(&mPLVMesh, mRenderer, sphereResource);
+
+	//meshLibrary.NewMesh(&mPLVMesh, mRenderer);
+	//mRenderer->VSetMeshVertexBuffer(mPLVMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
+	//mRenderer->VSetMeshIndexBuffer(mPLVMesh, &indices[0], indices.size());
 
 	// Full Screen Quad
 
@@ -356,9 +360,9 @@ void Level01::RenderPointLightVolumes()
 	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);	// Normal
 	mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
 
-	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPLVMesh->GetIndexCount(), 3, 0, 0, 0);
+	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPLVMesh->GetIndexCount(), mPointLightCount, 0, 0, 0);
 
-//	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
+	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
 }
 
 void Level01::RenderFullScreenQuad()
