@@ -23,15 +23,14 @@ struct SkillBinding
 class Skill : public BaseComponent
 {
 	friend class Factory<Skill>;
+	EXPOSE_CALLBACK_3(Use, float, BaseSceneObject*, vec3f)
 
 public:
-	typedef void(*SkillCallback)(Skill*, BaseSceneObject*, vec3f);
-
 	float mCoolDownMs;
 	float mDurationMs;
 	float mLastUsed;
 	
-	SkillCallback mCallback;
+	UseCallback mCallback;
 	SkillBinding  mBinding;
 
 private:
@@ -41,9 +40,10 @@ private:
 	Skill();
 	~Skill();
 
+
 public:
 	void SetBinding(SkillBinding& binding);
-	void Setup(float cooldown, float duration, SkillCallback callback);
+	void Setup(float cooldown, float duration, UseCallback callback);
 	void Update();
 };
 

@@ -34,8 +34,6 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 		}
 	}
 
-//	auto a = ComponentPool<CompA>::Create();
-
 	Engine& engine = Singleton<Engine>::SharedInstance();
 
 	Options options;

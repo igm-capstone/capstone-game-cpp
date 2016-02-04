@@ -45,7 +45,7 @@ void BaseScene::SetStaticMemory(void* staticMemory, size_t size)
 
 void BaseScene::RenderFPSIndicator()
 {
-	ImGui::SetNextWindowPos(ImVec2(mRenderer->GetWindowWidth() - 100, 10), ImGuiSetCond_Always);
+	ImGui::SetNextWindowPos(ImVec2(mRenderer->GetWindowWidth() - 100.0f, 10.0f), ImGuiSetCond_Always);
 	ImGui::Begin("FPS", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::Text("%6.1f FPS ", ImGui::GetIO().Framerate);
 	ImGui::End();

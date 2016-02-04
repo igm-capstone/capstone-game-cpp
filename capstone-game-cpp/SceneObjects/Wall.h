@@ -16,7 +16,7 @@ private:
 		mMesh(nullptr),
 		mBoxCollider(Factory<OrientedBoxColliderComponent>::Create())
 	{
-		mBoxCollider->mTraits.isDynamic = false;	// Walls don't move :)
+		mBoxCollider->isDynamic = false;	// Walls don't move :)
 		mBoxCollider->mSceneObject = this;
 	}
 

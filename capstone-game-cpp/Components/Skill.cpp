@@ -43,11 +43,11 @@ void Skill::SetBinding(SkillBinding& binding)
 	mBinding = binding;
 }
 
-void Skill::Setup(float cooldown, float duration, SkillCallback callback)
+void Skill::Setup(float cooldown, float duration, UseCallback callback)
 {
 	mCoolDownMs = cooldown * 1000;
 	mDurationMs = duration * 1000;
-	mCallback = callback;
+	RegisterUseCallback(callback);
 }
 
 void Skill::Update()
@@ -74,10 +74,6 @@ void Skill::Update()
 		return;
 	}
 
-	if (mCallback)
-	{
-		mCallback(this, nullptr, vec3f());
-	}
-
+	OnUse(mDurationMs, nullptr, vec3f());
 	mLastUsed = appTime;
 }

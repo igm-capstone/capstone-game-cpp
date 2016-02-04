@@ -7,19 +7,7 @@ class ExplorerController : public BaseComponent
 {
 private:
 	Input* mInput;
-	typedef void(*MoveCallback)(BaseSceneObject*, vec3f);
-
-private:
-	//callbacks
-	MoveCallback mOnControllerMove;
-
 	double mSprintDuration;
-
-public:
-	void RegisterCallback(MoveCallback handler)
-	{
-		mOnControllerMove = handler;
-	}
 
 public:
 	float mSpeed;
@@ -29,5 +17,7 @@ public:
 
 	bool Update(double milliseconds);
 
-	static void DoSprint(Skill* skill, BaseSceneObject* target, vec3f worldPosition);
+	static void DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
+
+	EXPOSE_CALLBACK(Move, vec3f)
 };

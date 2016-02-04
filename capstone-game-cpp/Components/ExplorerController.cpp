@@ -25,7 +25,7 @@ bool ExplorerController::Update(double milliseconds)
 
 	if (mSprintDuration > 0)
 	{
-		speed *= 1.5f;
+		speed *= 2;
 
 		mSprintDuration -= min(milliseconds, mSprintDuration);
 	}
@@ -52,16 +52,16 @@ bool ExplorerController::Update(double milliseconds)
 		hasMoved = true;
 	}
 
-	if (hasMoved && mOnControllerMove)
-		mOnControllerMove(mSceneObject, pos);
+	if (hasMoved)
+		OnMove(pos);
 
 	return hasMoved;
 }
 
-void ExplorerController::DoSprint(Skill* skill, BaseSceneObject* target, vec3f worldPosition)
+void ExplorerController::DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
 {
 	TRACE_LOG("Sprint!!");
 
-	auto e = reinterpret_cast<Explorer*>(skill->mSceneObject);
-	e->mController->mSprintDuration = skill->mDurationMs;
+	auto e = reinterpret_cast<Explorer*>(obj);
+	e->mController->mSprintDuration = duration;
 }
