@@ -213,7 +213,32 @@ void Console::DrawConsole()
 		if (copy) ImGui::LogToClipboard();
 	}
 
-	DrawConsoleItems(filter, mVisible ? -1 : 5);
+	float timespan = mVisible ? -1 : 5;
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
+	for (int i = 0; i < mItems.Size; i++)
+	{
+		const char* item = mItems[i].text;
+
+		if (timespan > 0 && difftime(time(nullptr), mItems[i].timestamp) > timespan)
+		{
+			continue;
+		}
+
+		if (!filter.PassFilter(item))
+			continue;
+		ImVec4 col = ImColor(255, 255, 255); // A better implementation may store a type per-item. For the sample let's just parse the text.
+		if (strstr(item, "[Error]"))          col = ImColor(255, 100, 100);
+		else if (strstr(item, "[Warning]"))   col = ImColor(255, 255, 100);
+		else if (strstr(item, "[Log]"))	      col = ImColor(100, 255, 255);
+		else if (strncmp(item, "$ ", 2) == 0) col = ImColor(255, 200, 150);
+		ImGui::PushStyleColor(ImGuiCol_Text, col);
+		ImGui::TextUnformatted(item);
+		ImGui::PopStyleColor();
+	}
+	if (!mVisible || mScrollToBottom)
+		ImGui::SetScrollHere();
+	mScrollToBottom = false;
+	ImGui::PopStyleVar();
 
 	ImGui::EndChild();
 	
@@ -244,35 +269,6 @@ void Console::DrawConsole()
 	}
 
 	ImGui::End();
-	ImGui::PopStyleVar();
-}
-
-void Console::DrawConsoleItems(ImGuiTextFilter& filter, double timespan)
-{
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
-	for (int i = 0; i < mItems.Size; i++)
-	{
-		const char* item = mItems[i].text;
-		
-		if (timespan > 0 && difftime(time(nullptr), mItems[i].timestamp) > timespan)
-		{
-			continue;
-		}
-
-		if (!filter.PassFilter(item))
-			continue;
-		ImVec4 col = ImColor(255, 255, 255); // A better implementation may store a type per-item. For the sample let's just parse the text.
-		if (strstr(item, "[Error]"))          col = ImColor(255, 100, 100);
-		else if (strstr(item, "[Warning]"))   col = ImColor(255, 255, 100);
-		else if (strstr(item, "[Log]"))	      col = ImColor(100, 255, 255);
-		else if (strncmp(item, "$ ", 2) == 0) col = ImColor(255, 200, 150);
-		ImGui::PushStyleColor(ImGuiCol_Text, col);
-		ImGui::TextUnformatted(item);
-		ImGui::PopStyleColor();
-	}
-	if (mScrollToBottom)
-		ImGui::SetScrollHere();
-	mScrollToBottom = false;
 	ImGui::PopStyleVar();
 }
 

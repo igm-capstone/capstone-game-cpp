@@ -10,10 +10,10 @@ enum BindingType
 
 struct SkillBinding
 {
-	BindingType   bindingType = BindingType(0);
-	MouseButton   mouseButton = MouseButton(0);
+	BindingType   bindingType   = BindingType(0);
+	MouseButton   mouseButton   = MouseButton(0);
 	GamepadButton gamepadButton = GamepadButton(0);
-	KeyCode       keyCode = KeyCode(0);
+	KeyCode       keyCode       = KeyCode(0);
 
 	SkillBinding& Set(MouseButton value);
 	SkillBinding& Set(GamepadButton value);
@@ -27,14 +27,16 @@ class Skill : public BaseComponent
 public:
 	typedef void(*SkillCallback)(Skill*, BaseSceneObject*, vec3f);
 
-private:
-	Input* mInput;
-
+	float mCoolDownMs;
+	float mDurationMs;
+	float mLastUsed;
+	
 	SkillCallback mCallback;
 	SkillBinding  mBinding;
 
-	float mCoolDown;
-	float mDuration;
+private:
+	Input* mInput;
+	Timer* mTimer;
 
 	Skill();
 	~Skill();

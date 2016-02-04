@@ -39,7 +39,6 @@ protected:
 	int TextEditCallback(ImGuiTextEditCallbackData* data);
 
 	void DrawConsole();
-	void DrawConsoleItems(ImGuiTextFilter& filter, double timespan);
 	void AddLog(const char* fmt, ...) IM_PRINTFARGS(2);
 	void ClearLog();
 

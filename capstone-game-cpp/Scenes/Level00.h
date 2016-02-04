@@ -180,7 +180,7 @@ public:
 	void RenderRobots();
 	void RenderGrid();
 	
-	void UpdateExplorers();
+	void UpdateExplorers(double milliseconds);
 	void UpdateGrid();
 	void UpdateRobots();
 

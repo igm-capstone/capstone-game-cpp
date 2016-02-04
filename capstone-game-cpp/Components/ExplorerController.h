@@ -13,6 +13,7 @@ private:
 	//callbacks
 	MoveCallback mOnControllerMove;
 
+	double mSprintDuration;
 
 public:
 	void RegisterCallback(MoveCallback handler)
@@ -26,7 +27,7 @@ public:
 	ExplorerController();
 	~ExplorerController();
 
-	bool Update();
+	bool Update(double milliseconds);
 
 	static void DoSprint(Skill* skill, BaseSceneObject* target, vec3f worldPosition);
 };

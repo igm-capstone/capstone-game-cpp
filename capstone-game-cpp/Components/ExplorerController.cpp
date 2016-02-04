@@ -15,31 +15,40 @@ ExplorerController::~ExplorerController()
 	
 }
 
-bool ExplorerController::Update()
+bool ExplorerController::Update(double milliseconds)
 {
 	if (!mIsActive) return false;
 
 	bool hasMoved = false;
 
+	float speed = mSpeed;
+
+	if (mSprintDuration > 0)
+	{
+		speed *= 1.5f;
+
+		mSprintDuration -= min(milliseconds, mSprintDuration);
+	}
+
 	auto pos = mSceneObject->mTransform->GetPosition();
 	if (mInput->GetKey(KEYCODE_LEFT))
 	{
-		pos.x -= mSpeed;
+		pos.x -= speed;
 		hasMoved = true;
 	}
 	if (mInput->GetKey(KEYCODE_RIGHT))
 	{
-		pos.x += mSpeed;
+		pos.x += speed;
 		hasMoved = true;
 	}
 	if (mInput->GetKey(KEYCODE_UP))
 	{
-		pos.y += mSpeed;
+		pos.y += speed;
 		hasMoved = true;
 	}
 	if (mInput->GetKey(KEYCODE_DOWN))
 	{
-		pos.y -= mSpeed;
+		pos.y -= speed;
 		hasMoved = true;
 	}
 
@@ -52,4 +61,7 @@ bool ExplorerController::Update()
 void ExplorerController::DoSprint(Skill* skill, BaseSceneObject* target, vec3f worldPosition)
 {
 	TRACE_LOG("Sprint!!");
+
+	auto e = reinterpret_cast<Explorer*>(skill->mSceneObject);
+	e->mController->mSprintDuration = skill->mDurationMs;
 }

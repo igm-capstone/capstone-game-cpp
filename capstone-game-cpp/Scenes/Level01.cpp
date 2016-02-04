@@ -128,7 +128,7 @@ void Level01::VUpdate(double milliseconds)
 {
 	for (ExplorerController& ec : Factory<ExplorerController>())
 	{
-		ec.Update();
+		ec.Update(milliseconds);
 	}
 
 	for (Skill& skill : Factory<Skill>())

@@ -20,6 +20,7 @@ public:
 	ExplorerController*			mController;
 	SphereColliderComponent*	mCollider;
 	Skill*						mSkills[MAX_SKILLS];
+
 private:
 	NetworkClient*				mNetworkClient;
 	Camera*						mCamera;
@@ -40,7 +41,6 @@ private:
 		mCollider->mSceneObject = this;
 		mCollider->mIsActive = false;
 
-		memset(mSkills, 0, sizeof(Skill) * MAX_SKILLS);
 	
 		mNetworkID->RegisterCallback(&OnNetAuthorityChange);
 		mNetworkID->RegisterCallback(&OnNetSyncTransform);
@@ -48,9 +48,14 @@ private:
 		mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
 		mCamera = &Application::SharedInstance().GetCurrentScene()->mCamera;
 
+		memset(mSkills, 0, sizeof(Skill*) * MAX_SKILLS);
+
 		auto sprint = Factory<Skill>::Create();
+		sprint->mSceneObject = this;
 		sprint->SetBinding(SkillBinding().Set(KEYCODE_A).Set(MOUSEBUTTON_LEFT));
-		sprint->Setup(0, 0, ExplorerController::DoSprint);
+		sprint->Setup(2, 1, ExplorerController::DoSprint);
+
+		mSkills[0] = sprint;
 	}
 	~Explorer() {};
 
