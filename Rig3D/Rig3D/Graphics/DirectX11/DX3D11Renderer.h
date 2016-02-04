@@ -202,19 +202,19 @@ namespace Rig3D
 
 		void	VCreateRenderContext(IRenderContext** renderContext, LinearAllocator* allocator);
 
-		void	VCreateContextDepthStencilTarget(IRenderContext* renderContext, uint32_t width, uint32_t height);
 		void	VCreateContextTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
+		void	VCreateContextDepthStencilTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
 
-		void	VCreateContextDepthResourceTarget(IRenderContext* renderContext, uint32_t width, uint32_t height);
 		void	VCreateContextResourceTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
+		void	VCreateContextDepthStencilResourceTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
 
 		void	VSetContextTarget();
 		void	VSetContextTargetWithDepth();
 		void	VSetRenderContextTargets(IRenderContext* renderContext);
-		void	VSetRenderContextTargetsWithDepth(IRenderContext* renderContext);
+		void	VSetRenderContextTargetsWithDepth(IRenderContext* renderContext, const uint32_t DSVIndex);
 
 		void	VSetRenderContextTarget(IRenderContext* renderContext, const uint32_t& atIndex);
-		void	VSetRenderContextTargetWithDepth(IRenderContext* renderContext, const uint32_t& atIndex);
+		void	VSetRenderContextTargetWithDepth(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& DSVIndex);
 
 		void	VClearContext(const float* color, float depth, uint8_t stencil);
 		void	VClearContext(IRenderContext* renderContext, const float* color, float depth, uint8_t stencil);
@@ -223,10 +223,10 @@ namespace Rig3D
 		void	VClearContextTarget(IRenderContext* renderContext, const uint32_t& atIndex, const float* color);
 
 		void	VClearDepthStencil(float depth, uint8_t stencil);
-		void	VClearDepthStencil(IRenderContext* renderContext, float depth, uint8_t stencil);
+		void	VClearDepthStencil(IRenderContext* renderContext, const uint32_t& atIndex, float depth, uint8_t stencil);
 
-		void	VSetVertexShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& toBindingIndex);
-		void	VSetPixelShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& toBindingIndex);
+		void	VSetVertexShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+		void	VSetPixelShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
 
 		void	VSetVertexShaderResourceViews(IRenderContext* renderContext);
 		void	VSetPixelShaderResourceViews(IRenderContext* renderContext);

@@ -67,7 +67,7 @@ void Level01::VOnResize()
 
 	// 0: Position, 1: Normal, 2: Color 3: Albedo
 	mRenderer->VCreateContextResourceTargets(mGBufferContext, 4, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
-	mRenderer->VCreateContextDepthResourceTarget(mGBufferContext, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
+	mRenderer->VCreateContextDepthStencilResourceTargets(mGBufferContext, 1, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
 }
 
 #pragma region Initialization
@@ -287,12 +287,12 @@ void Level01::VRender()
 
 void Level01::SetGBufferRenderTargets()
 {
-	mRenderer->VSetRenderContextTargetsWithDepth(mGBufferContext);
+	mRenderer->VSetRenderContextTargetsWithDepth(mGBufferContext, 0);
 
 	mRenderer->VClearContextTarget(mGBufferContext, 0, Colors::magenta.pCols);	// Position
 	mRenderer->VClearContextTarget(mGBufferContext, 1, Colors::magenta.pCols);	// Normal
 	mRenderer->VClearContextTarget(mGBufferContext, 2, Colors::magenta.pCols);	// Color
-	mRenderer->VClearDepthStencil(mGBufferContext, 1.0f, 0);					// Depth
+	mRenderer->VClearDepthStencil(mGBufferContext, 0, 1.0f, 0);					// Depth
 }
 
 void Level01::SetDefaultTarget()
@@ -399,7 +399,7 @@ void Level01::RenderFullScreenQuad()
 
 	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 2, 0);		// Color
 	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 3, 1);		// Albedo
-	mRenderer->VSetPixelShaderDepthResourceView(mGBufferContext, 3);	// Depth
+	mRenderer->VSetPixelShaderDepthResourceView(mGBufferContext, 0, 3);	// Depth
 	mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
 
 	mRenderer->VBindMesh(mNDSQuadMesh);
