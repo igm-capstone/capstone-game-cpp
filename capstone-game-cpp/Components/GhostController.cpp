@@ -15,5 +15,5 @@ GhostController::~GhostController()
 
 void GhostController::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
-	Application::SharedInstance().GetCurrentScene()->CmdSpawnNewMinion(pos);
+	NetworkCmd::SpawnNewMinion(pos);
 }

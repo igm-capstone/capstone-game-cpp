@@ -161,7 +161,7 @@ void Level01::VUpdate(double milliseconds)
 
 	if (mInput->GetKeyDown(KEYCODE_O) && mNetworkManager->mMode == NetworkManager::Mode::SERVER)
 	{
-		CmdSpawnNewMinion(vec3f(0, 0, 0));
+		NetworkCmd::SpawnNewMinion(vec3f(0, 0, 0));
 	}
 
 

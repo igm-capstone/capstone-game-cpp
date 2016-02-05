@@ -33,7 +33,23 @@ public:
 	~NetworkManager();
 };
 
+class NetworkCmd
+{
+	static NetworkManager* mNetworkManager;
+public:
+	static void SpawnNewExplorer(int clientID);
+	static void SpawnNewMinion(vec3f pos);
+};
 
+class NetworkRpc {
+	static NetworkManager* mNetworkManager;
+public:
+	static void SpawnExistingExplorer(int UUID, vec3f pos);
+	static void SpawnExistingMinion(int UUID, vec3f pos);
+
+	static void GrantAuthority(int UUID);
+	static void SyncTransform(int UUID, vec3f pos);
+};
 
 
 class MyUUID {
