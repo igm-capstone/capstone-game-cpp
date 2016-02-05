@@ -36,6 +36,7 @@ Level01::Level01() :
 	mPLVMesh(nullptr),
 	mNDSQuadMesh(nullptr),
 	mGBufferContext(nullptr),
+	mShadowContext(nullptr),
 	mWallShaderResource(nullptr),
 	mExplorerShaderResource(nullptr),
 	mPLVShaderResource(nullptr)
@@ -57,6 +58,7 @@ Level01::~Level01()
 	mPLVShaderResource->~IShaderResource();
 	
 	mGBufferContext->~IRenderContext();
+	mShadowContext->~IRenderContext();
 
 	mAllocator.Free();
 }
@@ -68,6 +70,8 @@ void Level01::VOnResize()
 	// 0: Position, 1: Normal, 2: Color 3: Albedo
 	mRenderer->VCreateContextResourceTargets(mGBufferContext, 4, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
 	mRenderer->VCreateContextDepthStencilResourceTargets(mGBufferContext, 1, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
+
+	mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mPointLightCount, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
 }
 
 #pragma region Initialization
@@ -143,9 +147,9 @@ void Level01::InitializeGeometry()
 
 	// Point Light Volume 
 
-	Geometry::Sphere(vertices, indices, 6, 6, 1.0f);
+//	Geometry::Cone(vertices, indices, 6, 1.0f, PI * 0.5f);
 
-	OBJBasicResource<Vertex3> sphereResource("D:/Users/go4113/Capstone/Bin/Debug/sphere.obj");
+	OBJBasicResource<Vertex3> sphereResource("D:/Users/go4113/Capstone/Bin/Debug/spotlight_cone.obj");
 	sphereResource.Load();
 	meshLibrary.LoadMesh(&mPLVMesh, mRenderer, sphereResource);
 
@@ -170,6 +174,7 @@ void Level01::InitializeShaderResources()
 {
 	// Allocate render context
 	mRenderer->VCreateRenderContext(&mGBufferContext, &mAllocator);
+	mRenderer->VCreateRenderContext(&mShadowContext, &mAllocator);
 
 	// Allocate wall shader resource
 	mRenderer->VCreateShaderResource(&mWallShaderResource, &mAllocator);
@@ -189,7 +194,7 @@ void Level01::InitializeShaderResources()
 
 	// Constant buffer data
 	void*	cbWallData[] = { &mPVM.camera };
-	size_t	cbWallSizes[] = { sizeof(CbufferPVM::CameraData) };
+	size_t	cbWallSizes[] = { sizeof(CameraData) };
 
 	mRenderer->VCreateShaderConstantBuffers(mWallShaderResource, cbWallData, cbWallSizes, 1);
 
@@ -261,6 +266,8 @@ void Level01::VRender()
 
 	mDeviceContext->RSSetViewports(1, &mRenderer->GetViewport());
 
+	RenderShadowMaps();
+
 	SetGBufferRenderTargets();
 
 	RenderWalls();
@@ -299,6 +306,35 @@ void Level01::SetDefaultTarget()
 {
 	mRenderer->VSetContextTargetWithDepth();
 	mRenderer->VClearContext(Colors::magenta.pCols, 1.0f, 0);
+}
+
+void Level01::RenderShadowMaps()
+{
+	mRenderer->VSetInputLayout(mApplication->mQuadVertexShader);
+	mRenderer->VSetVertexShader(mApplication->mQuadVertexShader);
+	mRenderer->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
+
+	for (uint32_t i = 0; i < mPointLightCount; i++)
+	{
+		mRenderer->VSetRenderContextDepthTarget(mShadowContext, i);
+		mRenderer->VClearDepthStencil(mShadowContext, i, 1.0f, 0);
+
+		mSpotLightPV.projection = mat4f::normalizedPerspectiveLH(PI * 0.5f, mRenderer->GetAspectRatio(), 0.1f, 20.0f).transpose();
+		mSpotLightPV.view = mat4f::lookToLH(vec3f(0.0f, 1.0f, 0.0f), mPlaneWorldMatrices[i].transpose().t, vec3f(0.0f, 0.0f, -1.0f)).transpose();
+		
+		mRenderer->VUpdateShaderConstantBuffer(mWallShaderResource, &mSpotLightPV, 0);
+
+		mRenderer->VBindMesh(mWallMesh0);
+		mRenderer->VSetVertexShaderInstanceBuffer(mWallShaderResource, 0, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mWallShaderResource, 0, 0);
+
+		mRenderer->GetDeviceContext()->DrawIndexedInstanced(mWallMesh0->GetIndexCount(), mWallCount0, 0, 0, 0);
+
+		mRenderer->VBindMesh(mPlaneMesh);
+		mRenderer->VSetVertexShaderInstanceBuffer(mWallShaderResource, 1, 1);
+
+		mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPlaneMesh->GetIndexCount(), mPlaneCount, 0, 0, 0);
+	}
 }
 
 void Level01::RenderWalls()
@@ -360,37 +396,39 @@ void Level01::RenderPointLightVolumes()
 	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);	// Normal
 	mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
 
-	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPLVMesh->GetIndexCount(), mPointLightCount, 0, 0, 0);
+	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPLVMesh->GetIndexCount(), 3, 0, 0, 0);
 
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
 }
 
 void Level01::RenderFullScreenQuad()
 {
-	//mRenderer->VSetInputLayout(mApplication->mNDSQuadVertexShader);
-	//mRenderer->VSetVertexShader(mApplication->mNDSQuadVertexShader);
-	//mRenderer->VSetPixelShader(mApplication->mDBGPixelShader);
+		//{
+		//	mRenderer->VSetInputLayout(mApplication->mNDSQuadVertexShader);
+		//	mRenderer->VSetVertexShader(mApplication->mNDSQuadVertexShader);
+		//	mRenderer->VSetPixelShader(mApplication->mDBGPixelShader);
 
-	//static uint32_t index = 0;
-	//if (mEngine->GetInput()->GetKeyDown(KEYCODE_0))
-	//{
-	//	index = 0;
-	//}
-	//else if (mEngine->GetInput()->GetKeyDown(KEYCODE_1))
-	//{
-	//	index = 1;
-	//}
-	//else if (mEngine->GetInput()->GetKeyDown(KEYCODE_2))
-	//{
-	//	index = 2;
-	//}
-	//else if (mEngine->GetInput()->GetKeyDown(KEYCODE_3))
-	//{
-	//	index = 3;
-	//}
+		//	static uint32_t index = 0;
+		//	if (mEngine->GetInput()->GetKeyDown(KEYCODE_0))
+		//	{
+		//		index = 0;
+		//	}
+		//	else if (mEngine->GetInput()->GetKeyDown(KEYCODE_1))
+		//	{
+		//		index = 1;
+		//	}
+		//	else if (mEngine->GetInput()->GetKeyDown(KEYCODE_2))
+		//	{
+		//		index = 2;
+		//	}
+		//	else if (mEngine->GetInput()->GetKeyDown(KEYCODE_3))
+		//	{
+		//		index = 3;
+		//	}
 
-	//mRenderer->VSetPixelShaderResourceView(mGBufferContext, index, 0);		// Color
-	//mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
+		//	mRenderer->VSetPixelShaderResourceView(mGBufferContext, index, 0);		// Color
+		//	mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
+		//}
 
 
 	mRenderer->VSetInputLayout(mApplication->mNDSQuadVertexShader);

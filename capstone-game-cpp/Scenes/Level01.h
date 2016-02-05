@@ -8,6 +8,7 @@ class Level01 : public BaseScene
 {
 	// Cbuffer data
 	CbufferPVM			mPVM;
+	CameraData			mSpotLightPV;
 
 	// Allocators
 	LinearAllocator		mAllocator;
@@ -39,6 +40,7 @@ class Level01 : public BaseScene
 
 	// RenderContext
 	IRenderContext*		mGBufferContext;
+	IRenderContext*		mShadowContext;
 
 	// ShaderResource
 	IShaderResource*	mWallShaderResource;
@@ -67,6 +69,7 @@ public:
 	void VRender() override;
 	void SetGBufferRenderTargets();
 	void SetDefaultTarget();
+	void RenderShadowMaps();
 	void RenderWalls();
 	void RenderExplorers();
 	void RenderPointLightVolumes();
