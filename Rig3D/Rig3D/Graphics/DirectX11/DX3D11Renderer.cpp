@@ -1571,6 +1571,13 @@ void DX3D11Renderer::VSetRenderContextTargetWithDepth(IRenderContext* renderCont
 	mDeviceContext->OMSetRenderTargets(1, &RTVs[atIndex], DSVs[DSVIndex]);
 }
 
+void DX3D11Renderer::VSetRenderContextDepthTarget(IRenderContext* renderContext, const uint32_t& atIndex)
+{
+	DX11RenderContext* context = static_cast<DX11RenderContext*>(renderContext);
+	ID3D11DepthStencilView** DSVs = context->GetDepthStencilViews();
+	mDeviceContext->OMSetRenderTargets(0, nullptr, DSVs[atIndex]);
+}
+
 void DX3D11Renderer::VClearContext(const float* color, float depth, uint8_t stencil)
 {
 	mDeviceContext->ClearRenderTargetView(mRenderTargetView, color);

@@ -216,6 +216,8 @@ namespace Rig3D
 		void	VSetRenderContextTarget(IRenderContext* renderContext, const uint32_t& atIndex);
 		void	VSetRenderContextTargetWithDepth(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& DSVIndex);
 
+		void	VSetRenderContextDepthTarget(IRenderContext* renderContext, const uint32_t& atIndex);
+
 		void	VClearContext(const float* color, float depth, uint8_t stencil);
 		void	VClearContext(IRenderContext* renderContext, const float* color, float depth, uint8_t stencil);
 
