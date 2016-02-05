@@ -114,7 +114,7 @@ void Level00::VUpdate(double milliseconds)
 	HandleInput(*mInput);
 	mNetworkManager->Update();
 
-	UpdateExplorers();
+	UpdateExplorers(milliseconds);
 	UpdateGrid();
 	UpdateRobots();
 
@@ -524,13 +524,13 @@ void Level00::RenderGrid()
 #pragma endregion
 
 #pragma region Update
-void Level00::UpdateExplorers() {
+void Level00::UpdateExplorers(double milliseconds) {
 	mat4f explorerWorldMatrix[MAX_CLIENTS];
 
 	int c = 0;
 	for each(auto explorer in mExplorer) {
 		if (explorer->mNetworkID->mIsActive) { // player is connected
-			explorer->mController->Update();
+			explorer->mController->Update(milliseconds);
 			explorerWorldMatrix[c] = explorer->mTransform->GetWorldMatrix().transpose();
 			c++;
 		}

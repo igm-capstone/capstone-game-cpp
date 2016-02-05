@@ -13,6 +13,7 @@ void MainMenuScene::VInitialize()
 	mState = BASE_SCENE_STATE_INITIALIZING;
 
 	// Initialization code here
+	strcpy(mIPAdress,"localhost");
 
 	mState = BASE_SCENE_STATE_RUNNING;
 }
@@ -51,6 +52,7 @@ void MainMenuScene::VRender()
 	RenderUI();
 	RenderFPSIndicator();
 	Console::Draw();
+	
 	ImGui::Render();
 
 	mRenderer->VSwapBuffers();
@@ -58,23 +60,77 @@ void MainMenuScene::VRender()
 
 void MainMenuScene::RenderUI()
 {
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.WindowTitleAlign = ImGuiAlign_Center;
+	style.FramePadding.x = 5;
+	style.ItemSpacing.y = 10;
+	style.Colors[ImGuiCol_TitleBg] = ImVec4(0.67f, 0.51f, 1.00f, 0.26f);
+	style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.34f, 0.00f, 0.55f, 0.94f);
+	style.Colors[ImGuiCol_Button] = ImVec4(0.27f, 0.40f, 0.44f, 1.00f);
+
+
+
 	ImGui::SetNextWindowPosCenter(ImGuiSetCond_Always);
+	ImGui::SetNextWindowContentWidth(300);
+	ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 	ImGui::Begin("Scare Tactics", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
-	if (ImGui::Button("Start Server"))
+	
+	ImGui::SetCursorPosX(70);
+	if (ImGui::Button("Host Match", ImVec2(160,0)))
+	{
+		if (mNetworkManager->StartServer())
+			Application::SharedInstance().LoadScene<Level01>();
+		else {
+			ImGui::OpenPopup("Error");
+			mErrorMsg = "Failed to host a server";
+		}
+	}
+
+	ImGui::Separator();
+	ImGui::SetCursorPosX((300 - ImGui::CalcTextSize("IP Address").x) / 2);
+	ImGui::LabelText("##IPLabel", "IP Address");
+	ImGui::SetCursorPosX(50);
+	ImGui::PushItemWidth(200);
+	ImGui::InputText("##IPInput", mIPAdress, 40);
+	ImGui::PopItemWidth();
+
+	ImGui::SetCursorPosX(70);
+	if (ImGui::Button("Join Match", ImVec2(160, 0)))
+	{
+		mNetworkManager->mClient.mIPAddress = mIPAdress;
+		if (mNetworkManager->StartClient())
+			Application::SharedInstance().LoadScene<Level01>();
+		else {
+			ImGui::OpenPopup("Error");
+			mErrorMsg = "Failed to connect.";
+		}
+	}
+
+
+
+	ImGui::Separator();
+
+	if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text(mErrorMsg);
+		ImGui::SetCursorPosX(60);
+		if (ImGui::Button("Close"))
+			ImGui::CloseCurrentPopup();
+		ImGui::EndPopup();
+	}
+
+	ImGui::SetCursorPosX(70);
+#ifdef _DEBUG
+	if (ImGui::Button("Start Debug", ImVec2(160, 0)))
 	{
 		mNetworkManager->StartServer();
 		Application::SharedInstance().LoadScene<Level01>();
+		auto e = Factory<Explorer>::Create();
+		Explorer::OnNetAuthorityChange(e, true);
 	}
-	if (ImGui::Button("Start Client"))
-	{
-		if (mNetworkManager->StartClient())
-			Application::SharedInstance().LoadScene<Level01>();
-		else
-			failedClient = true;
-	}
-	if (failedClient) 
-		ImGui::Text("Failed to start client");
+#endif
 	ImGui::End();
+	ImGui::PopFont();
 }
 
 void MainMenuScene::VShutdown()

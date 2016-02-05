@@ -84,6 +84,9 @@
     <ClCompile Include="Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Components\Skill.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PathFinder\Fringe.h">
@@ -216,6 +219,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Culler.h">
+		<Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneObjects\Ghost.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\Skill.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

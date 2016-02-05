@@ -16,8 +16,6 @@ namespace Rig3D
 		mat4f		mView;
 
 	public:
-		Transform	mTransform;
-
 		Camera();
 		~Camera();
 

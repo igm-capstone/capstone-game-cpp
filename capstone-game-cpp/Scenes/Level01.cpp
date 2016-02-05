@@ -42,8 +42,7 @@ Level01::Level01() :
 	mExplorerShaderResource(nullptr),
 	mPLVShaderResource(nullptr)
 {
-	auto e = Factory<Explorer>::Create();
-	e->mController->mIsActive = true;
+
 }
 
 Level01::~Level01()
@@ -53,6 +52,12 @@ Level01::~Level01()
 	mExplorerCubeMesh->~IMesh();
 	mPLVMesh->~IMesh();
 	mNDSQuadMesh->~IMesh();
+
+	for (Explorer& e : Factory<Explorer>())
+	{
+		//e.mMesh->~IMesh();
+	}
+	mExplorerCubeMesh->~IMesh();
 
 	mWallShaderResource->~IShaderResource();
 	mExplorerShaderResource->~IShaderResource();
@@ -66,13 +71,13 @@ Level01::~Level01()
 
 void Level01::VOnResize()
 {
-	mMainCamera.SetProjectionMatrix(mat4f::normalizedPerspectiveLH(0.25f * PI, mRenderer->GetAspectRatio(), 0.1f, 1000.0f));
-
 	// 0: Position, 1: Normal, 2: Color 3: Albedo
 	mRenderer->VCreateContextResourceTargets(mGBufferContext, 4, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
 	mRenderer->VCreateContextDepthStencilResourceTargets(mGBufferContext, 1, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
 
 	mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mPointLightCount, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
+
+	mCamera.SetProjectionMatrix(mat4f::normalizedPerspectiveLH(0.25f * PI, mRenderer->GetAspectRatio(), 0.1f, 1000.0f));
 }
 
 #pragma region Initialization
@@ -87,7 +92,7 @@ void Level01::VInitialize()
 	InitializeResource();
 	InitializeGeometry();
 	InitializeShaderResources();
-	InitializeMainCamera();
+	mCamera.SetViewMatrix(mat4f::lookAtLH(vec3f(0, 0, 0), vec3f(10.0f, 0.0f, -100.0f), vec3f(0, 1, 0))); //Temporary until Ghost get a controller.
 
 	mCollisionManager.Initialize();
 
@@ -234,12 +239,6 @@ void Level01::InitializeShaderResources()
 	mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_CLAMP);
 	mRenderer->AddAdditiveBlendState(mPLVShaderResource);
 }
-
-void Level01::InitializeMainCamera()
-{
-	// Use to set view based on network logic
-	mMainCamera.SetViewMatrix(mat4f::lookAtLH(kVectorZero, vec3f(10.0f, 0.0f, -100.0f), kVectorUp));
-}
 #pragma endregion
 
 #pragma region Update
@@ -248,7 +247,12 @@ void Level01::VUpdate(double milliseconds)
 {
 	for (ExplorerController& ec : Factory<ExplorerController>())
 	{
-		ec.Update();
+		ec.Update(milliseconds);
+	}
+
+	for (Skill& skill : Factory<Skill>())
+	{
+		skill.Update();
 	}
 
 	UpdateCamera();
@@ -261,8 +265,8 @@ void Level01::VUpdate(double milliseconds)
 
 void Level01::UpdateCamera()
 {
-	mPVM.camera.projection	= mMainCamera.GetProjectionMatrix().transpose();
-	mPVM.camera.view		= mMainCamera.GetViewMatrix().transpose();
+	mPVM.camera.projection	= mCamera.GetProjectionMatrix().transpose();
+	mPVM.camera.view		= mCamera.GetViewMatrix().transpose();
 }
 
 #pragma endregion

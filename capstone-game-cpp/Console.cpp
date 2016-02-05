@@ -177,9 +177,6 @@ void Console::DrawConsole()
 		Toggle();
 	}
 
-	if (!mVisible)
-		return;
-
 	ImGuiWindowFlags flags = 0
 		| ImGuiWindowFlags_NoMove
 		| ImGuiWindowFlags_NoTitleBar
@@ -187,31 +184,46 @@ void Console::DrawConsole()
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
-	ImGui::Begin("Console", nullptr, ImVec2(1600, 300), 0.80f, flags);
-	
-	static ImGuiTextFilter filter;
-	filter.Draw("Filter (\"incl,-excl\") (\"error\")", 0);
+	ImGui::Begin("Console", nullptr, ImVec2(1600, 300), mVisible ? 0.80f : 0.0f, flags);
 
-	ImGui::Separator();
+
+	static ImGuiTextFilter filter;
+	
+	if (mVisible)
+	{
+		filter.Draw("Filter (\"incl,-excl\") (\"error\")", 0);
+		ImGui::Separator();
+	}
 
 	// Display every line as a separate entry so we can change their color or add custom widgets. If you only want raw text you can use ImGui::TextUnformatted(log.begin(), log.end());
 	// NB- if you have thousands of entries this approach may be too inefficient. You can seek and display only the lines that are visible - CalcListClipping() is a helper to compute this information.
 	// If your items are of variable size you may want to implement code similar to what CalcListClipping() does. Or split your data into fixed height items to allow random-seeking into your list.
 	ImGui::BeginChild("ScrollingRegion", ImVec2(0, -ImGui::GetItemsLineHeightWithSpacing()), false, ImGuiWindowFlags_HorizontalScrollbar);
-	bool copy = false;
-	if (ImGui::BeginPopupContextWindow())
+	
+	if (mVisible)
 	{
-		if (ImGui::Selectable("Clear")) ClearLog();
-		copy = ImGui::Selectable("Copy");
-		ImGui::EndPopup();
+		bool copy = false;
+		if (ImGui::BeginPopupContextWindow())
+		{
+			if (ImGui::Selectable("Clear")) ClearLog();
+			copy = ImGui::Selectable("Copy");
+			ImGui::EndPopup();
+		}
+
+		if (copy) ImGui::LogToClipboard();
 	}
 
-	if (copy) ImGui::LogToClipboard();
-
+	float timespan = mVisible ? -1 : 5;
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
 	for (int i = 0; i < mItems.Size; i++)
 	{
-		const char* item = mItems[i];
+		const char* item = mItems[i].text;
+
+		if (timespan > 0 && difftime(time(nullptr), mItems[i].timestamp) > timespan)
+		{
+			continue;
+		}
+
 		if (!filter.PassFilter(item))
 			continue;
 		ImVec4 col = ImColor(255, 255, 255); // A better implementation may store a type per-item. For the sample let's just parse the text.
@@ -223,31 +235,38 @@ void Console::DrawConsole()
 		ImGui::TextUnformatted(item);
 		ImGui::PopStyleColor();
 	}
-	if (mScrollToBottom)
+	if (!mVisible || mScrollToBottom)
 		ImGui::SetScrollHere();
 	mScrollToBottom = false;
 	ImGui::PopStyleVar();
+
 	ImGui::EndChild();
-	ImGui::Separator();
-
-	// Command-line
-	auto inputFlags = 0
-		| ImGuiInputTextFlags_EnterReturnsTrue
-		| ImGuiInputTextFlags_CallbackCompletion
-		| ImGuiInputTextFlags_CallbackHistory;
-
-	if (ImGui::InputTextEx("", mInputBuf, IM_ARRAYSIZE(mInputBuf), ImVec2(-1, 0), inputFlags, &TextEditCallbackStub, static_cast<void*>(this)))
+	
+	
+	if (mVisible)
 	{
-		char* input_end = mInputBuf + strlen(mInputBuf);
-		while (input_end > mInputBuf && input_end[-1] == ' ') input_end--; *input_end = 0;
-		if (mInputBuf[0])
-			ExecCommand(mInputBuf);
-		strcpy(mInputBuf, "");
-	}
+		ImGui::Separator();
 
-	// Demonstrate keeping auto focus on the input box
-	if (ImGui::IsItemHovered() || (ImGui::IsRootWindowOrAnyChildFocused() && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0)))
-		ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+		// Command-line
+		auto inputFlags = 0
+			| ImGuiInputTextFlags_EnterReturnsTrue
+			| ImGuiInputTextFlags_CallbackCompletion
+			| ImGuiInputTextFlags_CallbackHistory;
+
+		if (ImGui::InputTextEx("", mInputBuf, IM_ARRAYSIZE(mInputBuf), ImVec2(-1, 0), inputFlags, &TextEditCallbackStub, static_cast<void*>(this)))
+		{
+			char* input_end = mInputBuf + strlen(mInputBuf);
+			while (input_end > mInputBuf && input_end[-1] == ' ') input_end--; *input_end = 0;
+			if (mInputBuf[0])
+				ExecCommand(mInputBuf);
+			strcpy(mInputBuf, "");
+		}
+
+		// Demonstrate keeping auto focus on the input box
+		if (ImGui::IsItemHovered() || (ImGui::IsRootWindowOrAnyChildFocused() && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0)))
+			ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+
+	}
 
 	ImGui::End();
 	ImGui::PopStyleVar();
@@ -256,7 +275,7 @@ void Console::DrawConsole()
 void Console::ClearLog()
 {
 	for (int i = 0; i < mItems.Size; i++)
-		free(mItems[i]);
+		free(mItems[i].text);
 	mItems.clear();
 	mScrollToBottom = true;
 }
@@ -269,7 +288,7 @@ void Console::AddLog(const char* fmt, ...)
 	vsnprintf(buf, IM_ARRAYSIZE(buf), fmt, args);
 	buf[IM_ARRAYSIZE(buf) - 1] = 0;
 	va_end(args);
-	mItems.push_back(strdup(buf));
+	mItems.push_back({ strdup(buf), time(nullptr) });
 	mScrollToBottom = true;
 }
 

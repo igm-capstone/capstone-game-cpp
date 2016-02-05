@@ -87,6 +87,7 @@
     <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="Components\ColliderComponent.cpp" />
     <ClCompile Include="Components\ExplorerController.cpp" />
+    <ClCompile Include="Components\Skill.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="Factory.cpp" />
     <ClCompile Include="Resource.cpp" />
@@ -119,6 +120,8 @@
     <ClInclude Include="CollisionManager.h" />
     <ClInclude Include="Components\BaseComponent.h" />
     <ClInclude Include="Components\ColliderComponent.h" />
+    <ClInclude Include="SceneObjects\Ghost.h" />
+    <ClInclude Include="Components\Skill.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="capstone-game-cpp.rc.h" />
     <ClInclude Include="Console.h" />

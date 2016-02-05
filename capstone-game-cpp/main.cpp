@@ -34,8 +34,6 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 		}
 	}
 
-//	auto a = ComponentPool<CompA>::Create();
-
 	Engine& engine = Singleton<Engine>::SharedInstance();
 
 	Options options;
@@ -63,15 +61,5 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 
 	engine.RunApplication(app);
 
-	return 0;
-
-	//Level00 scene;
-	//gRig3DScene = &scene;
-	//engine.Initialize(hInstance,
-	//	hPrevInstance,
-	//	cmdLine,
-	//	showCmd,
-	//	gRig3DScene->mOptions);
-	//engine.RunScene(gRig3DScene);
 	return 0;
 }

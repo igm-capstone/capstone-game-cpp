@@ -21,11 +21,11 @@ private:
 	char mPacketData[sizeof(Packet)];
 
 	int mID;
-
 public:
 	NetworkClient(void) {};
 	~NetworkClient(void) {};
 
+	PCSTR mIPAddress;
 	int SendData(Packet* p);
 
 protected:

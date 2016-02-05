@@ -2,16 +2,27 @@
 #include "Rig3D/Parametric.h"
 #include "BaseComponent.h"
 
-struct ColliderTraits
-{
-	bool isDynamic = true;
-};
+struct Collision;
 
-class BoxColliderComponent :
+class BaseColliderComponent :
 	public BaseComponent
 {
 public:
-	ColliderTraits	mTraits;
+	bool isDynamic;
+
+	EXPOSE_CALLBACK(CollisionEnter, Collision*)
+	EXPOSE_CALLBACK(CollisionExit, Collision*)
+
+protected:
+	BaseColliderComponent() : isDynamic(true) {};
+	~BaseColliderComponent() {};
+};
+
+
+class BoxColliderComponent :
+	public BaseColliderComponent
+{
+public:
 	BoxCollider		mCollider;
 
 	BoxColliderComponent();
@@ -19,10 +30,9 @@ public:
 };
 
 class OrientedBoxColliderComponent : 
-	public BaseComponent
+	public BaseColliderComponent
 {
 public:
-	ColliderTraits		mTraits;
 	OrientedBoxCollider mCollider;
 
 	OrientedBoxColliderComponent();
@@ -30,10 +40,9 @@ public:
 };
 
 class QuadColliderComponent :
-	public BaseComponent
+	public BaseColliderComponent
 {
 public:
-	ColliderTraits	mTraits;
 	BoxCollider2D mCollider;
 
 	QuadColliderComponent();
@@ -41,10 +50,9 @@ public:
 };
 
 class SphereColliderComponent : 
-	public BaseComponent
+	public BaseColliderComponent
 {
 public:
-	ColliderTraits	mTraits;
 	SphereCollider mCollider;
 
 	SphereColliderComponent();

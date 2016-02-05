@@ -3,11 +3,13 @@
 #include "Rig3D/Graphics/DirectX11/imgui/imgui.h"
 #include <SceneObjects/SpawnPoint.h>
 #include <SceneObjects/Explorer.h>
+#include <SceneObjects/Ghost.h>
 
 BaseScene::BaseScene() : 
 	mStaticMemory(nullptr),
 	mStaticMemorySize(0),
-	mState(BASE_SCENE_STATE_CONSTRUCTED)
+	mState(BASE_SCENE_STATE_CONSTRUCTED),
+	mMe(nullptr)
 {
 	mEngine = &Singleton<Engine>::SharedInstance();
 
@@ -23,7 +25,11 @@ BaseScene::BaseScene() :
 	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
 		Packet p(PacketTypes::INIT_CONNECTION);
 		mNetworkManager->mClient.SendData(&p);
+	} 
+	else if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
+		mMe = Factory<Ghost>::Create();
 	}
+
 }
 
 BaseScene::~BaseScene()
@@ -39,7 +45,7 @@ void BaseScene::SetStaticMemory(void* staticMemory, size_t size)
 
 void BaseScene::RenderFPSIndicator()
 {
-	ImGui::SetNextWindowPos(ImVec2(mRenderer->GetWindowWidth() - 100, 10), ImGuiSetCond_Always);
+	ImGui::SetNextWindowPos(ImVec2(mRenderer->GetWindowWidth() - 100.0f, 10.0f), ImGuiSetCond_Always);
 	ImGui::Begin("FPS", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::Text("%6.1f FPS ", ImGui::GetIO().Framerate);
 	ImGui::End();
@@ -77,6 +83,7 @@ void BaseScene::RpcSpawnExistingExplorer(int UUID, vec3f pos) {
 	assert(mNetworkManager->mMode == NetworkManager::Mode::CLIENT);
 	auto e = Factory<Explorer>::Create();
 	e->Spawn(pos, UUID);
+	if (!mMe) mMe = e;
 }
 
 

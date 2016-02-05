@@ -19,6 +19,7 @@
 #include "Shaders/obj/ShadowCasterPixelShader.h"
 #include "Shaders/obj/ShadowGridComputeShader.h"
 #include "Shaders/obj/ShadowPixelShader.h"
+#include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 
 using namespace Rig3D;
 
@@ -39,7 +40,9 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mStaticMemory(nullptr),
 	mStaticMemorySize(0)
 {
-	
+	ImGuiIO& io = ImGui::GetIO();
+	io.Fonts->AddFontDefault();
+	io.Fonts->AddFontFromFileTTF("Assets\\Wil2ghan.ttf", 30.0f, NULL, NULL);
 }
 
 ScareTacticsApplication::~ScareTacticsApplication()
