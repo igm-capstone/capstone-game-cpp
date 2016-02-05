@@ -316,6 +316,94 @@ namespace Rig3D
 		}
 	
 		template <class Vertex, class Index>
+		static void Cone(std::vector<Vertex>& vertices, std::vector<Index>& indices, uint32_t subdivisions, float height, float angle)
+		{
+			vertices.reserve(sizeof(Vertex) * (subdivisions + 1) * 2);
+			indices.reserve(sizeof(Index) * (subdivisions * 2) * 2);
+
+			float radius = tan(angle * 0.5f) * height;
+
+			float step = (2.0f * PI) / subdivisions;
+			float ny0 = (PI * 0.5f) - angle / (PI * 0.5f);
+
+			Vertex c0;
+			c0.Position = { 0.0f, height, 0.0f };
+			c0.Normal = { 0.0f, 1.0f, 0.0f };
+			c0.UV = { 0.5f, 0.5f };
+
+			vertices.push_back(c0);
+			indices.push_back(0);
+
+			Vertex v0;
+			v0.Position = { 0.0f, 0.0f, radius  };
+			v0.Normal = { 0.0f, 0.0f, 1.0f };
+			v0.UV = { 0.0f, 1.0f };
+	
+			vertices.push_back(v0);
+
+			for (uint32_t i = 1; i < subdivisions; i++)
+			{
+				indices.push_back(i);
+
+				float a = i * step;
+				float s = sin(a);
+				float c = cos(a);
+
+				float x0 = radius * s;
+				float z0 = radius * cos(i * step);
+
+				v0.Position = { radius * s, 0.0f, radius * c };
+				v0.Normal = { s, 0.0f, c };
+				v0.UV = { static_cast<float>(i) / subdivisions, 1.0f };
+
+				vertices.push_back(v0);
+				indices.push_back(i + 1);
+				indices.push_back(0);
+			}
+
+			indices.push_back(subdivisions);
+			indices.push_back(1);
+
+			Vertex c1;
+			c1.Position = { 0.0f, 0.0f, 0.0f };
+			c1.Normal = { 0.0f, 1.0f, 0.0f };
+			c1.UV = { 0.5f, 0.5f };
+
+			vertices.push_back(c1);
+			uint32_t bi = vertices.size() - 1;
+			indices.push_back(bi);
+
+			v0.Position = { 0.0f, 0.0f, radius };
+			v0.Normal = { 0.0f, 0.0f, 1.0f };
+			v0.UV = { 0.0f, 1.0f };
+
+			vertices.push_back(v0);
+
+			for (uint32_t i = 1; i < subdivisions; i++)
+			{
+				indices.push_back(i + subdivisions);
+
+				float a = i * step;
+				float s = sin(a);
+				float c = cos(a);
+
+				float x0 = radius * s;
+				float z0 = radius * cos(i * step);
+
+				v0.Position = { radius * s, 0.0f, radius * c };
+				v0.Normal = { s, 0.0f, c };
+				v0.UV = { static_cast<float>(i) / subdivisions, 1.0f };
+
+				vertices.push_back(v0);
+				indices.push_back(i + subdivisions + 1);
+				indices.push_back(bi);
+			}
+
+			indices.push_back(subdivisions * 2);
+			indices.push_back(subdivisions);
+		}
+
+		template <class Vertex, class Index>
 		static void NDSQuad(std::vector<Vertex>& vertices, std::vector<Index>& indices)
 		{
 			vertices.reserve(sizeof(Vertex) * 4);
