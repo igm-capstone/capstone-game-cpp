@@ -38,6 +38,7 @@ protected:
 public:
 	BaseSceneState				mState;
 	Camera						mCamera;
+	vec3f						mCameraDirection;
 
 	BaseScene();
 	virtual ~BaseScene();

@@ -71,6 +71,8 @@ void Level01::VInitialize()
 
 	InitializeGeometry();
 	InitializeShaderResources();
+	vec3f dir = vec3f(10.0f, 0.0f, -100.0f);
+	cliqCity::graphicsMath::normalize(dir);
 	mCamera.SetViewMatrix(mat4f::lookAtLH(vec3f(0, 0, 0), vec3f(10.0f, 0.0f, -100.0f), vec3f(0, 1, 0))); //Temporary until Ghost get a controller.
 
 	mCollisionManager.Initialize();

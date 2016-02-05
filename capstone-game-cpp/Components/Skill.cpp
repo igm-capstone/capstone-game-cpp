@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "Skill.h"
 #include <trace.h>
+#include <ScareTacticsApplication.h>
+#include <Rig3D/Parametric.h>
+#include <RayCast.h>
 
 SkillBinding& SkillBinding::Set(MouseButton value)
 {
@@ -74,6 +77,28 @@ void Skill::Update()
 		return;
 	}
 
-	OnUse(mDurationMs, nullptr, vec3f());
+	auto camera = Application::SharedInstance().GetCurrentScene()->mCamera;
+	auto renderer = Singleton<Engine>::SharedInstance().GetRenderer();
+	auto mousePosition = mInput->mousePosition;
+
+	float x = (2.0f * mousePosition.x) / renderer->GetWindowWidth() - 1.0f;
+	float y = 1.0f - (2.0f * mousePosition.y) / renderer->GetWindowHeight();
+
+	mat4f toWorld = (camera.GetProjectionMatrix() * camera.GetViewMatrix()).inverse();
+	vec3f worldPos = vec4f(x, y, 0.0f, 1.0f) * toWorld;
+	vec3f worldDir = camera.GetForward();
+	worldPos.z = -30.0f;
+
+	vec3f skillPos {};
+
+	RayCastHit<vec3f> hit;
+	Ray<vec3f> ray = { worldPos, worldDir };
+	/*if (RayCast(&hit, ray, mLightColliders, mCircleCount))
+	{
+		skillPos = hit.poi;
+	}
+	*/
+	OnUse(mDurationMs, nullptr, skillPos);
+
 	mLastUsed = appTime;
 }
