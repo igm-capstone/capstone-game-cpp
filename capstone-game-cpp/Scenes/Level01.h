@@ -8,7 +8,7 @@ class Level01 : public BaseScene
 {
 	// Cbuffer data
 	CbufferPVM			mPVM;
-	CameraData			mSpotLightPV;
+	CbufferPVM			mSpotLightPV;
 
 	// Allocators
 	LinearAllocator		mAllocator;
@@ -67,8 +67,6 @@ public:
 	void UpdateCamera();
 
 	void VRender() override;
-	void SetGBufferRenderTargets();
-	void SetDefaultTarget();
 	void RenderShadowMaps();
 	void RenderWalls();
 	void RenderExplorers();
