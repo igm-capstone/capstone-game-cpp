@@ -1,16 +1,20 @@
 struct Pixel
 {
-	float4 positionH	:	SV_POSITION;
-	float4 lightColor	:	COLOR;
-	float3 lightPos		:	POSITIONT;
-	float2 uv			:	TEXCOORD;
-	float  radius : TEXCOORD1;
+	float4	positionH	:	SV_POSITION;
+	float4	lightPosH	:	POSITION;
+	float4	lightColor	:	COLOR;
+	float3	lightPos	:	POSITIONT;
+	float2	uv			:	TEXCOORD;
+	float	radius		:	TEXCOORD1;
+	float	cosAngle	:	TEXCOORD2;
 };
 
 Texture2D positionMap	: register(t0);
 Texture2D normalMap		: register(t1);
+Texture2D depthMap		: register(t2);
 
-SamplerState samplerState : register(s0);
+SamplerState samplerState		: register(s0);
+SamplerState depthSamplerState	: register(s1);
 
 float4 main(Pixel pixel) : SV_TARGET
 {
@@ -26,6 +30,21 @@ float4 main(Pixel pixel) : SV_TARGET
 	//float attenuation = saturate(1.0f - magnitude / pixel.radius); // 0.1f / dot(lightAttenuation, float3(1.0f, magnitude, magnitude * magnitude));
 	//float nDotL = saturate(dot(normal, lightDirection));
 	//return nDotL * pixel.lightColor * attenuation;
+
+	float bias = 0.0001f;
+	float2 projectedUV;
+	
+	projectedUV.x = pixel.lightPosH.x / pixel.lightPosH.w;
+	projectedUV.y = pixel.lightPosH.y / pixel.lightPosH.w;
+
+	float depth = depthMap.Sample(depthSamplerState, projectedUV).r;
+	float lightDepthValue = (pixel.lightPosH.z / pixel.lightPosH.w) - bias;
+
+	float4 ac = float4(0.3f, 0.3f, 0.3f, 1.0f);
+	if (lightDepthValue > depth)
+	{
+		return ac;
+	}
 
 	float4 diffuse = pixel.lightColor;
 	float4 specular = float4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -56,8 +75,6 @@ float4 main(Pixel pixel) : SV_TARGET
 	if (cosAlpha > cutoff) {
 		totalAttenuation = (1.0f - (1.0f - cosAlpha) * 1.0f / (1.0f - cutoff));
 	}
-
-	float4 ac = float4(0.3f, 0.3f, 0.3f, 1.0f);
 
 	return (ac + returnColor) * totalAttenuation;
 }

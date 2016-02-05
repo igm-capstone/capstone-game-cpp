@@ -120,18 +120,13 @@ void ScareTacticsApplication::InitializeShaders()
 	{
 		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
 		{ "NORMAL",		0, 0, 12,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
-		{ "TEXCOORD",	0, 0, 24,  0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX },
-		{ "COLOR",		0, 1, 0, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
-		{ "WORLD",		0, 2, 0,  1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
-		{ "WORLD",		1, 2, 16, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
-		{ "WORLD",		2, 2, 32, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
-		{ "WORLD",		3, 2, 48, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE }
+		{ "TEXCOORD",	0, 0, 24,  0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX }
 	};
 
 	renderer->VCreateShader(&mPLVolumeVertexShader, &mGameAllocator);
 	renderer->VCreateShader(&mPLVolumePixelShader, &mGameAllocator);
 
-	renderer->LoadVertexShader(mPLVolumeVertexShader, gPointLightVolumeVertexShader, sizeof(gPointLightVolumeVertexShader), plvInputElements, 8);
+	renderer->LoadVertexShader(mPLVolumeVertexShader, gPointLightVolumeVertexShader, sizeof(gPointLightVolumeVertexShader), plvInputElements, 3);
 	renderer->VLoadPixelShader(mPLVolumePixelShader, gPointLightVolumePixelShader, sizeof(gPointLightVolumePixelShader));
 
 	// Normalized Device Quad Shaders

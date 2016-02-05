@@ -8,7 +8,8 @@ class Level01 : public BaseScene
 {
 	// Cbuffer data
 	CbufferPVM			mPVM;
-	CbufferPVM			mSpotLightPV;
+	CbufferPVM			mLightPVM;
+	CBufferLight		mLightData;
 
 	// Allocators
 	LinearAllocator		mAllocator;

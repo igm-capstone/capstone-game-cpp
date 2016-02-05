@@ -16,6 +16,7 @@
 #include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
 #include <Console.h>
 #include <Culler.h>
+#include <SceneObjects/Lamp.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -75,7 +76,7 @@ void Level01::VOnResize()
 	mRenderer->VCreateContextResourceTargets(mGBufferContext, 4, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
 	mRenderer->VCreateContextDepthStencilResourceTargets(mGBufferContext, 1, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
 
-	mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mPointLightCount, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
+	mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mPointLightCount, 2048, 2048);
 
 	mCamera.SetProjectionMatrix(mat4f::normalizedPerspectiveLH(0.25f * PI, mRenderer->GetAspectRatio(), 0.1f, 1000.0f));
 }
@@ -117,7 +118,8 @@ void Level01::InitializeResource()
 	mPointLightWorldMatrices = level.lamps;
 	mPointLightColors = level.lampColors;
 
-	mPointLightWorldMatrices[0] = (mat4f::scale(15.41f) * mat4f::translate(vec3f(0.0f, 0.0f, -1.0f))).transpose();
+	//mPointLightWorldMatrices[0] = (mat4f::scale(15.41f) * mat4f::translate(vec3f(0.0f, 0.0f, -1.0f))).transpose();
+	//mPointLightCount = 1;
 }
 
 void Level01::InitializeGeometry()
@@ -225,18 +227,14 @@ void Level01::InitializeShaderResources()
 
 	mRenderer->VCreateShaderResource(&mPLVShaderResource, &mAllocator);
 
-	// Instance buffer data
-	void*	ibLampData[] = { mPointLightColors, mPointLightWorldMatrices};
-	size_t	ibLampSizes[] = {  sizeof(vec4f) * mPointLightCount, sizeof(mat4f) * mPointLightCount };
-	size_t	ibLampStrides[] = { sizeof(vec4f), sizeof(mat4f) };
-	size_t	ibLampOffsets[] = { 0, 0 };
+	void* cbPVLData[] = { &mLightData };
+	size_t cbPVLSizes[] = { sizeof(CBufferLight) };
 
-	mRenderer->VCreateDynamicShaderInstanceBuffers(mPLVShaderResource, ibLampData, ibLampSizes, ibLampStrides, ibLampOffsets, 2);
-
-	mRenderer->VUpdateShaderInstanceBuffer(mPLVShaderResource, mPointLightColors, ibLampSizes[0], 0);
-	mRenderer->VUpdateShaderInstanceBuffer(mPLVShaderResource, mPointLightWorldMatrices, ibLampSizes[1], 1);
+	mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 1);
 
 	mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_CLAMP);
+	mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_BORDER, const_cast<float*>(Colors::transparent.pCols));
+
 	mRenderer->AddAdditiveBlendState(mPLVShaderResource);
 }
 #pragma endregion
@@ -308,22 +306,37 @@ void Level01::RenderShadowMaps()
 	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
 	mRenderer->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
 
-	for (uint32_t i = 0; i < 1; i++)
+	D3D11_VIEWPORT viewport;
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = 2048;
+	viewport.Height = 2048;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+
+	mRenderer->GetDeviceContext()->RSSetViewports(1, &viewport);
+
+	uint32_t i = 0;
+	for (Lamp& l : Factory<Lamp>())
 	{
-		
+		if (i >= mPointLightCount)
+		{
+			break;
+		}
+
 		mRenderer->VSetRenderContextDepthTarget(mShadowContext, i);
 		mRenderer->VClearDepthStencil(mShadowContext, i, 1.0f, 0);
 
-		mat4f projection = mat4f::normalizedPerspectiveLH(PI * 0.5f, mRenderer->GetAspectRatio(), 0.1f, 20.0f);
-		mat4f view = mat4f::lookToLH(vec3f(0.0f, 1.0f, 0.0f), mPlaneWorldMatrices[i].transpose().t, vec3f(0.0f, 0.0f, -1.0f));
+		mat4f projection = mat4f::normalizedPerspectiveLH(PI * 0.5f, mRenderer->GetAspectRatio(), 0.1f, l.mLightRadius);
+		mat4f view = mat4f::lookToLH(vec3f(1.0f, 0.0f, 0.0f), mPointLightWorldMatrices[i].transpose().t, vec3f(0.0f, 0.0f, -1.0f));
 
 		std::vector<uint32_t> indices;
 		Rig3D::Frustum frustum;
 		mat4f viewProjection = view * projection;
 		Rig3D::ExtractNormalizedFrustumLH(&frustum, viewProjection);
 
-		mSpotLightPV.camera.projection = projection.transpose();
-		mSpotLightPV.camera.view = view.transpose();
+		mLightPVM.camera.projection = projection.transpose();
+		mLightPVM.camera.view = view.transpose();
 
 		// Walls
 
@@ -333,8 +346,8 @@ void Level01::RenderShadowMaps()
 
 		for (uint32_t j : indices)
 		{
-			mSpotLightPV.world = mWallWorldMatrices0[j];
-			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mSpotLightPV, 0);
+			mLightPVM.world = mWallWorldMatrices0[j];
+			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
 			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 			mRenderer->VDrawIndexed(0, mWallMesh0->GetIndexCount());
 		}
@@ -349,16 +362,19 @@ void Level01::RenderShadowMaps()
 		
 		for (uint32_t j : indices)
 		{
-			mSpotLightPV.world = mPlaneWorldMatrices[j];
-			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mSpotLightPV, 0);
+			mLightPVM.world = mPlaneWorldMatrices[j];
+			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
 			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 			mRenderer->VDrawIndexed(0, mPlaneMesh->GetIndexCount());
 		}
+
+		i++;
 	}
 }
 
 void Level01::RenderWalls()
 {
+	mRenderer->GetDeviceContext()->RSSetViewports(1, &mRenderer->GetViewport());
 	mRenderer->VSetRenderContextTargetsWithDepth(mGBufferContext, 0);
 
 	mRenderer->VClearContextTarget(mGBufferContext, 0, Colors::magenta.pCols);	// Position
@@ -419,14 +435,39 @@ void Level01::RenderPointLightVolumes()
 	mRenderer->VSetPixelShader(mApplication->mPLVolumePixelShader);
 
 	mRenderer->VBindMesh(mPLVMesh);
-	mRenderer->VSetVertexShaderInstanceBuffer(mPLVShaderResource, 0, 1);	// Colors
-	mRenderer->VSetVertexShaderInstanceBuffer(mPLVShaderResource, 1, 2);	// World Matrices
-	mRenderer->VSetVertexShaderConstantBuffer(mWallShaderResource, 0, 0);
-	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);	// Position
-	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);	// Normal
-	mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
+	
+	uint32_t i = 0;
+	for (Lamp& l : Factory<Lamp>())
+	{
+		if (i >= mPointLightCount)
+		{
+			break;
+		}
 
-	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPLVMesh->GetIndexCount(), 1, 0, 0, 0);
+		mPVM.world = mPointLightWorldMatrices[i];
+
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mPVM, 0);
+
+		mLightData.camera.projection = mat4f::normalizedPerspectiveLH(PI * 0.5f, mRenderer->GetAspectRatio(), 0.1f, l.mLightRadius).transpose();
+		mLightData.camera.view = mat4f::lookToLH(vec3f(1.0f, 0.0f, 0.0f), mPointLightWorldMatrices[i].transpose().t, vec3f(0.0f, 0.0f, -1.0f)).transpose();
+		mLightData.color = Colors::yellow;
+		mLightData.range = 15.41f;
+		mLightData.cosAngle = cos(1.57079632679f);
+
+		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
+
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+		mRenderer->VSetVertexShaderConstantBuffer(mPLVShaderResource, 0, 1);
+		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);	// Position
+		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);	// Normal
+		mRenderer->VSetPixelShaderDepthResourceView(mShadowContext, i, 2);	// Shadow
+		mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);	// Clamp, Border
+		
+		mRenderer->VDrawIndexed(0, mPLVMesh->GetIndexCount());
+		i++;
+	}
+
+	
 
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
 }
@@ -441,9 +482,13 @@ void Level01::RenderFullScreenQuad()
 	{
 		state = 0;
 	}
-	else if (mEngine->GetInput()->GetKeyDown(KEYCODE_D))
+	else if (mEngine->GetInput()->GetKeyDown(KEYCODE_N))
 	{
 		state = 1;
+	}
+	else if (mEngine->GetInput()->GetKeyDown(KEYCODE_D))
+	{
+		state = 2;
 	}
 
 	if (state == 0)
@@ -485,6 +530,21 @@ void Level01::RenderFullScreenQuad()
 			mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
 		}
 		
+	}
+	else if (state == 2)
+	{
+		static uint32_t d = 0;
+		if (mEngine->GetInput()->GetKeyDown(KEYCODE_RIGHT))
+		{
+			d = min(mPointLightCount - 1, d + 1);
+		}
+		else if (mEngine->GetInput()->GetKeyDown(KEYCODE_RIGHT))
+		{
+			d = max(0, d - 1);
+		}
+
+		mRenderer->VSetPixelShaderDepthResourceView(mShadowContext, d, 0);		// Color
+		mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
 	}
 	else
 	{

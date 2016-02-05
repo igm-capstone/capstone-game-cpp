@@ -12,3 +12,12 @@ struct CbufferPVM
 	CameraData camera;
 	mat4f world;
 };
+
+struct CBufferLight
+{
+	CameraData	camera;
+	vec4f		color;
+	float		cosAngle;
+	float		range;
+	float		padding[2];
+};
