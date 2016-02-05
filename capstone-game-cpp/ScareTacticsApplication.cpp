@@ -16,7 +16,6 @@
 #include "Shaders/obj/NDSQuadVertexShader.h"
 #include "Shaders/obj/NDSQuadPixelShader.h"
 #include "Shaders/obj/DebugTexturePixelShader.h"
-#include "Shaders/obj/SpotlightShadowVetexShader.h"
 #include "Shaders/obj/ShadowCasterPixelShader.h"
 #include "Shaders/obj/ShadowGridComputeShader.h"
 #include "Shaders/obj/ShadowPixelShader.h"
@@ -32,7 +31,6 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mPLVolumePixelShader(nullptr),
 	mNDSQuadVertexShader(nullptr),
 	mNDSQuadPixelShader(nullptr),
-	mSLShaderVertexShader(nullptr),
 	mDBGPixelShader(nullptr),
 	mLoadingScreen(nullptr),
 	mCurrentScene(nullptr),
@@ -221,7 +219,6 @@ void ScareTacticsApplication::VShutdown()
 	mPLVolumePixelShader->~IShader();
 	mNDSQuadVertexShader->~IShader();
 	mNDSQuadPixelShader->~IShader();
-//	mSLShaderVertexShader->~IShader();
 	mDBGPixelShader->~IShader();
 
 	mSceneAllocator.Free();

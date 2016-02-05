@@ -24,7 +24,6 @@ public:
 	IShader* mPLVolumePixelShader;
 	IShader* mNDSQuadVertexShader;
 	IShader* mNDSQuadPixelShader;
-	IShader* mSLShaderVertexShader;
 
 	IShader* mDBGPixelShader;
 

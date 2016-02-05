@@ -271,9 +271,6 @@
     <FxCompile Include="DebugTexturePixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="SLDepthVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="capstone-game-cpp.rc">
