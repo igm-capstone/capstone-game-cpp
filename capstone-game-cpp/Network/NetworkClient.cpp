@@ -22,7 +22,7 @@ bool NetworkClient::Init(void)
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
 
-	ret = getaddrinfo("127.0.0.1", DEFAULT_PORT, &hints, &result);
+	ret = getaddrinfo(mIPAddress, DEFAULT_PORT, &hints, &result);
 	if (ret != 0) {
 		printf("getaddrinfo failed: %d\n", ret);
 		WSACleanup();

@@ -3,7 +3,8 @@
 
 class MainMenuScene : public BaseScene
 {
-	bool failedClient = false;
+	char* mErrorMsg;
+	char mIPAdress[40];
 
 public:
 	MainMenuScene() {};
