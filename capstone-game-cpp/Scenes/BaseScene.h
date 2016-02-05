@@ -51,9 +51,11 @@ public:
 public:
 	//Server
 	void CmdSpawnNewExplorer(int clientID);
+	void CmdSpawnNewMinion(vec3f pos);
 
 	//Client
 	void RpcSpawnExistingExplorer(int UUID, vec3f pos);
+	void RpcSpawnExistingMinion(int UUID, vec3f pos);
 	
 	//Both
 	void GrantAuthority(int UUID);

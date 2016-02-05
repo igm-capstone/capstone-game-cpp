@@ -106,6 +106,9 @@ void NetworkClient::Update()
 			case SPAWN_EXPLORER:
 				Application::SharedInstance().GetCurrentScene()->RpcSpawnExistingExplorer(packet.UUID, packet.Position);
 				break;
+			case SPAWN_MINION:
+				Application::SharedInstance().GetCurrentScene()->RpcSpawnExistingMinion(packet.UUID, packet.Position);
+				break;
 			case GRANT_AUTHORITY:
 				Application::SharedInstance().GetCurrentScene()->GrantAuthority(packet.UUID);
 				break;

@@ -14,12 +14,15 @@
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 #include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
 #include <Console.h>
+#include <SceneObjects/Minion.h>
 
 Level01::Level01() : 
 	mWallCount0(0), 
 	mExplorerCount(0),
 	mWallWorldMatrices0(nullptr), 
-	mWallMesh0(nullptr), 
+	mWallMesh0(nullptr),
+	mExplorerCubeMesh(nullptr),
+	mMinionCubeMesh(nullptr), 
 	mWallShaderResource(nullptr),
 	mExplorerShaderResource(nullptr)
 {
@@ -33,7 +36,14 @@ Level01::~Level01()
 	{
 		//e.mMesh->~IMesh();
 	}
+
+	for (Minion& m : Factory<Minion>())
+	{
+		//m.mMesh->~IMesh();
+	}
+
 	mExplorerCubeMesh->~IMesh();
+	mMinionCubeMesh->~IMesh();
 
 	mWallShaderResource->~IShaderResource();
 	mExplorerShaderResource->~IShaderResource();
@@ -86,6 +96,10 @@ void Level01::InitializeGeometry()
 	meshLibrary.NewMesh(&mExplorerCubeMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mExplorerCubeMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
 	mRenderer->VSetMeshIndexBuffer(mExplorerCubeMesh, &indices[0], indices.size());
+
+	meshLibrary.NewMesh(&mMinionCubeMesh, mRenderer);
+	mRenderer->VSetMeshVertexBuffer(mMinionCubeMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
+	mRenderer->VSetMeshIndexBuffer(mMinionCubeMesh, &indices[0], indices.size());
 }
 
 void Level01::InitializeShaderResources()
@@ -119,6 +133,15 @@ void Level01::InitializeShaderResources()
 	size_t cbExplorerSizes[] = { sizeof(CbufferPVM) };
 
 	mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 1);
+
+	// Minions
+
+	mRenderer->VCreateShaderResource(&mMinionShaderResource, &mAllocator);
+
+	void*  cbMinionData[] = { &mPVM };
+	size_t cbMinionSizes[] = { sizeof(CbufferPVM) };
+
+	mRenderer->VCreateShaderConstantBuffers(mMinionShaderResource, cbMinionData, cbMinionSizes, 1);
 }
 #pragma endregion
 
@@ -135,6 +158,12 @@ void Level01::VUpdate(double milliseconds)
 	{
 		skill.Update();
 	}
+
+	if (mInput->GetKeyDown(KEYCODE_O) && mNetworkManager->mMode == NetworkManager::Mode::SERVER)
+	{
+		CmdSpawnNewMinion(vec3f(0, 0, 0));
+	}
+
 
 	UpdateCamera();
 
@@ -165,6 +194,7 @@ void Level01::VRender()
 
 	RenderWalls();
 	RenderExplorers();
+	RenderMinions();
 	mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
 
 	//FPS
@@ -208,6 +238,23 @@ void Level01::RenderExplorers()
 	}
 }
 
+
+void Level01::RenderMinions()
+{
+	mRenderer->VSetInputLayout (mApplication->mExplorerVertexShader);
+	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
+	mRenderer->VSetPixelShader (mApplication->mExplorerPixelShader);
+
+	for (Minion& m : Factory<Minion>())
+	{
+		mPVM.world = m.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mMinionShaderResource, &mPVM, 0);
+
+		mRenderer->VBindMesh(mMinionCubeMesh);
+		mRenderer->VSetVertexShaderConstantBuffer(mMinionShaderResource, 0, 0);
+		mRenderer->VDrawIndexed(0, mMinionCubeMesh->GetIndexCount());
+	}
+}
 
 #pragma endregion
 

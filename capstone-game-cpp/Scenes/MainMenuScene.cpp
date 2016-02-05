@@ -62,16 +62,14 @@ void MainMenuScene::RenderUI()
 {
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.WindowTitleAlign = ImGuiAlign_Center;
-	style.FramePadding.x = 5;
-	style.ItemSpacing.y = 10;
 	style.Colors[ImGuiCol_TitleBg] = ImVec4(0.67f, 0.51f, 1.00f, 0.26f);
 	style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.34f, 0.00f, 0.55f, 0.94f);
 	style.Colors[ImGuiCol_Button] = ImVec4(0.27f, 0.40f, 0.44f, 1.00f);
 
-
-
 	ImGui::SetNextWindowPosCenter(ImGuiSetCond_Always);
 	ImGui::SetNextWindowContentWidth(300);
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 3));
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 10));
 	ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 	ImGui::Begin("Scare Tactics", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
 	
@@ -131,6 +129,8 @@ void MainMenuScene::RenderUI()
 #endif
 	ImGui::End();
 	ImGui::PopFont();
+	ImGui::PopStyleVar();
+	ImGui::PopStyleVar();
 }
 
 void MainMenuScene::VShutdown()

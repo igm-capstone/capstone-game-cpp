@@ -83,7 +83,7 @@ void CollisionManager::ResolveCollisions()
 	for (uint32_t i = 0; i < mCollisionsCount; i++)
 	{
 		// If object A and B are dynamic move both. If only A or B is dynamic only move A or B.
-		if (pCollisions[i].colliderA.SphereCollider->isDynamic && pCollisions[i].colliderB.SphereCollider->isDynamic)
+		if (pCollisions[i].colliderA.SphereCollider->mIsDynamic && pCollisions[i].colliderB.SphereCollider->mIsDynamic)
 		{
 			vec3f halfOverlap = pCollisions[i].minimumOverlap * 0.5f;
 			vec3f posA = pCollisions[i].colliderA.SphereCollider->mSceneObject->mTransform->GetPosition() + halfOverlap;
@@ -95,14 +95,14 @@ void CollisionManager::ResolveCollisions()
 			pCollisions[i].colliderA.SphereCollider->mCollider.origin = posA;
 			pCollisions[i].colliderB.SphereCollider->mCollider.origin = posB;
 		}
-		else if (pCollisions[i].colliderA.SphereCollider->isDynamic && !pCollisions[i].colliderB.SphereCollider->isDynamic)
+		else if (pCollisions[i].colliderA.SphereCollider->mIsDynamic && !pCollisions[i].colliderB.SphereCollider->mIsDynamic)
 		{
 			vec3f posA = pCollisions[i].colliderA.SphereCollider->mSceneObject->mTransform->GetPosition() + pCollisions[i].minimumOverlap;
 			pCollisions[i].colliderA.SphereCollider->mSceneObject->mTransform->SetPosition(posA);
 			pCollisions[i].colliderA.SphereCollider->mCollider.origin = posA;
 
 		}
-		else if (!pCollisions[i].colliderA.SphereCollider->isDynamic && pCollisions[i].colliderB.SphereCollider->isDynamic)
+		else if (!pCollisions[i].colliderA.SphereCollider->mIsDynamic && pCollisions[i].colliderB.SphereCollider->mIsDynamic)
 		{
 			vec3f posB = pCollisions[i].colliderB.SphereCollider->mSceneObject->mTransform->GetPosition() - pCollisions[i].minimumOverlap;
 			pCollisions[i].colliderB.SphereCollider->mSceneObject->mTransform->SetPosition(posB);

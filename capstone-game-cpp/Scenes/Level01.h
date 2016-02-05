@@ -22,10 +22,12 @@ class Level01 : public BaseScene
 	// Mesh
 	IMesh*				mWallMesh0;
 	IMesh*				mExplorerCubeMesh; //better solution when will come when we start to handle models
+	IMesh*				mMinionCubeMesh; //better solution when will come when we start to handle models
 
 	// ShaderResource
 	IShaderResource*	mWallShaderResource;
 	IShaderResource*	mExplorerShaderResource;
+	IShaderResource*	mMinionShaderResource;
 
 	// Managers
 	CollisionManager	mCollisionManager;
@@ -47,6 +49,7 @@ public:
 	void VRender() override;
 	void RenderWalls();
 	void RenderExplorers();
+	void RenderMinions();
 
 	void VShutdown() override;
 };

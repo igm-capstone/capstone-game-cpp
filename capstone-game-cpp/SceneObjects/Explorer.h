@@ -8,8 +8,8 @@
 #include <Rig3D/Graphics/Camera.h>
 #include "ScareTacticsApplication.h"
 
-#define MAX_EXPLORERS  4
-#define MAX_SKILLS     5
+#define MAX_EXPLORERS        4
+#define MAX_EXPLORER_SKILLS  5
 
 class Explorer : public BaseSceneObject
 {
@@ -19,7 +19,7 @@ public:
 	NetworkID*					mNetworkID;
 	ExplorerController*			mController;
 	SphereColliderComponent*	mCollider;
-	Skill*						mSkills[MAX_SKILLS];
+	Skill*						mSkills[MAX_EXPLORER_SKILLS];
 
 private:
 	NetworkClient*				mNetworkClient;
@@ -37,11 +37,10 @@ private:
 		mController->RegisterMoveCallback(&OnMove);
 
 		mCollider = Factory<SphereColliderComponent>::Create();
-		mCollider->isDynamic = true;
+		mCollider->mIsDynamic = true;
 		mCollider->mSceneObject = this;
 		mCollider->mIsActive = false;
 		mCollider->RegisterCollisionExitCallback(&OnCollisionExit);
-
 	
 		mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
 		mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
@@ -49,7 +48,7 @@ private:
 		mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
 		mCamera = &Application::SharedInstance().GetCurrentScene()->mCamera;
 
-		memset(mSkills, 0, sizeof(Skill*) * MAX_SKILLS);
+		memset(mSkills, 0, sizeof(Skill*) * MAX_EXPLORER_SKILLS);
 
 		auto sprint = Factory<Skill>::Create();
 		sprint->mSceneObject = this;

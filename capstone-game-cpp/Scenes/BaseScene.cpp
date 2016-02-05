@@ -4,6 +4,7 @@
 #include <SceneObjects/SpawnPoint.h>
 #include <SceneObjects/Explorer.h>
 #include <SceneObjects/Ghost.h>
+#include <SceneObjects/Minion.h>
 
 BaseScene::BaseScene() : 
 	mStaticMemory(nullptr),
@@ -52,6 +53,30 @@ void BaseScene::RenderFPSIndicator()
 }
 
 #pragma region Network Callbacks
+
+void BaseScene::CmdSpawnNewMinion(vec3f pos) {
+	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER);
+	
+	auto m = Factory<Minion>::Create();
+	m->Spawn(pos, MyUUID::GenUUID());
+	
+	// set auhtority for the server
+	m->mNetworkID->mHasAuthority = true;
+	m->mNetworkID->OnNetAuthorityChange(true);
+
+	Packet p(PacketTypes::SPAWN_MINION);
+	p.UUID = m->mNetworkID->mUUID;
+	p.Position = pos;
+	mNetworkManager->mServer.SendToAll(&p);
+}
+
+void BaseScene::RpcSpawnExistingMinion(int UUID, vec3f pos) {
+	assert(mNetworkManager->mMode == NetworkManager::Mode::CLIENT);
+	
+	auto m = Factory<Minion>::Create();
+	m->Spawn(pos, UUID);
+}
+
 void BaseScene::CmdSpawnNewExplorer(int clientID) {
 	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER);
 	// Get a spawn point

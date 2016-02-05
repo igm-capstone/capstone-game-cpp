@@ -5,15 +5,16 @@ class Skill;
 
 class ExplorerController : public BaseComponent
 {
-private:
+	friend class Factory<ExplorerController>;
+
+	ExplorerController();
+	~ExplorerController();
+
 	Input* mInput;
 	double mSprintDuration;
 
 public:
 	float mSpeed;
-
-	ExplorerController();
-	~ExplorerController();
 
 	bool Update(double milliseconds);
 
