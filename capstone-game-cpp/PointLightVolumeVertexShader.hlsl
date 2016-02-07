@@ -68,7 +68,7 @@ Pixel main( Vertex vertex )
 	pixel.uv = float2((pixel.positionH.x / pixel.positionH.w + 1.0f) * 0.5f, (1.0f - pixel.positionH.y / pixel.positionH.w) * 0.5f);
 
 	// Get linear range from matrix for now.
-	pixel.radius = world[0][0];
+	pixel.radius = range;
 
 	// Pass cosAngle
 	pixel.cosAngle = cosAngle;

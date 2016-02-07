@@ -119,7 +119,7 @@ void Level01::InitializeResource()
 	mPointLightColors = level.lampColors;
 
 	//mPointLightWorldMatrices[0] = (mat4f::scale(15.41f) * mat4f::translate(vec3f(0.0f, 0.0f, -1.0f))).transpose();
-	//mPointLightCount = 1;
+	//mPointLightCount = 3;
 }
 
 void Level01::InitializeGeometry()
@@ -263,6 +263,14 @@ void Level01::VUpdate(double milliseconds)
 
 void Level01::UpdateCamera()
 {
+	//uint32_t i = 0;
+	//for (Lamp& l : Factory<Lamp>())
+	//{
+	//	mPVM.camera.projection = mat4f::normalizedPerspectiveLH(PI * 0.5f, mRenderer->GetAspectRatio(), 0.1f, l.mLightRadius).transpose();
+	//	mPVM.camera.view = mat4f::lookToLH(vec3f(1.0f, 0.0f, 0.0f), mPointLightWorldMatrices[i].transpose().t, vec3f(0.0f, 0.0f, -1.0f)).transpose();
+	//	if (i >= 1) break;
+	//}
+
 	mPVM.camera.projection	= mCamera.GetProjectionMatrix().transpose();
 	mPVM.camera.view		= mCamera.GetViewMatrix().transpose();
 }
@@ -423,6 +431,9 @@ void Level01::RenderExplorers()
 
 void Level01::RenderPointLightVolumes()
 {
+	//mRenderer->VSetContextTarget();
+	//mRenderer->VClearContextTarget(Colors::black.pCols);
+
 	mRenderer->VSetRenderContextTarget(mGBufferContext, 3);
 	mRenderer->VClearContextTarget(mGBufferContext, 3, Colors::black.pCols);	// Albedo
 
@@ -451,7 +462,7 @@ void Level01::RenderPointLightVolumes()
 		mLightData.camera.projection = mat4f::normalizedPerspectiveLH(PI * 0.5f, mRenderer->GetAspectRatio(), 0.1f, l.mLightRadius).transpose();
 		mLightData.camera.view = mat4f::lookToLH(vec3f(1.0f, 0.0f, 0.0f), mPointLightWorldMatrices[i].transpose().t, vec3f(0.0f, 0.0f, -1.0f)).transpose();
 		mLightData.color = Colors::yellow;
-		mLightData.range = 15.41f;
+		mLightData.range = l.mLightRadius;
 		mLightData.cosAngle = cos(1.57079632679f);
 
 		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
@@ -526,7 +537,7 @@ void Level01::RenderFullScreenQuad()
 		}
 		else
 		{
-			mRenderer->VSetPixelShaderDepthResourceView(mGBufferContext, 0, 0);		// Color
+			mRenderer->VSetPixelShaderDepthResourceView(mGBufferContext, 0, 0);		// Depth
 			mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
 		}
 		
@@ -554,7 +565,7 @@ void Level01::RenderFullScreenQuad()
 
 		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 2, 0);		// Color
 		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 3, 1);		// Albedo
-		mRenderer->VSetPixelShaderDepthResourceView(mGBufferContext, 0, 3);	// Depth
+		mRenderer->VSetPixelShaderDepthResourceView(mGBufferContext, 0, 2);	// Depth
 		mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
 	}
 

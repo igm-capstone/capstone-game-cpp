@@ -18,10 +18,15 @@ SamplerState depthSamplerState	: register(s1);
 
 float4 main(Pixel pixel) : SV_TARGET
 {
-	//return normalMap.Sample(samplerState, pixel.uv);
+	int3 i = int3(pixel.positionH.xy, 0);
 
-	float3 position = positionMap.Sample(samplerState, pixel.uv).xyz;
-	float3 normal = normalize(normalMap.Sample(samplerState, pixel.uv).xyz);
+//	return positionMap.Load(i);
+
+	float3 position = positionMap.Load(i).xyz;
+	float3 normal = normalize(normalMap.Load(i).xyz);
+
+	//float3 position = positionMap.Sample(samplerState, pixel.uv).xyz;
+	//float3 normal = normalize(normalMap.Sample(samplerState, pixel.uv).xyz);
 	//float3 lightDirection = pixel.lightPos - position;
 	//float  magnitude = length(lightDirection);
 	//lightDirection /= magnitude;
@@ -40,35 +45,36 @@ float4 main(Pixel pixel) : SV_TARGET
 	float depth = depthMap.Sample(depthSamplerState, projectedUV).r;
 	float lightDepthValue = (pixel.lightPosH.z / pixel.lightPosH.w) - bias;
 
-	float4 ac = float4(0.3f, 0.3f, 0.3f, 1.0f);
 	if (lightDepthValue > depth)
 	{
-		return ac;
+		return float4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
 	float4 diffuse = pixel.lightColor;
 	float4 specular = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	float3 lightDirection = float3(1.0f, 0.0f, 0.0f);
+	float3 lightDirection = float3(1.0f, 0.0f, 0.0f); // Hard Coded
 	float3 pixelToLight = pixel.lightPos - position;
 	float d = length(pixelToLight);
 	pixelToLight /= d;
 
-	float df = dot(pixelToLight, normal);
-	float3 eyePos = float3(10.0f, 0.0f, -100.0f);
-	if (df > 0.0f)
+	float nDotL = dot(pixelToLight, normal);
+	diffuse *= saturate(nDotL);
+
+	float3 eyePos = float3(10.0f, 0.0f, -100.0f);	// Hard Coded.
+
+	if (nDotL > 0.0f)
 	{
 		float3 v = reflect(pixelToLight, normal);
 		float3 pixelToEye = normalize(eyePos - position);
 		float specFactor = pow(max(dot(v, pixelToEye), 0.0f), 32.0f);
 
-		diffuse *= df * diffuse;
-		specular *= specFactor;
+		diffuse += specular * specFactor;
 	}
 
-	float4 returnColor = (diffuse + specular) / (d * d);
-
-	float   phi = 1.57079632679f * 0.5f;
+	float4 albedo = diffuse / (d * 0.5f) ;
+			
+	float   phi = 1.57079632679f * 0.5f;		// Hard coded
 	float	cutoff = cos(phi);
 	float	cosAlpha = dot(pixelToLight, -normalize(lightDirection));
 	float totalAttenuation = 0.0f;
@@ -76,5 +82,5 @@ float4 main(Pixel pixel) : SV_TARGET
 		totalAttenuation = (1.0f - (1.0f - cosAlpha) * 1.0f / (1.0f - cutoff));
 	}
 
-	return (ac + returnColor) * totalAttenuation;
+	return albedo * totalAttenuation;
 }

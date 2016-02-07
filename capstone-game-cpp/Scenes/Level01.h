@@ -7,9 +7,9 @@
 class Level01 : public BaseScene
 {
 	// Cbuffer data
-	CbufferPVM			mPVM;
-	CbufferPVM			mLightPVM;
-	CBufferLight		mLightData;
+	CbufferPVM			mPVM;			// Used for main camera matrics
+	CbufferPVM			mLightPVM;		// Used for spotlight matrices
+	CBufferLight		mLightData;		// Used for spotlight data (color, angle, etc).
 
 	// Allocators
 	LinearAllocator		mAllocator;
