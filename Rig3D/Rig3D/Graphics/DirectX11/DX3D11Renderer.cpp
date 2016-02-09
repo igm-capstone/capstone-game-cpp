@@ -229,6 +229,28 @@ void DX3D11Renderer::VDrawIndexed(uint32_t startIndex, uint32_t count)
 		0);
 }
 
+#pragma region Viewport
+
+void DX3D11Renderer::SetViewport()
+{
+	mDeviceContext->RSSetViewports(1, &mViewport);
+}
+
+void DX3D11Renderer::SetViewport(float topLeftX, float topLeftY, float width, float height, float minDepth, float maxDepth)
+{
+	D3D11_VIEWPORT viewport;
+	viewport.TopLeftX = topLeftX;
+	viewport.TopLeftY = topLeftY;
+	viewport.Width = width;
+	viewport.Height = height;
+	viewport.MinDepth = minDepth;
+	viewport.MaxDepth = maxDepth;
+
+	mDeviceContext->RSSetViewports(1, &viewport);
+}
+
+#pragma endregion 
+
 #pragma region ID3D11Buffer
 
 void DX3D11Renderer::VCreateVertexBuffer(void* buffer, void* vertices, const size_t& size)
@@ -1575,7 +1597,8 @@ void DX3D11Renderer::VSetRenderContextDepthTarget(IRenderContext* renderContext,
 {
 	DX11RenderContext* context = static_cast<DX11RenderContext*>(renderContext);
 	ID3D11DepthStencilView** DSVs = context->GetDepthStencilViews();
-	mDeviceContext->OMSetRenderTargets(0, nullptr, DSVs[atIndex]);
+	ID3D11RenderTargetView* nullRTV[] = { nullptr };
+	mDeviceContext->OMSetRenderTargets(1, nullRTV, DSVs[atIndex]);
 }
 
 void DX3D11Renderer::VClearContext(const float* color, float depth, uint8_t stencil)

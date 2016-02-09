@@ -55,6 +55,13 @@ namespace Rig3D
 		inline void	VDrawIndexed(GPUPrimitiveType type, uint32_t startIndex, uint32_t count);
 		inline void	VDrawIndexed(uint32_t startIndex, uint32_t count);
 
+#pragma region Viewport
+
+		inline void SetViewport();
+		inline void SetViewport(float topLeftX, float topLeftY, float width, float height, float minDepth, float maxDepth);
+
+#pragma endregion 
+
 #pragma region  Buffer
 
 		void	VCreateVertexBuffer(void* buffer, void* vertices, const size_t& size);
