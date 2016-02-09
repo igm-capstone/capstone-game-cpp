@@ -64,7 +64,7 @@ public:
 	void UpdateCamera();
 
 	void VRender() override;
-	void RenderShadowMaps();
+	void RenderShadowMaps();	// Not called per frame
 	void RenderWalls();
 	void RenderExplorers();
 	void RenderPointLightVolumes();

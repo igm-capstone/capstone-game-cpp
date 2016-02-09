@@ -80,9 +80,6 @@ void Level01::VOnResize()
 	mRenderer->VCreateContextResourceTargets(mGBufferContext, 4, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
 	mRenderer->VCreateContextDepthStencilResourceTargets(mGBufferContext, 1, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
 
-	// Shadow Maps for each light
-	mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mPointLightCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
-
 	// Camera
 	mCamera.SetProjectionMatrix(mat4f::normalizedPerspectiveLH(0.25f * PI, mRenderer->GetAspectRatio(), 0.1f, 1000.0f));
 }
@@ -99,6 +96,8 @@ void Level01::VInitialize()
 	InitializeResource();
 	InitializeGeometry();
 	InitializeShaderResources();
+	RenderShadowMaps();
+
 	mCamera.SetViewMatrix(mat4f::lookAtLH(vec3f(0, 0, 0), vec3f(10.0f, 0.0f, -100.0f), vec3f(0, 1, 0))); //Temporary until Ghost get a controller.
 
 	mCollisionManager.Initialize();
@@ -160,15 +159,17 @@ void Level01::InitializeGeometry()
 
 	// Point Light Volume 
 
-	Geometry::Cone(vertices, indices, 6, 1.0f, PI * 0.5f);
+	//Geometry::Cone(vertices, indices, 6, 1.0f, PI * 0.5f);
 
-	//OBJBasicResource<Vertex3> sphereResource("D:/Users/go4113/Capstone/Bin/Debug/spotlight_cone.obj");
-	//sphereResource.Load();
-	//meshLibrary.LoadMesh(&mPLVMesh, mRenderer, sphereResource);
+	//meshLibrary.NewMesh(&mPLVMesh, mRenderer);
+	//mRenderer->VSetMeshVertexBuffer(mPLVMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
+	//mRenderer->VSetMeshIndexBuffer(mPLVMesh, &indices[0], indices.size());
 
-	meshLibrary.NewMesh(&mPLVMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mPLVMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
-	mRenderer->VSetMeshIndexBuffer(mPLVMesh, &indices[0], indices.size());
+	OBJBasicResource<Vertex3> sphereResource("D:/Users/go4113/Capstone/Bin/Debug/spotlight_cone.obj");
+	sphereResource.Load();
+	meshLibrary.LoadMesh(&mPLVMesh, mRenderer, sphereResource);
+
+
 
 	// Full Screen Quad
 
@@ -188,6 +189,9 @@ void Level01::InitializeShaderResources()
 	// Allocate render context
 	mRenderer->VCreateRenderContext(&mGBufferContext, &mAllocator);
 	mRenderer->VCreateRenderContext(&mShadowContext, &mAllocator);
+
+	// Shadow Maps for each light
+	mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mPointLightCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 
 	// Allocate wall shader resource
 	mRenderer->VCreateShaderResource(&mWallShaderResource, &mAllocator);
@@ -281,8 +285,6 @@ void Level01::VRender()
 
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, Colors::transparent.pCols, 0xffffffff);
 
-	RenderShadowMaps();
-
 	RenderWalls();
 	RenderExplorers();
 	RenderPointLightVolumes();
@@ -305,7 +307,6 @@ void Level01::VRender()
 void Level01::RenderShadowMaps()
 {
 	mRenderer->SetViewport(0.0f, 0.0f, static_cast<float>(SHADOW_MAP_SIZE), static_cast<float>(SHADOW_MAP_SIZE), 0.0f, 1.0f);
-
 	mRenderer->VSetInputLayout(mApplication->mExplorerVertexShader);
 	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
 	mRenderer->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
@@ -313,11 +314,6 @@ void Level01::RenderShadowMaps()
 	uint32_t i = 0;
 	for (Lamp& l : Factory<Lamp>())
 	{
-		if (i >= mPointLightCount)
-		{
-			break;
-		}
-
 		mRenderer->VSetRenderContextDepthTarget(mShadowContext, i);
 		mRenderer->VClearDepthStencil(mShadowContext, i, 1.0f, 0);
 
@@ -334,31 +330,28 @@ void Level01::RenderShadowMaps()
 
 		// Walls
 
-		//CullWalls(frustum, indices);
+		CullWalls(frustum, indices);
 
 		mRenderer->VBindMesh(mWallMesh0);
 
-		//for (uint32_t j : indices)
-		uint32_t j = 0;
-		for(Wall& w : Factory<Wall>())
+		for (uint32_t j : indices)
 		{
 			mLightPVM.world = mWallWorldMatrices0[j];
 			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
+
 			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 			mRenderer->VDrawIndexed(0, mWallMesh0->GetIndexCount());
-			j++;
 		}
 
 		indices.clear();
 
 		// Planes
 
-	//	CullPlanes(frustum, indices, mPlaneWorldMatrices, mPlaneWidth, mPlaneHeight, mPlaneCount);
+		CullPlanes(frustum, indices, mPlaneWorldMatrices, mPlaneWidth, mPlaneHeight, mPlaneCount);
 
 		mRenderer->VBindMesh(mPlaneMesh);
 		
-	//	for (uint32_t j : indices)
-		for (j = 0; j < mPlaneCount; j++)
+		for (uint32_t j : indices)
 		{
 			mLightPVM.world = mPlaneWorldMatrices[j];
 			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
@@ -473,89 +466,13 @@ void Level01::RenderFullScreenQuad()
 	mRenderer->VSetContextTargetWithDepth();
 	mRenderer->VClearContext(Colors::magenta.pCols, 1.0f, 0);
 
-	static int state = 1;
-	if (mEngine->GetInput()->GetKeyDown(KEYCODE_G))
-	{
-		state = 0;
-	}
-	else if (mEngine->GetInput()->GetKeyDown(KEYCODE_N))
-	{
-		state = 1;
-	}
-	else if (mEngine->GetInput()->GetKeyDown(KEYCODE_D))
-	{
-		state = 2;
-	}
+	mRenderer->VSetInputLayout(mApplication->mNDSQuadVertexShader);
+	mRenderer->VSetVertexShader(mApplication->mNDSQuadVertexShader);
+	mRenderer->VSetPixelShader(mApplication->mNDSQuadPixelShader);
 
-	if (state == 0)
-	{
-		mRenderer->VSetInputLayout(mApplication->mNDSQuadVertexShader);
-		mRenderer->VSetVertexShader(mApplication->mNDSQuadVertexShader);
-		mRenderer->VSetPixelShader(mApplication->mDBGPixelShader);
-
-		static uint32_t index = 0;
-		if (mEngine->GetInput()->GetKeyDown(KEYCODE_0))
-		{
-			index = 0;
-		}
-		else if (mEngine->GetInput()->GetKeyDown(KEYCODE_1))
-		{
-			index = 1;
-		}
-		else if (mEngine->GetInput()->GetKeyDown(KEYCODE_2))
-		{
-			index = 2;
-		}
-		else if (mEngine->GetInput()->GetKeyDown(KEYCODE_3))
-		{
-			index = 3;
-		}
-		else if (mEngine->GetInput()->GetKeyDown(KEYCODE_4))
-		{
-			index = 4;
-		}
-
-		if (index < 4)
-		{
-			mRenderer->VSetPixelShaderResourceView(mGBufferContext, index, 0);		// Color
-			mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
-		}
-		else
-		{
-			mRenderer->VSetPixelShaderDepthResourceView(mGBufferContext, 0, 0);		// Depth
-			mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
-		}
-		
-	}
-	else if (state == 2)
-	{
-		mRenderer->VSetInputLayout(mApplication->mNDSQuadVertexShader);
-		mRenderer->VSetVertexShader(mApplication->mNDSQuadVertexShader);
-		mRenderer->VSetPixelShader(mApplication->mDBGPixelShader);
-
-		static uint32_t d = 0;
-		if (mEngine->GetInput()->GetKeyDown(KEYCODE_RIGHT))
-		{
-			d = min(mPointLightCount - 1, d + 1);
-		}
-		else if (mEngine->GetInput()->GetKeyDown(KEYCODE_LEFT))
-		{
-			d = max(0, d - 1);
-		}
-
-		mRenderer->VSetPixelShaderDepthResourceView(mShadowContext, d, 0);		// Shadow Map
-		mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);
-	}
-	else
-	{
-		mRenderer->VSetInputLayout(mApplication->mNDSQuadVertexShader);
-		mRenderer->VSetVertexShader(mApplication->mNDSQuadVertexShader);
-		mRenderer->VSetPixelShader(mApplication->mNDSQuadPixelShader);
-
-		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 2, 0);		// Color
-		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 3, 1);		// Albedo
-		mRenderer->VSetPixelShaderDepthResourceView(mGBufferContext, 0, 2);	// Depth
-	}
+	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 2, 0);		// Color
+	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 3, 1);		// Albedo
+	mRenderer->VSetPixelShaderDepthResourceView(mGBufferContext, 0, 2);	// Depth
 
 	mRenderer->VBindMesh(mNDSQuadMesh);
 	mRenderer->VDrawIndexed(0, mNDSQuadMesh->GetIndexCount());
