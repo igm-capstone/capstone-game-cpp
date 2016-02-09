@@ -37,8 +37,10 @@ inline void CullWalls(const Rig3D::Frustum& frustum, std::vector<uint32_t>& indi
 
 		if (!shouldCull)
 		{
-			indices.push_back(index++);
+			indices.push_back(index);
 		}
+
+		index++;
 	}
 }
 
