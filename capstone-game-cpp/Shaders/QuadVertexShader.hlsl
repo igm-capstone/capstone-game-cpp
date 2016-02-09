@@ -30,7 +30,7 @@ Pixel main(Vertex vertex)
 	Pixel pixel;
 	pixel.positionH = mul(vertexPos, clip);
 	pixel.positionT = mul(vertexPos, vertex.world).xyz;
-	pixel.normal = mul(float4(vertex.normal, 0.0f), vertex.world).xyz;
+	pixel.normal = mul(vertex.normal, (float3x3)vertex.world).xyz;
 	pixel.uv = vertex.uv;
 
 	return pixel;

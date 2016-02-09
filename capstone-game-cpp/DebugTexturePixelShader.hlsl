@@ -9,5 +9,7 @@ SamplerState samplerState : register(s0);
 
 float4 main(Pixel pixel) : SV_TARGET
 {
-	return debugTexture.Load(int3(pixel.position.xy, 0));
+	return debugTexture.Sample(samplerState, pixel.uv);
+
+	//return debugTexture.Load(int3(pixel.position.xy, 0));
 }

@@ -8,8 +8,6 @@ Texture2D diffuseMap : register(t0);
 Texture2D lightMap		: register(t1);
 Texture2D depthMap		: register(t2);
 
-SamplerState samplerState : register(s0);
-
 float4 main(Pixel pixel) : SV_TARGET
 {
 	int3 i = int3(pixel.position.xy, 0);
