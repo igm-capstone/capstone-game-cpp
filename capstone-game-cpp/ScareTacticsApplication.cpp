@@ -119,14 +119,12 @@ void ScareTacticsApplication::InitializeShaders()
 	InputElement plvInputElements[] = 
 	{
 		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
-		{ "NORMAL",		0, 0, 12,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
-		{ "TEXCOORD",	0, 0, 24,  0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX }
 	};
 
 	renderer->VCreateShader(&mPLVolumeVertexShader, &mGameAllocator);
 	renderer->VCreateShader(&mPLVolumePixelShader, &mGameAllocator);
 
-	renderer->LoadVertexShader(mPLVolumeVertexShader, gPointLightVolumeVertexShader, sizeof(gPointLightVolumeVertexShader), plvInputElements, 3);
+	renderer->LoadVertexShader(mPLVolumeVertexShader, gPointLightVolumeVertexShader, sizeof(gPointLightVolumeVertexShader), plvInputElements, 1);
 	renderer->VLoadPixelShader(mPLVolumePixelShader, gPointLightVolumePixelShader, sizeof(gPointLightVolumePixelShader));
 
 	// Normalized Device Quad Shaders

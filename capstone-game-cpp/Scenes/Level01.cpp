@@ -93,7 +93,7 @@ void Level01::VInitialize()
 	mAllocator.SetMemory(mStaticMemory, mStaticMemory + mStaticMemorySize);
 	mRenderer->SetDelegate(this);
 
-	InitializeResource();
+	InitializeAssets();
 	InitializeGeometry();
 	InitializeShaderResources();
 	RenderShadowMaps();
@@ -107,7 +107,7 @@ void Level01::VInitialize()
 	mState = BASE_SCENE_STATE_RUNNING;
 }
 
-void Level01::InitializeResource()
+void Level01::InitializeAssets()
 {
 	auto level = Resource::LoadLevel("Assets/Level01.json", mAllocator);
 
@@ -159,20 +159,17 @@ void Level01::InitializeGeometry()
 
 	// Point Light Volume 
 
-	//Geometry::Cone(vertices, indices, 6, 1.0f, PI * 0.5f);
+	std::vector<Vertex1> coneVertices;
 
-	//meshLibrary.NewMesh(&mPLVMesh, mRenderer);
-	//mRenderer->VSetMeshVertexBuffer(mPLVMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
-	//mRenderer->VSetMeshIndexBuffer(mPLVMesh, &indices[0], indices.size());
+	Geometry::SpotlightCone(coneVertices, indices, 6, 1.0f, PI * 0.5f);
 
-	OBJBasicResource<Vertex3> sphereResource("D:/Users/go4113/Capstone/Bin/Debug/spotlight_cone.obj");
-	sphereResource.Load();
-	meshLibrary.LoadMesh(&mPLVMesh, mRenderer, sphereResource);
-
-
+	meshLibrary.NewMesh(&mPLVMesh, mRenderer);
+	mRenderer->VSetMeshVertexBuffer(mPLVMesh, &coneVertices[0], sizeof(Vertex1) * coneVertices.size(), sizeof(Vertex1));
+	mRenderer->VSetMeshIndexBuffer(mPLVMesh, &indices[0], indices.size());
 
 	// Full Screen Quad
 
+	vertices.clear();
 	indices.clear();
 
 	std::vector<NDSVertex> ndsVertices;

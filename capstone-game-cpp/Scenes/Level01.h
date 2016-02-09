@@ -55,7 +55,7 @@ public:
 	void VOnResize() override;
 
 	void VInitialize() override;
-	void InitializeResource();
+	void InitializeAssets();
 	void InitializeGeometry();
 	void InitializeShaderResources();
 	void InitializePlayers();

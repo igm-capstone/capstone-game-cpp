@@ -188,15 +188,15 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	{
 		loadLamps(lamps);
 
+		level.lampColors = reinterpret_cast<vec4f*>(allocator.Allocate(sizeof(vec4f) * lamps->size(), alignof(vec4f), 0));
+		level.lamps = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * lamps->size(), alignof(mat4f), 0));
 		level.lampCount = static_cast<short>(lamps->size());
-		level.lamps = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.lampCount, alignof(mat4f), 0));
-		level.lampColors = reinterpret_cast<vec4f*>(allocator.Allocate(sizeof(vec4f) * level.lampCount, alignof(vec4f), 0));
-		
+
 		int i = 0;
 		for (Lamp& l : Factory<Lamp>())
 		{
 			level.lampColors[i] = { 0.6f, 0.6f, 0.0f, 1.0f };
-			level.lamps[i++] = (mat4f::scale(l.mLightRadius) * mat4f::translate(l.mTransform->GetPosition())).transpose();
+			level.lamps[i++] = (mat4f::scale(l.mLightRadius) * mat4f::rotateZ(PI * 0.5f) * mat4f::translate(l.mTransform->GetPosition())).transpose();
 		}
 	}
 

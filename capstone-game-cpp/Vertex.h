@@ -1,6 +1,11 @@
 #pragma once
 #include "Rig3D/GraphicsMath/cgm.h"
 
+struct Vertex1
+{
+	vec3f Position;
+};
+
 struct QuadVertex
 {
 	vec3f Position;
