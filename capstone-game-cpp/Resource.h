@@ -7,14 +7,18 @@ class Resource
 {
 	struct LevelInfo
 	{
-		mat4f* walls;
-		mat4f* tiles;
+		mat4f* wallWorldMatrices;
+		mat4f* floorWorldMatrices;
+		mat4f* lampWorldMatrices;
+		mat4f* lampVPTMatrices;
+		vec4f* lampColors;
 		Rig3D::Transform* moveableBlocks;
 
 		vec3f center, extents;
-		float tileWidth, tileHeight;
+		float floorWidth, floorHeight;
 		short wallCount;
-		short tileCount;
+		short floorCount;
+		short lampCount;
 	};
 
 public:

@@ -20,7 +20,7 @@ private:
 		mNetworkID = Factory<NetworkID>::Create();
 		mNetworkID->mSceneObject = this;
 		mNetworkID->mIsActive = false;
-		mNetworkID->OnNetAuthorityChange(&OnNetAuthorityChange);
+		mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
 
 		mCollider = Factory<SphereColliderComponent>::Create();
 		mCollider->mSceneObject = this;

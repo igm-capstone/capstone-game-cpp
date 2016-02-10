@@ -7,13 +7,17 @@
 class Level01 : public BaseScene
 {
 	// Cbuffer data
-	CbufferPVM			mPVM;
+	CbufferPVM			mPVM;			// Used for main camera matrics
+	CbufferPVM			mLightPVM;		// Used for spotlight matrices
+	CBufferLight		mLightData;		// Used for spotlight data (color, angle, etc).
 
 	// Allocators
 	LinearAllocator		mAllocator;
 	
 	// Counts
 	uint32_t			mWallCount0;
+	uint32_t			mPlaneCount;
+	uint32_t			mSpotLightCount;
 	uint32_t			mExplorerCount;
 
 	float				mPlaneWidth;
@@ -21,16 +25,29 @@ class Level01 : public BaseScene
 
 	// Wall Data
 	mat4f*				mWallWorldMatrices0;
-	
+	mat4f*				mPlaneWorldMatrices;
+
+	// Lights
+	mat4f*				mSpotLightWorldMatrices;
+	mat4f*				mSpotLightVPTMatrices;
+	vec4f*				mSpotLightColors;
+
 	// Mesh
 	IMesh*				mWallMesh0;
+	IMesh*				mPlaneMesh;
 	IMesh*				mExplorerCubeMesh; //better solution when will come when we start to handle models
-	IMesh*				mMinionCubeMesh; //better solution when will come when we start to handle models
+	IMesh*				mMinionCubeMesh; 
+	IMesh*				mPLVMesh;
+	IMesh*				mNDSQuadMesh;
+
+	// RenderContext
+	IRenderContext*		mGBufferContext;
+	IRenderContext*		mShadowContext;
 
 	// ShaderResource
 	IShaderResource*	mWallShaderResource;
 	IShaderResource*	mExplorerShaderResource;
-	IShaderResource*	mMinionShaderResource;
+	IShaderResource*	mPLVShaderResource;
 
 	// Managers
 	CollisionManager	mCollisionManager;
@@ -42,6 +59,7 @@ public:
 	void VOnResize() override;
 
 	void VInitialize() override;
+	void InitializeAssets();
 	void InitializeGeometry();
 	void InitializeShaderResources();
 	void InitializePlayers();
@@ -50,8 +68,11 @@ public:
 	void UpdateCamera();
 
 	void VRender() override;
+	void RenderShadowMaps();	// Not called per frame
 	void RenderWalls();
 	void RenderExplorers();
+	void RenderSpotLightVolumes();
+	void RenderFullScreenQuad();
 	void RenderMinions();
 
 	void VShutdown() override;

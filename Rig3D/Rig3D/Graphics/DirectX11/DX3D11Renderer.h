@@ -55,6 +55,13 @@ namespace Rig3D
 		inline void	VDrawIndexed(GPUPrimitiveType type, uint32_t startIndex, uint32_t count);
 		inline void	VDrawIndexed(uint32_t startIndex, uint32_t count);
 
+#pragma region Viewport
+
+		inline void SetViewport();
+		inline void SetViewport(float topLeftX, float topLeftY, float width, float height, float minDepth, float maxDepth);
+
+#pragma endregion 
+
 #pragma region  Buffer
 
 		void	VCreateVertexBuffer(void* buffer, void* vertices, const size_t& size);
@@ -101,6 +108,12 @@ namespace Rig3D
 		void VCreateLinearClampSamplerState(void* samplerState);
 		void VCreateLinearWrapSamplerState(void* samplerState);
 		void VCreateLinearBorderSamplerState(void* samplerState, float* color);
+
+#pragma endregion 
+
+#pragma region BlendState
+
+		void CreateAdditiveBlendState(ID3D11BlendState** blendState);
 
 #pragma endregion 
 
@@ -186,25 +199,31 @@ namespace Rig3D
 		void	VSetVertexShaderSamplerStates(IShaderResource* shaderResource);
 		void	VSetPixelShaderSamplerStates(IShaderResource* shaderResource);
 
+		void	AddAdditiveBlendState(IShaderResource* shaderResource);
+
+		void	SetBlendState(IShaderResource* shaderResource, const uint32_t& atIndex, float* color, uint32_t sampleMask);
+
 #pragma endregion 
 
 #pragma region Render Context
 
 		void	VCreateRenderContext(IRenderContext** renderContext, LinearAllocator* allocator);
 
-		void	VCreateContextDepthStencilTarget(IRenderContext* renderContext, uint32_t width, uint32_t height);
 		void	VCreateContextTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
+		void	VCreateContextDepthStencilTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
 
-		void	VCreateContextDepthResourceTarget(IRenderContext* renderContext, uint32_t width, uint32_t height);
 		void	VCreateContextResourceTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
+		void	VCreateContextDepthStencilResourceTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
 
 		void	VSetContextTarget();
 		void	VSetContextTargetWithDepth();
 		void	VSetRenderContextTargets(IRenderContext* renderContext);
-		void	VSetRenderContextTargetsWithDepth(IRenderContext* renderContext);
+		void	VSetRenderContextTargetsWithDepth(IRenderContext* renderContext, const uint32_t DSVIndex);
 
 		void	VSetRenderContextTarget(IRenderContext* renderContext, const uint32_t& atIndex);
-		void	VSetRenderContextTargetWithDepth(IRenderContext* renderContext, const uint32_t& atIndex);
+		void	VSetRenderContextTargetWithDepth(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& DSVIndex);
+
+		void	VSetRenderContextDepthTarget(IRenderContext* renderContext, const uint32_t& atIndex);
 
 		void	VClearContext(const float* color, float depth, uint8_t stencil);
 		void	VClearContext(IRenderContext* renderContext, const float* color, float depth, uint8_t stencil);
@@ -213,10 +232,10 @@ namespace Rig3D
 		void	VClearContextTarget(IRenderContext* renderContext, const uint32_t& atIndex, const float* color);
 
 		void	VClearDepthStencil(float depth, uint8_t stencil);
-		void	VClearDepthStencil(IRenderContext* renderContext, float depth, uint8_t stencil);
+		void	VClearDepthStencil(IRenderContext* renderContext, const uint32_t& atIndex, float depth, uint8_t stencil);
 
-		void	VSetVertexShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& toBindingIndex);
-		void	VSetPixelShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& toBindingIndex);
+		void	VSetVertexShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+		void	VSetPixelShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
 
 		void	VSetVertexShaderResourceViews(IRenderContext* renderContext);
 		void	VSetPixelShaderResourceViews(IRenderContext* renderContext);

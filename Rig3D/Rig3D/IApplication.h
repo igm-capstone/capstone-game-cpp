@@ -8,8 +8,6 @@
 #define RIG3D __declspec(dllimport)
 #endif
 
-#define STATIC_SCENE_MEMORY 1000000
-
 namespace Rig3D
 {
 	class RIG3D IApplication

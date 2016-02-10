@@ -192,12 +192,12 @@ void NetworkServer::ReceiveFromClients()
 						Send(client.first, &p);
 
 						//Spawn on the server
-						Application::SharedInstance().GetCurrentScene()->CmdSpawnNewExplorer(client.first);
+						NetworkCmd::SpawnNewExplorer(client.first);
 					}
 					break;
 				case SYNC_TRANSFORM:
 					Retransmit(client.first, &packet);
-					Application::SharedInstance().GetCurrentScene()->SyncTransform(packet.UUID, packet.Position);
+					NetworkRpc::SyncTransform(packet.UUID, packet.Position);
 					break;
 				default:
 					printf("error in packet types\n");

@@ -692,7 +692,7 @@ inline Matrix4 Matrix4::operator*=(const float& rhs)
 
 // Unary
 
-inline Matrix4 Matrix4::operator=(const Matrix4& rhs)
+inline Matrix4& Matrix4::operator=(const Matrix4& rhs)
 {
 	u = rhs.u;
 	v = rhs.v;
