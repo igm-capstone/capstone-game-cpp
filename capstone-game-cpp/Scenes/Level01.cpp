@@ -20,6 +20,9 @@
 #include <SceneObjects/Minion.h>
 #include <trace.h>
 
+#pragma comment (lib, "fmodL_vc.lib")
+#pragma comment (lib, "fmodstudioL_vc.lib")
+
 #define SHADOW_MAP_SIZE 1024
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
@@ -103,12 +106,12 @@ void Level01::VInitialize()
 	mRenderer->SetDelegate(this);
 
 	InitializeAssets();
-	mFloorCollider.halfSize = level.extents;
-	mFloorCollider.origin = level.center;
 
 	InitializeGeometry();
 	InitializeShaderResources();
 	RenderShadowMaps();
+
+
 
 	mCamera.SetViewMatrix(mat4f::lookAtLH(vec3f(0, 0, 0), vec3f(10.0f, 0.0f, -100.0f), vec3f(0, 1, 0))); //Temporary until Ghost get a controller.
 
@@ -134,8 +137,10 @@ void Level01::InitializeAssets()
 	mSpotLightWorldMatrices = level.lampWorldMatrices;
 	mSpotLightVPTMatrices	= level.lampVPTMatrices;
 	mSpotLightColors		= level.lampColors;
-	mSpotLightCount		= level.lampCount;
+	mSpotLightCount			= level.lampCount;
 
+	mFloorCollider.halfSize = level.extents;
+	mFloorCollider.origin	= level.center;
 }
 
 void Level01::InitializeGeometry()
