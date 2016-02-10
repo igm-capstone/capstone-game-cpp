@@ -16,6 +16,8 @@
 #include "Shaders/obj/NDSQuadVertexShader.h"
 #include "Shaders/obj/NDSQuadPixelShader.h"
 #include "Shaders/obj/DebugTexturePixelShader.h"
+#include "Shaders/obj/SpriteVertexShader.h"
+#include "Shaders/obj/SpritePixelShader.h"
 #include "Shaders/obj/ShadowCasterPixelShader.h"
 #include "Shaders/obj/ShadowGridComputeShader.h"
 #include "Shaders/obj/ShadowPixelShader.h"
@@ -33,6 +35,8 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mNDSQuadVertexShader(nullptr),
 	mNDSQuadPixelShader(nullptr),
 	mDBGPixelShader(nullptr),
+	mSpriteVertexShader(nullptr),
+	mSpritePixelShader(nullptr),
 	mLoadingScreen(nullptr),
 	mCurrentScene(nullptr),
 	mSceneToLoad(nullptr),
@@ -144,6 +148,21 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VCreateShader(&mDBGPixelShader, &mGameAllocator);
 	renderer->VLoadPixelShader(mDBGPixelShader, gDebugTexturePixelShader, sizeof(gDebugTexturePixelShader));
 
+
+
+	// Sprite Shaders
+
+	InputElement spriteInputElements[] =
+	{
+		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "TEXCOORD",	0, 0, 12,  0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX }
+	};
+
+	renderer->VCreateShader(&mSpriteVertexShader, &mGameAllocator);
+	renderer->VCreateShader(&mSpritePixelShader, &mGameAllocator);
+
+	renderer->LoadVertexShader(mSpriteVertexShader, gSpriteVertexShader, sizeof(gSpriteVertexShader), spriteInputElements, 2);
+	renderer->VLoadPixelShader(mSpritePixelShader, gSpritePixelShader, sizeof(gSpritePixelShader));
 }
 
 void ScareTacticsApplication::VInitialize()
