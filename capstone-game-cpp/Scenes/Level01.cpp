@@ -105,8 +105,7 @@ void Level01::VInitialize()
 	mRenderer->SetDelegate(this);
 
 	InitializeAssets();
-	mFloorCollider.halfSize = level.extents;
-	mFloorCollider.origin = level.center;
+
 
 	InitializeGeometry();
 	InitializeShaderResources();
@@ -137,6 +136,8 @@ void Level01::InitializeAssets()
 	mSpotLightVPTMatrices	= level.lampVPTMatrices;
 	mSpotLightCount			= level.lampCount;
 
+	mFloorCollider.halfSize = level.extents;
+	mFloorCollider.origin	= level.center;
 }
 
 void Level01::InitializeGeometry()
