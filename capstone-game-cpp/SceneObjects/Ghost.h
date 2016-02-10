@@ -39,7 +39,7 @@ private:
 		auto spawnMinion = Factory<Skill>::Create();
 		spawnMinion->mSceneObject = this;
 		spawnMinion->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
-		spawnMinion->Setup(2, 0, GhostController::DoSpawnMinion);
+		spawnMinion->Setup(0, 0, GhostController::DoSpawnMinion);
 		mSkills[0] = spawnMinion;
 	}
 

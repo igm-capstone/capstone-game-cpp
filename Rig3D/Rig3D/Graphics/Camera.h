@@ -14,7 +14,8 @@ namespace Rig3D
 	private:
 		mat4f		mProjection;
 		mat4f		mView;
-
+		bool		mIsDirty;
+		vec3f		mForward;
 	public:
 		Camera();
 		~Camera();
@@ -24,6 +25,7 @@ namespace Rig3D
 
 		void SetProjectionMatrix(const mat4f& projection);
 		void SetViewMatrix(const mat4f& view);
+		vec3f GetForward();
 	};
 
 }

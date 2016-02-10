@@ -33,4 +33,15 @@ void Camera::SetProjectionMatrix(const mat4f& projection)
 void Camera::SetViewMatrix(const mat4f& view)
 {
 	mView = view;
+	mIsDirty = true;
+}
+
+vec3f Camera::GetForward()
+{
+	if (mIsDirty)
+	{
+		mForward = vec3f(0, 0, 1) * mat3f(mView.inverse());
+	}
+
+	return mForward;
 }

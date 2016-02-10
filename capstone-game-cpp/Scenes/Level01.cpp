@@ -18,6 +18,7 @@
 #include <Culler.h>
 #include <SceneObjects/Lamp.h>
 #include <SceneObjects/Minion.h>
+#include <trace.h>
 
 #define SHADOW_MAP_SIZE 1024
 
@@ -104,6 +105,9 @@ void Level01::VInitialize()
 	mRenderer->SetDelegate(this);
 
 	InitializeAssets();
+	mFloorCollider.halfSize = level.extents;
+	mFloorCollider.origin = level.center;
+
 	InitializeGeometry();
 	InitializeShaderResources();
 	RenderShadowMaps();
@@ -316,6 +320,8 @@ void Level01::VRender()
 	ID3D11ShaderResourceView* nullSRV[4] = { 0, 0, 0, 0 };
 	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, nullSRV);
 
+	RENDER_TRACE();
+	
 	//FPS
 	mRenderer->VSetContextTarget();
 
