@@ -17,7 +17,7 @@ class Level01 : public BaseScene
 	// Counts
 	uint32_t			mWallCount0;
 	uint32_t			mPlaneCount;
-	uint32_t			mPointLightCount;
+	uint32_t			mSpotLightCount;
 	uint32_t			mExplorerCount;
 
 	float				mPlaneWidth;
@@ -26,8 +26,11 @@ class Level01 : public BaseScene
 	// Wall Data
 	mat4f*				mWallWorldMatrices0;
 	mat4f*				mPlaneWorldMatrices;
-	mat4f*				mPointLightWorldMatrices;
-	vec4f*				mPointLightColors;
+
+	// Lights
+	mat4f*				mSpotLightWorldMatrices;
+	mat4f*				mSpotLightVPTMatrices;
+	vec4f*				mSpotLightColors;
 
 	// Mesh
 	IMesh*				mWallMesh0;

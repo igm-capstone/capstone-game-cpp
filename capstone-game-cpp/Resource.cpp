@@ -163,23 +163,23 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		level.extents = parseVec3f(extents);
 	}
 
-	level.tileCount = TILE_COUNT_X * TILE_COUNT_Y;
-	level.tiles = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.tileCount, alignof(mat4f), 0));
+	level.floorCount = TILE_COUNT_X * TILE_COUNT_Y;
+	level.floorWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.floorCount, alignof(mat4f), 0));
 
 	float levelWidth	= level.extents.x * 2.0f;
 	float levelHeight	= level.extents.x * 2.0f;
 
-	level.tileWidth		=	levelWidth / static_cast<float>(TILE_COUNT_X);
-	level.tileHeight	=	levelHeight / static_cast<float>(TILE_COUNT_Y);
+	level.floorWidth		=	levelWidth / static_cast<float>(TILE_COUNT_X);
+	level.floorHeight	=	levelHeight / static_cast<float>(TILE_COUNT_Y);
 	
-	float halfWidth		= (levelWidth - level.tileWidth) * 0.5f;
-	float halfHeight	= (levelHeight - level.tileHeight) * 0.5f;
+	float halfWidth		= (levelWidth - level.floorWidth) * 0.5f;
+	float halfHeight	= (levelHeight - level.floorHeight) * 0.5f;
 
 	for (int y = 0; y < TILE_COUNT_Y; y++)
 	{
 		for (int x = 0; x < TILE_COUNT_X; x++)
 		{
-			level.tiles[y * TILE_COUNT_X + x] = (mat4f::rotateX(-PI * 0.5f) * mat4f::translate({ x * level.tileWidth - halfWidth, halfHeight - y * level.tileHeight, 0.0f })).transpose();
+			level.floorWorldMatrices[y * TILE_COUNT_X + x] = (mat4f::rotateX(-PI * 0.5f) * mat4f::translate({ x * level.floorWidth - halfWidth, halfHeight - y * level.floorHeight, 0.0f })).transpose();
 		}
 	}
 
@@ -188,15 +188,24 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	{
 		loadLamps(lamps);
 
-		level.lampColors = reinterpret_cast<vec4f*>(allocator.Allocate(sizeof(vec4f) * lamps->size(), alignof(vec4f), 0));
-		level.lamps = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * lamps->size(), alignof(mat4f), 0));
-		level.lampCount = static_cast<short>(lamps->size());
+		level.lampWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * lamps->size(), alignof(mat4f), 0));
+		level.lampVPTMatrices	= reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * lamps->size(), alignof(mat4f), 0));
+		level.lampColors		= reinterpret_cast<vec4f*>(allocator.Allocate(sizeof(vec4f) * lamps->size(), alignof(vec4f), 0));
+		level.lampCount			= static_cast<short>(lamps->size());
 
 		int i = 0;
 		for (Lamp& l : Factory<Lamp>())
 		{
+			level.lampWorldMatrices[i] = (mat4f::scale(l.mLightRadius) * mat4f::rotateZ(PI * 0.5f) * mat4f::translate(l.mTransform->GetPosition())).transpose();
+			
+			// Note: we don't bother transposing this matrix because we need it for culling in row maj fashion.
+			level.lampVPTMatrices[i] = 
+				mat4f::lookToLH(vec3f(1.0f, 0.0f, 0.0f), l.mTransform->GetPosition(), vec3f(0.0f, 0.0f, -1.0f)) 
+				* mat4f::normalizedPerspectiveLH(PI * 0.5f, 1.0f, 0.1f, l.mLightRadius);
+
+
 			level.lampColors[i] = { 0.6f, 0.6f, 0.0f, 1.0f };
-			level.lamps[i++] = (mat4f::scale(l.mLightRadius) * mat4f::rotateZ(PI * 0.5f) * mat4f::translate(l.mTransform->GetPosition())).transpose();
+			i++;
 		}
 	}
 
@@ -230,12 +239,12 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		loadWalls(walls);
 
 		level.wallCount = static_cast<short>(walls->size());
-		level.walls = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.wallCount, alignof(mat4f), 0));
+		level.wallWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.wallCount, alignof(mat4f), 0));
 
 		int i = 0;
 		for (Wall& w : Factory<Wall>())
 		{
-			level.walls[i++] = w.mTransform->GetWorldMatrix().transpose();
+			level.wallWorldMatrices[i++] = w.mTransform->GetWorldMatrix().transpose();
 		}
 	}
 

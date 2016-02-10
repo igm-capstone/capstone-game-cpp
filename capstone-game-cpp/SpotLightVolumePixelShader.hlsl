@@ -13,8 +13,7 @@ SamplerState depthSamplerState	: register(s0);
 
 cbuffer light : register (b0)
 {
-	matrix	lightProjection;
-	matrix	lightView;
+	matrix	lightViewProjection;
 	float4	lightColor;
 	float	cosAngle;
 	float	range;
@@ -36,7 +35,7 @@ float4 main(Pixel pixel) : SV_TARGET
 	};
 
 	// Compute transform for homogenous light space
-	matrix VPT = mul(lightView, mul(lightProjection, T));
+	matrix VPT = mul(lightViewProjection, T);
 
 	// Transform world position to homogenous light space
 	float4 lightPosH = mul(float4(position, 1.0f), VPT);

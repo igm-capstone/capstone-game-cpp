@@ -219,7 +219,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Culler.h">
-		<Filter>Header Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SceneObjects\Ghost.h">
       <Filter>Header Files</Filter>
@@ -265,12 +265,6 @@
     <FxCompile Include="ExplorerPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PointLightVolumeVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="PointLightVolumePixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="NDSQuadVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
@@ -278,6 +272,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="DebugTexturePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="SpotLightVolumeVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="SpotLightVolumePixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

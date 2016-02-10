@@ -11,8 +11,8 @@
 #include "Shaders/obj/QuadVertexShader.h"
 #include "Shaders/obj/ExplorerVertexShader.h"
 #include "Shaders/obj/ExplorerPixelShader.h"
-#include "Shaders/obj/PointLightVolumeVertexShader.h"
-#include "Shaders/obj/PointLightVolumePixelShader.h"
+#include "Shaders/obj/SpotLightVolumeVertexShader.h"
+#include "Shaders/obj/SpotLightVolumePixelShader.h"
 #include "Shaders/obj/NDSQuadVertexShader.h"
 #include "Shaders/obj/NDSQuadPixelShader.h"
 #include "Shaders/obj/DebugTexturePixelShader.h"
@@ -118,14 +118,14 @@ void ScareTacticsApplication::InitializeShaders()
 
 	InputElement plvInputElements[] = 
 	{
-		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX }
 	};
 
 	renderer->VCreateShader(&mPLVolumeVertexShader, &mGameAllocator);
 	renderer->VCreateShader(&mPLVolumePixelShader, &mGameAllocator);
 
-	renderer->LoadVertexShader(mPLVolumeVertexShader, gPointLightVolumeVertexShader, sizeof(gPointLightVolumeVertexShader), plvInputElements, 1);
-	renderer->VLoadPixelShader(mPLVolumePixelShader, gPointLightVolumePixelShader, sizeof(gPointLightVolumePixelShader));
+	renderer->LoadVertexShader(mPLVolumeVertexShader, gSpotLightVolumeVertexShader, sizeof(gSpotLightVolumeVertexShader), plvInputElements, 1);
+	renderer->VLoadPixelShader(mPLVolumePixelShader, gSpotLightVolumePixelShader, sizeof(gSpotLightVolumePixelShader));
 
 	// Normalized Device Quad Shaders
 

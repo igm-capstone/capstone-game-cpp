@@ -28,14 +28,15 @@ static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 Level01::Level01() :
 	mWallCount0(0),
 	mPlaneCount(0),
-	mPointLightCount(0),
+	mSpotLightCount(0),
 	mExplorerCount(0),
 	mPlaneWidth(0.0f),
 	mPlaneHeight(0.0f),
 	mWallWorldMatrices0(nullptr),
 	mPlaneWorldMatrices(nullptr),
-	mPointLightWorldMatrices(nullptr),
-	mPointLightColors(nullptr),
+	mSpotLightWorldMatrices(nullptr),
+	mSpotLightVPTMatrices(nullptr),
+	mSpotLightColors(nullptr),
 	mWallMesh0(nullptr),
 	mPlaneMesh(nullptr),
 	mExplorerCubeMesh(nullptr),
@@ -111,17 +112,19 @@ void Level01::InitializeAssets()
 {
 	auto level = Resource::LoadLevel("Assets/Level01.json", mAllocator);
 
-	mWallCount0 = level.wallCount;
-	mWallWorldMatrices0 = level.walls;
+	mWallWorldMatrices0 = level.wallWorldMatrices;
+	mWallCount0			= level.wallCount;
 
-	mPlaneCount = level.tileCount;
-	mPlaneWorldMatrices = level.tiles;
-	mPlaneWidth = level.tileWidth;
-	mPlaneHeight = level.tileHeight;
+	mPlaneWorldMatrices = level.floorWorldMatrices;
+	mPlaneWidth			= level.floorWidth;
+	mPlaneHeight		= level.floorHeight;
+	mPlaneCount			= level.floorCount;
 
-	mPointLightCount = level.lampCount;
-	mPointLightWorldMatrices = level.lamps;
-	mPointLightColors = level.lampColors;
+	mSpotLightWorldMatrices = level.lampWorldMatrices;
+	mSpotLightVPTMatrices	= level.lampVPTMatrices;
+	mSpotLightColors		= level.lampColors;
+	mSpotLightCount		= level.lampCount;
+
 }
 
 void Level01::InitializeGeometry()
@@ -188,7 +191,7 @@ void Level01::InitializeShaderResources()
 	mRenderer->VCreateRenderContext(&mShadowContext, &mAllocator);
 
 	// Shadow Maps for each light
-	mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mPointLightCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+	mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mSpotLightCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 
 	// Allocate wall shader resource
 	mRenderer->VCreateShaderResource(&mWallShaderResource, &mAllocator);
@@ -308,22 +311,21 @@ void Level01::RenderShadowMaps()
 	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
 	mRenderer->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
 
+	// Identity here just to be compatible with shader.
+	mLightPVM.camera.view = mat4f(1.0f);	
+
 	uint32_t i = 0;
 	for (Lamp& l : Factory<Lamp>())
 	{
 		mRenderer->VSetRenderContextDepthTarget(mShadowContext, i);
 		mRenderer->VClearDepthStencil(mShadowContext, i, 1.0f, 0);
 
-		mat4f projection = mat4f::normalizedPerspectiveLH(PI * 0.5f, mRenderer->GetAspectRatio(), 0.1f, l.mLightRadius);
-		mat4f view = mat4f::lookToLH(vec3f(1.0f, 0.0f, 0.0f), mPointLightWorldMatrices[i].transpose().t, vec3f(0.0f, 0.0f, -1.0f));
-
+		// Set projection matrix for light frustum
+		mLightPVM.camera.projection = mSpotLightVPTMatrices[i].transpose();
+		
 		std::vector<uint32_t> indices;
 		Rig3D::Frustum frustum;
-		mat4f viewProjection = view * projection;
-		Rig3D::ExtractNormalizedFrustumLH(&frustum, viewProjection);
-
-		mLightPVM.camera.projection = projection.transpose();
-		mLightPVM.camera.view = view.transpose();
+		Rig3D::ExtractNormalizedFrustumLH(&frustum, mSpotLightVPTMatrices[i]);
 
 		// Walls
 
@@ -423,21 +425,15 @@ void Level01::RenderPointLightVolumes()
 	mRenderer->VSetPixelShader(mApplication->mPLVolumePixelShader);
 
 	mRenderer->VBindMesh(mPLVMesh);
-	
+
 	uint32_t i = 0;
 	for (Lamp& l : Factory<Lamp>())
 	{
-		if (i >= mPointLightCount)
-		{
-			break;
-		}
-
-		mPVM.world = mPointLightWorldMatrices[i];
-
+		mPVM.world = mSpotLightWorldMatrices[i];
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mPVM, 0);
 
-		mLightData.camera.projection = mat4f::normalizedPerspectiveLH(PI * 0.5f, mRenderer->GetAspectRatio(), 0.1f, l.mLightRadius).transpose();
-		mLightData.camera.view = mat4f::lookToLH(vec3f(1.0f, 0.0f, 0.0f), mPointLightWorldMatrices[i].transpose().t, vec3f(0.0f, 0.0f, -1.0f)).transpose();
+		// Set Light data
+		mLightData.viewProjection = (mSpotLightVPTMatrices[i]).transpose();
 		mLightData.color = Colors::yellow;
 		mLightData.range = l.mLightRadius;
 		mLightData.cosAngle = cos(1.57079632679f * 0.5f);

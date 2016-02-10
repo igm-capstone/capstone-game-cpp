@@ -233,7 +233,7 @@
       <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">g%(Filename)</VariableName>
       <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">g%(Filename)</VariableName>
     </FxCompile>
-    <FxCompile Include="PointLightVolumePixelShader.hlsl">
+    <FxCompile Include="SpotLightVolumePixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>
@@ -247,7 +247,7 @@
       <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">g%(Filename)</VariableName>
       <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">g%(Filename)</VariableName>
     </FxCompile>
-    <FxCompile Include="PointLightVolumeVertexShader.hlsl">
+    <FxCompile Include="SpotLightVolumeVertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.0</ShaderModel>

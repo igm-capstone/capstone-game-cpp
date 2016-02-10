@@ -15,7 +15,7 @@ struct CbufferPVM
 
 struct CBufferLight
 {
-	CameraData	camera;
+	mat4f		viewProjection;
 	vec4f		color;
 	float		cosAngle;
 	float		range;
