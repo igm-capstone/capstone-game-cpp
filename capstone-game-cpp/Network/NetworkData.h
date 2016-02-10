@@ -7,10 +7,11 @@
 
 enum PacketTypes {
 	INIT_CONNECTION = '0',
-	SET_CLIENT_ID = '1',
-	SPAWN_EXPLORER = 'E',
+	SET_CLIENT_ID   = '1',
+	SPAWN_EXPLORER  = 'E',
+	SPAWN_MINION    = 'M',
 	GRANT_AUTHORITY = 'A',
-	SYNC_TRANSFORM = 'T',
+	SYNC_TRANSFORM  = 'T',
 	UNKNOWN
 };
 

@@ -104,13 +104,16 @@ void NetworkClient::Update()
 				mID = packet.ClientID;
 				break;
 			case SPAWN_EXPLORER:
-				Application::SharedInstance().GetCurrentScene()->RpcSpawnExistingExplorer(packet.UUID, packet.Position);
+				NetworkRpc::SpawnExistingExplorer(packet.UUID, packet.Position);
+				break;
+			case SPAWN_MINION:
+				NetworkRpc::SpawnExistingMinion(packet.UUID, packet.Position);
 				break;
 			case GRANT_AUTHORITY:
-				Application::SharedInstance().GetCurrentScene()->GrantAuthority(packet.UUID);
+				NetworkRpc::GrantAuthority(packet.UUID);
 				break;
 			case SYNC_TRANSFORM:
-				Application::SharedInstance().GetCurrentScene()->SyncTransform(packet.UUID, packet.Position);
+				NetworkRpc::SyncTransform(packet.UUID, packet.Position);
 				break;
 			default:
 				printf("error in packet types\n");

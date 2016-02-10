@@ -17,6 +17,7 @@
 #include <Console.h>
 #include <Culler.h>
 #include <SceneObjects/Lamp.h>
+#include <SceneObjects/Minion.h>
 
 #define SHADOW_MAP_SIZE 1024
 
@@ -40,6 +41,7 @@ Level01::Level01() :
 	mWallMesh0(nullptr),
 	mPlaneMesh(nullptr),
 	mExplorerCubeMesh(nullptr),
+	mMinionCubeMesh(nullptr),
 	mPLVMesh(nullptr),
 	mNDSQuadMesh(nullptr),
 	mGBufferContext(nullptr),
@@ -56,6 +58,7 @@ Level01::~Level01()
 	mWallMesh0->~IMesh();
 	mPlaneMesh->~IMesh();
 	mExplorerCubeMesh->~IMesh();
+	mMinionCubeMesh->~IMesh();
 	mPLVMesh->~IMesh();
 	mNDSQuadMesh->~IMesh();
 
@@ -63,7 +66,11 @@ Level01::~Level01()
 	{
 		//e.mMesh->~IMesh();
 	}
-	mExplorerCubeMesh->~IMesh();
+
+	for (Minion& m : Factory<Minion>())
+	{
+		//m.mMesh->~IMesh();
+	}
 
 	mWallShaderResource->~IShaderResource();
 	mExplorerShaderResource->~IShaderResource();
@@ -147,6 +154,11 @@ void Level01::InitializeGeometry()
 	meshLibrary.NewMesh(&mExplorerCubeMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mExplorerCubeMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
 	mRenderer->VSetMeshIndexBuffer(mExplorerCubeMesh, &indices[0], indices.size());
+
+	// Minion 
+	meshLibrary.NewMesh(&mMinionCubeMesh, mRenderer);
+	mRenderer->VSetMeshVertexBuffer(mMinionCubeMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
+	mRenderer->VSetMeshIndexBuffer(mMinionCubeMesh, &indices[0], indices.size());
 
 	vertices.clear();
 	indices.clear();
@@ -259,6 +271,12 @@ void Level01::VUpdate(double milliseconds)
 		skill.Update();
 	}
 
+	if (mInput->GetKeyDown(KEYCODE_O) && mNetworkManager->mMode == NetworkManager::Mode::SERVER)
+	{
+		NetworkCmd::SpawnNewMinion(vec3f(0, 0, 0));
+	}
+
+
 	UpdateCamera();
 
 	mCollisionManager.DetectCollisions();
@@ -287,14 +305,15 @@ void Level01::VRender()
 
 	RenderWalls();
 	RenderExplorers();
-	RenderPointLightVolumes();
+	RenderMinions();
+	RenderSpotLightVolumes();
 	RenderFullScreenQuad();
 
 	ID3D11ShaderResourceView* nullSRV[4] = { 0, 0, 0, 0 };
 	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, nullSRV);
 
 	//FPS
-	mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
+	mRenderer->VSetContextTarget();
 
 	DX11IMGUI::NewFrame();
 	RenderFPSIndicator();
@@ -411,7 +430,7 @@ void Level01::RenderExplorers()
 	}
 }
 
-void Level01::RenderPointLightVolumes()
+void Level01::RenderSpotLightVolumes()
 {
 	mRenderer->VSetRenderContextTarget(mGBufferContext, 3);
 	mRenderer->VClearContextTarget(mGBufferContext, 3, Colors::black.pCols);	// Albedo
@@ -469,6 +488,23 @@ void Level01::RenderFullScreenQuad()
 
 	mRenderer->VBindMesh(mNDSQuadMesh);
 	mRenderer->VDrawIndexed(0, mNDSQuadMesh->GetIndexCount());
+}
+
+void Level01::RenderMinions()
+{
+	mRenderer->VSetInputLayout (mApplication->mExplorerVertexShader);
+	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
+	mRenderer->VSetPixelShader (mApplication->mExplorerPixelShader);
+
+	for (Minion& m : Factory<Minion>())
+	{
+		mPVM.world = m.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mPVM, 0);
+
+		mRenderer->VBindMesh(mMinionCubeMesh);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+		mRenderer->VDrawIndexed(0, mMinionCubeMesh->GetIndexCount());
+	}
 }
 
 #pragma endregion

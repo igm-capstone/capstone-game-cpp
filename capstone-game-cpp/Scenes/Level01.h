@@ -36,6 +36,7 @@ class Level01 : public BaseScene
 	IMesh*				mWallMesh0;
 	IMesh*				mPlaneMesh;
 	IMesh*				mExplorerCubeMesh; //better solution when will come when we start to handle models
+	IMesh*				mMinionCubeMesh; 
 	IMesh*				mPLVMesh;
 	IMesh*				mNDSQuadMesh;
 
@@ -70,10 +71,9 @@ public:
 	void RenderShadowMaps();	// Not called per frame
 	void RenderWalls();
 	void RenderExplorers();
-	void RenderPointLightVolumes();
+	void RenderSpotLightVolumes();
 	void RenderFullScreenQuad();
-
-	
+	void RenderMinions();
 
 	void VShutdown() override;
 };
