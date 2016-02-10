@@ -15,8 +15,14 @@ cbuffer light : register (b0)
 {
 	matrix	lightViewProjection;
 	float4	lightColor;
+	float3  lightDirection;
 	float	cosAngle;
 	float	range;
+}
+
+cbuffer camera : register(b1)
+{
+	float4 eyePos;
 }
 
 float4 main(Pixel pixel) : SV_TARGET
@@ -58,7 +64,6 @@ float4 main(Pixel pixel) : SV_TARGET
 	float4 diffuse = lightColor;
 	float4 specular = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	float3 lightDirection = float3(1.0f, 0.0f, 0.0f); // Hard Coded
 	float3 pixelToLight = pixel.lightPos - position;
 	float d = length(pixelToLight);
 	pixelToLight /= d;
@@ -66,12 +71,10 @@ float4 main(Pixel pixel) : SV_TARGET
 	float nDotL = dot(pixelToLight, normal);
 	diffuse *= saturate(nDotL);
 
-	float3 eyePos = float3(10.0f, 0.0f, -100.0f);	// Hard Coded.
-
 	if (nDotL > 0.0f)
 	{
 		float3 v = reflect(pixelToLight, normal);
-		float3 pixelToEye = normalize(eyePos - position);
+		float3 pixelToEye = normalize(eyePos.xyz - position);
 		float specFactor = pow(max(dot(v, pixelToEye), 0.0f), 32.0f);
 
 		diffuse += specular * specFactor;
@@ -79,8 +82,7 @@ float4 main(Pixel pixel) : SV_TARGET
 
 	float4 albedo = diffuse / (d * 0.5f) ;
 			
-	float   phi = 1.57079632679f * 0.5f;		// Hard coded 90 deg
-	float	cutoff = cosAngle;//cos(phi);
+	float	cutoff = cosAngle;	// Input as cos(half spotlight cone angle)
 	float	cosAlpha = dot(pixelToLight, -normalize(lightDirection));
 	float totalAttenuation = 0.0f;
 	if (cosAlpha > cutoff) {
