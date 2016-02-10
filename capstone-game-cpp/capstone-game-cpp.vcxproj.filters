@@ -227,6 +227,9 @@
     <ClInclude Include="capstone-game-cpp.rc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Culler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="SceneObjects\Ghost.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -278,6 +281,21 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\ExplorerVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DebugTexturePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SpotLightVolumeVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SpotLightVolumePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\NDSQuadVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\NDSQuadPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

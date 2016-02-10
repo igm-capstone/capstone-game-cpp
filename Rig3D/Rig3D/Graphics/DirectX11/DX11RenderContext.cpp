@@ -2,7 +2,7 @@
 
 using namespace Rig3D;
 
-DX11RenderContext::DX11RenderContext() : mDepthStencilView(nullptr), mDepthStencilResourceView(nullptr)
+DX11RenderContext::DX11RenderContext()
 {
 	
 }
@@ -10,18 +10,6 @@ DX11RenderContext::DX11RenderContext() : mDepthStencilView(nullptr), mDepthStenc
 
 DX11RenderContext::~DX11RenderContext()
 {
-	if (mDepthStencilView)
-	{
-		mDepthStencilView->Release();
-		mDepthStencilView = nullptr;
-	}
-
-	if (mDepthStencilResourceView)
-	{
-		mDepthStencilResourceView->Release();
-		mDepthStencilResourceView = nullptr;
-	}
-
 	for (ID3D11RenderTargetView* rtv : mRenderTargetViews)
 	{
 		if (rtv)
@@ -51,16 +39,26 @@ DX11RenderContext::~DX11RenderContext()
 	}
 
 	mShaderResourceViews.clear();
-}
 
-ID3D11DepthStencilView* DX11RenderContext::GetDepthStencilView()
-{
-	return mDepthStencilView;
-}
+	for (ID3D11DepthStencilView* dsv : mDepthStencilViews)
+	{
+		if (dsv)
+		{
+			dsv->Release();
+		}
+	}
 
-ID3D11ShaderResourceView* DX11RenderContext::GetDepthStencilResourceView()
-{
-	return mDepthStencilResourceView;
+	mDepthStencilViews.clear();
+
+	for (ID3D11ShaderResourceView* srv : mDepthStencilResourceViews)
+	{
+		if (srv)
+		{
+			srv->Release();
+		}
+	}
+
+	mDepthStencilResourceViews.clear();
 }
 
 ID3D11RenderTargetView** DX11RenderContext::GetRenderTargetViews()
@@ -78,6 +76,15 @@ ID3D11ShaderResourceView** DX11RenderContext::GetShaderResourceViews()
 	return &mShaderResourceViews[0];
 }
 
+ID3D11DepthStencilView** DX11RenderContext::GetDepthStencilViews()
+{
+	return &mDepthStencilViews[0];
+}
+ID3D11ShaderResourceView** DX11RenderContext::GetDepthStencilResourceViews()
+{
+	return &mDepthStencilResourceViews[0];
+}
+
 uint32_t  DX11RenderContext::GetRenderTargetViewCount() const
 {
 	return mRenderTargetViews.size();
@@ -93,26 +100,14 @@ uint32_t DX11RenderContext::GetShaderResourceViewCount() const
 	return mShaderResourceViews.size();
 }
 
-void DX11RenderContext::SetDepthStencilView(ID3D11DepthStencilView* depthStencilView)
+uint32_t DX11RenderContext::GetDepthStencilViewCount() const
 {
-	if (mDepthStencilView)
-	{
-		mDepthStencilView->Release();
-		mDepthStencilView = nullptr;
-	}
-
-	mDepthStencilView = depthStencilView;
+	return mDepthStencilViews.size();
 }
 
-void DX11RenderContext::SetDepthStencilResourceView(ID3D11ShaderResourceView* depthStencilResourceView)
+uint32_t DX11RenderContext::GetDepthStencilResourceViewCount() const
 {
-	if (mDepthStencilResourceView)
-	{
-		mDepthStencilResourceView->Release();
-		mDepthStencilResourceView = nullptr;
-	}
-
-	mDepthStencilResourceView = depthStencilResourceView;
+	return mDepthStencilResourceViews.size();
 }
 
 void DX11RenderContext::SetRenderTargetViews(std::vector<ID3D11RenderTargetView*>& renderTargetViews)
@@ -136,17 +131,18 @@ void DX11RenderContext::SetShaderResourceViews(std::vector<ID3D11ShaderResourceV
 	mShaderResourceViews = shaderResourceViews;
 }
 
-void DX11RenderContext::VClearDepthStencilView()
+void DX11RenderContext::SetDepthStencilViews(std::vector<ID3D11DepthStencilView*>& depthStencilViews)
 {
-	if (mDepthStencilView)
-	{
-		mDepthStencilView->Release();
-	}
+	VClearDepthStencilViews();
 
-	if (mDepthStencilResourceView)
-	{
-		mDepthStencilResourceView->Release();
-	}
+	mDepthStencilViews = depthStencilViews;
+}
+
+void DX11RenderContext::SetDepthStencilResourceViews(std::vector<ID3D11ShaderResourceView*>& depthStencilResourceViews)
+{
+	VClearDepthStencilResourceViews();
+
+	mDepthStencilResourceViews = depthStencilResourceViews;
 }
 
 void DX11RenderContext::VClearRenderTargetViews()
@@ -186,4 +182,30 @@ void DX11RenderContext::VClearShaderResourceViews()
 	}
 
 	mShaderResourceViews.clear();
+}
+
+void DX11RenderContext::VClearDepthStencilViews()
+{
+	for (ID3D11DepthStencilView* dsv : mDepthStencilViews)
+	{
+		if (dsv)
+		{
+			dsv->Release();
+		}
+	}
+
+	mDepthStencilViews.clear();
+}
+
+void DX11RenderContext::VClearDepthStencilResourceViews()
+{
+	for (ID3D11ShaderResourceView* srv : mDepthStencilResourceViews)
+	{
+		if (srv)
+		{
+			srv->Release();
+		}
+	}
+
+	mDepthStencilResourceViews.clear();
 }

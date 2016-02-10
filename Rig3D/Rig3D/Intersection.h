@@ -347,11 +347,40 @@ namespace Rig3D
 		return 1;
 	}
 
+	template <class Vector>
+	int IntersectAABBPlane(const AABB<Vector>& aabb, const Plane<Vector>& plane)
+	{
+		float pir =
+			aabb.halfSize.pCols[0] * abs(plane.normal.pCols[0]) +
+			aabb.halfSize.pCols[1] * abs(plane.normal.pCols[1]) +
+			aabb.halfSize.pCols[2] * abs(plane.normal.pCols[2]);
+
+		float distance = cliqCity::graphicsMath::dot(plane.normal, aabb.origin) - plane.distance;
+
+		return abs(distance) <= pir;
+	}
+
 #pragma endregion 
 
 #pragma region OBB - Primitive Tests
 
-	
+	template<class Vector>
+	int IntesectOBBPlane(const OBB<Vector>& obb, const Plane<Vector>& plane)
+	{
+		// Should iterate components here to support 2D.
+
+		// Compute projection interval radius
+		float pir =
+			obb.halfSize.pCols[0] * abs(cliqCity::graphicsMath::dot(plane.normal, obb.axis[0])) +
+			obb.halfSize.pCols[1] * abs(cliqCity::graphicsMath::dot(plane.normal, obb.axis[1])) +
+			obb.halfSize.pCols[2] * abs(cliqCity::graphicsMath::dot(plane.normal, obb.axis[2]));
+
+		// Compute distance from obb center to plane
+		float distance = cliqCity::graphicsMath::dot(plane.normal, obb.origin) - plane.distance;
+
+		// Intersection occurs when -pir <= distance <= +pir
+		return (abs(distance) <= pir);
+	}
 
 #pragma endregion 
 }

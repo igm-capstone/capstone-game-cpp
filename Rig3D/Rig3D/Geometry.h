@@ -314,5 +314,185 @@ namespace Rig3D
 				}
 			}
 		}
-	}
+	
+		template <class Vertex, class Index>
+		static void Cone(std::vector<Vertex>& vertices, std::vector<Index>& indices, uint32_t subdivisions, float height, float angle)
+		{
+			vertices.reserve(sizeof(Vertex) * (subdivisions + 1) * 2);
+			indices.reserve(sizeof(Index) * (subdivisions * 2) * 2);
+
+			float radius = tan(angle * 0.5f) * height;
+			float step = (2.0f * PI) / subdivisions;
+			float halfHeight = height * 0.5f;
+
+			Vertex c0;
+			c0.Position = { 0.0f, halfHeight, 0.0f };
+			c0.Normal = { 0.0f, 1.0f, 0.0f };
+			c0.UV = { 0.5f, 0.5f };
+
+			vertices.push_back(c0);
+			indices.push_back(0);
+
+			Vertex v0;
+			v0.Position = { 0.0f, -halfHeight, radius  };
+			v0.Normal = { 0.0f, 0.0f, 1.0f };
+			v0.UV = { 0.0f, 1.0f };
+	
+			vertices.push_back(v0);
+
+			for (uint32_t i = 1; i < subdivisions; i++)
+			{
+				indices.push_back(i);
+
+				float a = i * step;
+				float s = sin(a);
+				float c = cos(a);
+
+				v0.Position = { radius * s, -halfHeight, radius * c };
+				v0.Normal = { s, 0.0f, c };
+				v0.UV = { static_cast<float>(i) / subdivisions, 1.0f };
+
+				vertices.push_back(v0);
+				indices.push_back(i + 1);
+				indices.push_back(0);
+			}
+
+			indices.push_back(subdivisions);
+			indices.push_back(1);
+
+			Vertex c1;
+			c1.Position = { 0.0f, -halfHeight, 0.0f };
+			c1.Normal = { 0.0f, -1.0f, 0.0f };
+			c1.UV = { 0.5f, 0.5f };
+			vertices.push_back(c1);
+
+			uint32_t bi = subdivisions + 2;
+			indices.push_back(bi);
+
+			v0.Position = { 0.0f, -halfHeight, radius };
+			v0.Normal = { 0.0f, 0.0f, 1.0f };
+			v0.UV = { 0.0f, 1.0f };
+
+			vertices.push_back(v0);
+
+			for (uint32_t i = 1; i < subdivisions; i++)
+			{
+				indices.push_back(i + subdivisions + 2);
+
+				float a = i * step;
+				float s = sin(a);
+				float c = cos(a);
+
+				float x0 = radius * s;
+				float z0 = radius * cos(i * step);
+
+				v0.Position = { radius * s, -halfHeight, radius * c };
+				v0.Normal = { s, 0.0f, c };
+				v0.UV = { static_cast<float>(i) / subdivisions, 1.0f };
+
+				vertices.push_back(v0);
+				indices.push_back(i + subdivisions + 3);
+				indices.push_back(bi);
+			}
+
+			indices.push_back(subdivisions + subdivisions + 3);
+			indices.push_back(subdivisions + 3);
+		}
+
+		template <class Vertex, class Index>
+		static void SpotlightCone(std::vector<Vertex>& vertices, std::vector<Index>& indices, uint32_t subdivisions, float height, float angle)
+		{
+			vertices.reserve(sizeof(Vertex) * (subdivisions + 1) * 2);
+			indices.reserve(sizeof(Index) * (subdivisions * 2) * 2);
+
+			float radius = tan(angle * 0.5f) * height;
+			float step = (2.0f * PI) / subdivisions;
+
+			Vertex c0;
+			c0.Position = { 0.0f, 0.0f, 0.0f };
+
+			vertices.push_back(c0);
+			indices.push_back(0);
+
+			Vertex v0;
+			v0.Position = { 0.0f, -height, radius };
+			vertices.push_back(v0);
+
+			for (uint32_t i = 1; i < subdivisions; i++)
+			{
+				indices.push_back(i);
+
+				float a = i * step;
+				float s = sin(a);
+				float c = cos(a);
+
+				v0.Position = { radius * s, -height, radius * c };
+
+				vertices.push_back(v0);
+				indices.push_back(i + 1);
+				indices.push_back(0);
+			}
+
+			indices.push_back(subdivisions);
+			indices.push_back(1);
+
+			Vertex c1;
+			c1.Position = { 0.0f, -height, 0.0f };
+			vertices.push_back(c1);
+
+			uint32_t bi = subdivisions + 2;
+			indices.push_back(bi);
+
+			v0.Position = { 0.0f, -height, radius };
+			vertices.push_back(v0);
+
+			for (uint32_t i = 1; i < subdivisions; i++)
+			{
+				indices.push_back(i + subdivisions + 2);
+
+				float a = i * step;
+				float s = sin(a);
+				float c = cos(a);
+
+				v0.Position = { radius * s, -height, radius * c };
+
+				vertices.push_back(v0);
+				indices.push_back(i + subdivisions + 3);
+				indices.push_back(bi);
+			}
+
+			indices.push_back(subdivisions + subdivisions + 3);
+			indices.push_back(subdivisions + 3);
+		}
+
+		template <class Vertex, class Index>
+		static void NDSQuad(std::vector<Vertex>& vertices, std::vector<Index>& indices)
+		{
+			vertices.reserve(sizeof(Vertex) * 4);
+			indices.reserve(sizeof(Index) * 6);
+
+			Vertex v0, v1, v2, v3;
+			v0.Position = { -1.0f, +1.0f, 0.0f };
+			v1.Position = { +1.0f, +1.0f, 0.0f };
+			v2.Position = { +1.0f, -1.0f, 0.0f };
+			v3.Position = { -1.0f, -1.0f, 0.0f };
+
+			v0.UV = { 0.0f, 0.0f };
+			v1.UV = { 1.0f, 0.0f };
+			v2.UV = { 1.0f, 1.0f };
+			v3.UV = { 0.0f, 1.0f };
+
+			vertices.push_back(v0);
+			vertices.push_back(v1);
+			vertices.push_back(v2);
+			vertices.push_back(v3);
+
+			indices.push_back(0);
+			indices.push_back(1);
+			indices.push_back(2);
+			indices.push_back(2);
+			indices.push_back(3);
+			indices.push_back(0);
+		}
+}
 }

@@ -8,6 +8,7 @@
 #include "SceneObjects/DominationPoint.h"
 #include "trace.h"
 #include "SceneObjects/Lamp.h"
+#include <GraphicsMath/cgm.h>
 
 using namespace std;
 using namespace Rig3D;
@@ -150,10 +151,62 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	LevelInfo level;
 	memset(&level, 0, sizeof(level));
 	
+	auto center = obj["metadata"]["bounds"]["center"];
+	if (center != nullptr)
+	{
+		level.center = parseVec3f(center);
+	}
+
+	auto extents = obj["metadata"]["bounds"]["extents"];
+	if (extents != nullptr)
+	{
+		level.extents = parseVec3f(extents);
+	}
+
+	level.floorCount = TILE_COUNT_X * TILE_COUNT_Y;
+	level.floorWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.floorCount, alignof(mat4f), 0));
+
+	float levelWidth	= level.extents.x * 2.0f;
+	float levelHeight	= level.extents.x * 2.0f;
+
+	level.floorWidth		=	levelWidth / static_cast<float>(TILE_COUNT_X);
+	level.floorHeight	=	levelHeight / static_cast<float>(TILE_COUNT_Y);
+	
+	float halfWidth		= (levelWidth - level.floorWidth) * 0.5f;
+	float halfHeight	= (levelHeight - level.floorHeight) * 0.5f;
+
+	for (int y = 0; y < TILE_COUNT_Y; y++)
+	{
+		for (int x = 0; x < TILE_COUNT_X; x++)
+		{
+			level.floorWorldMatrices[y * TILE_COUNT_X + x] = (mat4f::rotateX(-PI * 0.5f) * mat4f::translate({ x * level.floorWidth - halfWidth, halfHeight - y * level.floorHeight, 0.0f })).transpose();
+		}
+	}
+
 	auto lamps = obj["lamp"].get_ptr<jarr_t>();
 	if (lamps != nullptr)
 	{
 		loadLamps(lamps);
+
+		level.lampWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * lamps->size(), alignof(mat4f), 0));
+		level.lampVPTMatrices	= reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * lamps->size(), alignof(mat4f), 0));
+		level.lampColors		= reinterpret_cast<vec4f*>(allocator.Allocate(sizeof(vec4f) * lamps->size(), alignof(vec4f), 0));
+		level.lampCount			= static_cast<short>(lamps->size());
+
+		int i = 0;
+		for (Lamp& l : Factory<Lamp>())
+		{
+			level.lampWorldMatrices[i] = (mat4f::scale(l.mLightRadius) * mat4f::rotateZ(PI * 0.5f) * mat4f::translate(l.mTransform->GetPosition())).transpose();
+			
+			// Note: we don't bother transposing this matrix because we need it for culling in row maj fashion.
+			level.lampVPTMatrices[i] = 
+				mat4f::lookToLH(vec3f(1.0f, 0.0f, 0.0f), l.mTransform->GetPosition(), vec3f(0.0f, 0.0f, -1.0f)) 
+				* mat4f::normalizedPerspectiveLH(PI * 0.5f, 1.0f, 0.1f, l.mLightRadius);
+
+
+			level.lampColors[i] = { 0.6f, 0.6f, 0.0f, 1.0f };
+			i++;
+		}
 	}
 
 	auto domination = obj["domination"].get_ptr<jarr_t>();
@@ -184,15 +237,15 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	if (walls != nullptr)
 	{
 		loadWalls(walls);
-	}
 
-	level.wallCount = static_cast<short>(walls->size());
-	level.walls = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.wallCount, alignof(mat4f), 0));
+		level.wallCount = static_cast<short>(walls->size());
+		level.wallWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.wallCount, alignof(mat4f), 0));
 
-	int i = 0;
-	for (Wall& w : Factory<Wall>())
-	{
-		level.walls[i++] = w.mTransform->GetWorldMatrix().transpose();
+		int i = 0;
+		for (Wall& w : Factory<Wall>())
+		{
+			level.wallWorldMatrices[i++] = w.mTransform->GetWorldMatrix().transpose();
+		}
 	}
 
 	return level;

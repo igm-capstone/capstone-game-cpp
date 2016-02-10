@@ -165,7 +165,7 @@ namespace cliqCity
 			Matrix4 operator-=(const Matrix4& rhs);
 			Matrix4 operator*=(const float& rhs);
 
-			Matrix4 operator=(const Matrix4& rhs);
+			Matrix4& operator=(const Matrix4& rhs);
 			Matrix4 operator-();
 
 			Vector4& operator[](const unsigned int& index);

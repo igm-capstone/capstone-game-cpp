@@ -6,6 +6,9 @@
 #include <unordered_map>
 #include <Rig3D/Graphics/Interface/IShader.h>
 
+#define STATIC_SCENE_MEMORY		1000000
+#define SCENE_ALIGNMENT_PADDING 6
+
 using namespace Rig3D;
 
 class ScareTacticsApplication : public IApplication
@@ -17,6 +20,12 @@ public:
 	IShader* mQuadPixelShader;
 	IShader* mExplorerVertexShader;
 	IShader* mExplorerPixelShader;
+	IShader* mPLVolumeVertexShader;
+	IShader* mPLVolumePixelShader;
+	IShader* mNDSQuadVertexShader;
+	IShader* mNDSQuadPixelShader;
+
+	IShader* mDBGPixelShader;
 
 	ScareTacticsApplication();
 	~ScareTacticsApplication();

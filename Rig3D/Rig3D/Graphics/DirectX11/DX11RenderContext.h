@@ -11,33 +11,35 @@ namespace Rig3D
 		DX11RenderContext();
 		~DX11RenderContext();
 
-		ID3D11DepthStencilView*		GetDepthStencilView();
-		ID3D11ShaderResourceView*	GetDepthStencilResourceView();
 		ID3D11RenderTargetView**	GetRenderTargetViews();
 		ID3D11Texture2D**			GetRenderTextures();
 		ID3D11ShaderResourceView**  GetShaderResourceViews();
+		ID3D11DepthStencilView**	GetDepthStencilViews();
+		ID3D11ShaderResourceView**	GetDepthStencilResourceViews();
 
 		uint32_t GetRenderTargetViewCount() const;
 		uint32_t GetRenderTextureCount() const;
 		uint32_t GetShaderResourceViewCount() const;
+		uint32_t GetDepthStencilViewCount() const;
+		uint32_t GetDepthStencilResourceViewCount() const;
 
-		void SetDepthStencilView(ID3D11DepthStencilView* depthStencilView);
-		void SetDepthStencilResourceView(ID3D11ShaderResourceView* depthStencilResourceView);
 		void SetRenderTargetViews(std::vector<ID3D11RenderTargetView*>& renderTargetViews);
 		void SetRenderTextures(std::vector<ID3D11Texture2D*>& renderTextures);
-		void SetShaderResourceViews(std::vector<ID3D11ShaderResourceView*>& shaderResourceViews);
-	
-		void VClearDepthStencilView() override;
+		void SetShaderResourceViews(std::vector<ID3D11ShaderResourceView*>& depthStencilResourceViews);
+		void SetDepthStencilViews(std::vector<ID3D11DepthStencilView*>& depthStencilViews);
+		void SetDepthStencilResourceViews(std::vector<ID3D11ShaderResourceView*>& depthStencilResourceViews);
+
 		void VClearRenderTargetViews() override;
 		void VClearRenderTextures() override;
 		void VClearShaderResourceViews() override;
+		void VClearDepthStencilViews() override;
+		void VClearDepthStencilResourceViews() override;
 
 	private:
-		ID3D11DepthStencilView*					mDepthStencilView;
-		ID3D11ShaderResourceView*				mDepthStencilResourceView;
-
 		std::vector<ID3D11RenderTargetView*>	mRenderTargetViews;
 		std::vector<ID3D11Texture2D*>			mRenderTextures;
 		std::vector<ID3D11ShaderResourceView*>	mShaderResourceViews;
+		std::vector<ID3D11DepthStencilView*>	mDepthStencilViews;
+		std::vector<ID3D11ShaderResourceView*>	mDepthStencilResourceViews;
 	};
 }
