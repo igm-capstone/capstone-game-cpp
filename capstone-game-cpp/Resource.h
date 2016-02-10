@@ -11,7 +11,6 @@ class Resource
 		mat4f* floorWorldMatrices;
 		mat4f* lampWorldMatrices;
 		mat4f* lampVPTMatrices;
-		vec4f* lampColors;
 		Rig3D::Transform* moveableBlocks;
 
 		vec3f center, extents;
