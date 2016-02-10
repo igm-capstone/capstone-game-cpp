@@ -52,13 +52,13 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Rig3D\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ext\fmod\studio\inc;$(SolutionDir)ext\fmod\lowlevel\inc;$(SolutionDir)ext\fmod\fsbank\inc;$(ProjectDir);$(SolutionDir)Rig3D\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Rig3D.lib;Memory.lib;GraphicsMath.lib;EventHandler.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(TargetDir)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)ext\fmod\fsbank\lib;$(SolutionDir)ext\fmod\lowlevel\lib;$(SolutionDir)ext\fmod\studio\lib;$(TargetDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -74,13 +74,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(SolutionDir)Rig3D\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ext\fmod\studio\inc;$(SolutionDir)ext\fmod\lowlevel\inc;$(SolutionDir)ext\fmod\fsbank\inc;$(ProjectDir);$(SolutionDir)Rig3D\;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Rig3D.lib;Memory.lib;GraphicsMath.lib;EventHandler.lib;d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(TargetDir)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)ext\fmod\fsbank\lib;$(SolutionDir)ext\fmod\lowlevel\lib;$(SolutionDir)ext\fmod\studio\lib;$(TargetDir)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -416,6 +416,32 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Assets\icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="External\fmodstudioL.ref">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">COPY "$(SolutionDir)ext\fmod\studio\lib\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename).dll to output directory...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(Filename).dll</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)ext\fmod\studio\lib\%(Filename).dll</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">COPY "$(SolutionDir)ext\fmod\studio\lib\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename).dll to output directory...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).dll</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)ext\fmod\studio\lib\%(Filename).dll</AdditionalInputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="External\fmodL.ref">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">COPY "$(SolutionDir)ext\fmod\lowlevel\lib\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">COPY "$(SolutionDir)ext\fmod\lowlevel\lib\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename).dll to output directory...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(Filename).dll</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename).dll to output directory...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).dll</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)ext\fmod\studio\lib\%(Filename).dll</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)ext\fmod\studio\lib\%(Filename).dll</AdditionalInputs>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

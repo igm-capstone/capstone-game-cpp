@@ -20,6 +20,9 @@
 #include <SceneObjects/Minion.h>
 #include <trace.h>
 
+#pragma comment (lib, "fmodL_vc.lib")
+#pragma comment (lib, "fmodstudioL_vc.lib")
+
 #define SHADOW_MAP_SIZE 1024
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
@@ -112,6 +115,7 @@ void Level01::VInitialize()
 	RenderShadowMaps();
 
 	mCamera.SetViewMatrix(mat4f::lookAtLH(vec3f(0, 0, 0), vec3f(kEyePos.x, kEyePos.y, kEyePos.z), vec3f(0, 1, 0))); //Temporary until Ghost get a controller.
+
 
 	mCollisionManager.Initialize();
 

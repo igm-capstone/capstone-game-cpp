@@ -309,4 +309,8 @@
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="External\fmodstudioL.ref" />
+    <CustomBuild Include="External\fmodL.ref" />
+  </ItemGroup>
 </Project>
