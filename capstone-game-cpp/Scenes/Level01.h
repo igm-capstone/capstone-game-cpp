@@ -30,14 +30,12 @@ class Level01 : public BaseScene
 	// Lights
 	mat4f*				mSpotLightWorldMatrices;
 	mat4f*				mSpotLightVPTMatrices;
-	vec4f*				mSpotLightColors;
 
 	// Mesh
 	IMesh*				mWallMesh0;
 	IMesh*				mPlaneMesh;
 	IMesh*				mExplorerCubeMesh; //better solution when will come when we start to handle models
 	IMesh*				mMinionCubeMesh; 
-	IMesh*				mPLVMesh;
 	IMesh*				mNDSQuadMesh;
 
 	// RenderContext

@@ -28,7 +28,7 @@
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 
-
+static vec4f kEyePos = { 10.0f, 0.0f, -100.0f, 0.0f };
 
 Level01::Level01() :
 	mWallCount0(0),
@@ -41,12 +41,10 @@ Level01::Level01() :
 	mPlaneWorldMatrices(nullptr),
 	mSpotLightWorldMatrices(nullptr),
 	mSpotLightVPTMatrices(nullptr),
-	mSpotLightColors(nullptr),
 	mWallMesh0(nullptr),
 	mPlaneMesh(nullptr),
 	mExplorerCubeMesh(nullptr),
 	mMinionCubeMesh(nullptr),
-	mPLVMesh(nullptr),
 	mNDSQuadMesh(nullptr),
 	mGBufferContext(nullptr),
 	mShadowContext(nullptr),
@@ -63,8 +61,12 @@ Level01::~Level01()
 	mPlaneMesh->~IMesh();
 	mExplorerCubeMesh->~IMesh();
 	mMinionCubeMesh->~IMesh();
-	mPLVMesh->~IMesh();
 	mNDSQuadMesh->~IMesh();
+
+	for (Lamp& l : Factory<Lamp>())
+	{
+		l.mConeMesh->~IMesh();
+	}
 
 	for (Explorer& e : Factory<Explorer>())
 	{
@@ -107,13 +109,13 @@ void Level01::VInitialize()
 
 	InitializeAssets();
 
+
 	InitializeGeometry();
 	InitializeShaderResources();
 	RenderShadowMaps();
 
+	mCamera.SetViewMatrix(mat4f::lookAtLH(vec3f(0, 0, 0), vec3f(kEyePos.x, kEyePos.y, kEyePos.z), vec3f(0, 1, 0))); //Temporary until Ghost get a controller.
 
-
-	mCamera.SetViewMatrix(mat4f::lookAtLH(vec3f(0, 0, 0), vec3f(10.0f, 0.0f, -100.0f), vec3f(0, 1, 0))); //Temporary until Ghost get a controller.
 
 	mCollisionManager.Initialize();
 
@@ -136,7 +138,6 @@ void Level01::InitializeAssets()
 
 	mSpotLightWorldMatrices = level.lampWorldMatrices;
 	mSpotLightVPTMatrices	= level.lampVPTMatrices;
-	mSpotLightColors		= level.lampColors;
 	mSpotLightCount			= level.lampCount;
 
 	mFloorCollider.halfSize = level.extents;
@@ -181,20 +182,23 @@ void Level01::InitializeGeometry()
 	vertices.clear();
 	indices.clear();
 
-	// Point Light Volume 
+	// Spot Light Volume 
 
 	std::vector<Vertex1> coneVertices;
 
-	Geometry::SpotlightCone(coneVertices, indices, 6, 1.0f, PI * 0.5f);
+	for (Lamp& l : Factory<Lamp>())
+	{
+		Geometry::SpotlightCone(coneVertices, indices, 6, 1.0f, l.mLightAngle);
 
-	meshLibrary.NewMesh(&mPLVMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mPLVMesh, &coneVertices[0], sizeof(Vertex1) * coneVertices.size(), sizeof(Vertex1));
-	mRenderer->VSetMeshIndexBuffer(mPLVMesh, &indices[0], indices.size());
+		meshLibrary.NewMesh(&l.mConeMesh, mRenderer);
+		mRenderer->VSetMeshVertexBuffer(l.mConeMesh, &coneVertices[0], sizeof(Vertex1) * coneVertices.size(), sizeof(Vertex1));
+		mRenderer->VSetMeshIndexBuffer(l.mConeMesh, &indices[0], indices.size());
+
+		coneVertices.clear();
+		indices.clear();
+	}
 
 	// Full Screen Quad
-
-	vertices.clear();
-	indices.clear();
 
 	std::vector<NDSVertex> ndsVertices;
 
@@ -255,10 +259,10 @@ void Level01::InitializeShaderResources()
 
 	mRenderer->VCreateShaderResource(&mPLVShaderResource, &mAllocator);
 
-	void* cbPVLData[] = { &mLightData };
-	size_t cbPVLSizes[] = { sizeof(CBufferLight) };
+	void* cbPVLData[] = { &mLightData, &kEyePos.pCols[0] };
+	size_t cbPVLSizes[] = { sizeof(CBufferLight), sizeof(vec4f)  };
 
-	mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 1);
+	mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 2);
 
 	mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_BORDER, const_cast<float*>(Colors::transparent.pCols));
 
@@ -454,7 +458,9 @@ void Level01::RenderSpotLightVolumes()
 	mRenderer->VSetVertexShader(mApplication->mPLVolumeVertexShader);
 	mRenderer->VSetPixelShader(mApplication->mPLVolumePixelShader);
 
-	mRenderer->VBindMesh(mPLVMesh);
+	
+
+	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &kEyePos.pCols[0], 1);
 
 	uint32_t i = 0;
 	for (Lamp& l : Factory<Lamp>())
@@ -463,21 +469,24 @@ void Level01::RenderSpotLightVolumes()
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mPVM, 0);
 
 		// Set Light data
-		mLightData.viewProjection = (mSpotLightVPTMatrices[i]).transpose();
-		mLightData.color = Colors::yellow;
-		mLightData.range = l.mLightRadius;
-		mLightData.cosAngle = cos(1.57079632679f * 0.5f);
+		mLightData.viewProjection	= (mSpotLightVPTMatrices[i]).transpose();
+		mLightData.color			= l.mLightColor;
+		mLightData.direction		= l.mLightDirection;
+		mLightData.range			= l.mLightRadius;
+		mLightData.cosAngle			= cos(l.mLightAngle);
 
 		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
 
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
-		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
+		mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
 		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);		// Position
 		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);		// Normal
 		mRenderer->VSetPixelShaderDepthResourceView(mShadowContext, i, 2);	// Shadow
 		mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);		// Border
 		
-		mRenderer->VDrawIndexed(0, mPLVMesh->GetIndexCount());
+		mRenderer->VBindMesh(l.mConeMesh);
+
+		mRenderer->VDrawIndexed(0, l.mConeMesh->GetIndexCount());
 		i++;
 	}
 

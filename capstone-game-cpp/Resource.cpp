@@ -57,12 +57,20 @@ void parseTransform(json obj, Transform* transform)
 void loadLamps(jarr_t objs)
 {
 	TRACE_LOG("Loading " << int(objs->size()) << " lamps...");
+	
+	vec3f defaultDirection = { 1.0f, 0.0f, 0.0f };
+
+	float radians = PI / 180.0f;
+
 	for (auto obj : *objs)
 	{
 		auto lamp = Factory<Lamp>::Create();
 		parseTransform(obj, lamp->mTransform);
-
-		lamp->mLightRadius = obj["lightRadius"].get<float>();
+		
+		lamp->mLightColor		= { 0.6f, 0.6f, 0.0f, 1.0f };
+		lamp->mLightDirection	= defaultDirection * lamp->mTransform->GetRotationMatrix();
+		lamp->mLightRadius		= obj["lightRadius"].get<float>();
+		lamp->mLightAngle		= obj["angle"].get<float>() * radians;
 	}
 }
 
@@ -190,21 +198,20 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 
 		level.lampWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * lamps->size(), alignof(mat4f), 0));
 		level.lampVPTMatrices	= reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * lamps->size(), alignof(mat4f), 0));
-		level.lampColors		= reinterpret_cast<vec4f*>(allocator.Allocate(sizeof(vec4f) * lamps->size(), alignof(vec4f), 0));
 		level.lampCount			= static_cast<short>(lamps->size());
+
+		mat4f defaultRotation	= mat4f::rotateZ(PI * 0.5f);
+		vec3f defaultUp			= { 0.0f, 0.0f, -1.0f };
 
 		int i = 0;
 		for (Lamp& l : Factory<Lamp>())
 		{
-			level.lampWorldMatrices[i] = (mat4f::scale(l.mLightRadius) * mat4f::rotateZ(PI * 0.5f) * mat4f::translate(l.mTransform->GetPosition())).transpose();
+			level.lampWorldMatrices[i] = (mat4f::scale(l.mLightRadius) * defaultRotation * l.mTransform->GetWorldMatrix()).transpose();
 			
 			// Note: we don't bother transposing this matrix because we need it for culling in row maj fashion.
 			level.lampVPTMatrices[i] = 
-				mat4f::lookToLH(vec3f(1.0f, 0.0f, 0.0f), l.mTransform->GetPosition(), vec3f(0.0f, 0.0f, -1.0f)) 
-				* mat4f::normalizedPerspectiveLH(PI * 0.5f, 1.0f, 0.1f, l.mLightRadius);
-
-
-			level.lampColors[i] = { 0.6f, 0.6f, 0.0f, 1.0f };
+				mat4f::lookToLH(l.mLightDirection, l.mTransform->GetPosition(), defaultUp) 
+				* mat4f::normalizedPerspectiveLH(l.mLightAngle, 1.0f, 0.1f, l.mLightRadius);
 			i++;
 		}
 	}
