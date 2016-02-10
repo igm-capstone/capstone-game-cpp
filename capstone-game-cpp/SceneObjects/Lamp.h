@@ -7,12 +7,17 @@ class Lamp : public BaseSceneObject
 
 public:
 	SphereColliderComponent*	mCollider;		// Collider for clicking. Note, this collider radius will differ from the actual light radius value.
-	float mLightRadius;							// Radius of point light
-
+	IMesh*						mConeMesh;
+	vec4f mLightColor;
+	vec3f mLightDirection;
+	float mLightRadius;							// Linear range of spot light
+	float mLightAngle;
 private:
 	Lamp() : 
 		mCollider(Factory<SphereColliderComponent>::Create()),
-		mLightRadius(0.0f)
+		mConeMesh(nullptr),
+		mLightRadius(0.0f),
+		mLightAngle(0.0f)
 	{
 		mCollider->mSceneObject = this;
 	}
