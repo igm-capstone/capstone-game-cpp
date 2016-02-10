@@ -228,7 +228,7 @@ void Level01::InitializeShaderResources()
 	mRenderer->VCreateShaderConstantBuffers(mWallShaderResource, cbWallData, cbWallSizes, 1);
 
 	// Textures
-	const char* filenames[] = { "D:/Users/go4113/Capstone/Bin/Debug/tileable5d.png", "D:/Users/go4113/Capstone/Bin/Debug/wood floor 2.png" };
+	const char* filenames[] = { "Assets/tileable5d.png", "Assets/wood floor 2.png" };
 	mRenderer->VAddShaderTextures2D(mWallShaderResource, filenames, 2);
 
 	mRenderer->VAddShaderLinearSamplerState(mWallShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
