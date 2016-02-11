@@ -45,15 +45,14 @@ void CameraManager::OnResize()
 {
 	auto aspectRatio = mRenderer->GetAspectRatio();
 
-	mCameraPersp.SetProjectionMatrix(mat4f::normalizedPerspectiveLH(0.25f * PI, aspectRatio, 0.1f, 1000.0f));
+	mCameraPersp.SetProjectionMatrix(mat4f::normalizedPerspectiveLH(mFOV, aspectRatio, mNearPlane, mFarPlane));
 	mCBufferPersp.projection = mCameraPersp.GetProjectionMatrix().transpose();
 
-	//Get matching orto projection - needs math review
-	Rig3D::Frustum me;
-	auto mv = mCameraPersp.GetViewMatrix() * mCameraPersp.GetProjectionMatrix();
-	ExtractNormalizedFrustumLH(&me, mv);
+	auto halfHeight = 2 * tan(mFOV / 2) * magnitude(vec3f(0, 0, 0) - mOrigin) / 2;
+	auto halfWidth = halfHeight * aspectRatio;
+	pPixel2Unit = mRenderer->GetWindowHeight() / halfHeight * 2;
 
-	mCameraOrto.SetProjectionMatrix(mat4f::normalizedOrthographicLH(me.left.distance / me.left.normal.x, me.right.distance / me.right.normal.x, me.bottom.distance / me.bottom.normal.y, me.top.distance / me.top.normal.y, 0.1f, 1000.0f));
+	mCameraOrto.SetProjectionMatrix(mat4f::normalizedOrthographicLH(-halfWidth, halfWidth, -halfHeight, halfHeight, mNearPlane, mFarPlane));
 	mCBufferOrto.projection = mCameraOrto.GetProjectionMatrix().transpose();
 }
 
@@ -101,4 +100,9 @@ Ray<vec3f> CameraManager::Screen2Ray(vec2f screen)
 	pRay.origin = mOrigin;
 
 	return pRay;
+}
+
+float CameraManager::PixelToWorldSize(float pixel)
+{
+	return pixel / pPixel2Unit;
 }

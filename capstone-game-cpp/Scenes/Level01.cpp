@@ -542,7 +542,7 @@ void Level01::RenderSprites()
 	{
 		//FIXME: Update transform isnide Sprite obj
 		auto t = *(h.mSceneObject->mTransform);
-		t.SetScale(5, 1, 0);
+		t.SetScale(mCameraManager->PixelToWorldSize(100), mCameraManager->PixelToWorldSize(16), 0);
 		mModel.world = t.GetWorldMatrix();
 		mModel.world.t = mModel.world.t + vec4f(0, 5, 0, 0);
 		mModel.world = mModel.world.transpose();

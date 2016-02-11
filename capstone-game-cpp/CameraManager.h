@@ -16,6 +16,10 @@ class CameraManager
 	vec3f mOrigin;
 	vec3f mLookAt;
 
+	const float mFOV = 0.25f * PI;
+	const float mNearPlane = 0.1f;
+	const float mFarPlane = 200;
+
 protected:
 	CameraManager();
 	~CameraManager();
@@ -37,11 +41,13 @@ public:
 	vec2f World2Screen(vec3f world);
 	vec3f Screen2WorldAt0(vec2f screen);
 	Rig3D::Ray<vec3f> Screen2Ray(vec2f screen);
+	float PixelToWorldSize(float pixel);
 
 private:
-	//For Screen2World calculation
+	//For Screen2World/Pixel2Unit calculation
 	Rig3D::Ray<vec3f> pRay;
 	Rig3D::Plane<vec3f> pPlane;
 	float pDist;
+	float pPixel2Unit;
 };
 
