@@ -38,8 +38,8 @@ Texture2D mTexture : register(t0);
 Pixel main(Vertex vertex)
 {
 	Pixel output;
-	float sliceWidth = 48 / 3;
-	float sliceHeight = 64 / 2;
+	float sliceWidth = 100 / 1;
+	float sliceHeight = 32 / 2;
 
 	float textureWidth;
 	float textureHeight;

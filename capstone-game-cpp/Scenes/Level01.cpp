@@ -325,8 +325,8 @@ void Level01::VRender()
 	RenderMinions();
 	RenderSpotLightVolumes();
 	RenderFullScreenQuad();
-	RenderSprites();
 	RenderIMGUI(); 
+	RenderSprites();
 
 	ID3D11ShaderResourceView* nullSRV[4] = { 0, 0, 0, 0 };
 	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, nullSRV);
