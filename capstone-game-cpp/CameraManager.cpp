@@ -80,7 +80,16 @@ vec2f CameraManager::World2Screen(vec3f world)
 	return vec2f(winX, winY);
 }
 
-vec3f CameraManager::Screen2World(vec2f screen)
+vec3f CameraManager::Screen2WorldAt0(vec2f screen)
+{
+	Screen2Ray(screen);
+
+	vec3f world;
+	IntersectRayPlane(pRay, pPlane, world, pDist);
+	return world;
+}
+
+Ray<vec3f> CameraManager::Screen2Ray(vec2f screen)
 {
 	double x = 2.0 * screen.x / mRenderer->GetWindowWidth() - 1;
 	double y = 1 - 2.0 * screen.y / mRenderer->GetWindowHeight();
@@ -90,8 +99,6 @@ vec3f CameraManager::Screen2World(vec2f screen)
 
 	pRay.normal = ray_clip * (mCameraPersp.GetViewMatrix()).inverse();
 	pRay.origin = mOrigin;
-	
-	vec3f world;
-	IntersectRayPlane(pRay, pPlane, world, pDist);
-	return world;
+
+	return pRay;
 }
