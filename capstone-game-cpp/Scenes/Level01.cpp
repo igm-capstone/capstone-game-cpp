@@ -92,7 +92,7 @@ void Level01::VOnResize()
 	mRenderer->VCreateContextDepthStencilResourceTargets(mGBufferContext, 1, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
 
 	// Camera
-	mCameraManager->ChangeAspectRatio(mRenderer->GetAspectRatio());
+	mCameraManager->OnResize();
 }
 
 #pragma region Initialization
@@ -230,7 +230,7 @@ void Level01::InitializeShaderResources()
 		mRenderer->VUpdateShaderInstanceBuffer(mWallShaderResource, mPlaneWorldMatrices, ibWallSizes[1], 1);
 
 		// Constant buffer data
-		void*	cbWallData[] = { mCameraManager->GetPerspCameraData() };
+		void*	cbWallData[] = { mCameraManager->GetCBufferPersp() };
 		size_t	cbWallSizes[] = { sizeof(CBufferCamera) };
 
 		mRenderer->VCreateShaderConstantBuffers(mWallShaderResource, cbWallData, cbWallSizes, 1);
@@ -245,7 +245,7 @@ void Level01::InitializeShaderResources()
 	{
 		mRenderer->VCreateShaderResource(&mExplorerShaderResource, &mAllocator);
 
-		void* cbExplorerData[] = { mCameraManager->GetPerspCameraData(), &mModel };
+		void* cbExplorerData[] = { mCameraManager->GetCBufferPersp(), &mModel };
 		size_t cbExplorerSizes[] = { sizeof(CBufferCamera), sizeof(CBufferModel) };
 
 		mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 2);
@@ -267,7 +267,7 @@ void Level01::InitializeShaderResources()
 	{
 		mRenderer->VCreateShaderResource(&mSpritesShaderResource, &mAllocator);
 
-		void*  cbSpritesData[] = { mCameraManager->GetPerspCameraData(), &mModel };
+		void*  cbSpritesData[] = { mCameraManager->GetCBufferPersp(), &mModel };
 		size_t cbSpritesSizes[] = { sizeof(CBufferCamera), sizeof(CBufferModel) };
 
 		mRenderer->VCreateShaderConstantBuffers(mSpritesShaderResource, cbSpritesData, cbSpritesSizes, 2);
@@ -405,7 +405,7 @@ void Level01::RenderWalls()
 	mRenderer->VSetPixelShader(mApplication->mQuadPixelShader);
 
 	// This can probably go into the render method...
-	mRenderer->VUpdateShaderConstantBuffer(mWallShaderResource, mCameraManager->GetPerspCameraData(), 0);
+	mRenderer->VUpdateShaderConstantBuffer(mWallShaderResource, mCameraManager->GetCBufferPersp(), 0);
 
 	mRenderer->VBindMesh(mWallMesh0);
 	mRenderer->VSetVertexShaderInstanceBuffer(mWallShaderResource, 0, 1);
@@ -428,7 +428,7 @@ void Level01::RenderExplorers()
 	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
 	mRenderer->VSetPixelShader(mApplication->mExplorerPixelShader);
 
-	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetPerspCameraData(), 0);
+	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 	for (Explorer& e : Factory<Explorer>())
 	{
@@ -458,7 +458,7 @@ void Level01::RenderSpotLightVolumes()
 
 	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
 
-	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetPerspCameraData(), 0);
+	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
 	uint32_t i = 0;
 	for (Lamp& l : Factory<Lamp>())
 	{
@@ -515,7 +515,7 @@ void Level01::RenderMinions()
 	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
 	mRenderer->VSetPixelShader (mApplication->mExplorerPixelShader);
 
-	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetPerspCameraData(), 0);
+	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 	for (Minion& m : Factory<Minion>())
 	{
@@ -537,14 +537,14 @@ void Level01::RenderSprites()
 	mRenderer->VSetVertexShader(mApplication->mSpriteVertexShader);
 	mRenderer->VSetPixelShader(mApplication->mSpritePixelShader);
 
-	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetOrtoCameraData(), 0);
+	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferOrto(), 0);
 	for (Health& h : Factory<Health>())
 	{
 		//FIXME: Update transform isnide Sprite obj
 		auto t = *(h.mSceneObject->mTransform);
-		t.SetScale(6, 1, 0);
+		t.SetScale(5, 1, 0);
 		mModel.world = t.GetWorldMatrix();
-		mModel.world.t = mModel.world.t + vec4f(0, 2, -5, 0);
+		mModel.world.t = mModel.world.t + vec4f(0, 5, 0, 0);
 		mModel.world = mModel.world.transpose();
 
 		mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, &mModel, 1);

@@ -24,7 +24,6 @@ BaseScene::BaseScene() :
 	mInput = mEngine->GetInput();
 
 	mCameraManager = &Singleton<CameraManager>::SharedInstance();
-	mCameraManager->Initialize(mRenderer->GetAspectRatio());
 	
 	mNetworkManager = &Singleton<NetworkManager>::SharedInstance();
 

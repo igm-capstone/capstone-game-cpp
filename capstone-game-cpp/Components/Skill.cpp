@@ -95,18 +95,18 @@ void Skill::Update()
 	float y = 1.0f - (2.0f * mousePosition.y) / renderer->GetWindowHeight();
 
 	vec4f rayClip(x, y, 0, 1);
-	vec4f rayEye = rayClip * camera->GetPerspCameraData()->projection;
+	vec4f rayEye = rayClip * camera->GetCBufferPersp()->projection;
 	rayEye.z = 0;
 	rayEye.w = 0;
 
-	vec3f rayWorld = rayEye * camera->GetPerspCameraData()->view;
+	vec3f rayWorld = rayEye * camera->GetCBufferPersp()->view;
 
 
 
 	//float x = (2.0f * mousePosition.x) / renderer->GetWindowWidth() - 1.0f;
 	//float y = 1.0f - (2.0f * mousePosition.y) / renderer->GetWindowHeight();
 
-	mat4f toWorld = (camera->GetPerspCameraData()->projection.inverse() * camera->GetPerspCameraData()->view.inverse()).inverse();
+	mat4f toWorld = (camera->GetCBufferPersp()->projection.inverse() * camera->GetCBufferPersp()->view.inverse()).inverse();
 	vec3f worldPos = vec4f(x, y, 0.0f, 1.0f) * toWorld;
 	vec3f worldDir = camera->GetForward();
 	worldPos.z = 10.0f;
