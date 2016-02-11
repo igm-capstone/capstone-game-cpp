@@ -20,9 +20,6 @@
 #include <SceneObjects/Minion.h>
 #include <trace.h>
 
-#pragma comment (lib, "fmodL_vc.lib")
-#pragma comment (lib, "fmodstudioL_vc.lib")
-
 #define SHADOW_MAP_SIZE 1024
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
@@ -54,7 +51,7 @@ Level01::Level01() :
 {
 
 }
-
+FMOD::Studio::System* studio;
 Level01::~Level01()
 {
 	mWallMesh0->~IMesh();

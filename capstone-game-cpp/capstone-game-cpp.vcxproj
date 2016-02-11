@@ -125,6 +125,7 @@
     <ClInclude Include="Components\ColliderComponent.h" />
     <ClInclude Include="Components\GhostController.h" />
     <ClInclude Include="Components\MinionController.h" />
+    <ClInclude Include="fmodwrap.h" />
     <ClInclude Include="SceneObjects\Ghost.h" />
     <ClInclude Include="Components\Skill.h" />
     <ClInclude Include="Config.h" />
