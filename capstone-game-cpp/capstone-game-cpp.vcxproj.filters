@@ -245,6 +245,9 @@
     <ClInclude Include="Components\GhostController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FBXResource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\QuadVertexShader.hlsl">
@@ -312,5 +315,8 @@
   <ItemGroup>
     <CustomBuild Include="External\fmodstudioL.ref" />
     <CustomBuild Include="External\fmodL.ref" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="External\libfbxsdk.ref" />
   </ItemGroup>
 </Project>

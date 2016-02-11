@@ -11,7 +11,7 @@
 #include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 #include <Rig3D/Graphics/Interface/IRenderContext.h>
-
+#include <FBXResource.h>
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 #include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
 #include <Console.h>
@@ -161,9 +161,12 @@ void Level01::InitializeGeometry()
 
 	// Explorer Mesh
 
-	meshLibrary.NewMesh(&mExplorerCubeMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mExplorerCubeMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
-	mRenderer->VSetMeshIndexBuffer(mExplorerCubeMesh, &indices[0], indices.size());
+	FBXMeshResource<Vertex3> explorerFBXResource("Assets/BaseExplorerMesh.fbx");
+	meshLibrary.LoadMesh(&mExplorerCubeMesh, mRenderer, explorerFBXResource);
+
+	//meshLibrary.NewMesh(&mExplorerCubeMesh, mRenderer);
+	//mRenderer->VSetMeshVertexBuffer(mExplorerCubeMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
+	//mRenderer->VSetMeshIndexBuffer(mExplorerCubeMesh, &indices[0], indices.size());
 
 	// Minion 
 	meshLibrary.NewMesh(&mMinionCubeMesh, mRenderer);
