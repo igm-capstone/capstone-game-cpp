@@ -7,6 +7,9 @@
 #include <Rig3D/Graphics/Camera.h>
 #include <ScareTacticsApplication.h>
 #include <Components/GhostController.h>
+#include <Components/FmodEvent.h>
+#include <Components/Skill.h>
+#include <Components/FmodEventCollection.h>
 
 #define MAX_GHOST_SKILLS 4
 
@@ -17,6 +20,7 @@ public:
 	NetworkID*					mNetworkID;
 	GhostController*			mController;
 	Skill*						mSkills[MAX_GHOST_SKILLS];
+	FmodEventCollection*		mEvents;
 
 private:
 	CameraManager*				mCameraManager;
@@ -33,6 +37,10 @@ private:
 
 		mCameraManager = &Singleton<CameraManager>::SharedInstance();
 		mCameraManager->MoveCamera(vec3f(0, 0, 0), vec3f(0.0f, 0.0f, -100.0f));
+
+		mEvents = Factory<FmodEventCollection>::Create();
+		mEvents->mSceneObject = this;
+		mEvents->Register("Spawn", "Explosions/Single Explosion", FmodEventType::FIRE_AND_FORGET);
 
 		memset(mSkills, 0, sizeof(Skill*) * MAX_GHOST_SKILLS);
 
