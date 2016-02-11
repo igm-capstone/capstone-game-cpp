@@ -6,7 +6,6 @@
 
 class CameraManager
 {
-
 	Rig3D::Renderer* mRenderer;
 	Rig3D::Camera mCameraOrto;
 	Rig3D::Camera mCameraPersp;
@@ -17,9 +16,11 @@ class CameraManager
 	vec3f mOrigin;
 	vec3f mLookAt;
 
-public:
+protected:
 	CameraManager();
 	~CameraManager();
+
+public:
 
 	vec3f GetOrigin() { return mOrigin; };
 	vec3f GetLookAt() { return mLookAt; };

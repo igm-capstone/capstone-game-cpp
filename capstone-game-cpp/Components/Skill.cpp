@@ -64,17 +64,21 @@ public:
 
 void Skill::Update()
 {
+
+	//--- check if a binding was activated
+
 	bool useSkill = false;
 
 	useSkill = useSkill || (mBinding.bindingType & KEY_CODE)       && mInput->GetKeyDown(mBinding.keyCode);
 	useSkill = useSkill || (mBinding.bindingType & MOUSE_BUTTON)   && mInput->GetMouseButtonDown(mBinding.mouseButton);
 	useSkill = useSkill || (mBinding.bindingType & GAMEPAD_BUTTON) && mInput->GetGamepadButtonDown(mBinding.gamepadButton);
 
-
 	if (!useSkill)
 	{
 		return;
 	}
+
+	//--- check if skill is still on cooldown
 
 	float appTime = mTimer->GetApplicationTime();
 	float timeFromLastUse = appTime - mLastUsed;
@@ -86,57 +90,26 @@ void Skill::Update()
 		return;
 	}
 
-	auto scene = Application::SharedInstance().GetCurrentScene();
-	auto camera = &Singleton<CameraManager>::SharedInstance();
-	auto renderer = Singleton<Engine>::SharedInstance().GetRenderer();
+	//--- set skill pos
+
 	auto mousePosition = mInput->mousePosition;
-
-	float x = (2.0f * mousePosition.x) / renderer->GetWindowWidth() - 1.0f;
-	float y = 1.0f - (2.0f * mousePosition.y) / renderer->GetWindowHeight();
-
-	vec4f rayClip(x, y, 0, 1);
-	vec4f rayEye = rayClip * camera->GetCBufferPersp()->projection;
-	rayEye.z = 0;
-	rayEye.w = 0;
-
-	vec3f rayWorld = rayEye * camera->GetCBufferPersp()->view;
-
-
-
-	//float x = (2.0f * mousePosition.x) / renderer->GetWindowWidth() - 1.0f;
-	//float y = 1.0f - (2.0f * mousePosition.y) / renderer->GetWindowHeight();
-
-	mat4f toWorld = (camera->GetCBufferPersp()->projection.inverse() * camera->GetCBufferPersp()->view.inverse()).inverse();
-	vec3f worldPos = vec4f(x, y, 0.0f, 1.0f) * toWorld;
-	vec3f worldDir = camera->GetForward();
-	worldPos.z = 10.0f;
-
-
-	vec3f skillPos {};
-	RayCastHit<vec3f> hit;
-	//Ray<vec3f> ray = { normalize(rayWorld), camera.GetForward() };
-	Ray<vec3f> ray = { worldPos, worldDir };
-	//// WTF BRO? HOW DO I DO DIS
-
-	if (RayCast(&hit, ray, &colWrapper(&scene->mFloorCollider), 1))
-	{
-		skillPos = hit.poi;
-	}
+	auto cameraManager = &Singleton<CameraManager>::SharedInstance();
+	auto ray = cameraManager->Screen2Ray(mousePosition);
 	
-	TRACE_LOG(x << " " << y);
-	TRACE_LINE(worldPos, hit.poi, Colors::red);
-	TRACE_BOX(worldPos, Colors::blue);
-	TRACE_BOX(hit.poi,  Colors::green);
-	worldPos.z = 0;
-	TRACE_BOX(vec3f(),  Colors::red);
+	float t;
+	vec3f skillPos {};
+	auto scene = Application::SharedInstance().GetCurrentScene();
+
+	// skillPos is an out parameter that  will only be set if
+	// the ray intersects the collider.
+	IntersectRayAABB(ray, scene->mFloorCollider, skillPos, t);
+	
+	//--- set target
 
 
-	if (!useSkill)
-	{
-		return;
-	}
+
+	//--- fire callback
 
 	OnUse(mDurationMs, nullptr, skillPos);
-
 	mLastUsed = appTime;
 }
