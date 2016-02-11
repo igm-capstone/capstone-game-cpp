@@ -25,7 +25,6 @@
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 
-static vec4f kEyePos = { 10.0f, 0.0f, -100.0f, 0.0f };
 
 Level01::Level01() :
 	mWallCount0(0),
@@ -256,7 +255,7 @@ void Level01::InitializeShaderResources()
 	{
 		mRenderer->VCreateShaderResource(&mPLVShaderResource, &mAllocator);
 
-		void* cbPVLData[] = { &mLightData, &kEyePos.pCols[0] };
+		void* cbPVLData[] = { &mLightData, mCameraManager->GetOrigin().pCols };
 		size_t cbPVLSizes[] = { sizeof(CBufferLight), sizeof(vec4f) };
 
 		mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 2);
@@ -457,7 +456,7 @@ void Level01::RenderSpotLightVolumes()
 
 	
 
-	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &kEyePos.pCols[0], 1);
+	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
 
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetPerspCameraData(), 0);
 	uint32_t i = 0;
