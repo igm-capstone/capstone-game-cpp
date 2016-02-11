@@ -17,11 +17,6 @@ mat4f Camera::GetProjectionMatrix()
 
 mat4f Camera::GetViewMatrix()
 {
-	//if (mTransform.IsDirty())
-	//{
-	//	mView = mTransform.GetWorldMatrix().inverse();
-	//}
-
 	return mView;
 }
 

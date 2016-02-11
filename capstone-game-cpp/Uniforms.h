@@ -1,15 +1,21 @@
 #pragma once
 #include <GraphicsMath/cgm.h>
 
-struct CameraData
+struct CBufferCamera
 {
 	mat4f projection;
 	mat4f view;
 };
 
-struct CbufferPVM
+struct CBufferModel
 {
-	CameraData camera;
+	mat4f world;
+};
+
+struct CBufferLightPVM
+{
+	mat4f projection;
+	mat4f view;
 	mat4f world;
 };
 

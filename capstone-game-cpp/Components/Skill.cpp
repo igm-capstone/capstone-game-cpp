@@ -87,7 +87,7 @@ void Skill::Update()
 	}
 
 	auto scene = Application::SharedInstance().GetCurrentScene();
-	auto camera = scene->mCamera;
+	auto camera = &Singleton<CameraManager>::SharedInstance();
 	auto renderer = Singleton<Engine>::SharedInstance().GetRenderer();
 	auto mousePosition = mInput->mousePosition;
 
@@ -95,20 +95,20 @@ void Skill::Update()
 	float y = 1.0f - (2.0f * mousePosition.y) / renderer->GetWindowHeight();
 
 	vec4f rayClip(x, y, 0, 1);
-	vec4f rayEye = rayClip * camera.GetProjectionMatrix().inverse();
+	vec4f rayEye = rayClip * camera->GetPerspCameraData()->projection;
 	rayEye.z = 0;
 	rayEye.w = 0;
 
-	vec3f rayWorld = rayEye * camera.GetViewMatrix().inverse();
+	vec3f rayWorld = rayEye * camera->GetPerspCameraData()->view;
 
 
 
 	//float x = (2.0f * mousePosition.x) / renderer->GetWindowWidth() - 1.0f;
 	//float y = 1.0f - (2.0f * mousePosition.y) / renderer->GetWindowHeight();
 
-	mat4f toWorld = (camera.GetProjectionMatrix() * camera.GetViewMatrix()).inverse();
+	mat4f toWorld = (camera->GetPerspCameraData()->projection.inverse() * camera->GetPerspCameraData()->view.inverse()).inverse();
 	vec3f worldPos = vec4f(x, y, 0.0f, 1.0f) * toWorld;
-	vec3f worldDir = camera.GetForward();
+	vec3f worldDir = camera->GetForward();
 	worldPos.z = 10.0f;
 
 

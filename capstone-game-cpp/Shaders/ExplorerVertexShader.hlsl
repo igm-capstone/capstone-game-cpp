@@ -12,10 +12,14 @@ struct Pixel
 	float3 normal		: NORMAL;
 };
 
-cbuffer transform : register(b0)
+cbuffer camera : register(b0)
 {
 	matrix projection;
 	matrix view;
+}
+
+cbuffer model : register (b1)
+{
 	matrix world;
 }
 

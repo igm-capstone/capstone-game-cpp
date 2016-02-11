@@ -19,7 +19,7 @@ public:
 	Skill*						mSkills[MAX_GHOST_SKILLS];
 
 private:
-	Camera*						mCamera;
+	CameraManager*				mCameraManager;
 
 private:
 	Ghost() : mNetworkID(nullptr) {
@@ -31,8 +31,8 @@ private:
 		mController->mSceneObject = this;
 		mController->mIsActive = false;
 
-		mCamera = &Application::SharedInstance().GetCurrentScene()->mCamera; //FIXME: CurrentScene is still the previous scene during constructors...
-		mCamera->SetViewMatrix(mat4f::lookAtLH(vec3f(0, 0, 0), vec3f(10.0f, 0.0f, -100.0f), vec3f(0, 1, 0)));
+		mCameraManager = &Singleton<CameraManager>::SharedInstance();
+		mCameraManager->MoveCamera(vec3f(0, 0, 0), vec3f(0.0f, 0.0f, -100.0f));
 
 		memset(mSkills, 0, sizeof(Skill*) * MAX_GHOST_SKILLS);
 

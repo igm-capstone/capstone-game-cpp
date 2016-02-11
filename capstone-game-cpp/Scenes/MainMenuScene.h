@@ -13,7 +13,8 @@ public:
 	void VInitialize() override;
 	void VUpdate(double milliseconds) override;
 	void VRender() override;
-	void RenderUI();
 	void VShutdown() override;
 	void VOnResize() override;
+	
+	static void RenderMainMenu(BaseScene* s);
 };

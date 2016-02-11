@@ -24,3 +24,9 @@ struct NDSVertex
 	vec3f Position;
 	vec2f UV;
 };
+
+struct SpriteVertex
+{
+	vec3f Position;
+	vec2f UV;
+};

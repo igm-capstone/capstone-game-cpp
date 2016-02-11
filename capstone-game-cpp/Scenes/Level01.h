@@ -7,8 +7,8 @@
 class Level01 : public BaseScene
 {
 	// Cbuffer data
-	CbufferPVM			mPVM;			// Used for main camera matrics
-	CbufferPVM			mLightPVM;		// Used for spotlight matrices
+	CBufferModel		mModel;
+	CBufferLightPVM		mLightPVM;		// Used for spotlight matrices
 	CBufferLight		mLightData;		// Used for spotlight data (color, angle, etc).
 
 	// Allocators
@@ -41,11 +41,12 @@ class Level01 : public BaseScene
 	// RenderContext
 	IRenderContext*		mGBufferContext;
 	IRenderContext*		mShadowContext;
-
+	
 	// ShaderResource
 	IShaderResource*	mWallShaderResource;
 	IShaderResource*	mExplorerShaderResource;
 	IShaderResource*	mPLVShaderResource;
+	IShaderResource*	mSpritesShaderResource;
 
 	// Managers
 	CollisionManager	mCollisionManager;
@@ -72,6 +73,6 @@ public:
 	void RenderSpotLightVolumes();
 	void RenderFullScreenQuad();
 	void RenderMinions();
-
+	void RenderSprites();
 	void VShutdown() override;
 };
