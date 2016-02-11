@@ -2,19 +2,36 @@
 #include "BaseComponent.h"
 #include "fmodwrap.h"
 
+
+enum class FmodEventType
+{
+	SINGLE_INSTANCE = 1,
+	FIRE_AND_FORGET = 2,
+};
+
+
 class FmodEvent : public BaseComponent
 {
 	friend class Factory<FmodEvent>;
 
 public:
-	FMOD::Studio::EventInstance* mInstance;
 
-	void Load(std::string path);
+	void Load(std::string path, FmodEventType eventType);
 	void Unload();
+	
 	void Play();
+	void Pause();
+	void Unpause();
+	bool IsPaused();
+	void Stop(bool immediate = false);
+
+	FMOD::Studio::EventInstance* GetInstance();
 
 private:
-	FMOD::Studio::System* mSystem;
+	FMOD::Studio::EventDescription* mDescription;
+	FMOD::Studio::EventInstance* mInstance;
+	FMOD::Studio::System* mStudio;
+	FmodEventType mType;
 
 	FmodEvent();
 	~FmodEvent();

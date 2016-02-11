@@ -165,16 +165,22 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VLoadPixelShader(mSpritePixelShader, gSpritePixelShader, sizeof(gSpritePixelShader));
 }
 
-	FMOD::Studio::Bank* masterBank = nullptr;
 void ScareTacticsApplication::InitializeFMOD()
 {
 	FMOD_CHECK(FMOD::Studio::System::create(&mStudio));
 	FMOD_CHECK(mStudio->initialize(512, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr));
 
 	// can be async with: FMOD_STUDIO_LOAD_BANK_NONBLOCKING
-	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Surround_Ambience.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &masterBank));
-	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Master Bank.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &masterBank));
-	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Master Bank.strings.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &masterBank));
+	FMOD::Studio::Bank* bank = nullptr;
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Master Bank.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Master Bank.strings.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Character.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Music.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Surround_Ambience.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/UI_Menu.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Vehicles.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Weapons.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
 }
 
 void ScareTacticsApplication::VInitialize()
@@ -210,22 +216,6 @@ void ScareTacticsApplication::VUpdateCurrentScene()
 
 void ScareTacticsApplication::VUpdate(float deltaTime)
 {
-	if (Singleton<Engine>::SharedInstance().GetInput()->GetKeyDown(KEYCODE_A))
-	{
-
-		FMOD::Studio::EventDescription* loopingAmbienceDescription = NULL;
-		FMOD_CHECK(mStudio->getEvent("event:/Ambience/Country", &loopingAmbienceDescription));
-		//loopingAmbienceDescription->loadSampleData();
-
-		FMOD::Studio::EventInstance* eventInstance = NULL;
-		FMOD_CHECK(loopingAmbienceDescription->createInstance(&eventInstance));
-
-		FMOD_CHECK(eventInstance->start());
-
-		// Release will clean up the instance when it completes
-		FMOD_CHECK(eventInstance->release());
-	}
-
 	if (mCurrentScene)
 	{
 		mCurrentScene->VUpdate(deltaTime);

@@ -99,6 +99,12 @@
     <ClCompile Include="CameraManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Components\FmodEvent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\FmodEventCollection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PathFinder\Fringe.h">
@@ -249,12 +255,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="fmodwrap.h">
-          <Filter>Header Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Components\Health.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CameraManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\FmodEvent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\FmodEventCollection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

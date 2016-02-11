@@ -100,6 +100,8 @@
     <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="Components\ColliderComponent.cpp" />
     <ClCompile Include="Components\ExplorerController.cpp" />
+    <ClCompile Include="Components\FmodEvent.cpp" />
+    <ClCompile Include="Components\FmodEventCollection.cpp" />
     <ClCompile Include="Components\GhostController.cpp" />
     <ClCompile Include="Components\MinionController.cpp" />
     <ClCompile Include="Components\Skill.cpp" />
@@ -137,6 +139,8 @@
     <ClInclude Include="CollisionManager.h" />
     <ClInclude Include="Components\BaseComponent.h" />
     <ClInclude Include="Components\ColliderComponent.h" />
+    <ClInclude Include="Components\FmodEvent.h" />
+    <ClInclude Include="Components\FmodEventCollection.h" />
     <ClInclude Include="Components\GhostController.h" />
     <ClInclude Include="Components\Health.h" />
     <ClInclude Include="Components\MinionController.h" />
@@ -291,7 +295,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(Filename).dll</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename).dll to output directory...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).dll</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)ext\fmod\studio\lib\%(Filename).dll</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)ext\fmod\lowlevel\lib\%(Filename).dll</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)ext\fmod\studio\lib\%(Filename).dll</AdditionalInputs>
     </CustomBuild>
   </ItemGroup>
