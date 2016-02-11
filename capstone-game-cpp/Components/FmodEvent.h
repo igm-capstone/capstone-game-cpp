@@ -13,6 +13,7 @@ enum class FmodEventType
 class FmodEvent : public BaseComponent
 {
 	friend class Factory<FmodEvent>;
+	friend class FmodEventCollection;
 
 public:
 
@@ -21,7 +22,7 @@ public:
 	
 	void Play();
 	void Pause();
-	void Unpause();
+	void Resume();
 	bool IsPaused();
 	void Stop(bool immediate = false);
 

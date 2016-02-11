@@ -63,7 +63,7 @@ void FmodEvent::Pause()
 	}
 }
 
-void FmodEvent::Unpause()
+void FmodEvent::Resume()
 {
 	if (mInstance)
 	{

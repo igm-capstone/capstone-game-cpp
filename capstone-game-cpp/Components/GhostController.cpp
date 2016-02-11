@@ -18,7 +18,7 @@ GhostController::~GhostController()
 void GhostController::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
 	auto ghost = reinterpret_cast<Ghost*>(obj);
-	ghost->mEvent->Play();
+	ghost->mEvents->Play("Spawn");
 
 	NetworkCmd::SpawnNewMinion(pos);
 }
