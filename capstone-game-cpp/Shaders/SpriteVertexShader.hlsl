@@ -39,7 +39,7 @@ Pixel main(Vertex vertex)
 	Pixel output;
 	float sliceWidth = 100 / 1;
 	float sliceHeight = 32 / 2;
-	float sliceIndex = 0;
+	float sliceIndex = vertex.id;
 
 	float textureWidth;
 	float textureHeight;

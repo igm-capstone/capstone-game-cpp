@@ -273,12 +273,11 @@ void Level01::InitializeShaderResources()
 		
 		const char* filenames[] = { "Assets/Health.png" };
 		mRenderer->VAddShaderTextures2D(mSpritesShaderResource, filenames, 1);
-
-		mRenderer->VAddShaderLinearSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
+		mRenderer->VAddShaderPointSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 
 		// Instance buffer data
 		void*	ibSpriteData[] = { nullptr };
-		size_t	ibSpriteSizes[] = { sizeof(Sprite) };
+		size_t	ibSpriteSizes[] = { sizeof(Sprite) * 2 };
 		size_t	ibSpriteStrides[] = { sizeof(Sprite) };
 		size_t	ibSpriteOffsets[] = { 0 };
 
@@ -549,12 +548,16 @@ void Level01::RenderSprites()
 	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferOrto(), 0);
 	for (Health& h : Factory<Health>())
 	{
-		Sprite s;
-		s.pointpos = h.mSceneObject->mTransform->GetPosition() + vec3f(0, 5, 0);
-		s.id = 11;
-		s.size = { 100, 16, mCameraManager->pPixel2Unit };
+		Sprite s[2];
+		s[0].pointpos = h.mSceneObject->mTransform->GetPosition() + vec3f(0, 3, 0);
+		s[0].id = 1;
+		s[0].size = { 100 * h.GetHealthPerc(), 16, mCameraManager->pPixel2Unit };
 
-		mRenderer->VUpdateShaderInstanceBuffer(mSpritesShaderResource, &s, sizeof(Sprite), 0);
+		s[1].pointpos = h.mSceneObject->mTransform->GetPosition() + vec3f(0, 3, 0);
+		s[1].id = 0;
+		s[1].size = { 100, 16, mCameraManager->pPixel2Unit };
+
+		mRenderer->VUpdateShaderInstanceBuffer(mSpritesShaderResource, &s, sizeof(Sprite) * 2, 0);
 
 		mRenderer->VSetVertexShaderResourceView(mSpritesShaderResource, 0, 0);
 		mRenderer->VSetPixelShaderResourceView(mSpritesShaderResource, 0, 0);
@@ -567,7 +570,7 @@ void Level01::RenderSprites()
 		mRenderer->VBindMesh(mNDSQuadMesh);
 		mRenderer->VSetVertexShaderInstanceBuffer(mSpritesShaderResource, 0, 1);
 		mRenderer->VSetVertexShaderConstantBuffer(mSpritesShaderResource, 0, 0);
-		mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), 1, 0, 0, 0);
+		mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), 2, 0, 0, 0);
 	}
 }
 #pragma endregion

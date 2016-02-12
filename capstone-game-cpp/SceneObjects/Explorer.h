@@ -55,7 +55,7 @@ private:
 
 		mHealth = Factory<Health>::Create();
 		mHealth->mSceneObject = this;
-		mHealth->SetMaxHealth(1000);
+		mHealth->SetMaxHealth(1000.0f);
 
 		memset(mSkills, 0, sizeof(Skill*) * MAX_EXPLORER_SKILLS);
 
@@ -93,7 +93,7 @@ public:
 			e->mNetworkClient->SendData(&p);
 		}
 
-		e->mHealth->TakeDamage(1);
+		e->mHealth->TakeDamage(1.0f);
 	}
 
 	static void OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)

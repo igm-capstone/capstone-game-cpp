@@ -3,23 +3,25 @@
 
 class Health : public BaseComponent {
 private:
-	int		mCurrentHealth;
-	int		mMaxHealth;
+	float	mCurrentHealth;
+	float	mMaxHealth;
 
 public:
 
-	void SetMaxHealth(int i)
+	void SetMaxHealth(float i)
 	{
 		mMaxHealth = i;
-		mCurrentHealth = 1;
+		mCurrentHealth = i;
 	}
 
-	void TakeDamage(int i)
+	void TakeDamage(float i)
 	{
 		mCurrentHealth -= i;
 		if (mCurrentHealth < 0) mCurrentHealth = 0;
 		else if (mCurrentHealth > mMaxHealth) mCurrentHealth = mMaxHealth;
 	}
 
-	int GetHealth() { return mCurrentHealth; }
+	float GetHealth() { return mCurrentHealth; }
+	float GetMaxHealth() { return mMaxHealth; }
+	float GetHealthPerc() { return mCurrentHealth/mMaxHealth; }
 };

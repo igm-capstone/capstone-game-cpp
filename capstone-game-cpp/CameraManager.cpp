@@ -73,8 +73,8 @@ vec2f CameraManager::World2Screen(vec3f world)
 	auto ndc = vec4f(world,1) * viewProjectionMatrix;
  	ndc /= ndc.w;
 
-	int winX = round(((ndc.x + 1) / 2.0) * mRenderer->GetWindowWidth());
-	int winY = round(((1 - ndc.y) / 2.0) * mRenderer->GetWindowHeight());
+	float winX = round(((ndc.x + 1) / 2.0f) * mRenderer->GetWindowWidth());
+	float winY = round(((1 - ndc.y) / 2.0f) * mRenderer->GetWindowHeight());
 
 	return vec2f(winX, winY);
 }
@@ -90,10 +90,10 @@ vec3f CameraManager::Screen2WorldAt0(vec2f screen)
 
 Ray<vec3f> CameraManager::Screen2Ray(vec2f screen)
 {
-	double x = 2.0 * screen.x / mRenderer->GetWindowWidth() - 1;
-	double y = 1 - 2.0 * screen.y / mRenderer->GetWindowHeight();
+	float x = 2.0f * screen.x / mRenderer->GetWindowWidth() - 1;
+	float y = 1 - 2.0f * screen.y / mRenderer->GetWindowHeight();
 
-	vec4f ray_clip = vec4f(x, y, -1, 1) * (mCameraPersp.GetProjectionMatrix()).inverse();
+	vec4f ray_clip = vec4f(x, y, -1.0f, 1.0f) * (mCameraPersp.GetProjectionMatrix()).inverse();
 	ray_clip.w = 0;
 
 	pRay.normal = ray_clip * (mCameraPersp.GetViewMatrix()).inverse();
