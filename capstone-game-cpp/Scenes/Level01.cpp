@@ -267,15 +267,24 @@ void Level01::InitializeShaderResources()
 	{
 		mRenderer->VCreateShaderResource(&mSpritesShaderResource, &mAllocator);
 
-		void*  cbSpritesData[] = { mCameraManager->GetCBufferPersp(), &mModel };
-		size_t cbSpritesSizes[] = { sizeof(CBufferCamera), sizeof(CBufferModel) };
+		void*  cbSpritesData[] = { mCameraManager->GetCBufferPersp() };
+		size_t cbSpritesSizes[] = { sizeof(CBufferCamera) };
 
-		mRenderer->VCreateShaderConstantBuffers(mSpritesShaderResource, cbSpritesData, cbSpritesSizes, 2);
+		mRenderer->VCreateShaderConstantBuffers(mSpritesShaderResource, cbSpritesData, cbSpritesSizes, 1);
 		
 		const char* filenames[] = { "Assets/Health.png" };
 		mRenderer->VAddShaderTextures2D(mSpritesShaderResource, filenames, 1);
 
 		mRenderer->VAddShaderLinearSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
+
+		// Instance buffer data
+		void*	ibSpriteData[] = { nullptr };
+		size_t	ibSpriteSizes[] = { sizeof(Sprite) };
+		size_t	ibSpriteStrides[] = { sizeof(Sprite) };
+		size_t	ibSpriteOffsets[] = { 0 };
+
+		// Create the instance buffer
+		mRenderer->VCreateDynamicShaderInstanceBuffers(mSpritesShaderResource, ibSpriteData, ibSpriteSizes, ibSpriteStrides, ibSpriteOffsets, 1);
 	}
 }
 #pragma endregion
@@ -540,27 +549,25 @@ void Level01::RenderSprites()
 	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferOrto(), 0);
 	for (Health& h : Factory<Health>())
 	{
-		//FIXME: Update transform isnide Sprite obj
-		auto t = *(h.mSceneObject->mTransform);
-		t.SetScale(mCameraManager->PixelToWorldSize(100), mCameraManager->PixelToWorldSize(16), 0);
-		mModel.world = t.GetWorldMatrix();
-		mModel.world.t = mModel.world.t + vec4f(0, 5, 0, 0);
-		mModel.world = mModel.world.transpose();
+		Sprite s;
+		s.pointpos = h.mSceneObject->mTransform->GetPosition() + vec3f(0, 5, 0);
+		s.id = 11;
+		s.size = { 100, 16, mCameraManager->pPixel2Unit };
 
-		mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, &mModel, 1);
+		mRenderer->VUpdateShaderInstanceBuffer(mSpritesShaderResource, &s, sizeof(Sprite), 0);
+
 		mRenderer->VSetVertexShaderResourceView(mSpritesShaderResource, 0, 0);
 		mRenderer->VSetPixelShaderResourceView(mSpritesShaderResource, 0, 0);
 		mRenderer->VSetPixelShaderSamplerStates(mSpritesShaderResource);
 
-		
 		// Set slice index and draw.
 		//mSpriteMaterial.SetPerObjectBuffer(mD3d.GetContext(), worldMatrix, spriteComponent.AtlasIndex);
 		//mDeviceContext->DrawIndexed(12, 0, 0);
 
 		mRenderer->VBindMesh(mNDSQuadMesh);
+		mRenderer->VSetVertexShaderInstanceBuffer(mSpritesShaderResource, 0, 1);
 		mRenderer->VSetVertexShaderConstantBuffer(mSpritesShaderResource, 0, 0);
-		mRenderer->VSetVertexShaderConstantBuffer(mSpritesShaderResource, 1, 1);
-		mRenderer->VDrawIndexed(0, mNDSQuadMesh->GetIndexCount()); //Could become instanced
+		mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), 1, 0, 0, 0);
 	}
 }
 #pragma endregion

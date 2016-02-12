@@ -4,27 +4,26 @@ cbuffer camera : register(b0)
 	matrix view;
 }
 
-cbuffer model : register (b1) 
-{
-	matrix world;
-}
 /*
 cbuffer GridAtlasBuffer
 {
 float sliceWidth;
 float sliceHeight;
-}*/
+}
 
 cbuffer PerObjectBuffer
 {
 	matrix worldMatrix;
 	uint sliceIndex;
-}
+}*/
 
 struct Vertex
 {
 	float4		position	: POSITION;
 	float2		uv			: TEXCOORD;
+	float3		pointpos	: POINTPOS;
+	float3		size		: SIZEPX;
+	float		id			: TEXID;
 };
 
 struct Pixel
@@ -40,6 +39,7 @@ Pixel main(Vertex vertex)
 	Pixel output;
 	float sliceWidth = 100 / 1;
 	float sliceHeight = 32 / 2;
+	float sliceIndex = 0;
 
 	float textureWidth;
 	float textureHeight;
@@ -51,7 +51,12 @@ Pixel main(Vertex vertex)
 	uint vIndex = sliceIndex / slicesX;
 	uint hIndex = sliceIndex - (slicesX * vIndex);
 
-	matrix clip = mul(mul(world, view), projection);
+	float4x4 translate = { vertex.size.x / vertex.size.z, 0, 0, 0,
+							0, vertex.size.y / vertex.size.z, 0, 0,
+							0, 0, 1, 0,
+							vertex.pointpos.x, vertex.pointpos.y, vertex.pointpos.z, 1 };
+
+	matrix clip = mul(mul(translate, view), projection);
 	output.position = mul(float4(vertex.position.xyz, 1.0f), clip);
 
 	// Modify UV coordinates to grab the appropriate slice.

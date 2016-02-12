@@ -155,13 +155,16 @@ void ScareTacticsApplication::InitializeShaders()
 	InputElement spriteInputElements[] =
 	{
 		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
-		{ "TEXCOORD",	0, 0, 12,  0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX }
+		{ "TEXCOORD",	0, 0, 12, 0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "POINTPOS",	0, 1, 0,  1, RGB_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "SIZEPX",		0, 1, 12, 1, RGB_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "TEXID",		0, 1, 24, 1, R_FLOAT32,  INPUT_CLASS_PER_INSTANCE }
 	};
 
 	renderer->VCreateShader(&mSpriteVertexShader, &mGameAllocator);
 	renderer->VCreateShader(&mSpritePixelShader, &mGameAllocator);
 
-	renderer->LoadVertexShader(mSpriteVertexShader, gSpriteVertexShader, sizeof(gSpriteVertexShader), spriteInputElements, 2);
+	renderer->LoadVertexShader(mSpriteVertexShader, gSpriteVertexShader, sizeof(gSpriteVertexShader), spriteInputElements, 5);
 	renderer->VLoadPixelShader(mSpritePixelShader, gSpritePixelShader, sizeof(gSpritePixelShader));
 }
 

@@ -28,3 +28,10 @@ struct CBufferLight
 	float		range;
 	float		padding[3];
 };
+
+struct Sprite
+{
+	vec3f		pointpos;
+	vec3f		size;
+	float		id;
+};
