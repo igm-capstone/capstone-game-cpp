@@ -258,6 +258,8 @@ void ScareTacticsApplication::VShutdown()
 	mPLVolumePixelShader->~IShader();
 	mNDSQuadVertexShader->~IShader();
 	mNDSQuadPixelShader->~IShader();
+	mSpriteVertexShader->~IShader();
+	mSpritePixelShader->~IShader();
 	mDBGPixelShader->~IShader();
 
 	mSceneAllocator.Free();

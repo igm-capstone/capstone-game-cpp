@@ -78,6 +78,7 @@ Level01::~Level01()
 	mWallShaderResource->~IShaderResource();
 	mExplorerShaderResource->~IShaderResource();
 	mPLVShaderResource->~IShaderResource();
+	mSpritesShaderResource->~IShaderResource();
 	
 	mGBufferContext->~IRenderContext();
 	mShadowContext->~IRenderContext();
