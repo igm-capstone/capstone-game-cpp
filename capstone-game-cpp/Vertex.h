@@ -25,8 +25,10 @@ struct NDSVertex
 	vec2f UV;
 };
 
-struct SpriteVertex
+struct Sprite
 {
-	vec3f Position;
-	vec2f UV;
+	vec3f pointpos;
+	vec2f size;
+	vec2f scale;
+	float id;
 };

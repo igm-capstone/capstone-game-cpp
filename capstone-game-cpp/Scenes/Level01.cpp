@@ -1,20 +1,14 @@
 #include "stdafx.h"
 #include "capstone-game-cpp/ScareTacticsApplication.h"
 #include "Level01.h"
-#include "MainMenuScene.h"
 #include <Resource.h>
 #include <Colors.h>
 #include <Vertex.h>
 #include <Rig3D/Geometry.h>
 #include <Rig3D/Graphics/Interface/IShaderResource.h>
 #include <SceneObjects/Explorer.h>
-#include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
-#include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 #include <Rig3D/Graphics/Interface/IRenderContext.h>
 #include <FBXResource.h>
-#include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
-#include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
-#include <Console.h>
 #include <Culler.h>
 #include <SceneObjects/Lamp.h>
 #include <SceneObjects/Minion.h>
@@ -78,6 +72,7 @@ Level01::~Level01()
 	mWallShaderResource->~IShaderResource();
 	mExplorerShaderResource->~IShaderResource();
 	mPLVShaderResource->~IShaderResource();
+	mSpritesShaderResource->~IShaderResource();
 	
 	mGBufferContext->~IRenderContext();
 	mShadowContext->~IRenderContext();
@@ -230,7 +225,7 @@ void Level01::InitializeShaderResources()
 
 		// Constant buffer data
 		void*	cbWallData[] = { mCameraManager->GetCBufferPersp() };
-		size_t	cbWallSizes[] = { sizeof(CBufferCamera) };
+		size_t	cbWallSizes[] = { sizeof(CBuffer::Camera) };
 
 		mRenderer->VCreateShaderConstantBuffers(mWallShaderResource, cbWallData, cbWallSizes, 1);
 
@@ -245,7 +240,7 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateShaderResource(&mExplorerShaderResource, &mAllocator);
 
 		void* cbExplorerData[] = { mCameraManager->GetCBufferPersp(), &mModel };
-		size_t cbExplorerSizes[] = { sizeof(CBufferCamera), sizeof(CBufferModel) };
+		size_t cbExplorerSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::Model) };
 
 		mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 2);
 	}
@@ -255,7 +250,7 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateShaderResource(&mPLVShaderResource, &mAllocator);
 
 		void* cbPVLData[] = { &mLightData, mCameraManager->GetOrigin().pCols };
-		size_t cbPVLSizes[] = { sizeof(CBufferLight), sizeof(vec4f) };
+		size_t cbPVLSizes[] = { sizeof(CBuffer::Light), sizeof(vec4f) };
 
 		mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 2);
 		mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_BORDER, const_cast<float*>(Colors::transparent.pCols));
@@ -266,10 +261,14 @@ void Level01::InitializeShaderResources()
 	{
 		mRenderer->VCreateShaderResource(&mSpritesShaderResource, &mAllocator);
 
-		void*  cbSpritesData[] = { mCameraManager->GetCBufferPersp() };
-		size_t cbSpritesSizes[] = { sizeof(CBufferCamera) };
+		mSpriteSheetData.sliceWidth = 100 / 1;
+		mSpriteSheetData.sliceHeight = 32 / 2;
+		mSpriteSheetData.unit2px = mCameraManager->pPixel2Unit;
 
-		mRenderer->VCreateShaderConstantBuffers(mSpritesShaderResource, cbSpritesData, cbSpritesSizes, 1);
+		void*  cbSpritesData[] = { mCameraManager->GetCBufferPersp(), &mSpriteSheetData };
+		size_t cbSpritesSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::SpriteSheet) };
+
+		mRenderer->VCreateShaderConstantBuffers(mSpritesShaderResource, cbSpritesData, cbSpritesSizes, 2);
 		
 		const char* filenames[] = { "Assets/Health.png" };
 		mRenderer->VAddShaderTextures2D(mSpritesShaderResource, filenames, 1);
@@ -332,7 +331,7 @@ void Level01::VRender()
 	RenderIMGUI(); 
 	RenderSprites();
 
-	ID3D11ShaderResourceView* nullSRV[4] = { 0, 0, 0, 0 };
+	ID3D11ShaderResourceView* nullSRV[4] = { nullptr, nullptr, nullptr, nullptr };
 	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, nullSRV);
 
 	RENDER_TRACE();
@@ -546,16 +545,22 @@ void Level01::RenderSprites()
 	mRenderer->VSetPixelShader(mApplication->mSpritePixelShader);
 
 	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferOrto(), 0);
+	mSpriteSheetData.unit2px = mCameraManager->pPixel2Unit;
+	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, &mSpriteSheetData, 1);
+	mRenderer->VSetVertexShaderConstantBuffers(mSpritesShaderResource);
 	for (Health& h : Factory<Health>())
 	{
 		Sprite s[2];
 		s[0].pointpos = h.mSceneObject->mTransform->GetPosition() + vec3f(0, 3, 0);
 		s[0].id = 1;
-		s[0].size = { 100 * h.GetHealthPerc(), 16, mCameraManager->pPixel2Unit };
+		s[0].size = { 100, 16 };
+		s[0].scale = { h.GetHealthPerc() , 1 };
+		
 
 		s[1].pointpos = h.mSceneObject->mTransform->GetPosition() + vec3f(0, 3, 0);
 		s[1].id = 0;
-		s[1].size = { 100, 16, mCameraManager->pPixel2Unit };
+		s[1].size = { 100, 16 };
+		s[1].scale = { 1, 1 };
 
 		mRenderer->VUpdateShaderInstanceBuffer(mSpritesShaderResource, &s, sizeof(Sprite) * 2, 0);
 
@@ -569,7 +574,6 @@ void Level01::RenderSprites()
 
 		mRenderer->VBindMesh(mNDSQuadMesh);
 		mRenderer->VSetVertexShaderInstanceBuffer(mSpritesShaderResource, 0, 1);
-		mRenderer->VSetVertexShaderConstantBuffer(mSpritesShaderResource, 0, 0);
 		mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), 2, 0, 0, 0);
 	}
 }

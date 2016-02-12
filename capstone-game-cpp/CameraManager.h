@@ -10,8 +10,8 @@ class CameraManager
 	Rig3D::Camera mCameraOrto;
 	Rig3D::Camera mCameraPersp;
 
-	CBufferCamera	mCBufferOrto;
-	CBufferCamera	mCBufferPersp;
+	CBuffer::Camera	mCBufferOrto;
+	CBuffer::Camera	mCBufferPersp;
 	vec3f mForward;
 	vec3f mOrigin;
 	vec3f mLookAt;
@@ -29,8 +29,8 @@ public:
 	vec3f GetOrigin() { return mOrigin; };
 	vec3f GetLookAt() { return mLookAt; };
 
-	CBufferCamera* GetCBufferPersp() { return &mCBufferPersp; }
-	CBufferCamera* GetCBufferOrto() { return &mCBufferOrto; }
+	CBuffer::Camera* GetCBufferPersp() { return &mCBufferPersp; }
+	CBuffer::Camera* GetCBufferOrto() { return &mCBufferOrto; }
 
 
 	void ChangeLookAtTo(const vec3f& newLookAt);
