@@ -263,13 +263,13 @@ void Level01::InitializeShaderResources()
 
 		mSpriteSheetData.sliceWidth = 100 / 1;
 		mSpriteSheetData.sliceHeight = 32 / 2;
-		mSpriteSheetData.unit2px = mCameraManager->pPixel2Unit;
 
 		void*  cbSpritesData[] = { mCameraManager->GetCBufferPersp(), &mSpriteSheetData };
 		size_t cbSpritesSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::SpriteSheet) };
 
 		mRenderer->VCreateShaderConstantBuffers(mSpritesShaderResource, cbSpritesData, cbSpritesSizes, 2);
-		
+		mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, &mSpriteSheetData, 1);
+
 		const char* filenames[] = { "Assets/Health.png" };
 		mRenderer->VAddShaderTextures2D(mSpritesShaderResource, filenames, 1);
 		mRenderer->VAddShaderPointSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
@@ -545,19 +545,17 @@ void Level01::RenderSprites()
 	mRenderer->VSetPixelShader(mApplication->mSpritePixelShader);
 
 	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferOrto(), 0);
-	mSpriteSheetData.unit2px = mCameraManager->pPixel2Unit;
-	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, &mSpriteSheetData, 1);
+	
 	mRenderer->VSetVertexShaderConstantBuffers(mSpritesShaderResource);
 	for (Health& h : Factory<Health>())
 	{
 		Sprite s[2];
-		s[0].pointpos = h.mSceneObject->mTransform->GetPosition() + vec3f(0, 3, 0);
+		s[0].pointpos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, -32);
 		s[0].id = 1;
 		s[0].size = { 100, 16 };
-		s[0].scale = { h.GetHealthPerc() , 1 };
-		
+		s[0].scale = { h.GetHealthPerc(), 1 };
 
-		s[1].pointpos = h.mSceneObject->mTransform->GetPosition() + vec3f(0, 3, 0);
+		s[1].pointpos = s[0].pointpos;
 		s[1].id = 0;
 		s[1].size = { 100, 16 };
 		s[1].scale = { 1, 1 };

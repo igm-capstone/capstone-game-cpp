@@ -48,11 +48,7 @@ void CameraManager::OnResize()
 	mCameraPersp.SetProjectionMatrix(mat4f::normalizedPerspectiveLH(mFOV, aspectRatio, mNearPlane, mFarPlane));
 	mCBufferPersp.projection = mCameraPersp.GetProjectionMatrix().transpose();
 
-	auto halfHeight = 2 * tan(mFOV / 2) * magnitude(vec3f(0, 0, 0) - mOrigin) / 2;
-	auto halfWidth = halfHeight * aspectRatio;
-	pPixel2Unit = mRenderer->GetWindowHeight() / halfHeight;
-
-	mCameraOrto.SetProjectionMatrix(mat4f::normalizedOrthographicLH(-halfWidth, halfWidth, -halfHeight, halfHeight, mNearPlane, mFarPlane));
+	mCameraOrto.SetProjectionMatrix(mat4f::normalizedOrthographicLH(0, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight(), 0, mNearPlane, mFarPlane));
 	mCBufferOrto.projection = mCameraOrto.GetProjectionMatrix().transpose();
 }
 
@@ -100,9 +96,4 @@ Ray<vec3f> CameraManager::Screen2Ray(vec2f screen)
 	pRay.origin = mOrigin;
 
 	return pRay;
-}
-
-float CameraManager::PixelToWorldSize(float pixel)
-{
-	return pixel / pPixel2Unit;
 }

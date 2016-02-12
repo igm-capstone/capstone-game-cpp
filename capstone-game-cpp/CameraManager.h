@@ -41,9 +41,7 @@ public:
 	vec2f World2Screen(vec3f world);
 	vec3f Screen2WorldAt0(vec2f screen);
 	Rig3D::Ray<vec3f> Screen2Ray(vec2f screen);
-	float PixelToWorldSize(float pixel);
 
-	float pPixel2Unit;
 private:
 	//For Screen2World/Pixel2Unit calculation
 	Rig3D::Ray<vec3f> pRay;
