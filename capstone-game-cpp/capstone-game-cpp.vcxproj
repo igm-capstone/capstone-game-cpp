@@ -184,6 +184,7 @@
     <ClInclude Include="Scenes\Level01.h" />
     <ClInclude Include="Scenes\LoadingScreen.h" />
     <ClInclude Include="Scenes\MainMenuScene.h" />
+    <ClInclude Include="Skeleton.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TargetFollower.h" />
     <ClInclude Include="trace.h" />
@@ -275,7 +276,7 @@
     <Image Include="..\Assets\icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="External\fmodstudioL.ref">
+    <CustomBuild Include="External\fmodstudio.ref">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">COPY "$(SolutionDir)ext\fmod\studio\lib\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename).dll to output directory...</Message>
@@ -288,7 +289,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="External\fmodL.ref">
+    <CustomBuild Include="External\fmod.ref">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">COPY "$(SolutionDir)ext\fmod\lowlevel\lib\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">COPY "$(SolutionDir)ext\fmod\lowlevel\lib\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
