@@ -4,7 +4,7 @@
 
 #include <sstream>
 
-#define TRACE(message)                          Trace::GetTrace() << message << Trace::endl
+#define TRACE(message)                          Trace::GetTrace() << message
 #define TRACE_ERROR(message)                    Trace::GetTrace() << "[Error] " << message << Trace::endl
 #define TRACE_WARN(message)                     Trace::GetTrace() << "[Warning] " << message << Trace::endl
 #define TRACE_LOG(message)                      Trace::GetTrace() << "[Log] " << message << Trace::endl
