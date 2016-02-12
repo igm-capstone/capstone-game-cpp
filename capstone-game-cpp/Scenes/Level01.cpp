@@ -148,7 +148,7 @@ void Level01::InitializeGeometry()
 	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
 
 	// Explorer Mesh
-	FBXMeshResource<Vertex3> explorerFBXResource("Assets/BaseExplorerMesh_MM_N.fbx");
+	FBXMeshResource<Vertex3> explorerFBXResource("Assets/BaseCharacter_RIg_WalkAnim.fbx");
 	meshLibrary.LoadMesh(&mExplorerCubeMesh, mRenderer, explorerFBXResource);
 
 	// Minion 
