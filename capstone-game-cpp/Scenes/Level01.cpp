@@ -161,7 +161,7 @@ void Level01::InitializeGeometry()
 
 	// Explorer Mesh
 
-	FBXMeshResource<Vertex3> explorerFBXResource("Assets/BaseExplorerMesh.fbx");
+	FBXMeshResource<Vertex3> explorerFBXResource("Assets/BaseExplorerMesh_MM_N.fbx");
 	meshLibrary.LoadMesh(&mExplorerCubeMesh, mRenderer, explorerFBXResource);
 
 	//meshLibrary.NewMesh(&mExplorerCubeMesh, mRenderer);
@@ -314,6 +314,7 @@ void Level01::UpdateCamera()
 void Level01::VRender()
 {
 	// Reset state.
+	mRenderer->GetDeviceContext()->RSSetState(nullptr);
 	mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_TRIANGLE);
 	mRenderer->SetViewport();
 

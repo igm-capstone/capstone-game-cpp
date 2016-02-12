@@ -1,6 +1,5 @@
 #pragma once
 #include <fbxsdk.h>
-#include <trace.h>
 
 #define GET_FLOAT(f) static_cast<float>(f)
 
@@ -14,16 +13,12 @@ class FBXMeshResource
 {
 public:
 	std::vector<Vertex>		mVertices;
-	//std::vector<float[3]>	mPositions;
-	//std::vector<float[3]>	mNormals;
-	//std::vector<float[2]>	mUVs;
 	std::vector<uint16_t>	mIndices;
 
 	const char* mFilename;
 
 	FBXMeshResource(const char* filename) : mFilename(filename)
 	{
-
 
 	}
 
@@ -98,25 +93,28 @@ public:
 
 					FbxVector4 position, normal;
 					FbxVector2 uv;
-					int index;
+					int controlPointIndex;
 					bool unmapped;
 
-				//	TRACE_LOG("Polygon: " << pIndex);
+					// Remapping for winding order to clockwise
+					int cw[3]	= { 0, 2, 1 };
 
-					int directxindices[3] = { 2,1,0 };
-
-
-					for (int vIndex = 0; vIndex < pSize; vIndex++)
+					for (int polygonVertexIndex = 0; polygonVertexIndex < pSize; polygonVertexIndex++)
 					{
-						index = pMesh->GetPolygonVertex(pIndex, directxindices[vIndex]);
+						controlPointIndex = pMesh->GetPolygonVertex(pIndex, cw[polygonVertexIndex]);
 						
-						position = pMesh->GetControlPointAt(index);
-						pMesh->GetPolygonVertexNormal(pIndex, index, normal);
-						pMesh->GetPolygonVertexUV(pIndex, index, uvSetNameList.GetStringAt(0), uv, unmapped);
+						// Position
+						position = pMesh->GetControlPointAt(controlPointIndex);
+
+						// Normal
+						pMesh->GetPolygonVertexNormal(pIndex, cw[polygonVertexIndex], normal);
+						
+						// UV
+						pMesh->GetPolygonVertexUV(pIndex, cw[polygonVertexIndex], uvSetNameList.GetStringAt(0), uv, unmapped);
 
 						Vertex vertex;
-						vertex.Position = { GET_FLOAT(position.mData[0]), GET_FLOAT(position.mData[1]), GET_FLOAT(position.mData[2]) };
-						vertex.Normal	= { GET_FLOAT(normal.mData[0]), GET_FLOAT(normal.mData[1]), GET_FLOAT(normal.mData[2]) };
+						vertex.Position = { GET_FLOAT(position.mData[0]), GET_FLOAT(position.mData[1]), -GET_FLOAT(position.mData[2]) };
+						vertex.Normal	= { GET_FLOAT(normal.mData[0]), GET_FLOAT(normal.mData[1]), -GET_FLOAT(normal.mData[2]) };
 
 						if (!unmapped)
 						{
@@ -125,98 +123,9 @@ public:
 
 						mVertices.push_back(vertex);
 						mIndices.push_back(indices++);
-
-				//		TRACE_LOG("Position: " << index << " " << (float)position.mData[0] << " " << (float)position.mData[1] << " " << (float)position.mData[2]);
 					}
 				}
-				//// Positions
-
-				//for (int vIndex = 0; vIndex < pMesh->GetControlPointsCount(); vIndex++)
-				//{
-				//	FbxVector4 fbxVertex = pMesh->GetControlPointAt(j);
-				//	mPositions.push_back({ fbxVertex.mData[0], fbxVertex.mData[1], fbxVertex.mData[2] });
-				//}
-
-				//// Normals
-				//FbxGeometryElementNormal* pGeometryElementNormal = pMesh->GetElementNormal();
-				//if (pGeometryElementNormal)
-				//{
-				//	if (pGeometryElementNormal->GetMappingMode() == FbxGeometryElement::eByControlPoint)
-				//	{
-				//		for (int vIndex = 0; vIndex < pMesh->GetControlPointsCount(); vIndex++)
-				//		{
-				//			int nIndex = 0;
-				//			if (pGeometryElementNormal->GetReferenceMode() == FbxGeometryElement::eDirect)
-				//			{
-				//				nIndex = vIndex;
-				//			}
-
-				//			if (pGeometryElementNormal->GetReferenceMode() == FbxGeometryElement::eIndexToDirect)
-				//			{
-				//				nIndex = pGeometryElementNormal->GetIndexArray().GetAt(vIndex);
-				//			}
-
-				//			FbxVector4 normal = pGeometryElementNormal->GetDirectArray().GetAt(nIndex);
-				//			mNormals.push_back({ normal[0], normal[1], normal[2] });
-				//		}
-				//	}
-				//	else if (pGeometryElementNormal->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
-				//	{
-				//		int indexByPolygonVertex = 0;
-
-				//		for (int pIndex = 0; pIndex < pMesh->GetPolygonCount(); pIndex++)
-				//		{
-				//			
-				//			int pSize = pMesh->GetPolygonSize(pIndex);
-				//			assert(pSize == 3);
-
-				//			for (int vIndex = 0; vIndex < pSize; vIndex++)
-				//			{
-				//				int nIndex = 0;
-				//				if (pGeometryElementNormal->GetReferenceMode() == FbxGeometryElement::eDirect)
-				//				{
-				//					nIndex = indexByPolygonVertex;
-				//				}
-
-				//				if (pGeometryElementNormal->GetReferenceMode() == FbxGeometryElement::eIndexToDirect)
-				//				{
-				//					nIndex = pGeometryElementNormal->GetIndexArray().GetAt(indexByPolygonVertex);
-				//				}
-
-				//				FbxVector4 normal = pGeometryElementNormal->GetDirectArray().GetAt(nIndex);
-				//				mNormals.push_back({ normal[0], normal[1], normal[2] });
-
-				//				indexByPolygonVertex++;
-				//			}
-				//		}
-				//	}
-				//}
-
-				//// UVs
-
-				//for (int pIndex = 0; pIndex < pMesh->GetPolygonCount(); pIndex++)
-				//{
-
-				//	int pSize = pMesh->GetPolygonSize(pIndex);
-				//	assert(pSize == 3);
-
-				//	FbxStringList uvSetList;
-
-				//	for (int vIndex = 0; vIndex < pSize; vIndex++)
-				//	{
-				//		pMesh->GetUVSetNames(uvSetList);
-
-				//		pMesh->getuvs
-				//	}
-				//}
-
-				//// Indices
-
-				//int* pIndices = pMesh->GetPolygonVertices();
-				//for (int j = 0; j < pMesh->GetPolygonVertexCount(); j++)
-				//{
-				//	mIndices.push_back(static_cast<uint16_t>(pIndices[j]));
-				//}			
+	
 			}
 		}
 
