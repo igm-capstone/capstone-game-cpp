@@ -11,7 +11,7 @@
 #include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 #include <Rig3D/Graphics/Interface/IRenderContext.h>
-
+#include <FBXResource.h>
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 #include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
 #include <Console.h>
@@ -153,9 +153,8 @@ void Level01::InitializeGeometry()
 	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
 
 	// Explorer Mesh
-	meshLibrary.NewMesh(&mExplorerCubeMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mExplorerCubeMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
-	mRenderer->VSetMeshIndexBuffer(mExplorerCubeMesh, &indices[0], indices.size());
+	FBXMeshResource<Vertex3> explorerFBXResource("Assets/BaseExplorerMesh_MM_N.fbx");
+	meshLibrary.LoadMesh(&mExplorerCubeMesh, mRenderer, explorerFBXResource);
 
 	// Minion 
 	meshLibrary.NewMesh(&mMinionCubeMesh, mRenderer);
@@ -311,6 +310,7 @@ void Level01::VUpdate(double milliseconds)
 void Level01::VRender()
 {
 	// Reset state.
+	mRenderer->GetDeviceContext()->RSSetState(nullptr);
 	mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_TRIANGLE);
 	mRenderer->SetViewport();
 
