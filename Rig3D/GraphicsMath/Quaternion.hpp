@@ -36,6 +36,7 @@ namespace cliqCity
 
 			static Quaternion rollPitchYaw(const float& roll, const float& pitch, const float& yaw);
 			static Quaternion angleAxis(const float& angle, const Vector3& axis);
+			static Quaternion fromMatrix3(const Matrix3& mat);
 
 			Quaternion(const float& w, const float& x, const float& y, const float& z) : x(x), y(y), z(z), w(w) {};
 			Quaternion(const float& w, const Vector3& v) : Quaternion(w, v.x, v.y, v.z) {};
