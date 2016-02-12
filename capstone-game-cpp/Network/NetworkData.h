@@ -12,6 +12,7 @@ enum PacketTypes {
 	SPAWN_MINION    = 'M',
 	GRANT_AUTHORITY = 'A',
 	SYNC_TRANSFORM  = 'T',
+	SYNC_HEALTH		= 'H',
 	UNKNOWN
 };
 
@@ -28,6 +29,7 @@ struct Packet {
 	
 	union {
 		vec3f Position = { 0 };
+		float Value;
 	}; // Float Data
 
 	Packet() : Type(UNKNOWN) {};

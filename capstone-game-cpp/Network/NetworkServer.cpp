@@ -199,6 +199,10 @@ void NetworkServer::ReceiveFromClients()
 					Retransmit(client.first, &packet);
 					NetworkRpc::SyncTransform(packet.UUID, packet.Position);
 					break;
+				case SYNC_HEALTH:
+					Retransmit(client.first, &packet);
+					NetworkRpc::SyncHealth(packet.UUID, packet.Value);
+					break;
 				default:
 					printf("error in packet types\n");
 					break;

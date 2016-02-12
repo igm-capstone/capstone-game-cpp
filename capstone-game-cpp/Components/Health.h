@@ -16,12 +16,21 @@ public:
 
 	void TakeDamage(float i)
 	{
-		mCurrentHealth -= i;
-		if (mCurrentHealth < 0) mCurrentHealth = 0;
-		else if (mCurrentHealth > mMaxHealth) mCurrentHealth = mMaxHealth;
+		SetHealth(mCurrentHealth - i);
 	}
 
+	void SetHealth(float val)
+	{
+		mCurrentHealth = val;
+		if (mCurrentHealth < 0) mCurrentHealth = 0;
+		else if (mCurrentHealth > mMaxHealth) mCurrentHealth = mMaxHealth;
+
+		OnHealthChange(val);
+	}	
+	
 	float GetHealth() { return mCurrentHealth; }
 	float GetMaxHealth() { return mMaxHealth; }
 	float GetHealthPerc() { return mCurrentHealth/mMaxHealth; }
+
+	EXPOSE_CALLBACK(HealthChange, float);
 };

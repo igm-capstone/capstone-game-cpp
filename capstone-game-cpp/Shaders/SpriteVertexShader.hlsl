@@ -4,26 +4,21 @@ cbuffer camera : register(b0)
 	matrix view;
 }
 
-/*
-cbuffer GridAtlasBuffer
+cbuffer spriteSheet : register(b1)
 {
-float sliceWidth;
-float sliceHeight;
+	float sliceWidth;
+	float sliceHeight;
 }
 
-cbuffer PerObjectBuffer
-{
-	matrix worldMatrix;
-	uint sliceIndex;
-}*/
-
-struct Vertex
+struct Sprite
 {
 	float4		position	: POSITION;
 	float2		uv			: TEXCOORD;
+	//Per Sprite
 	float3		pointpos	: POINTPOS;
-	float3		size		: SIZEPX;
-	float		id			: TEXID;
+	float2		size		: SIZE;
+	float2		scale		: SCALE;
+	float		texid		: TEXID;
 };
 
 struct Pixel
@@ -34,12 +29,11 @@ struct Pixel
 
 Texture2D mTexture : register(t0);
 
-Pixel main(Vertex vertex)
+Pixel main(Sprite input)
 {
 	Pixel output;
-	float sliceWidth = 100 / 1;
-	float sliceHeight = 32 / 2;
-	float sliceIndex = vertex.id;
+
+	float sliceIndex = input.texid;
 
 	float textureWidth;
 	float textureHeight;
@@ -51,38 +45,29 @@ Pixel main(Vertex vertex)
 	uint vIndex = sliceIndex / slicesX;
 	uint hIndex = sliceIndex - (slicesX * vIndex);
 
-	float4x4 translate;
+	float4x4 translatePivot = {
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		1, 1, 0, 1 };
+	float4x4 scale = {
+		input.size.x / 2 * input.scale.x, 0, 0, 0,
+		0, input.size.y / 2 * input.scale.y, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1 };
+	float4x4 translatePosAndUndoPivot = {
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		input.pointpos.x - input.size.x / 2 , input.pointpos.y - input.size.y / 2, 0, 1 };
+	
+	float4x4 world = mul(mul(translatePivot,scale), translatePosAndUndoPivot);
 
-	if (sliceIndex == 1) {
-		float4x4 translate1 = {
-			1, 0, 0, 0,
-			0, 1, 0, 0,
-			0, 0, 1, 0,
-			1, 0, 0, 1 };
-		float4x4 scale = {
-			vertex.size.x / vertex.size.z, 0, 0, 0,
-			0, vertex.size.y / vertex.size.z, 0, 0,
-			0, 0, 1, 0,
-			0, 0, 0, 1 };
-		float4x4 translate3 = {
-			1, 0, 0, 0,
-			0, 1, 0, 0,
-			0, 0, 1, 0,
-			vertex.pointpos.x - 100 / vertex.size.z, vertex.pointpos.y, vertex.pointpos.z, 1 };
-		translate = mul(mul(translate1,scale), translate3);
-	}
-	else {
-		float4x4 translated = { vertex.size.x / vertex.size.z, 0, 0, 0,
-								0, vertex.size.y / vertex.size.z, 0, 0,
-								0, 0, 1, 0,
-								vertex.pointpos.x, vertex.pointpos.y, vertex.pointpos.z, 1 };
-		translate = translated;
-	}
-	matrix clip = mul(mul(translate, view), projection);
-	output.position = mul(float4(vertex.position.xyz, 1.0f), clip);
+	matrix clip = mul(world, projection);
+	output.position = mul(float4(input.position.xyz, 1.0f), clip);
 
 	// Modify UV coordinates to grab the appropriate slice.
-	output.uv = float2((vertex.uv.x / slicesX) + (((textureWidth / slicesX) * float(hIndex)) / textureWidth), (vertex.uv.y / slicesY) + (((textureHeight / slicesY) * float(vIndex)) / textureHeight));
+	output.uv = float2((input.uv.x / slicesX) + (((textureWidth / slicesX) * float(hIndex)) / textureWidth), (input.uv.y / slicesY) + (((textureHeight / slicesY) * float(vIndex)) / textureHeight));
 	
 	return output;
 }

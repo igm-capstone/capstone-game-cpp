@@ -1,3 +1,11 @@
+/* 
+Resources:
+http://docs.autodesk.com/FBX/2014/ENU/FBX-SDK-Documentation/index.html
+http://www.walkerb.net/blog/dx-4/
+http://www.gamedev.net/page/resources/_/technical/graphics-programming-and-theory/skinned-mesh-animation-using-matrices-r3577
+http://www.gamedev.net/page/resources/_/technical/graphics-programming-and-theory/how-to-work-with-fbx-sdk-r3582
+*/
+
 #pragma once
 #include <fbxsdk.h>
 
@@ -56,6 +64,14 @@ public:
 			return -1;
 		}
 
+		// Coordinate system conversion
+		FbxAxisSystem axisSystem = pScene->GetGlobalSettings().GetAxisSystem();
+		FbxAxisSystem dxAxisSystem(FbxAxisSystem::eDirectX);
+		if (axisSystem != dxAxisSystem)
+		{
+			dxAxisSystem.ConvertScene(pScene);
+		}
+
 		pImporter->Destroy();
 
 		FbxNode* pRootNode = pScene->GetRootNode();
@@ -96,25 +112,22 @@ public:
 					int controlPointIndex;
 					bool unmapped;
 
-					// Remapping for winding order to clockwise
-					int cw[3]	= { 0, 2, 1 };
-
 					for (int polygonVertexIndex = 0; polygonVertexIndex < pSize; polygonVertexIndex++)
 					{
-						controlPointIndex = pMesh->GetPolygonVertex(pIndex, cw[polygonVertexIndex]);
+						controlPointIndex = pMesh->GetPolygonVertex(pIndex, polygonVertexIndex);
 						
 						// Position
 						position = pMesh->GetControlPointAt(controlPointIndex);
 
 						// Normal
-						pMesh->GetPolygonVertexNormal(pIndex, cw[polygonVertexIndex], normal);
+						pMesh->GetPolygonVertexNormal(pIndex, polygonVertexIndex, normal);
 						
 						// UV
-						pMesh->GetPolygonVertexUV(pIndex, cw[polygonVertexIndex], uvSetNameList.GetStringAt(0), uv, unmapped);
+						pMesh->GetPolygonVertexUV(pIndex, polygonVertexIndex, uvSetNameList.GetStringAt(0), uv, unmapped);
 
 						Vertex vertex;
-						vertex.Position = { GET_FLOAT(position.mData[0]), GET_FLOAT(position.mData[1]), -GET_FLOAT(position.mData[2]) };
-						vertex.Normal	= { GET_FLOAT(normal.mData[0]), GET_FLOAT(normal.mData[1]), -GET_FLOAT(normal.mData[2]) };
+						vertex.Position = { GET_FLOAT(position.mData[0]), GET_FLOAT(position.mData[1]), GET_FLOAT(position.mData[2]) };
+						vertex.Normal	= { GET_FLOAT(normal.mData[0]), GET_FLOAT(normal.mData[1]), GET_FLOAT(normal.mData[2]) };
 
 						if (!unmapped)
 						{
