@@ -8,7 +8,6 @@ http://www.gamedev.net/page/resources/_/technical/graphics-programming-and-theor
 
 #pragma once
 #include <fbxsdk.h>
-#include <Rig3D/Memory/Memory/Memory.h>
 #include <Skeleton.h>
 
 #define GET_FLOAT(f) static_cast<float>(f)
@@ -22,10 +21,11 @@ template <class Vertex>
 class FBXMeshResource
 {
 public:
-	std::vector<Vertex>		mVertices;
-	std::vector<uint16_t>	mIndices;
+	std::unordered_map<int, std::vector<JointBlendWeight>>	mControlPointJointBlendMap;
+	std::vector<Vertex>										mVertices;
+	std::vector<uint16_t>									mIndices;
 
-	Skeleton				mSkeleton;
+	Skeleton												mSkeleton;
 
 	const char* mFilename;
 
@@ -82,9 +82,15 @@ public:
 
 		if (pRootNode)
 		{
-			LoadSkeletalHierarchy(pRootNode);
 			LoadMesh(pRootNode);
-			
+
+			bool isRigged = LoadSkeletalHierarchy(pRootNode);
+			if (isRigged)
+			{
+				
+			}
+
+
 		}
 
 		return 1;
@@ -154,18 +160,20 @@ public:
 		}
 	}
 
-	void LoadSkeletalHierarchy(FbxNode* pRootNode)
+	bool LoadSkeletalHierarchy(FbxNode* pRootNode)
 	{
 		int childNodeCount = pRootNode->GetChildCount();
 		if (childNodeCount == 0)
 		{
-			return;
+			return false;
 		}
 
 		for (int i = 0; i < childNodeCount; i++)
 		{
 			LoadSkeletalHierarchyRecursively(pRootNode->GetChild(i), 0, 0, -1);
 		}
+
+		return true;
 	}
 
 	void LoadSkeletalHierarchyRecursively(FbxNode* pNode, const int& depth, const int& index, const int& parentIndex)
@@ -176,7 +184,8 @@ public:
 			return;
 		}
 
-		if (pNodeAttribute->GetAttributeType() != FbxNodeAttribute::eSkeleton)
+		FbxNodeAttribute::EType AttributeType = pNode->GetNodeAttribute()->GetAttributeType();
+		if (AttributeType != FbxNodeAttribute::eSkeleton)
 		{
 			return;
 		}
@@ -189,13 +198,14 @@ public:
 		// Add joint to skeleton
 		mSkeleton.mJoints.push_back(joint);
 		
-		for (int i = 0; i < depth; ++i)
-		{
-			TRACE(" ");
-		}
+		//for (int i = 0; i < depth; ++i)
+		//{
+		//	TRACE(" ");
+		//}
 
-		TRACE(joint.mName << " " << joint.mParentIndex);
-		TRACE(Trace::endl);
+		//TRACE(joint.mName << " " << joint.mParentIndex);
+		//TRACE(Trace::endl);
+
 		// Process children
 		int childNodeCount = pNode->GetChildCount();
 		for (int i = 0; i < childNodeCount; i++)
@@ -203,4 +213,86 @@ public:
 			LoadSkeletalHierarchyRecursively(pNode->GetChild(i), depth + 1, mSkeleton.mJoints.size(), index);
 		}
 	}
+
+	void LoadSkeletalAnimations(FbxNode* pRootNode)
+	{
+		
+	}
+
+	void LoadSkeletalHierarchyRecursively(FbxNode* pNode)
+	{
+		if (!pNode->GetNodeAttribute())
+		{
+			return;
+		}
+
+		FbxNodeAttribute::EType AttributeType = pNode->GetNodeAttribute()->GetAttributeType();
+		if (AttributeType != FbxNodeAttribute::eMesh)
+		{
+			return;
+		}
+
+		FbxMesh* pMesh = pNode->GetMesh();
+
+		// Model matrix: Most likely identity
+		FbxVector4 scale		= pNode->GetGeometricScaling(FbxNode::eSourcePivot);
+		FbxVector4 rotation		= pNode->GetGeometricScaling(FbxNode::eSourcePivot);
+		FbxVector4 translation	= pNode->GetGeometricScaling(FbxNode::eSourcePivot);
+		FbxAMatrix modelMatrix	= FbxAMatrix(translation, rotation, scale);
+		
+		int deformerCount = pMesh->GetDeformerCount();
+
+		for (int deformerIndex = 0; deformerIndex < deformerCount; deformerIndex++)
+		{
+			FbxSkin* pSkin = reinterpret_cast<FbxSkin*>(pMesh->GetDeformer(deformerIndex, FbxDeformer::eSkin));
+			if (!pSkin)
+			{
+				continue;
+			}
+
+			int clusterCount = pSkin->GetClusterCount();
+
+			for (int clusterIndex = 0; clusterIndex < clusterCount; clusterIndex++)
+			{
+				FbxCluster* pCluster = pSkin->GetCluster(clusterIndex);
+
+				FbxAMatrix transformMatrix, transformLinkMatrix;
+				pCluster->GetTransformMatrix(transformMatrix);
+				pCluster->GetTransformLinkMatrix(transformLinkMatrix);
+
+				FbxAMatrix inverseBindPoseMatrix = transformLinkMatrix.Inverse() * transformMatrix * modelMatrix;
+
+				int jointIndex = mSkeleton.GetJointIndexByName(pCluster->GetName());
+				assert(jointIndex > -1);
+
+				Joint* pJoint = &mSkeleton.mJoints[jointIndex];
+
+				// May have to transpose this matrix...
+
+				pJoint->inverseBindPoseMatrix.u = { GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[3]) };
+				pJoint->inverseBindPoseMatrix.v = { GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[3]) };
+				pJoint->inverseBindPoseMatrix.w = { GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[3]) };
+				pJoint->inverseBindPoseMatrix.t = { GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[3]) };
+
+				int controlPointIndexCount = pCluster->GetControlPointIndicesCount();
+
+				for (int controlPointIndex = 0; controlPointIndex < controlPointIndexCount; controlPointIndex++)
+				{
+					mControlPointJointBlendMap[controlPointIndex].push_back({ jointIndex, GET_FLOAT(pCluster->GetControlPointWeights()[controlPointIndex]) });
+				}
+
+				FbxAnimStack* pAnimStack = pNode->GetScene()->GetCurrentAnimationStack();
+				
+				const char* animStackName = pAnimStack->GetName();
+
+				FbxTakeInfo* pTakeInfo	= pNode->GetScene()->GetTakeInfo(animStackName);
+				FbxTime startTime		= pTakeInfo->mLocalTimeSpan.GetStart();
+				FbxTime endTime			= pTakeInfo->mLocalTimeSpan.GetStop();
+				FbxLongLong duration	= endTime.GetFrameCount(FbxTime::eFrames24) - startTime.GetFrameCount(FbxTime::eFrames24) + 1;
+
+			}
+		}
+
+	}
+
 };

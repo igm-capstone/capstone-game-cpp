@@ -347,7 +347,7 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="External\libfbxsdk.ref" />
-    <CustomBuild Include="External\fmodstudio.ref" />
-    <CustomBuild Include="External\fmod.ref" />
+    <CustomBuild Include="External\fmodstudioL.ref" />
+    <CustomBuild Include="External\fmodL.ref" />
   </ItemGroup>
 </Project>

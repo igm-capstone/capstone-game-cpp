@@ -276,7 +276,7 @@
     <Image Include="..\Assets\icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="External\fmodstudio.ref">
+    <CustomBuild Include="External\fmodstudioL.ref">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">COPY "$(SolutionDir)ext\fmod\studio\lib\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename).dll to output directory...</Message>
@@ -289,7 +289,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="External\fmod.ref">
+    <CustomBuild Include="External\fmodL.ref">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">COPY "$(SolutionDir)ext\fmod\lowlevel\lib\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">COPY "$(SolutionDir)ext\fmod\lowlevel\lib\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
