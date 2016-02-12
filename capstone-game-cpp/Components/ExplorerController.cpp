@@ -65,3 +65,8 @@ void ExplorerController::DoSprint(BaseSceneObject* obj, float duration, BaseScen
 	auto e = reinterpret_cast<Explorer*>(obj);
 	e->mController->mSprintDuration = duration;
 }
+
+void ExplorerController::SetBaseRotation(const float& x, const float& y, const float& z)
+{
+	mModelRotation = quatf::rollPitchYaw(z, x, y);
+}

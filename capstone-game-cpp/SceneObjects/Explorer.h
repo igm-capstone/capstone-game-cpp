@@ -79,10 +79,11 @@ public:
 		mNetworkID->mUUID = UUID;
 	};
 
-	static void OnMove(BaseSceneObject* obj, vec3f newPos)
+	static void OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 	{
 		auto e = static_cast<Explorer*>(obj);
 		e->mTransform->SetPosition(newPos);
+		e->mTransform->SetRotation(newRot);
 		e->mCollider->mCollider.origin = newPos;
 		
 		if (e->mNetworkID->mHasAuthority) {

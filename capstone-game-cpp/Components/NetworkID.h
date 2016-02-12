@@ -6,6 +6,6 @@ public:
 	int				mUUID;
 	bool			mHasAuthority;
 
-	EXPOSE_CALLBACK(NetAuthorityChange, bool)
-	EXPOSE_CALLBACK(NetSyncTransform, vec3f)
+	EXPOSE_CALLBACK_1(NetAuthorityChange, bool)
+	EXPOSE_CALLBACK_1(NetSyncTransform, vec3f)
 };
