@@ -20,15 +20,11 @@
 #include <SceneObjects/Minion.h>
 #include <trace.h>
 
-#pragma comment (lib, "fmodL_vc.lib")
-#pragma comment (lib, "fmodstudioL_vc.lib")
-
 #define SHADOW_MAP_SIZE 1024
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 
-static vec4f kEyePos = { 10.0f, 0.0f, -100.0f, 0.0f };
 
 Level01::Level01() :
 	mWallCount0(0),
@@ -50,11 +46,12 @@ Level01::Level01() :
 	mShadowContext(nullptr),
 	mWallShaderResource(nullptr),
 	mExplorerShaderResource(nullptr),
-	mPLVShaderResource(nullptr)
+	mPLVShaderResource(nullptr), 
+	mSpritesShaderResource(nullptr)
 {
 
 }
-
+FMOD::Studio::System* studio;
 Level01::~Level01()
 {
 	mWallMesh0->~IMesh();
@@ -95,7 +92,7 @@ void Level01::VOnResize()
 	mRenderer->VCreateContextDepthStencilResourceTargets(mGBufferContext, 1, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight());
 
 	// Camera
-	mCamera.SetProjectionMatrix(mat4f::normalizedPerspectiveLH(0.25f * PI, mRenderer->GetAspectRatio(), 0.1f, 1000.0f));
+	mCameraManager->OnResize();
 }
 
 #pragma region Initialization
@@ -113,9 +110,6 @@ void Level01::VInitialize()
 	InitializeGeometry();
 	InitializeShaderResources();
 	RenderShadowMaps();
-
-	mCamera.SetViewMatrix(mat4f::lookAtLH(vec3f(0, 0, 0), vec3f(kEyePos.x, kEyePos.y, kEyePos.z), vec3f(0, 1, 0))); //Temporary until Ghost get a controller.
-
 
 	mCollisionManager.Initialize();
 
@@ -147,7 +141,6 @@ void Level01::InitializeAssets()
 void Level01::InitializeGeometry()
 {
 	// Wall Mesh
-
 	MeshLibrary<LinearAllocator> meshLibrary(&mAllocator);
 	meshLibrary.NewMesh(&mWallMesh0, mRenderer);
 
@@ -160,13 +153,8 @@ void Level01::InitializeGeometry()
 	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
 
 	// Explorer Mesh
-
 	FBXMeshResource<Vertex3> explorerFBXResource("Assets/BaseExplorerMesh_MM_N.fbx");
 	meshLibrary.LoadMesh(&mExplorerCubeMesh, mRenderer, explorerFBXResource);
-
-	//meshLibrary.NewMesh(&mExplorerCubeMesh, mRenderer);
-	//mRenderer->VSetMeshVertexBuffer(mExplorerCubeMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
-	//mRenderer->VSetMeshIndexBuffer(mExplorerCubeMesh, &indices[0], indices.size());
 
 	// Minion 
 	meshLibrary.NewMesh(&mMinionCubeMesh, mRenderer);
@@ -176,6 +164,7 @@ void Level01::InitializeGeometry()
 	vertices.clear();
 	indices.clear();
 
+	// Floor
 	Geometry::Plane(vertices, indices, mPlaneWidth, mPlaneHeight, 5, 5);
 
 	meshLibrary.NewMesh(&mPlaneMesh, mRenderer);
@@ -186,7 +175,6 @@ void Level01::InitializeGeometry()
 	indices.clear();
 
 	// Spot Light Volume 
-
 	std::vector<Vertex1> coneVertices;
 
 	for (Lamp& l : Factory<Lamp>())
@@ -203,6 +191,7 @@ void Level01::InitializeGeometry()
 
 	// Full Screen Quad
 
+	// Billboard Quad
 	std::vector<NDSVertex> ndsVertices;
 
 	Geometry::NDSQuad(ndsVertices, indices);
@@ -221,55 +210,72 @@ void Level01::InitializeShaderResources()
 	// Shadow Maps for each light
 	mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mSpotLightCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 
-	// Allocate wall shader resource
-	mRenderer->VCreateShaderResource(&mWallShaderResource, &mAllocator);
+	// Walls
+	{
+		// Allocate wall shader resource
+		mRenderer->VCreateShaderResource(&mWallShaderResource, &mAllocator);
 
-	// Instance buffer data
-	void*	ibWallData[] = { mWallWorldMatrices0, mPlaneWorldMatrices };
-	size_t	ibWallSizes[] = { sizeof(mat4f) * mWallCount0, sizeof(mat4f) * mPlaneCount };
-	size_t	ibWallStrides[] = { sizeof(mat4f), sizeof(mat4f) };
-	size_t	ibWallOffsets[] = { 0, 0 };
+		// Instance buffer data
+		void*	ibWallData[] = { mWallWorldMatrices0, mPlaneWorldMatrices };
+		size_t	ibWallSizes[] = { sizeof(mat4f) * mWallCount0, sizeof(mat4f) * mPlaneCount };
+		size_t	ibWallStrides[] = { sizeof(mat4f), sizeof(mat4f) };
+		size_t	ibWallOffsets[] = { 0, 0 };
 
-	// Create the instance buffer
-	mRenderer->VCreateDynamicShaderInstanceBuffers(mWallShaderResource, ibWallData, ibWallSizes, ibWallStrides, ibWallOffsets, 2);
+		// Create the instance buffer
+		mRenderer->VCreateDynamicShaderInstanceBuffers(mWallShaderResource, ibWallData, ibWallSizes, ibWallStrides, ibWallOffsets, 2);
 
-	// Set data for instance buffer once
-	mRenderer->VUpdateShaderInstanceBuffer(mWallShaderResource, mWallWorldMatrices0, ibWallSizes[0], 0);
-	mRenderer->VUpdateShaderInstanceBuffer(mWallShaderResource, mPlaneWorldMatrices, ibWallSizes[1], 1);
+		// Set data for instance buffer once
+		mRenderer->VUpdateShaderInstanceBuffer(mWallShaderResource, mWallWorldMatrices0, ibWallSizes[0], 0);
+		mRenderer->VUpdateShaderInstanceBuffer(mWallShaderResource, mPlaneWorldMatrices, ibWallSizes[1], 1);
 
-	// Constant buffer data
-	void*	cbWallData[] = { &mPVM.camera };
-	size_t	cbWallSizes[] = { sizeof(CameraData) };
+		// Constant buffer data
+		void*	cbWallData[] = { mCameraManager->GetCBufferPersp() };
+		size_t	cbWallSizes[] = { sizeof(CBufferCamera) };
 
-	mRenderer->VCreateShaderConstantBuffers(mWallShaderResource, cbWallData, cbWallSizes, 1);
+		mRenderer->VCreateShaderConstantBuffers(mWallShaderResource, cbWallData, cbWallSizes, 1);
 
-	// Textures
-	const char* filenames[] = { "Assets/tileable5d.png", "Assets/wood floor 2.png" };
-	mRenderer->VAddShaderTextures2D(mWallShaderResource, filenames, 2);
-
-	mRenderer->VAddShaderLinearSamplerState(mWallShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
+		// Textures
+		const char* filenames[] = { "Assets/tileable5d.png", "Assets/wood floor 2.png" };
+		mRenderer->VAddShaderTextures2D(mWallShaderResource, filenames, 2);
+		mRenderer->VAddShaderLinearSamplerState(mWallShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
+	}
 
 	// Explorers
+	{
+		mRenderer->VCreateShaderResource(&mExplorerShaderResource, &mAllocator);
 
-	mRenderer->VCreateShaderResource(&mExplorerShaderResource, &mAllocator);
+		void* cbExplorerData[] = { mCameraManager->GetCBufferPersp(), &mModel };
+		size_t cbExplorerSizes[] = { sizeof(CBufferCamera), sizeof(CBufferModel) };
 
-	void* cbExplorerData[] = { &mPVM };
-	size_t cbExplorerSizes[] = { sizeof(CbufferPVM) };
+		mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 2);
+	}
 
-	mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 1);
+	// PVL
+	{
+		mRenderer->VCreateShaderResource(&mPLVShaderResource, &mAllocator);
 
-	// PLV
+		void* cbPVLData[] = { &mLightData, mCameraManager->GetOrigin().pCols };
+		size_t cbPVLSizes[] = { sizeof(CBufferLight), sizeof(vec4f) };
 
-	mRenderer->VCreateShaderResource(&mPLVShaderResource, &mAllocator);
+		mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 2);
+		mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_BORDER, const_cast<float*>(Colors::transparent.pCols));
+		mRenderer->AddAdditiveBlendState(mPLVShaderResource);
+	}
 
-	void* cbPVLData[] = { &mLightData, &kEyePos.pCols[0] };
-	size_t cbPVLSizes[] = { sizeof(CBufferLight), sizeof(vec4f)  };
+	// Sprites
+	{
+		mRenderer->VCreateShaderResource(&mSpritesShaderResource, &mAllocator);
 
-	mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 2);
+		void*  cbSpritesData[] = { mCameraManager->GetCBufferPersp(), &mModel };
+		size_t cbSpritesSizes[] = { sizeof(CBufferCamera), sizeof(CBufferModel) };
 
-	mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_BORDER, const_cast<float*>(Colors::transparent.pCols));
+		mRenderer->VCreateShaderConstantBuffers(mSpritesShaderResource, cbSpritesData, cbSpritesSizes, 2);
+		
+		const char* filenames[] = { "Assets/Health.png" };
+		mRenderer->VAddShaderTextures2D(mSpritesShaderResource, filenames, 1);
 
-	mRenderer->AddAdditiveBlendState(mPLVShaderResource);
+		mRenderer->VAddShaderLinearSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
+	}
 }
 #pragma endregion
 
@@ -292,21 +298,11 @@ void Level01::VUpdate(double milliseconds)
 		NetworkCmd::SpawnNewMinion(vec3f(0, 0, 0));
 	}
 
-
-	UpdateCamera();
-
 	mCollisionManager.DetectCollisions();
 	mCollisionManager.ResolveCollisions();
 
 	mNetworkManager->Update();
 }
-
-void Level01::UpdateCamera()
-{
-	mPVM.camera.projection	= mCamera.GetProjectionMatrix().transpose();
-	mPVM.camera.view		= mCamera.GetViewMatrix().transpose();
-}
-
 #pragma endregion
 
 #pragma region Render
@@ -325,20 +321,13 @@ void Level01::VRender()
 	RenderMinions();
 	RenderSpotLightVolumes();
 	RenderFullScreenQuad();
+	RenderIMGUI(); 
+	RenderSprites();
 
 	ID3D11ShaderResourceView* nullSRV[4] = { 0, 0, 0, 0 };
 	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, nullSRV);
 
 	RENDER_TRACE();
-	
-	//FPS
-	mRenderer->VSetContextTarget();
-
-	DX11IMGUI::NewFrame();
-	RenderFPSIndicator();
-	Console::Draw();
-	ImGui::Render();
-
 	mRenderer->VSwapBuffers();
 }
 
@@ -350,7 +339,7 @@ void Level01::RenderShadowMaps()
 	mRenderer->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
 
 	// Identity here just to be compatible with shader.
-	mLightPVM.camera.view = mat4f(1.0f);	
+	mLightPVM.view = mat4f(1.0f);	
 
 	uint32_t i = 0;
 	for (Lamp& l : Factory<Lamp>())
@@ -359,7 +348,7 @@ void Level01::RenderShadowMaps()
 		mRenderer->VClearDepthStencil(mShadowContext, i, 1.0f, 0);
 
 		// Set projection matrix for light frustum
-		mLightPVM.camera.projection = mSpotLightVPTMatrices[i].transpose();
+		mLightPVM.projection = mSpotLightVPTMatrices[i].transpose();
 		
 		std::vector<uint32_t> indices;
 		Rig3D::Frustum frustum;
@@ -375,8 +364,9 @@ void Level01::RenderShadowMaps()
 		{
 			mLightPVM.world = mWallWorldMatrices0[j];
 			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
+			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM.world, 1);
 
-			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+			mRenderer->VSetVertexShaderConstantBuffers(mExplorerShaderResource);
 			mRenderer->VDrawIndexed(0, mWallMesh0->GetIndexCount());
 		}
 
@@ -391,7 +381,7 @@ void Level01::RenderShadowMaps()
 		for (uint32_t j : indices)
 		{
 			mLightPVM.world = mPlaneWorldMatrices[j];
-			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
+			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM.world, 1);
 			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 			mRenderer->VDrawIndexed(0, mPlaneMesh->GetIndexCount());
 		}
@@ -415,7 +405,7 @@ void Level01::RenderWalls()
 	mRenderer->VSetPixelShader(mApplication->mQuadPixelShader);
 
 	// This can probably go into the render method...
-	mRenderer->VUpdateShaderConstantBuffer(mWallShaderResource, &mPVM.camera, 0);
+	mRenderer->VUpdateShaderConstantBuffer(mWallShaderResource, mCameraManager->GetCBufferPersp(), 0);
 
 	mRenderer->VBindMesh(mWallMesh0);
 	mRenderer->VSetVertexShaderInstanceBuffer(mWallShaderResource, 0, 1);
@@ -438,13 +428,15 @@ void Level01::RenderExplorers()
 	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
 	mRenderer->VSetPixelShader(mApplication->mExplorerPixelShader);
 
+	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
+	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 	for (Explorer& e : Factory<Explorer>())
 	{
-		mPVM.world = e.mTransform->GetWorldMatrix().transpose();
-		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mPVM, 0);
+		mModel.world = e.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 
 		mRenderer->VBindMesh(mExplorerCubeMesh);
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 		mRenderer->VDrawIndexed(0, mExplorerCubeMesh->GetIndexCount());
 	}
 }
@@ -464,13 +456,14 @@ void Level01::RenderSpotLightVolumes()
 
 	
 
-	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &kEyePos.pCols[0], 1);
+	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
 
+	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
 	uint32_t i = 0;
 	for (Lamp& l : Factory<Lamp>())
 	{
-		mPVM.world = mSpotLightWorldMatrices[i];
-		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mPVM, 0);
+		mModel.world = mSpotLightWorldMatrices[i];
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 
 		// Set Light data
 		mLightData.viewProjection	= (mSpotLightVPTMatrices[i]).transpose();
@@ -483,6 +476,8 @@ void Level01::RenderSpotLightVolumes()
 
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 		mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
 		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);		// Position
 		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);		// Normal
 		mRenderer->VSetPixelShaderDepthResourceView(mShadowContext, i, 2);	// Shadow
@@ -499,8 +494,8 @@ void Level01::RenderSpotLightVolumes()
 
 void Level01::RenderFullScreenQuad()
 {
-	mRenderer->VSetContextTargetWithDepth();
-	mRenderer->VClearContext(Colors::magenta.pCols, 1.0f, 0);
+	mRenderer->VSetContextTarget();
+	mRenderer->VClearContextTarget(Colors::magenta.pCols);
 
 	mRenderer->VSetInputLayout(mApplication->mNDSQuadVertexShader);
 	mRenderer->VSetVertexShader(mApplication->mNDSQuadVertexShader);
@@ -520,17 +515,54 @@ void Level01::RenderMinions()
 	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
 	mRenderer->VSetPixelShader (mApplication->mExplorerPixelShader);
 
+	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
+	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 	for (Minion& m : Factory<Minion>())
 	{
-		mPVM.world = m.mTransform->GetWorldMatrix().transpose();
-		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mPVM, 0);
+		mModel.world = m.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 
 		mRenderer->VBindMesh(mMinionCubeMesh);
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 		mRenderer->VDrawIndexed(0, mMinionCubeMesh->GetIndexCount());
 	}
 }
 
+void Level01::RenderSprites()
+{
+	mRenderer->VSetContextTarget();
+	auto currentTexture = -1;
+
+	mRenderer->VSetInputLayout(mApplication->mSpriteVertexShader);
+	mRenderer->VSetVertexShader(mApplication->mSpriteVertexShader);
+	mRenderer->VSetPixelShader(mApplication->mSpritePixelShader);
+
+	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferOrto(), 0);
+	for (Health& h : Factory<Health>())
+	{
+		//FIXME: Update transform isnide Sprite obj
+		auto t = *(h.mSceneObject->mTransform);
+		t.SetScale(mCameraManager->PixelToWorldSize(100), mCameraManager->PixelToWorldSize(16), 0);
+		mModel.world = t.GetWorldMatrix();
+		mModel.world.t = mModel.world.t + vec4f(0, 5, 0, 0);
+		mModel.world = mModel.world.transpose();
+
+		mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderResourceView(mSpritesShaderResource, 0, 0);
+		mRenderer->VSetPixelShaderResourceView(mSpritesShaderResource, 0, 0);
+		mRenderer->VSetPixelShaderSamplerStates(mSpritesShaderResource);
+
+		
+		// Set slice index and draw.
+		//mSpriteMaterial.SetPerObjectBuffer(mD3d.GetContext(), worldMatrix, spriteComponent.AtlasIndex);
+		//mDeviceContext->DrawIndexed(12, 0, 0);
+
+		mRenderer->VBindMesh(mNDSQuadMesh);
+		mRenderer->VSetVertexShaderConstantBuffer(mSpritesShaderResource, 0, 0);
+		mRenderer->VSetVertexShaderConstantBuffer(mSpritesShaderResource, 1, 1);
+		mRenderer->VDrawIndexed(0, mNDSQuadMesh->GetIndexCount()); //Could become instanced
+	}
+}
 #pragma endregion
 
 void Level01::VShutdown()

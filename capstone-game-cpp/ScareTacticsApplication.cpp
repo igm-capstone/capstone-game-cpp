@@ -16,6 +16,8 @@
 #include "Shaders/obj/NDSQuadVertexShader.h"
 #include "Shaders/obj/NDSQuadPixelShader.h"
 #include "Shaders/obj/DebugTexturePixelShader.h"
+#include "Shaders/obj/SpriteVertexShader.h"
+#include "Shaders/obj/SpritePixelShader.h"
 #include "Shaders/obj/ShadowCasterPixelShader.h"
 #include "Shaders/obj/ShadowGridComputeShader.h"
 #include "Shaders/obj/ShadowPixelShader.h"
@@ -33,6 +35,8 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mNDSQuadVertexShader(nullptr),
 	mNDSQuadPixelShader(nullptr),
 	mDBGPixelShader(nullptr),
+	mSpriteVertexShader(nullptr),
+	mSpritePixelShader(nullptr),
 	mLoadingScreen(nullptr),
 	mCurrentScene(nullptr),
 	mSceneToLoad(nullptr),
@@ -144,11 +148,45 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VCreateShader(&mDBGPixelShader, &mGameAllocator);
 	renderer->VLoadPixelShader(mDBGPixelShader, gDebugTexturePixelShader, sizeof(gDebugTexturePixelShader));
 
+
+
+	// Sprite Shaders
+
+	InputElement spriteInputElements[] =
+	{
+		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "TEXCOORD",	0, 0, 12,  0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX }
+	};
+
+	renderer->VCreateShader(&mSpriteVertexShader, &mGameAllocator);
+	renderer->VCreateShader(&mSpritePixelShader, &mGameAllocator);
+
+	renderer->LoadVertexShader(mSpriteVertexShader, gSpriteVertexShader, sizeof(gSpriteVertexShader), spriteInputElements, 2);
+	renderer->VLoadPixelShader(mSpritePixelShader, gSpritePixelShader, sizeof(gSpritePixelShader));
+}
+
+void ScareTacticsApplication::InitializeFMOD()
+{
+	FMOD_CHECK(FMOD::Studio::System::create(&mStudio));
+	FMOD_CHECK(mStudio->initialize(512, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr));
+
+	// can be async with: FMOD_STUDIO_LOAD_BANK_NONBLOCKING
+	FMOD::Studio::Bank* bank = nullptr;
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Master Bank.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Master Bank.strings.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Character.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Music.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Surround_Ambience.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/UI_Menu.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Vehicles.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Weapons.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
 }
 
 void ScareTacticsApplication::VInitialize()
 {
 	InitializeShaders();
+	InitializeFMOD();
 
 	mLoadingScreen->VInitialize();
 }
@@ -188,6 +226,8 @@ void ScareTacticsApplication::VUpdate(float deltaTime)
 		mLoadingScreen->VUpdate(deltaTime);
 		mLoadingScreen->VRender();
 	}
+
+	FMOD_CHECK(mStudio->update());
 }
 
 void ScareTacticsApplication::VShutdown()
@@ -219,4 +259,6 @@ void ScareTacticsApplication::VShutdown()
 
 	mSceneAllocator.Free();
 	mGameAllocator.Free();
+
+	FMOD_CHECK(mStudio->release());
 }

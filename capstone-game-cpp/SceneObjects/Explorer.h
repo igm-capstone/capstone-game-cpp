@@ -7,6 +7,7 @@
 #include <Components/Skill.h>
 #include <Rig3D/Graphics/Camera.h>
 #include "ScareTacticsApplication.h"
+#include <Components/Health.h>
 
 #define MAX_EXPLORERS        4
 #define MAX_EXPLORER_SKILLS  5
@@ -20,10 +21,11 @@ public:
 	ExplorerController*			mController;
 	SphereColliderComponent*	mCollider;
 	Skill*						mSkills[MAX_EXPLORER_SKILLS];
+	Health*						mHealth;
 
 private:
 	NetworkClient*				mNetworkClient;
-	Camera*						mCamera;
+	CameraManager*				mCameraManager;
 
 private:
 	Explorer() : mMesh(nullptr), mNetworkID(nullptr) {
@@ -36,6 +38,7 @@ private:
 		mController = Factory<ExplorerController>::Create();
 		mController->mSceneObject = this;
 		mController->mIsActive = false;
+		mController->mSpeed = 0.05f;
 		mController->RegisterMoveCallback(&OnMove);
 
 		mCollider = Factory<SphereColliderComponent>::Create();
@@ -48,7 +51,11 @@ private:
 		mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
 
 		mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
-		mCamera = &Application::SharedInstance().GetCurrentScene()->mCamera;
+		mCameraManager = &Singleton<CameraManager>::SharedInstance();
+
+		mHealth = Factory<Health>::Create();
+		mHealth->mSceneObject = this;
+		mHealth->SetMaxHealth(1000);
 
 		memset(mSkills, 0, sizeof(Skill*) * MAX_EXPLORER_SKILLS);
 
@@ -79,20 +86,21 @@ public:
 		e->mCollider->mCollider.origin = newPos;
 		
 		if (e->mNetworkID->mHasAuthority) {
-			e->mCamera->SetViewMatrix(mat4f::lookAtLH(newPos, newPos - vec3f(0.0f, 0.0f, 20.0f), vec3f(0.0f, 1.0f, 0.0f)));
+			e->mCameraManager->ChangeLookAtTo(newPos);
 			Packet p(PacketTypes::SYNC_TRANSFORM);
 			p.UUID = e->mNetworkID->mUUID;
 			p.Position = newPos;
 			e->mNetworkClient->SendData(&p);
 		}
 
+		e->mHealth->TakeDamage(1);
 	}
 
 	static void OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	{
 		auto e = static_cast<Explorer*>(obj);
 		e->mController->mIsActive = newAuth;
-		e->mCamera->SetViewMatrix(mat4f::lookAtLH(e->mTransform->GetPosition(), e->mTransform->GetPosition() - vec3f(0.0f, 0.0f, 20.0f), vec3f(0.0f, 1.0f, 0.0f)));
+		e->mCameraManager->MoveCamera(e->mTransform->GetPosition(), e->mTransform->GetPosition() + vec3f(0,-10,-20));
 	}
 
 	static void OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos)
@@ -106,7 +114,7 @@ public:
 	{
 		auto e = static_cast<Explorer*>(obj);
 		if (e->mNetworkID->mHasAuthority) {
-			e->mCamera->SetViewMatrix(mat4f::lookAtLH(e->mTransform->GetPosition(), e->mTransform->GetPosition() - vec3f(0.0f, 0.0f, 20.0f), vec3f(0.0f, 1.0f, 0.0f)));
+			e->mCameraManager->ChangeLookAtTo(e->mTransform->GetPosition());
 		}
 	}
 };

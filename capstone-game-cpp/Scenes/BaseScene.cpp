@@ -5,6 +5,8 @@
 #include <SceneObjects/Explorer.h>
 #include <SceneObjects/Ghost.h>
 #include <SceneObjects/Minion.h>
+#include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
+#include <Console.h>
 
 BaseScene::BaseScene() : 
 	mStaticMemory(nullptr),
@@ -21,6 +23,8 @@ BaseScene::BaseScene() :
 
 	mInput = mEngine->GetInput();
 
+	mCameraManager = &Singleton<CameraManager>::SharedInstance();
+	
 	mNetworkManager = &Singleton<NetworkManager>::SharedInstance();
 
 	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
@@ -50,4 +54,16 @@ void BaseScene::RenderFPSIndicator()
 	ImGui::Begin("FPS", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::Text("%6.1f FPS ", ImGui::GetIO().Framerate);
 	ImGui::End();
+}
+
+/* Renders IMGUI. ideally, it is the last call in the render loop.
+ * Optionally takes a void(*)(BaseScene*) function that draw custom IMGUI on top of the default FPS and Console. */
+void BaseScene::RenderIMGUI(void(*IMGUIDrawFunc)(BaseScene*))
+{
+	mRenderer->VSetContextTarget();
+	DX11IMGUI::NewFrame();
+	RenderFPSIndicator();
+	Console::Draw();
+	if (IMGUIDrawFunc) IMGUIDrawFunc(this);
+	ImGui::Render();
 }

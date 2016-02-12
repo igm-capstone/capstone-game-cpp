@@ -3,6 +3,7 @@
 //#include <Windows.h>
 #include <unordered_set>
 #include "WMEventHandler.h"
+#include "GraphicsMath/cgm.h"
 
 #include <xinput.h>
 
@@ -29,6 +30,7 @@ namespace Rig3D
 		ScreenPoint() {}
 		ScreenPoint(int16_t _x, int16_t _y) : x(_x), y(_y) {}
 		explicit ScreenPoint(_In_reads_(2) const int16_t *pArray) : x(pArray[0]), y(pArray[1]) {}
+		operator vec2f() const { return vec2f(x, y); }
 
 		ScreenPoint& operator= (const ScreenPoint& Int2) { x = Int2.x; y = Int2.y; return *this; }
 	};

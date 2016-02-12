@@ -47,19 +47,15 @@ void MainMenuScene::VRender()
 	mDeviceContext->ClearRenderTargetView(*mRenderer->GetRenderTargetView(), bg);
 	mDeviceContext->ClearDepthStencilView(mRenderer->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	DX11IMGUI::NewFrame();
-	mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
-	RenderUI();
-	RenderFPSIndicator();
-	Console::Draw();
-	
-	ImGui::Render();
+	RenderIMGUI(&RenderMainMenu);
 
 	mRenderer->VSwapBuffers();
 }
 
-void MainMenuScene::RenderUI()
+void MainMenuScene::RenderMainMenu(BaseScene* s)
 {
+	MainMenuScene* scene = static_cast<MainMenuScene*>(s);
+
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.WindowTitleAlign = ImGuiAlign_Center;
 	style.Colors[ImGuiCol_TitleBg] = ImVec4(0.67f, 0.51f, 1.00f, 0.26f);
@@ -76,11 +72,11 @@ void MainMenuScene::RenderUI()
 	ImGui::SetCursorPosX(70);
 	if (ImGui::Button("Host Match", ImVec2(160,0)))
 	{
-		if (mNetworkManager->StartServer())
+		if (scene->mNetworkManager->StartServer())
 			Application::SharedInstance().LoadScene<Level01>();
 		else {
 			ImGui::OpenPopup("Error");
-			mErrorMsg = "Failed to host a server";
+			scene->mErrorMsg = "Failed to host a server";
 		}
 	}
 
@@ -89,18 +85,18 @@ void MainMenuScene::RenderUI()
 	ImGui::LabelText("##IPLabel", "IP Address");
 	ImGui::SetCursorPosX(50);
 	ImGui::PushItemWidth(200);
-	ImGui::InputText("##IPInput", mIPAdress, 40);
+	ImGui::InputText("##IPInput", scene->mIPAdress, 40);
 	ImGui::PopItemWidth();
 
 	ImGui::SetCursorPosX(70);
 	if (ImGui::Button("Join Match", ImVec2(160, 0)))
 	{
-		mNetworkManager->mClient.mIPAddress = mIPAdress;
-		if (mNetworkManager->StartClient())
+		scene->mNetworkManager->mClient.mIPAddress = scene->mIPAdress;
+		if (scene->mNetworkManager->StartClient())
 			Application::SharedInstance().LoadScene<Level01>();
 		else {
 			ImGui::OpenPopup("Error");
-			mErrorMsg = "Failed to connect.";
+			scene->mErrorMsg = "Failed to connect.";
 		}
 	}
 
@@ -110,7 +106,7 @@ void MainMenuScene::RenderUI()
 
 	if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize))
 	{
-		ImGui::Text(mErrorMsg);
+		ImGui::Text(scene->mErrorMsg);
 		ImGui::SetCursorPosX(60);
 		if (ImGui::Button("Close"))
 			ImGui::CloseCurrentPopup();
@@ -121,10 +117,10 @@ void MainMenuScene::RenderUI()
 #ifdef _DEBUG
 	if (ImGui::Button("Start Debug", ImVec2(160, 0)))
 	{
-		mNetworkManager->StartServer();
+		scene->mNetworkManager->StartServer();
 		Application::SharedInstance().LoadScene<Level01>();
 		auto e = Factory<Explorer>::Create();
-		Explorer::OnNetAuthorityChange(e, true);
+		e->mController->mIsActive = true;
 	}
 #endif
 	ImGui::End();

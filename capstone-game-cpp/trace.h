@@ -1,4 +1,5 @@
 #pragma once
+#include <iomanip>
 #if defined _DEBUG
 
 #include <sstream>
@@ -92,8 +93,12 @@ public:
 	Trace &operator << (long value) { ss << value; return *this; }
 	Trace &operator << (bool value) { ss << value; return *this; }
 	Trace &operator << (char* value) { ss << value; return *this; }
+	Trace &operator << (const char* value) { ss << value; return *this; }
 	Trace &operator << (std::string value) { ss << value; return *this; }
 	Trace &operator << (Trace &(*function)(Trace &trace)) { return function(*this); }
+	Trace &operator << (vec2f v) { ss << std::fixed << std::setprecision(2) << "vec2f(" << v.x << ", " << v.y << ")"; return *this; }
+	Trace &operator << (vec3f v) { ss << std::fixed << std::setprecision(2) << "vec3f(" << v.x << ", " << v.y << ", " << v.z << ")"; return *this; }
+	Trace &operator << (vec4f v) { ss << std::fixed << std::setprecision(2) << "vec4f(" << v.x << ", " << v.y << ", " << v.z << ", " << v.z << ")"; return *this; }
 
 	static Trace &endl(Trace &trace);
 

@@ -7,6 +7,9 @@
 #include <Rig3D/Graphics/Camera.h>
 #include <ScareTacticsApplication.h>
 #include <Components/GhostController.h>
+#include <Components/FmodEvent.h>
+#include <Components/Skill.h>
+#include <Components/FmodEventCollection.h>
 
 #define MAX_GHOST_SKILLS 4
 
@@ -17,9 +20,10 @@ public:
 	NetworkID*					mNetworkID;
 	GhostController*			mController;
 	Skill*						mSkills[MAX_GHOST_SKILLS];
+	FmodEventCollection*		mEvents;
 
 private:
-	Camera*						mCamera;
+	CameraManager*				mCameraManager;
 
 private:
 	Ghost() : mNetworkID(nullptr) {
@@ -31,8 +35,12 @@ private:
 		mController->mSceneObject = this;
 		mController->mIsActive = false;
 
-		mCamera = &Application::SharedInstance().GetCurrentScene()->mCamera; //FIXME: CurrentScene is still the previous scene during constructors...
-		mCamera->SetViewMatrix(mat4f::lookAtLH(vec3f(0, 0, 0), vec3f(10.0f, 0.0f, -100.0f), vec3f(0, 1, 0)));
+		mCameraManager = &Singleton<CameraManager>::SharedInstance();
+		mCameraManager->MoveCamera(vec3f(0, 0, 0), vec3f(0.0f, 0.0f, -100.0f));
+
+		mEvents = Factory<FmodEventCollection>::Create();
+		mEvents->mSceneObject = this;
+		mEvents->Register("Spawn", "Explosions/Single Explosion", FmodEventType::FIRE_AND_FORGET);
 
 		memset(mSkills, 0, sizeof(Skill*) * MAX_GHOST_SKILLS);
 

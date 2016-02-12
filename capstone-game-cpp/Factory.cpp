@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "Factory.h"
-#include "Components\NetworkID.h"
 #include "SceneObjects\Explorer.h"
 #include "SceneObjects\Minion.h"
 #include "SceneObjects\Wall.h"
@@ -23,7 +22,7 @@ PoolAllocator Factory<##type##>::sAllocator(__g##type##Buffer, __g##type##Buffer
 
 // register scene object factories
 REGISTER_FACTORY ( Ghost,			1	)
-REGISTER_FACTORY ( Explorer,		3	)
+REGISTER_FACTORY ( Explorer,		4	)
 REGISTER_FACTORY ( Minion,			50	)
 REGISTER_FACTORY ( Wall,			100	)
 REGISTER_FACTORY ( MoveableBlock,	10	)
@@ -40,7 +39,10 @@ REGISTER_FACTORY ( NetworkID,						10	)
 REGISTER_FACTORY ( BoxColliderComponent,			100	)
 REGISTER_FACTORY ( OrientedBoxColliderComponent,	100 )
 REGISTER_FACTORY ( SphereColliderComponent,			100 )
-REGISTER_FACTORY ( ExplorerController,				3	)
+REGISTER_FACTORY ( ExplorerController,				4	)
 REGISTER_FACTORY ( GhostController,					1	)
 REGISTER_FACTORY ( MinionController,				50	)
 REGISTER_FACTORY ( Skill,							20	)
+REGISTER_FACTORY ( Health,							4+50)
+REGISTER_FACTORY ( FmodEvent,						100	)
+REGISTER_FACTORY ( FmodEventCollection,				10	)

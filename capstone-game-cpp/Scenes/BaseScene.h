@@ -2,8 +2,8 @@
 #include "stdafx.h"
 
 #include "Network\NetworkManager.h"
-#include <Rig3D/Graphics/Camera.h>
 #include <SceneObjects/BaseSceneObject.h>
+#include <CameraManager.h>
 #include <Components/ColliderComponent.h>
 
 #define PI 3.14159265359f
@@ -30,6 +30,7 @@ protected:
 	ID3D11Device*				mDevice;
 	ID3D11DeviceContext*		mDeviceContext;
 
+	CameraManager*				mCameraManager;
 	NetworkManager*				mNetworkManager;
 	BaseSceneObject*			mMe;
 
@@ -38,7 +39,6 @@ protected:
 
 public:
 	BaseSceneState				mState;
-	Camera						mCamera;
 
 	// Miscelanious
 	BoxCollider					mFloorCollider;
@@ -50,5 +50,6 @@ public:
 
 	// Common methods
 	void RenderFPSIndicator();
+	void RenderIMGUI(void(*)(BaseScene*) = nullptr);
 };
 

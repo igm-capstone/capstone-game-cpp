@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <unordered_map>
 #include <Rig3D/Graphics/Interface/IShader.h>
+#include "fmodwrap.h"
 
 #define STATIC_SCENE_MEMORY		1000000
 #define SCENE_ALIGNMENT_PADDING 6
@@ -24,8 +25,12 @@ public:
 	IShader* mPLVolumePixelShader;
 	IShader* mNDSQuadVertexShader;
 	IShader* mNDSQuadPixelShader;
+	IShader* mSpriteVertexShader;
+	IShader* mSpritePixelShader;
 
 	IShader* mDBGPixelShader;
+
+	FMOD::Studio::System* mStudio;
 
 	ScareTacticsApplication();
 	~ScareTacticsApplication();
@@ -39,6 +44,7 @@ public:
 	void VShutdown() override;
 
 	void InitializeShaders();
+	void InitializeFMOD();
 
 	template<class TScene>
 	void LoadScene()

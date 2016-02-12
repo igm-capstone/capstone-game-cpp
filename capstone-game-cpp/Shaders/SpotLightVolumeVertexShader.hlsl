@@ -10,10 +10,14 @@ struct Pixel
 	float2	uv			:	TEXCOORD;
 };
 
-cbuffer transform : register (b0)
+cbuffer camera : register(b0)
 {
 	matrix projection;
 	matrix view;
+}
+
+cbuffer model : register (b1)
+{
 	matrix world;
 }
 
