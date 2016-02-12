@@ -7,9 +7,10 @@
 class Level01 : public BaseScene
 {
 	// Cbuffer data
-	CBufferModel		mModel;
-	CBufferLightPVM		mLightPVM;		// Used for spotlight matrices
-	CBufferLight		mLightData;		// Used for spotlight data (color, angle, etc).
+	CBuffer::Model		mModel;
+	CBuffer::LightPVM	mLightPVM;			// Used for spotlight matrices
+	CBuffer::Light		mLightData;			// Used for spotlight data (color, angle, etc).
+	CBuffer::SpriteSheet mSpriteSheetData;
 
 	// Allocators
 	LinearAllocator		mAllocator;
