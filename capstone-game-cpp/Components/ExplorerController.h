@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "BaseComponent.h"
+#include <ScareTacticsApplication.h>
 
 class Skill;
 
@@ -11,7 +12,9 @@ class ExplorerController : public BaseComponent
 	~ExplorerController();
 
 	Input* mInput;
+	Application* mApplication;
 	double mSprintDuration;
+	quatf mModelRotation;
 
 public:
 	float mSpeed;
