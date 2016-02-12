@@ -94,6 +94,7 @@ public:
 		}
 
 		e->mHealth->TakeDamage(1.0f);
+		if (e->mHealth->GetHealth() <= 0) e->mHealth->TakeDamage(-1000.0f);
 	}
 
 	static void OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)

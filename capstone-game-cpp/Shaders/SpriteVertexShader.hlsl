@@ -51,16 +51,38 @@ Pixel main(Vertex vertex)
 	uint vIndex = sliceIndex / slicesX;
 	uint hIndex = sliceIndex - (slicesX * vIndex);
 
-	float4x4 translate = { vertex.size.x / vertex.size.z, 0, 0, 0,
-							0, vertex.size.y / vertex.size.z, 0, 0,
-							0, 0, 1, 0,
-							vertex.pointpos.x, vertex.pointpos.y, vertex.pointpos.z, 1 };
+	float4x4 translate;
 
+	if (sliceIndex == 1) {
+		float4x4 translate1 = {
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			1, 0, 0, 1 };
+		float4x4 scale = {
+			vertex.size.x / vertex.size.z, 0, 0, 0,
+			0, vertex.size.y / vertex.size.z, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1 };
+		float4x4 translate3 = {
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			vertex.pointpos.x - 100 / vertex.size.z, vertex.pointpos.y, vertex.pointpos.z, 1 };
+		translate = mul(mul(translate1,scale), translate3);
+	}
+	else {
+		float4x4 translated = { vertex.size.x / vertex.size.z, 0, 0, 0,
+								0, vertex.size.y / vertex.size.z, 0, 0,
+								0, 0, 1, 0,
+								vertex.pointpos.x, vertex.pointpos.y, vertex.pointpos.z, 1 };
+		translate = translated;
+	}
 	matrix clip = mul(mul(translate, view), projection);
 	output.position = mul(float4(vertex.position.xyz, 1.0f), clip);
 
 	// Modify UV coordinates to grab the appropriate slice.
 	output.uv = float2((vertex.uv.x / slicesX) + (((textureWidth / slicesX) * float(hIndex)) / textureWidth), (vertex.uv.y / slicesY) + (((textureHeight / slicesY) * float(vIndex)) / textureHeight));
-
+	
 	return output;
 }
