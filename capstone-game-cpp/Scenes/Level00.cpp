@@ -675,8 +675,6 @@ void Level00::InitializeCamera()
 
 	mQuadShaderData.View = mViewMatrix;
 	mQuadShaderData.Projection = mProjectionMatrix;
-
-	TRACE_SET_VIEW_PROJ(mViewMatrix, mProjectionMatrix)
 }
 
 void Level00::InitializeLevel()
