@@ -8,6 +8,9 @@
 #include "Rig3D/Graphics/DirectX11/DX11IMGUI.h"
 #include "Rig3D/Graphics/DirectX11/imgui/imgui.h"
 
+bool MainMenuScene::gLocalClient = false;
+bool MainMenuScene::gLocalServer = false;
+
 void MainMenuScene::VInitialize()
 {
 	mState = BASE_SCENE_STATE_INITIALIZING;
@@ -20,6 +23,22 @@ void MainMenuScene::VInitialize()
 
 void MainMenuScene::VUpdate(double milliseconds)
 {
+	if (gLocalServer)
+	{
+		mNetworkManager->StartServer();
+		Application::SharedInstance().LoadScene<Level01>();
+		
+		if (gLocalClient)
+		{
+			system("start Bin/Debug/capstone-game-cpp.exe --local-client");
+		}
+	}
+	else if (gLocalClient)
+	{
+		mNetworkManager->StartClient();
+		Application::SharedInstance().LoadScene<Level01>();
+	}
+
 	if (mInput->GetKeyDown(KEYCODE_1))
 	{
 		mNetworkManager->StartServer();
@@ -112,9 +131,9 @@ void MainMenuScene::RenderMainMenu(BaseScene* s)
 			ImGui::CloseCurrentPopup();
 		ImGui::EndPopup();
 	}
+#ifdef _DEBUG
 
 	ImGui::SetCursorPosX(70);
-#ifdef _DEBUG
 	if (ImGui::Button("Start Debug", ImVec2(160, 0)))
 	{
 		scene->mNetworkManager->StartServer();
@@ -122,6 +141,15 @@ void MainMenuScene::RenderMainMenu(BaseScene* s)
 		auto e = Factory<Explorer>::Create();
 		e->mController->mIsActive = true;
 	}
+
+	ImGui::SetCursorPosX(70);
+	if (ImGui::Button("Start Pair", ImVec2(160, 0)))
+	{
+		scene->mNetworkManager->StartServer();
+		Application::SharedInstance().LoadScene<Level01>();
+		system("start Bin/Debug/capstone-game-cpp.exe --local-client");
+	}
+
 #endif
 	ImGui::End();
 	ImGui::PopFont();

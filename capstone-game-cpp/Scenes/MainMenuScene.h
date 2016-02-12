@@ -7,6 +7,9 @@ class MainMenuScene : public BaseScene
 	char mIPAdress[40];
 
 public:
+	static bool gLocalClient;
+	static bool gLocalServer;
+
 	MainMenuScene() {};
 	~MainMenuScene() override {}
 

@@ -22,6 +22,20 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 {
 	using namespace Rig3D;
 	
+	if (strcmp(cmdLine, "--local-client") == 0)
+	{
+		MainMenuScene::gLocalClient = true;
+	}
+	else if (strcmp(cmdLine, "--local-server") == 0)
+	{
+		MainMenuScene::gLocalServer = true;
+	}
+	else if (strcmp(cmdLine, "--local-all") == 0)
+	{
+		MainMenuScene::gLocalClient = true;
+		MainMenuScene::gLocalServer = true;
+	}
+
 	struct stat s;
 	if (stat("Assets", &s) != 0) {
 		_wchdir((LPCWSTR)L"..");
