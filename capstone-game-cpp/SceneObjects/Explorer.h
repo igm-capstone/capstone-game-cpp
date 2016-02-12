@@ -40,6 +40,7 @@ private:
 		mController->mIsActive = false;
 		mController->mSpeed = 0.05f;
 		mController->RegisterMoveCallback(&OnMove);
+		mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
 
 		mCollider = Factory<SphereColliderComponent>::Create();
 		mCollider->mIsDynamic = true;
