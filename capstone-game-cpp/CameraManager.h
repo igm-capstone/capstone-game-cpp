@@ -39,7 +39,7 @@ public:
 	void OnResize();
 	vec3f GetForward();
 	vec2f World2Screen(vec3f world);
-	vec3f Screen2WorldAt0(vec2f screen);
+	vec3f Screen2WorldAtZ0(vec2f screen);
 	Rig3D::Ray<vec3f> Screen2Ray(vec2f screen);
 
 private:

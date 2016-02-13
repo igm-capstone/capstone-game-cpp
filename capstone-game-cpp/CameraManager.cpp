@@ -75,7 +75,7 @@ vec2f CameraManager::World2Screen(vec3f world)
 	return vec2f(winX, winY);
 }
 
-vec3f CameraManager::Screen2WorldAt0(vec2f screen)
+vec3f CameraManager::Screen2WorldAtZ0(vec2f screen)
 {
 	Screen2Ray(screen);
 

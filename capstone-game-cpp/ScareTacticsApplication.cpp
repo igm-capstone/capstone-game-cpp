@@ -222,10 +222,7 @@ void ScareTacticsApplication::VUpdateCurrentScene()
 void ScareTacticsApplication::UpdateGroundMousePosition()
 {
 	auto mousePosition = mCurrentScene->mInput->mousePosition;
-	auto ray = mCurrentScene->mCameraManager->Screen2Ray(mousePosition);
-
-	float t;
-	IntersectRayAABB(ray, mCurrentScene->mFloorCollider, mGroundMousePosition, t);
+	mGroundMousePosition = mCurrentScene->mCameraManager->Screen2WorldAtZ0(mousePosition);
 }
 
 void ScareTacticsApplication::VUpdate(float deltaTime)
