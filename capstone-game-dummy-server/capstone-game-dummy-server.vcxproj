@@ -82,13 +82,8 @@
     </ClCompile>
     <PreBuildEvent />
     <PreBuildEvent />
-    <PostBuildEvent>
-      <Command>COPY "$(OutDir)\capstone-game-cpp.exe" "$(OutDir)$(TargetFileName)" &gt; NUL
-COPY "$(OutDir)\capstone-game-cpp.pdb" "$(OutDir)$(TargetName).pdb" &gt; NUL</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Cloning main game as dummy.</Message>
-    </PostBuildEvent>
+    <PostBuildEvent />
+    <PostBuildEvent />
     <PreBuildEvent>
       <Command>taskkill /f /fi "imagename eq $(TargetFileName)" &gt; NUL</Command>
     </PreBuildEvent>
@@ -117,13 +112,8 @@ COPY "$(OutDir)\capstone-game-cpp.pdb" "$(OutDir)$(TargetName).pdb" &gt; NUL</Co
     </Link>
     <PreBuildEvent />
     <PreBuildEvent />
-    <PostBuildEvent>
-      <Command>COPY "$(OutDir)\capstone-game-cpp.exe" "$(OutDir)$(TargetFileName)" &gt; NUL
-COPY "$(OutDir)\capstone-game-cpp.pdb" "$(OutDir)$(TargetName).pdb" &gt; NUL</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Cloning main game as dummy.</Message>
-    </PostBuildEvent>
+    <PostBuildEvent />
+    <PostBuildEvent />
     <PreBuildEvent>
       <Command>taskkill /f /fi "imagename eq $(TargetFileName)" &gt; NUL</Command>
     </PreBuildEvent>
@@ -145,6 +135,17 @@ COPY "$(OutDir)\capstone-game-cpp.pdb" "$(OutDir)$(TargetName).pdb" &gt; NUL</Co
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CustomBuild Include="capstone-game-cpp.ref">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">COPY "$(OutDir)%(Filename).exe" "$(OutDir)$(TargetName).exe" &gt; NUL</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">COPY "$(OutDir)%(Filename).exe" "$(OutDir)$(TargetName).exe" &gt; NUL</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Cloning main game as dummy.</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Cloning main game as dummy.</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)$(TargetFileName)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)$(TargetFileName)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(Filename).exe</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).exe</AdditionalInputs>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
