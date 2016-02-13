@@ -80,7 +80,7 @@ void Skill::Update()
 
 	//--- check if skill is still on cooldown
 
-	float appTime = mTimer->GetApplicationTime();
+	float appTime = float(mTimer->GetApplicationTime());
 	float timeFromLastUse = appTime - mLastUsed;
 
 	if (timeFromLastUse < mCoolDownMs)

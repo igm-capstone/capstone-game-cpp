@@ -48,7 +48,7 @@ void CameraManager::OnResize()
 	mCameraPersp.SetProjectionMatrix(mat4f::normalizedPerspectiveLH(mFOV, aspectRatio, mNearPlane, mFarPlane));
 	mCBufferPersp.projection = mCameraPersp.GetProjectionMatrix().transpose();
 
-	mCameraOrto.SetProjectionMatrix(mat4f::normalizedOrthographicLH(0, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight(), 0, mNearPlane, mFarPlane));
+	mCameraOrto.SetProjectionMatrix(mat4f::normalizedOrthographicLH(0, float(mRenderer->GetWindowWidth()), float(mRenderer->GetWindowHeight()), 0, mNearPlane, mFarPlane));
 	mCBufferOrto.projection = mCameraOrto.GetProjectionMatrix().transpose();
 }
 

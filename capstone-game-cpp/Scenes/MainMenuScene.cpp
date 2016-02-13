@@ -77,8 +77,6 @@ void MainMenuScene::RenderMainMenu(BaseScene* s)
 		if (!scene->StartClient()) ImGui::OpenPopup("Error");
 	}
 
-	ImGui::Separator();
-
 	if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize))
 	{
 		ImGui::Text(scene->mErrorMsg);
@@ -90,25 +88,26 @@ void MainMenuScene::RenderMainMenu(BaseScene* s)
 	}
 
 #ifdef _DEBUG
+	ImGui::Separator();
 	ImGui::PopFont();
 	ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
-	ImGui::SetCursorPosX(70);
-	if (ImGui::Button("Server + Explorer", ImVec2(160, 0)))
+	ImGui::SetCursorPosX(50);
+	if (ImGui::Button("Server -> Create Explorer", ImVec2(200, 0)))
 	{
 		scene->StartServer();
 		auto e = Factory<Explorer>::Create();
 		e->mController->mIsActive = true;
 	}
 
-	ImGui::SetCursorPosX(70);
-	if (ImGui::Button("Server -> New Client", ImVec2(160, 0)) || (gLocalServer && gLocalClient))
+	ImGui::SetCursorPosX(50);
+	if (ImGui::Button("Server -> New Client", ImVec2(200, 0)) || (gLocalServer && gLocalClient))
 	{
 		scene->StartServer();
 		system("start Bin/Debug/capstone-game-cpp.exe --local-client");
 	}
 
-	ImGui::SetCursorPosX(70);
-	if (ImGui::Button("Client -> New Server", ImVec2(160, 0)))
+	ImGui::SetCursorPosX(50);
+	if (ImGui::Button("Client -> New Server", ImVec2(200, 0)))
 	{
 		system("start Bin/Debug/capstone-game-cpp.exe --local-server");
 		Sleep(3);

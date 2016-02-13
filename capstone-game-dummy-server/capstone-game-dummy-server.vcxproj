@@ -84,7 +84,7 @@
     <PreBuildEvent />
     <PostBuildEvent>
       <Command>COPY "$(OutDir)\capstone-game-cpp.exe" "$(OutDir)$(TargetFileName)" &gt; NUL
-COPY "$(OutDir)\capstone-game-cpp.pdb" "$(OutDir)$(TargetFile).pdb" &gt; NUL</Command>
+COPY "$(OutDir)\capstone-game-cpp.pdb" "$(OutDir)$(TargetName).pdb" &gt; NUL</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Cloning main game as dummy.</Message>
@@ -119,7 +119,7 @@ COPY "$(OutDir)\capstone-game-cpp.pdb" "$(OutDir)$(TargetFile).pdb" &gt; NUL</Co
     <PreBuildEvent />
     <PostBuildEvent>
       <Command>COPY "$(OutDir)\capstone-game-cpp.exe" "$(OutDir)$(TargetFileName)" &gt; NUL
-COPY "$(OutDir)\capstone-game-cpp.pdb" "$(OutDir)$(TargetFile).pdb" &gt; NUL</Command>
+COPY "$(OutDir)\capstone-game-cpp.pdb" "$(OutDir)$(TargetName).pdb" &gt; NUL</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Cloning main game as dummy.</Message>

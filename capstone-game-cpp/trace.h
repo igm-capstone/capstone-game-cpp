@@ -109,6 +109,9 @@ public:
 
 #define TRACE(message)
 #define TRACE_LINE(from, to, color)
+#define TRACE_ERROR(message)
+#define TRACE_WARN(message)
+#define TRACE_LOG(message)
 #define TRACE_BOX(position, color)
 #define TRACE_DIAMOND(position, color)
 #define TRACE_CROSS(position, color)
@@ -120,5 +123,4 @@ public:
 
 #define RENDER_TRACE()
 
-#define TRACE_SET_VIEW_PROJ(mViewMatrix, mProjectionMatrix)	
 #endif
