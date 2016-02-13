@@ -13,7 +13,7 @@ protected:
 };
 
 
-#define EXPOSE_CALLBACK(name, argtype) 	\
+#define EXPOSE_CALLBACK_1(name, argtype) 	\
 typedef void(*name##Callback)(BaseSceneObject*, argtype); \
 public: \
 	void Register##name##Callback(name##Callback handler) { m##name = handler; } \

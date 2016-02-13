@@ -3,7 +3,6 @@
 
 #define DEFAULT_PORT "7895" 
 #define MAX_DATA_SIZE 1000000
-#define MAX_CLIENTS 4
 
 enum PacketTypes {
 	INIT_CONNECTION = '0',
@@ -12,6 +11,7 @@ enum PacketTypes {
 	SPAWN_MINION    = 'M',
 	GRANT_AUTHORITY = 'A',
 	SYNC_TRANSFORM  = 'T',
+	SYNC_HEALTH		= 'H',
 	UNKNOWN
 };
 
@@ -28,6 +28,7 @@ struct Packet {
 	
 	union {
 		vec3f Position = { 0 };
+		float Value;
 	}; // Float Data
 
 	Packet() : Type(UNKNOWN) {};

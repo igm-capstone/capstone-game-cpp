@@ -10,8 +10,8 @@ class BaseColliderComponent :
 public:
 	bool mIsDynamic;
 
-	EXPOSE_CALLBACK(CollisionEnter, Collision*)
-	EXPOSE_CALLBACK(CollisionExit, Collision*)
+	EXPOSE_CALLBACK_1(CollisionEnter, Collision*)
+	EXPOSE_CALLBACK_1(CollisionExit, Collision*)
 
 protected:
 	BaseColliderComponent() : mIsDynamic(true) {};

@@ -13,5 +13,5 @@ public:
 
 	bool Update(double milliseconds);
 
-	EXPOSE_CALLBACK(Move, vec3f)
+	EXPOSE_CALLBACK_1(Move, vec3f)
 };

@@ -7,6 +7,9 @@ class MainMenuScene : public BaseScene
 	char mIPAdress[40];
 
 public:
+	static bool gLocalClient;
+	static bool gLocalServer;
+
 	MainMenuScene() {};
 	~MainMenuScene() override {}
 
@@ -16,5 +19,8 @@ public:
 	void VShutdown() override;
 	void VOnResize() override;
 	
+	bool StartServer();
+	bool StartClient();
+
 	static void RenderMainMenu(BaseScene* s);
 };

@@ -525,7 +525,7 @@ void Level00::RenderGrid()
 
 #pragma region Update
 void Level00::UpdateExplorers(double milliseconds) {
-	mat4f explorerWorldMatrix[MAX_CLIENTS];
+	mat4f explorerWorldMatrix[MAX_EXPLORERS];
 
 	int c = 0;
 	for each(auto explorer in mExplorer) {
@@ -675,8 +675,6 @@ void Level00::InitializeCamera()
 
 	mQuadShaderData.View = mViewMatrix;
 	mQuadShaderData.Projection = mProjectionMatrix;
-
-	TRACE_SET_VIEW_PROJ(mViewMatrix, mProjectionMatrix)
 }
 
 void Level00::InitializeLevel()
@@ -1080,7 +1078,7 @@ void Level00::InitializePlayerShaders() {
 	//Mostly, re-using Walls shaders for now (or forever)
 	// Instance buffer
 	D3D11_BUFFER_DESC playerInstanceBufferDesc;
-	playerInstanceBufferDesc.ByteWidth = MAX_CLIENTS * sizeof(mat4f);
+	playerInstanceBufferDesc.ByteWidth = MAX_EXPLORERS * sizeof(mat4f);
 	playerInstanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	playerInstanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	playerInstanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;

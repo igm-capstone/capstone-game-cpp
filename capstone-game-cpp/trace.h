@@ -20,8 +20,6 @@
 
 #define RENDER_TRACE()                          Trace::GetTrace().Render();
 
-#define TRACE_SET_VIEW_PROJ(mViewMatrix, mProjectionMatrix)		Trace::GetTrace().mLineTraceShaderData = { mViewMatrix, mProjectionMatrix };
-
 typedef std::function<void(const float&, const float&, const float&, const float&, const float&, const float&, const cliqCity::graphicsMath::Vector4& color)> __TraceFunction;
 
 using namespace Rig3D;
@@ -49,11 +47,6 @@ private:
 		vec4f Color;
 		vec3f Position;
 	};
-	struct LineTraceShaderData
-	{
-		mat4f View;
-		mat4f Projection;
-	};
 
 	std::stringstream ss;
 	char buff[128];
@@ -77,9 +70,6 @@ private:
 	void InitializeLineTraceShaders();
 
 public:
-
-	LineTraceShaderData	mLineTraceShaderData;
-
 	static Trace &GetTrace() {
 		static Trace trace;
 		return trace;
@@ -119,6 +109,9 @@ public:
 
 #define TRACE(message)
 #define TRACE_LINE(from, to, color)
+#define TRACE_ERROR(message)
+#define TRACE_WARN(message)
+#define TRACE_LOG(message)
 #define TRACE_BOX(position, color)
 #define TRACE_DIAMOND(position, color)
 #define TRACE_CROSS(position, color)
@@ -130,5 +123,4 @@ public:
 
 #define RENDER_TRACE()
 
-#define TRACE_SET_VIEW_PROJ(mViewMatrix, mProjectionMatrix)	
 #endif

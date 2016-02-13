@@ -34,7 +34,6 @@ namespace CBuffer {
 	{
 		float sliceWidth;
 		float sliceHeight;
-		float unit2px;
-		float padding;
+		float padding[2];
 	};
 }

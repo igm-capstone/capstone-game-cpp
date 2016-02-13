@@ -12,8 +12,8 @@ struct Pixel
 
 cbuffer transform : register(b0)
 {
-	matrix view;
 	matrix projection;
+	matrix view;
 }
 
 Pixel main(Vertex vertex)

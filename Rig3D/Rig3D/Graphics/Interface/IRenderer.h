@@ -121,6 +121,7 @@ namespace Rig3D
 		inline const int&	GetWindowWidth() const { return mWindowWidth; };
 		inline const int&	GetWindowHeight() const { return mWindowHeight; };
 		inline GraphicsAPI	GetGraphicsAPI() const { return mGraphicsAPI; };
+		inline HWND			GetHWND() const { return mHWND; };
 
 		inline void SetDelegate(IRendererDelegate* renderDelegate) { mDelegate = renderDelegate; };
 

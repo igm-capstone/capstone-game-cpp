@@ -83,7 +83,7 @@ void NetworkServer::Shutdown(void)
 // accept new connections
 void NetworkServer::CheckForNewClients()
 {
-	if (mClientList.size() > MAX_CLIENTS) return;
+	if (mClientList.size() > MAX_EXPLORERS) return;
 
 	mClientSocket = accept(mListenSocket, NULL, NULL);
 	if (mClientSocket == INVALID_SOCKET) return;
@@ -198,6 +198,10 @@ void NetworkServer::ReceiveFromClients()
 				case SYNC_TRANSFORM:
 					Retransmit(client.first, &packet);
 					NetworkRpc::SyncTransform(packet.UUID, packet.Position);
+					break;
+				case SYNC_HEALTH:
+					Retransmit(client.first, &packet);
+					NetworkRpc::SyncHealth(packet.UUID, packet.Value);
 					break;
 				default:
 					printf("error in packet types\n");

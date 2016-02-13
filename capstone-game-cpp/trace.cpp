@@ -1,8 +1,10 @@
 #include <stdafx.h>
+#include "CameraManager.h"
 #if defined _DEBUG
 
 #include <trace.h>
 #include "Console.h"
+#include "Uniforms.h"
 
 #include <string>
 #include <debugapi.h>
@@ -103,7 +105,7 @@ void Trace::InitializeLineTraceShaders() {
 
 	// Constant buffers ----------------------------------------
 	D3D11_BUFFER_DESC lineTraceBufferDataDesc;
-	lineTraceBufferDataDesc.ByteWidth = sizeof(LineTraceShaderData);
+	lineTraceBufferDataDesc.ByteWidth = sizeof(CBuffer::Camera);
 	lineTraceBufferDataDesc.Usage = D3D11_USAGE_DEFAULT;
 	lineTraceBufferDataDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	lineTraceBufferDataDesc.CPUAccessFlags = 0;
@@ -148,8 +150,10 @@ void Trace::Render() {
 	mDeviceContext->VSSetShader(mLineTraceVertexShader, nullptr, 0);
 	mDeviceContext->PSSetShader(mLineTracePixelShader, nullptr, 0);
 
+	
+
 	mDeviceContext->UpdateSubresource(static_cast<DX11Mesh*>(mLineTraceMesh)->mVertexBuffer, 0, nullptr, mLineTraceVertices, 0, 0);
-	mDeviceContext->UpdateSubresource(mLineTraceShaderBuffer, 0, nullptr, &mLineTraceShaderData, 0, 0);
+	mDeviceContext->UpdateSubresource(mLineTraceShaderBuffer, 0, nullptr, Singleton<CameraManager>::SharedInstance().GetCBufferPersp(), 0, 0);
 	mDeviceContext->VSSetConstantBuffers(0, 1, &mLineTraceShaderBuffer);
 
 	mRenderer->VBindMesh(mLineTraceMesh);

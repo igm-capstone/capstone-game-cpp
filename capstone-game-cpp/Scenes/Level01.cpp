@@ -14,8 +14,6 @@
 #include <SceneObjects/Minion.h>
 #include <trace.h>
 
-#define SHADOW_MAP_SIZE 1024
-
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 
@@ -263,20 +261,20 @@ void Level01::InitializeShaderResources()
 
 		mSpriteSheetData.sliceWidth = 100 / 1;
 		mSpriteSheetData.sliceHeight = 32 / 2;
-		mSpriteSheetData.unit2px = mCameraManager->pPixel2Unit;
 
 		void*  cbSpritesData[] = { mCameraManager->GetCBufferPersp(), &mSpriteSheetData };
 		size_t cbSpritesSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::SpriteSheet) };
 
 		mRenderer->VCreateShaderConstantBuffers(mSpritesShaderResource, cbSpritesData, cbSpritesSizes, 2);
-		
+		mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, &mSpriteSheetData, 1);
+
 		const char* filenames[] = { "Assets/Health.png" };
 		mRenderer->VAddShaderTextures2D(mSpritesShaderResource, filenames, 1);
 		mRenderer->VAddShaderPointSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 
 		// Instance buffer data
-		void*	ibSpriteData[] = { nullptr };
-		size_t	ibSpriteSizes[] = { sizeof(Sprite) * 2 };
+		void*	ibSpriteData[] = { &mSpriteInstanceData };
+		size_t	ibSpriteSizes[] = { sizeof(Sprite) * MAX_SPRITES };
 		size_t	ibSpriteStrides[] = { sizeof(Sprite) };
 		size_t	ibSpriteOffsets[] = { 0 };
 
@@ -545,37 +543,33 @@ void Level01::RenderSprites()
 	mRenderer->VSetPixelShader(mApplication->mSpritePixelShader);
 
 	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferOrto(), 0);
-	mSpriteSheetData.unit2px = mCameraManager->pPixel2Unit;
-	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, &mSpriteSheetData, 1);
+	
 	mRenderer->VSetVertexShaderConstantBuffers(mSpritesShaderResource);
+	UINT sCount = 0;
 	for (Health& h : Factory<Health>())
 	{
-		Sprite s[2];
-		s[0].pointpos = h.mSceneObject->mTransform->GetPosition() + vec3f(0, 3, 0);
-		s[0].id = 1;
-		s[0].size = { 100, 16 };
-		s[0].scale = { h.GetHealthPerc() , 1 };
-		
+		mSpriteInstanceData[sCount].pointpos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, -32);
+		mSpriteInstanceData[sCount].id = 1;
+		mSpriteInstanceData[sCount].size = { 100, 16 };
+		mSpriteInstanceData[sCount].scale = { h.GetHealthPerc(), 1 };
+		sCount++;
 
-		s[1].pointpos = h.mSceneObject->mTransform->GetPosition() + vec3f(0, 3, 0);
-		s[1].id = 0;
-		s[1].size = { 100, 16 };
-		s[1].scale = { 1, 1 };
-
-		mRenderer->VUpdateShaderInstanceBuffer(mSpritesShaderResource, &s, sizeof(Sprite) * 2, 0);
-
-		mRenderer->VSetVertexShaderResourceView(mSpritesShaderResource, 0, 0);
-		mRenderer->VSetPixelShaderResourceView(mSpritesShaderResource, 0, 0);
-		mRenderer->VSetPixelShaderSamplerStates(mSpritesShaderResource);
-
-		// Set slice index and draw.
-		//mSpriteMaterial.SetPerObjectBuffer(mD3d.GetContext(), worldMatrix, spriteComponent.AtlasIndex);
-		//mDeviceContext->DrawIndexed(12, 0, 0);
-
-		mRenderer->VBindMesh(mNDSQuadMesh);
-		mRenderer->VSetVertexShaderInstanceBuffer(mSpritesShaderResource, 0, 1);
-		mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), 2, 0, 0, 0);
+		mSpriteInstanceData[sCount].pointpos = mSpriteInstanceData[sCount - 1].pointpos;
+		mSpriteInstanceData[sCount].id = 0;
+		mSpriteInstanceData[sCount].size = { 100, 16 };
+		mSpriteInstanceData[sCount].scale = { 1, 1 };
+		sCount++;
 	}
+
+	mRenderer->VUpdateShaderInstanceBuffer(mSpritesShaderResource, &mSpriteInstanceData, sizeof(Sprite) * sCount, 0);
+
+	mRenderer->VSetVertexShaderResourceView(mSpritesShaderResource, 0, 0);
+	mRenderer->VSetPixelShaderResourceView(mSpritesShaderResource, 0, 0);
+	mRenderer->VSetPixelShaderSamplerStates(mSpritesShaderResource);
+
+	mRenderer->VBindMesh(mNDSQuadMesh);
+	mRenderer->VSetVertexShaderInstanceBuffer(mSpritesShaderResource, 0, 1);
+	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), sCount, 0, 0, 0);
 }
 #pragma endregion
 

@@ -213,7 +213,7 @@ void Console::DrawConsole()
 		if (copy) ImGui::LogToClipboard();
 	}
 
-	float timespan = mVisible ? -1 : 5;
+	float timespan = mVisible ? -1.0f : 5.0f;
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
 	for (int i = 0; i < mItems.Size; i++)
 	{
