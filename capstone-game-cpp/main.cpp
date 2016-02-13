@@ -8,6 +8,7 @@
 #include "Scenes\LoadingScreen.h"
 #include "Scenes\MainMenuScene.h"
 #include "Factory.h"
+#include "capstone-game-cpp.rc.h"
 
 #define STATIC_APP_MEMORY 4000000
 
@@ -63,6 +64,9 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 		showCmd,
 		options);
 
+	HICON hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
+	SendMessage(engine.GetRenderer()->GetHWND(), WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+	DestroyIcon(hIcon);
 
 	Application* app = &Application::SharedInstance();
 	app->mOptions = options;
