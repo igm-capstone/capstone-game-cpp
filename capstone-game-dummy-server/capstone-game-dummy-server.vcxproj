@@ -83,13 +83,14 @@
     <PreBuildEvent />
     <PreBuildEvent />
     <PostBuildEvent>
-      <Command>COPY "$(OutDir)\capstone-game-cpp.exe" "$(OutDir)$(TargetFileName)"</Command>
+      <Command>COPY "$(OutDir)\capstone-game-cpp.exe" "$(OutDir)$(TargetFileName)" &gt; NUL
+COPY "$(OutDir)\capstone-game-cpp.pdb" "$(OutDir)$(TargetFile).pdb" &gt; NUL</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Cloning main game as dummy.</Message>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>taskkill /f /fi "imagename eq $(TargetFileName)"</Command>
+      <Command>taskkill /f /fi "imagename eq $(TargetFileName)" &gt; NUL</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Killing existing processes.</Message>
@@ -117,13 +118,14 @@
     <PreBuildEvent />
     <PreBuildEvent />
     <PostBuildEvent>
-      <Command>COPY "$(OutDir)\capstone-game-cpp.exe" "$(OutDir)$(TargetFileName)"</Command>
+      <Command>COPY "$(OutDir)\capstone-game-cpp.exe" "$(OutDir)$(TargetFileName)" &gt; NUL
+COPY "$(OutDir)\capstone-game-cpp.pdb" "$(OutDir)$(TargetFile).pdb" &gt; NUL</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Cloning main game as dummy.</Message>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>taskkill /f /fi "imagename eq $(TargetFileName)"</Command>
+      <Command>taskkill /f /fi "imagename eq $(TargetFileName)" &gt; NUL</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Killing existing processes.</Message>

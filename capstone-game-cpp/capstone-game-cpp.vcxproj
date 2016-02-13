@@ -65,7 +65,7 @@
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>taskkill /f /fi "imagename eq $(TargetFileName)"</Command>
+      <Command>taskkill /f /fi "imagename eq $(TargetFileName)" &gt; NUL</Command>
       <Message>Killing existing processes.</Message>
     </PreBuildEvent>
     <FxCompile>
@@ -95,7 +95,7 @@
       <ObjectFileOutput />
     </FxCompile>
     <PreBuildEvent>
-      <Command>taskkill /f /fi "imagename eq $(TargetFileName)"</Command>
+      <Command>taskkill /f /fi "imagename eq $(TargetFileName)" &gt; NUL</Command>
       <Message>Killing existing processes.</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
