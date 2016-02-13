@@ -19,5 +19,8 @@ public:
 	void VShutdown() override;
 	void VOnResize() override;
 	
+	bool StartServer();
+	bool StartClient();
+
 	static void RenderMainMenu(BaseScene* s);
 };

@@ -46,7 +46,7 @@
     <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)\Bin\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -65,8 +65,8 @@
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>taskkill /f /fi "imagename eq $(TargetFileName)"</Command>
+      <Message>Killing existing processes.</Message>
     </PreBuildEvent>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -94,6 +94,10 @@
       <VariableName>g%(Filename)</VariableName>
       <ObjectFileOutput />
     </FxCompile>
+    <PreBuildEvent>
+      <Command>taskkill /f /fi "imagename eq $(TargetFileName)"</Command>
+      <Message>Killing existing processes.</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CameraManager.cpp" />

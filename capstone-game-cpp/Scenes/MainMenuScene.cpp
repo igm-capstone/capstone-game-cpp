@@ -3,9 +3,7 @@
 #include "Level00.h"
 #include "Level01.h"
 #include <ScareTacticsApplication.h>
-#include <Console.h>
 
-#include "Rig3D/Graphics/DirectX11/DX11IMGUI.h"
 #include "Rig3D/Graphics/DirectX11/imgui/imgui.h"
 
 bool MainMenuScene::gLocalClient = false;
@@ -16,43 +14,14 @@ void MainMenuScene::VInitialize()
 	mState = BASE_SCENE_STATE_INITIALIZING;
 
 	// Initialization code here
-	strcpy(mIPAdress,"localhost");
+	strcpy_s(mIPAdress,"localhost");
 
 	mState = BASE_SCENE_STATE_RUNNING;
 }
 
 void MainMenuScene::VUpdate(double milliseconds)
 {
-	if (gLocalServer)
-	{
-		mNetworkManager->StartServer();
-		Application::SharedInstance().LoadScene<Level01>();
-		
-		if (gLocalClient)
-		{
-			system("start Bin/Debug/capstone-game-cpp.exe --local-client");
-		}
-	}
-	else if (gLocalClient)
-	{
-		mNetworkManager->StartClient();
-		Application::SharedInstance().LoadScene<Level01>();
-	}
 
-	if (mInput->GetKeyDown(KEYCODE_1))
-	{
-		mNetworkManager->StartServer();
-		Application::SharedInstance().LoadScene<Level01>();
-	}
-	if (mInput->GetKeyDown(KEYCODE_2))
-	{
-		if (mNetworkManager->StartClient())
-			Application::SharedInstance().LoadScene<Level01>();
-	}
-	if (mInput->GetKeyDown(KEYCODE_3))
-	{
-		Application::SharedInstance().LoadScene<Level01>();
-	}
 }
 
 void MainMenuScene::VRender()
@@ -89,14 +58,9 @@ void MainMenuScene::RenderMainMenu(BaseScene* s)
 	ImGui::Begin("Scare Tactics", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
 	
 	ImGui::SetCursorPosX(70);
-	if (ImGui::Button("Host Match", ImVec2(160,0)))
+	if (ImGui::Button("Host Match", ImVec2(160,0)) || scene->mInput->GetKeyDown(KEYCODE_1) || gLocalServer)
 	{
-		if (scene->mNetworkManager->StartServer())
-			Application::SharedInstance().LoadScene<Level01>();
-		else {
-			ImGui::OpenPopup("Error");
-			scene->mErrorMsg = "Failed to host a server";
-		}
+		if (!scene->StartServer()) ImGui::OpenPopup("Error");
 	}
 
 	ImGui::Separator();
@@ -108,18 +72,10 @@ void MainMenuScene::RenderMainMenu(BaseScene* s)
 	ImGui::PopItemWidth();
 
 	ImGui::SetCursorPosX(70);
-	if (ImGui::Button("Join Match", ImVec2(160, 0)))
+	if (ImGui::Button("Join Match", ImVec2(160, 0)) || scene->mInput->GetKeyDown(KEYCODE_2) || gLocalClient)
 	{
-		scene->mNetworkManager->mClient.mIPAddress = scene->mIPAdress;
-		if (scene->mNetworkManager->StartClient())
-			Application::SharedInstance().LoadScene<Level01>();
-		else {
-			ImGui::OpenPopup("Error");
-			scene->mErrorMsg = "Failed to connect.";
-		}
+		if (!scene->StartClient()) ImGui::OpenPopup("Error");
 	}
-
-
 
 	ImGui::Separator();
 
@@ -127,30 +83,39 @@ void MainMenuScene::RenderMainMenu(BaseScene* s)
 	{
 		ImGui::Text(scene->mErrorMsg);
 		ImGui::SetCursorPosX(60);
-		if (ImGui::Button("Close"))
+		if (ImGui::Button("Close")) {
 			ImGui::CloseCurrentPopup();
+		}
 		ImGui::EndPopup();
 	}
-#ifdef _DEBUG
 
+#ifdef _DEBUG
+	ImGui::PopFont();
+	ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
 	ImGui::SetCursorPosX(70);
-	if (ImGui::Button("Start Debug", ImVec2(160, 0)))
+	if (ImGui::Button("Server + Explorer", ImVec2(160, 0)))
 	{
-		scene->mNetworkManager->StartServer();
-		Application::SharedInstance().LoadScene<Level01>();
+		scene->StartServer();
 		auto e = Factory<Explorer>::Create();
 		e->mController->mIsActive = true;
 	}
 
 	ImGui::SetCursorPosX(70);
-	if (ImGui::Button("Start Pair", ImVec2(160, 0)))
+	if (ImGui::Button("Server -> New Client", ImVec2(160, 0)) || (gLocalServer && gLocalClient))
 	{
-		scene->mNetworkManager->StartServer();
-		Application::SharedInstance().LoadScene<Level01>();
+		scene->StartServer();
 		system("start Bin/Debug/capstone-game-cpp.exe --local-client");
 	}
 
+	ImGui::SetCursorPosX(70);
+	if (ImGui::Button("Client -> New Server", ImVec2(160, 0)))
+	{
+		system("start Bin/Debug/capstone-game-cpp.exe --local-server");
+		Sleep(3);
+		scene->StartClient();
+	}
 #endif
+
 	ImGui::End();
 	ImGui::PopFont();
 	ImGui::PopStyleVar();
@@ -166,4 +131,25 @@ void MainMenuScene::VShutdown()
 
 void MainMenuScene::VOnResize()
 {
+}
+
+bool MainMenuScene::StartServer()
+{
+	if (mNetworkManager->StartServer()) {
+		Application::SharedInstance().LoadScene<Level01>();
+		return true;
+	} 
+	mErrorMsg = "Failed to host a server";
+	return false;
+}
+
+bool MainMenuScene::StartClient()
+{
+	mNetworkManager->mClient.mIPAddress = mIPAdress;
+	if (mNetworkManager->StartClient()) {
+		Application::SharedInstance().LoadScene<Level01>();
+		return true;
+	}
+	mErrorMsg = "Failed to connect.";
+	return false;
 }
