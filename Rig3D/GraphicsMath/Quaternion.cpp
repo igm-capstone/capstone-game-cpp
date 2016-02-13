@@ -31,9 +31,9 @@ inline Quaternion Quaternion::angleAxis(const float& angle, const Vector3& axis)
 
 inline Quaternion Quaternion::fromMatrix3(const Matrix3& mat)
 {
-	const int m11 = mat.pData[0], m12 = mat.pData[1], m13 = mat.pData[2];
-	const int m21 = mat.pData[3], m22 = mat.pData[4], m23 = mat.pData[5];
-	const int m31 = mat.pData[6], m32 = mat.pData[7], m33 = mat.pData[8];
+	const float m11 = mat.pData[0], m12 = mat.pData[1], m13 = mat.pData[2];
+	const float m21 = mat.pData[3], m22 = mat.pData[4], m23 = mat.pData[5];
+	const float m31 = mat.pData[6], m32 = mat.pData[7], m33 = mat.pData[8];
 
 	// Determine which of w, x, y or z has the largest absolute value
 	float fourWSquaredMinus1 = + m11 + m22 + m33;
@@ -43,7 +43,7 @@ inline Quaternion Quaternion::fromMatrix3(const Matrix3& mat)
 
 	int biggestIndex = 0;
 	float fourBiggestSquardeMinus1 = fourWSquaredMinus1;
-	if(fourXSquaredMinus1 > fourBiggestSquardeMinus1)
+	if (fourXSquaredMinus1 > fourBiggestSquardeMinus1)
 	{
 		fourBiggestSquardeMinus1 = fourXSquaredMinus1;
 		biggestIndex = 1;
