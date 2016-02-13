@@ -3,7 +3,6 @@
 
 #define DEFAULT_PORT "7895" 
 #define MAX_DATA_SIZE 1000000
-#define MAX_CLIENTS 4
 
 enum PacketTypes {
 	INIT_CONNECTION = '0',

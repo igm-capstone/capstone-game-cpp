@@ -6,8 +6,6 @@
 #include <CameraManager.h>
 #include <Components/ColliderComponent.h>
 
-#define PI 3.14159265359f
-
 using namespace Rig3D;
 
 enum BaseSceneState

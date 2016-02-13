@@ -83,7 +83,7 @@ void NetworkServer::Shutdown(void)
 // accept new connections
 void NetworkServer::CheckForNewClients()
 {
-	if (mClientList.size() > MAX_CLIENTS) return;
+	if (mClientList.size() > MAX_EXPLORERS) return;
 
 	mClientSocket = accept(mListenSocket, NULL, NULL);
 	if (mClientSocket == INVALID_SOCKET) return;

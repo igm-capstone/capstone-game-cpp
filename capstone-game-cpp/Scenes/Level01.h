@@ -3,6 +3,7 @@
 #include "capstone-game-cpp/CollisionManager.h"
 #include <Rig3D/Graphics/Camera.h>
 #include <Uniforms.h>
+#include <Vertex.h>
 
 class Level01 : public BaseScene
 {
@@ -23,6 +24,9 @@ class Level01 : public BaseScene
 
 	float				mPlaneWidth;
 	float				mPlaneHeight;
+
+	// Sprite Data
+	Sprite				mSpriteInstanceData[MAX_SPRITES];
 
 	// Wall Data
 	mat4f*				mWallWorldMatrices0;

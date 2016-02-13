@@ -5,12 +5,8 @@
 #include <Components/ColliderComponent.h>
 #include <Components/ExplorerController.h>
 #include <Components/Skill.h>
-#include <Rig3D/Graphics/Camera.h>
 #include "ScareTacticsApplication.h"
 #include <Components/Health.h>
-
-#define MAX_EXPLORERS        4
-#define MAX_EXPLORER_SKILLS  5
 
 class Explorer : public BaseSceneObject
 {

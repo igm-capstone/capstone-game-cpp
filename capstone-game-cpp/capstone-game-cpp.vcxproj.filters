@@ -218,9 +218,6 @@
     <ClInclude Include="CollisionManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SceneObjects\DominationPoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
