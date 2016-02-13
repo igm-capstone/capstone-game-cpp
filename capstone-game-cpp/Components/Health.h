@@ -32,5 +32,5 @@ public:
 	float GetMaxHealth() { return mMaxHealth; }
 	float GetHealthPerc() { return mCurrentHealth/mMaxHealth; }
 
-	EXPOSE_CALLBACK(HealthChange, float);
+	EXPOSE_CALLBACK_1(HealthChange, float);
 };

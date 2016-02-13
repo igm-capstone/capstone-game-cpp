@@ -105,7 +105,7 @@ void Trace::InitializeLineTraceShaders() {
 
 	// Constant buffers ----------------------------------------
 	D3D11_BUFFER_DESC lineTraceBufferDataDesc;
-	lineTraceBufferDataDesc.ByteWidth = sizeof(CBufferCamera);
+	lineTraceBufferDataDesc.ByteWidth = sizeof(CBuffer::Camera);
 	lineTraceBufferDataDesc.Usage = D3D11_USAGE_DEFAULT;
 	lineTraceBufferDataDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	lineTraceBufferDataDesc.CPUAccessFlags = 0;
