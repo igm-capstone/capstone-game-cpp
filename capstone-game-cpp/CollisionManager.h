@@ -1,8 +1,6 @@
 #pragma once
 #include <Components/ColliderComponent.h>
-#include <Config.h>
 
-#define MAX_COLLISIONS 128
 
 struct Collision
 {

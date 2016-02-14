@@ -17,6 +17,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Engine", "Engine", "{A9F104
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTK_Desktop_2015", "Rig3D\Rig3D\Graphics\DirectX11\DirectXTK\DirectXTK_Desktop_2015.vcxproj", "{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "capstone-game-dummy-server", "capstone-game-dummy-server\capstone-game-dummy-server.vcxproj", "{E18F9F96-A1DB-460B-807A-C1A3B18E7CF3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9CDF32CA-A3F4-45A2-B703-EC18792690EF} = {9CDF32CA-A3F4-45A2-B703-EC18792690EF}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "capstone-game-dummy-client", "capstone-game-dummy-client\capstone-game-dummy-client.vcxproj", "{36767660-5D45-4C2C-9C7D-C7B43D8D4AB0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9CDF32CA-A3F4-45A2-B703-EC18792690EF} = {9CDF32CA-A3F4-45A2-B703-EC18792690EF}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -47,6 +57,14 @@ Global
 		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Debug|x86.Build.0 = Debug|Win32
 		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Release|x86.ActiveCfg = Release|Win32
 		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Release|x86.Build.0 = Release|Win32
+		{E18F9F96-A1DB-460B-807A-C1A3B18E7CF3}.Debug|x86.ActiveCfg = Debug|Win32
+		{E18F9F96-A1DB-460B-807A-C1A3B18E7CF3}.Debug|x86.Build.0 = Debug|Win32
+		{E18F9F96-A1DB-460B-807A-C1A3B18E7CF3}.Release|x86.ActiveCfg = Release|Win32
+		{E18F9F96-A1DB-460B-807A-C1A3B18E7CF3}.Release|x86.Build.0 = Release|Win32
+		{36767660-5D45-4C2C-9C7D-C7B43D8D4AB0}.Debug|x86.ActiveCfg = Debug|Win32
+		{36767660-5D45-4C2C-9C7D-C7B43D8D4AB0}.Debug|x86.Build.0 = Debug|Win32
+		{36767660-5D45-4C2C-9C7D-C7B43D8D4AB0}.Release|x86.ActiveCfg = Release|Win32
+		{36767660-5D45-4C2C-9C7D-C7B43D8D4AB0}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

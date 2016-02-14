@@ -80,7 +80,7 @@ void Skill::Update()
 
 	//--- check if skill is still on cooldown
 
-	float appTime = mTimer->GetApplicationTime();
+	float appTime = float(mTimer->GetApplicationTime());
 	float timeFromLastUse = appTime - mLastUsed;
 
 	if (timeFromLastUse < mCoolDownMs)
@@ -92,17 +92,7 @@ void Skill::Update()
 
 	//--- set skill pos
 
-	auto mousePosition = mInput->mousePosition;
-	auto cameraManager = &Singleton<CameraManager>::SharedInstance();
-	auto ray = cameraManager->Screen2Ray(mousePosition);
-	
-	float t;
-	vec3f skillPos {};
-	auto scene = Application::SharedInstance().GetCurrentScene();
-
-	// skillPos is an out parameter that  will only be set if
-	// the ray intersects the collider.
-	IntersectRayAABB(ray, scene->mFloorCollider, skillPos, t);
+	vec3f skillPos = Application::SharedInstance().mGroundMousePosition;
 	
 	//--- set target
 

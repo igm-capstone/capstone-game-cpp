@@ -8,6 +8,7 @@
 #include "Scenes\LoadingScreen.h"
 #include "Scenes\MainMenuScene.h"
 #include "Factory.h"
+#include "capstone-game-cpp.rc.h"
 
 #define STATIC_APP_MEMORY 4000000
 
@@ -22,6 +23,20 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 {
 	using namespace Rig3D;
 	
+	if (strcmp(cmdLine, "--local-client") == 0)
+	{
+		MainMenuScene::gLocalClient = true;
+	}
+	else if (strcmp(cmdLine, "--local-server") == 0)
+	{
+		MainMenuScene::gLocalServer = true;
+	}
+	else if (strcmp(cmdLine, "--local-all") == 0)
+	{
+		MainMenuScene::gLocalClient = true;
+		MainMenuScene::gLocalServer = true;
+	}
+
 	struct stat s;
 	if (stat("Assets", &s) != 0) {
 		_wchdir((LPCWSTR)L"..");
@@ -49,6 +64,9 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 		showCmd,
 		options);
 
+	HICON hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
+	SendMessage(engine.GetRenderer()->GetHWND(), WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+	DestroyIcon(hIcon);
 
 	Application* app = &Application::SharedInstance();
 	app->mOptions = options;

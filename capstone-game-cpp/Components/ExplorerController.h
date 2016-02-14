@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "BaseComponent.h"
+#include <ScareTacticsApplication.h>
 
 class Skill;
 
@@ -11,7 +12,9 @@ class ExplorerController : public BaseComponent
 	~ExplorerController();
 
 	Input* mInput;
+	Application* mApplication;
 	double mSprintDuration;
+	quatf mModelRotation;
 
 public:
 	float mSpeed;
@@ -19,6 +22,7 @@ public:
 	bool Update(double milliseconds);
 
 	static void DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
+	void SetBaseRotation(const float& x, const float& y, const float& z);
 
-	EXPOSE_CALLBACK(Move, vec3f)
+	EXPOSE_CALLBACK_2(Move, vec3f, quatf)
 };

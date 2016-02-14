@@ -5,12 +5,8 @@
 #include <Components/ColliderComponent.h>
 #include <Components/ExplorerController.h>
 #include <Components/Skill.h>
-#include <Rig3D/Graphics/Camera.h>
 #include "ScareTacticsApplication.h"
 #include <Components/Health.h>
-
-#define MAX_EXPLORERS        4
-#define MAX_EXPLORER_SKILLS  5
 
 class Explorer : public BaseSceneObject
 {
@@ -40,6 +36,7 @@ private:
 		mController->mIsActive = false;
 		mController->mSpeed = 0.05f;
 		mController->RegisterMoveCallback(&OnMove);
+		mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
 
 		mCollider = Factory<SphereColliderComponent>::Create();
 		mCollider->mIsDynamic = true;
@@ -49,6 +46,7 @@ private:
 	
 		mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
 		mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
+		mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
 
 		mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
 		mCameraManager = &Singleton<CameraManager>::SharedInstance();
@@ -56,6 +54,7 @@ private:
 		mHealth = Factory<Health>::Create();
 		mHealth->mSceneObject = this;
 		mHealth->SetMaxHealth(1000.0f);
+		mHealth->RegisterHealthChangeCallback(OnHealthChange);
 
 		memset(mSkills, 0, sizeof(Skill*) * MAX_EXPLORER_SKILLS);
 
@@ -79,10 +78,11 @@ public:
 		mNetworkID->mUUID = UUID;
 	};
 
-	static void OnMove(BaseSceneObject* obj, vec3f newPos)
+	static void OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 	{
 		auto e = static_cast<Explorer*>(obj);
 		e->mTransform->SetPosition(newPos);
+		e->mTransform->SetRotation(newRot);
 		e->mCollider->mCollider.origin = newPos;
 		
 		if (e->mNetworkID->mHasAuthority) {
@@ -91,10 +91,10 @@ public:
 			p.UUID = e->mNetworkID->mUUID;
 			p.Position = newPos;
 			e->mNetworkClient->SendData(&p);
-		}
 
-		e->mHealth->TakeDamage(1.0f);
-		if (e->mHealth->GetHealth() <= 0) e->mHealth->TakeDamage(-1000.0f);
+			e->mHealth->TakeDamage(1.0f);
+			if (e->mHealth->GetHealth() <= 0) e->mHealth->TakeDamage(-1000.0f);
+		}
 	}
 
 	static void OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
@@ -109,6 +109,23 @@ public:
 		auto e = static_cast<Explorer*>(obj);
 		e->mTransform->SetPosition(newPos);
 		e->mCollider->mCollider.origin = newPos;
+	}
+
+	static void OnNetHealthChange(BaseSceneObject* obj, float newVal)
+	{
+		auto e = static_cast<Explorer*>(obj);
+		e->mHealth->SetHealth(newVal);
+	}
+
+	static void OnHealthChange(BaseSceneObject* obj, float newVal)
+	{
+		auto e = static_cast<Explorer*>(obj);
+		if (e->mNetworkID->mHasAuthority) {
+			Packet p(PacketTypes::SYNC_HEALTH);
+			p.UUID = e->mNetworkID->mUUID;
+			p.Value = newVal;
+			e->mNetworkClient->SendData(&p);
+		}
 	}
 
 	static void OnCollisionExit(BaseSceneObject* obj, Collision*)

@@ -11,8 +11,6 @@
 #include <Components/Skill.h>
 #include <Components/FmodEventCollection.h>
 
-#define MAX_GHOST_SKILLS 4
-
 class Ghost : public BaseSceneObject
 {
 	friend class Factory<Ghost>;

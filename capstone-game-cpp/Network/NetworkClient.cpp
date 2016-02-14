@@ -115,6 +115,9 @@ void NetworkClient::Update()
 			case SYNC_TRANSFORM:
 				NetworkRpc::SyncTransform(packet.UUID, packet.Position);
 				break;
+			case SYNC_HEALTH:
+				NetworkRpc::SyncHealth(packet.UUID, packet.Value);
+				break;
 			default:
 				printf("error in packet types\n");
 				break;

@@ -143,3 +143,12 @@ void NetworkRpc::SyncTransform(int UUID, vec3f pos)
 		}
 	}
 }
+
+void NetworkRpc::SyncHealth(int UUID, float val)
+{
+	for each(auto &netID in Factory<NetworkID>()) {
+		if (netID.mUUID == UUID) {
+			netID.OnNetHealthChange(val);
+		}
+	}
+}

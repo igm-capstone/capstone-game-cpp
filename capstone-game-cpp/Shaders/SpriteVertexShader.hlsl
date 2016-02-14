@@ -8,7 +8,6 @@ cbuffer spriteSheet : register(b1)
 {
 	float sliceWidth;
 	float sliceHeight;
-	float unit2px;
 }
 
 struct Sprite
@@ -52,19 +51,19 @@ Pixel main(Sprite input)
 		0, 0, 1, 0,
 		1, 1, 0, 1 };
 	float4x4 scale = {
-		input.size.x / unit2px * input.scale.x, 0, 0, 0,
-		0, input.size.y / unit2px * input.scale.y, 0, 0,
+		input.size.x / 2 * input.scale.x, 0, 0, 0,
+		0, input.size.y / 2 * input.scale.y, 0, 0,
 		0, 0, 1, 0,
 		0, 0, 0, 1 };
 	float4x4 translatePosAndUndoPivot = {
 		1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, 1, 0,
-		input.pointpos.x - input.size.x / unit2px, input.pointpos.y - input.size.y / unit2px, input.pointpos.z, 1 };
+		input.pointpos.x - input.size.x / 2 , input.pointpos.y - input.size.y / 2, 0, 1 };
 	
 	float4x4 world = mul(mul(translatePivot,scale), translatePosAndUndoPivot);
 
-	matrix clip = mul(mul(world, view), 1);
+	matrix clip = mul(world, projection);
 	output.position = mul(float4(input.position.xyz, 1.0f), clip);
 
 	// Modify UV coordinates to grab the appropriate slice.

@@ -22,6 +22,7 @@
 #include "Shaders/obj/ShadowGridComputeShader.h"
 #include "Shaders/obj/ShadowPixelShader.h"
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
+#include <Rig3D/Intersection.h>
 
 using namespace Rig3D;
 
@@ -218,10 +219,23 @@ void ScareTacticsApplication::VUpdateCurrentScene()
 	}
 }
 
+void ScareTacticsApplication::UpdateGroundMousePosition()
+{
+	auto mousePosition = mCurrentScene->mInput->mousePosition;
+	mGroundMousePosition = mCurrentScene->mCameraManager->Screen2WorldAtZ0(mousePosition);
+}
+
 void ScareTacticsApplication::VUpdate(float deltaTime)
 {
+	
+
+	// Update audio
+	FMOD_CHECK(mStudio->update());
+
 	if (mCurrentScene)
 	{
+		UpdateGroundMousePosition();
+
 		mCurrentScene->VUpdate(deltaTime);
 		mCurrentScene->VRender();
 	}
@@ -230,8 +244,6 @@ void ScareTacticsApplication::VUpdate(float deltaTime)
 		mLoadingScreen->VUpdate(deltaTime);
 		mLoadingScreen->VRender();
 	}
-
-	FMOD_CHECK(mStudio->update());
 }
 
 void ScareTacticsApplication::VShutdown()

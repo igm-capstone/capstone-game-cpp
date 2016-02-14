@@ -15,7 +15,17 @@
 
 #include "Network\NetworkManager.h"
 
+//Config
 
+#define MAX_EXPLORERS 4
+#define MAX_EXPLORER_SKILLS  5
 
+#define MAX_GHOST_SKILLS 4
 
+#define MAX_MINIONS 50
 
+#define SHADOW_MAP_SIZE 1024
+
+#define MAX_COLLISIONS 128
+
+#define MAX_SPRITES (MAX_EXPLORERS+MAX_MINIONS)

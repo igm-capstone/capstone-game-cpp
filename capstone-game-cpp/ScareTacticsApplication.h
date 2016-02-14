@@ -31,6 +31,7 @@ public:
 	IShader* mDBGPixelShader;
 
 	FMOD::Studio::System* mStudio;
+	vec3f mGroundMousePosition;
 
 	ScareTacticsApplication();
 	~ScareTacticsApplication();
@@ -40,6 +41,7 @@ public:
 
 	void VInitialize() override;
 	void VUpdateCurrentScene() override;
+	void UpdateGroundMousePosition();
 	void VUpdate(float deltaTime) override;
 	void VShutdown() override;
 
