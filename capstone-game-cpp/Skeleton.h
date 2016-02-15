@@ -12,20 +12,13 @@ struct JointBlendWeight
 
 struct Joint
 {
-	mat4f		inverseBindPoseMatrix;
-	int			parentIndex;		// -1 indicates root 
+	mat4f		inverseBindPoseMatrix;  // Transforms from model space bind pose to joint space bind pose
+	mat4f		animPoseMatrix;			// Transforms from joint space bind pose to model space animated pose
+	int			parentIndex;			// -1 indicates root 
 	const char* name;
 };
 
-struct SkeletalAnimation
-{
-	const char* name;
-};
 
-struct Keyframe
-{
-	Joint* joint;
-};
 
 class Skeleton
 {
@@ -40,6 +33,34 @@ public:
 	~Skeleton()
 	{
 		mJoints.clear();
+	}
+
+	Skeleton(const Skeleton& other)
+	{
+		mJoints = other.mJoints;
+	}
+
+	Skeleton(Skeleton&& other)
+	{
+		mJoints = other.mJoints;
+
+		other.mJoints.clear();
+	}
+
+	Skeleton& operator=(const Skeleton& other)
+	{
+		mJoints = other.mJoints;
+
+		return *this;
+	}
+
+	Skeleton& operator=(Skeleton&& other)
+	{
+		mJoints = other.mJoints;
+
+		other.mJoints.clear();
+
+		return *this;
 	}
 
 	Joint* GetJointByName(const char* name)
@@ -66,6 +87,30 @@ public:
 		}
 
 		return  -1;
+	}
+
+	inline void UpdateAnimationPose()
+	{
+		UpdateAnimationPoseRecusively(&mJoints[0]);
+	}
+
+	void UpdateAnimationPoseRecusively(Joint* joint)
+	{
+		if (joint->parentIndex > -1)
+		{
+			UpdateAnimationPoseRecusively(&mJoints[joint->parentIndex]);
+		}
+
+		joint->animPoseMatrix = joint->animPoseMatrix * mJoints[joint->parentIndex].animPoseMatrix;
+	}
+
+	void CalculateSkinningMatrices(mat4f* skinningMatrices, uint32_t count)
+	{
+		std::vector<Joint>& joints = mJoints;
+		for (uint32_t i = 0; i < count; i++)
+		{
+			skinningMatrices[i] = (joints[i].inverseBindPoseMatrix * joints[i].animPoseMatrix).transpose();
+		}
 	}
 };
 
