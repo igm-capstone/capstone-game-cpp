@@ -149,6 +149,13 @@ void Level01::InitializeGeometry()
 	FBXMeshResource<Vertex3> explorerFBXResource("Assets/BaseCharacter_RIg_WalkAnim.fbx");
 	meshLibrary.LoadMesh(&mExplorerCubeMesh, mRenderer, explorerFBXResource);
 
+	for (Explorer& e : Factory<Explorer>())
+	{
+		e.mAnimationController->mSkeleton			= explorerFBXResource.mSkeleton;
+		e.mAnimationController->mSkeletalAnimations = explorerFBXResource.mSkeletalAnimations;
+		e.mAnimationController->PlayLoopingAnimation("Take 001");
+	}
+
 	// Minion 
 	meshLibrary.NewMesh(&mMinionCubeMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mMinionCubeMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
@@ -288,6 +295,7 @@ void Level01::InitializeShaderResources()
 
 void Level01::VUpdate(double milliseconds)
 {
+	// TO DO: Possibly a Components Update method... if we move this code to application level.
 	for (ExplorerController& ec : Factory<ExplorerController>())
 	{
 		ec.Update(milliseconds);
@@ -298,11 +306,18 @@ void Level01::VUpdate(double milliseconds)
 		skill.Update();
 	}
 
+	for (AnimationController& ac : Factory<AnimationController>())
+	{
+		ac.Update(milliseconds);
+	}
+
+	// TO DO: Ghost Controller Update?
 	if (mInput->GetKeyDown(KEYCODE_O) && mNetworkManager->mMode == NetworkManager::Mode::SERVER)
 	{
 		NetworkCmd::SpawnNewMinion(vec3f(0, 0, 0));
 	}
 
+	// TO DO: Wrap in a collision manager update.
 	mCollisionManager.DetectCollisions();
 	mCollisionManager.ResolveCollisions();
 
