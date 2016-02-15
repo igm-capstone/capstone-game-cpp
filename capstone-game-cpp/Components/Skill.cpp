@@ -28,8 +28,8 @@ SkillBinding& SkillBinding::Set(KeyCode value)
 }
 
 Skill::Skill() :
-	mCoolDownMs(0),
-	mDurationMs(0),
+	mCoolDown(0),
+	mDuration(0),
 	mLastUsed(0),
 	mCallback(nullptr)
 {
@@ -49,8 +49,8 @@ void Skill::SetBinding(SkillBinding& binding)
 
 void Skill::Setup(float cooldown, float duration, UseCallback callback)
 {
-	mCoolDownMs = cooldown * 1000;
-	mDurationMs = duration * 1000;
+	mCoolDown = cooldown;
+	mDuration = duration;
 	RegisterUseCallback(callback);
 }
 
@@ -80,13 +80,14 @@ void Skill::Update()
 
 	//--- check if skill is still on cooldown
 
-	float appTime = float(mTimer->GetApplicationTime());
+	// app time in seconds
+	float appTime = float(mTimer->GetApplicationTime()) * 0.001;
 	float timeFromLastUse = appTime - mLastUsed;
 
-	if (timeFromLastUse < mCoolDownMs)
+	if (timeFromLastUse < mCoolDown)
 	{
 		// on cooldown
-		TRACE_WARN("Skill on cooldown: " << (mCoolDownMs - timeFromLastUse) * 0.001f);
+		TRACE_WARN("Skill on cooldown: " << (mCoolDown - timeFromLastUse));
 		return;
 	}
 
@@ -100,6 +101,6 @@ void Skill::Update()
 
 	//--- fire callback
 
-	OnUse(mDurationMs, nullptr, skillPos);
+	OnUse(mDuration, nullptr, skillPos);
 	mLastUsed = appTime;
 }

@@ -269,6 +269,9 @@
     <ClInclude Include="Components\FmodEventCollection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Mathf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\QuadVertexShader.hlsl">

@@ -5,11 +5,18 @@
 #include <Rig3D/Intersection.h>
 #include <trace.h>
 #include <Colors.h>
+#include <Mathf.h>
+
+using namespace cliqCity::graphicsMath;
 
 ExplorerController::ExplorerController() :
 	mInput((&Singleton<Engine>::SharedInstance())->GetInput()), 
 	mApplication(&Application::SharedInstance()),
-	mSprintDuration(0), 
+	mSprintDuration(0),
+	mAcceleration(10.0f), 
+	mBaseMoveSpeed(20.0f), 
+	mSpeedMultiplier(1), 
+	mCurrentSpeed(0), 
 	mSpeed(0.01f)
 {
 
@@ -20,50 +27,48 @@ ExplorerController::~ExplorerController()
 	
 }
 
+// dt in milliseconds
 bool ExplorerController::Update(double milliseconds)
 {
 	if (!mIsActive) return false;
 
 	bool hasMoved = false;
 
-	float speed = mSpeed;
+	// delta time in seconds
+	float dt = milliseconds * 0.001f;
 
+	// update speed multiplier for the sprint skill
+	mSpeedMultiplier = mSprintDuration ? 2 : 1;
+	
 	if (mSprintDuration > 0)
 	{
-		speed *= 2;
-
-		mSprintDuration -= min(milliseconds, mSprintDuration);
+		mSprintDuration -= min(dt, mSprintDuration);
 	}
 
-	auto pos = mSceneObject->mTransform->GetPosition();
-	if (mInput->GetKey(KEYCODE_LEFT))
-	{
-		pos.x -= speed;
-		hasMoved = true;
-	}
-	if (mInput->GetKey(KEYCODE_RIGHT))
-	{
-		pos.x += speed;
-		hasMoved = true;
-	}
-	if (mInput->GetKey(KEYCODE_UP))
-	{
-		pos.y += speed;
-		hasMoved = true;
-	}
-	if (mInput->GetKey(KEYCODE_DOWN))
-	{
-		pos.y -= speed;
-		hasMoved = true;
-	}
+	// vertical and horizontal speed components
+	float hSpeed = (mInput->GetKey(KEYCODE_LEFT) ? -1 : 0) + (mInput->GetKey(KEYCODE_RIGHT) ? 1 : 0);
+	float vSpeed = (mInput->GetKey(KEYCODE_DOWN) ? -1 : 0) + (mInput->GetKey(KEYCODE_UP) ? 1 : 0);
+	
+	bool wantToMove = hSpeed || vSpeed;
 
+	vec3f dirVector = wantToMove ? normalize(vec2f(hSpeed, vSpeed)) : vec3f();
+
+	// speed per second
+	vec3f targetSpeed = wantToMove ? mBaseMoveSpeed * mSpeedMultiplier * dirVector : vec3f();
+	mCurrentSpeed = Mathf::Lerp(mCurrentSpeed, targetSpeed, mAcceleration * dt);
+	
+	// delta space for the current frame
+	vec3f ds = mCurrentSpeed * dt;
+	
+	auto pos = mSceneObject->mTransform->GetPosition() + ds;
+
+	// rotate towards mouse
 	auto mousePosition = mApplication->mGroundMousePosition;
-	mousePosition.z;
+	mousePosition.z = 0;
 
 	TRACE_LINE(pos, mousePosition, Colors::red);
 
 	auto dir = mousePosition - pos;
-
 	auto rot = quatf::angleAxis(atan2(dir.y, dir.x), vec3f(0, 0, 1)) * mModelRotation;
 
 	//if (hasMoved)
@@ -72,12 +77,9 @@ bool ExplorerController::Update(double milliseconds)
 	return hasMoved;
 }
 
-void ExplorerController::DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+void ExplorerController::Sprint(float duration)
 {
-	TRACE_LOG("Sprint!!");
-
-	auto e = reinterpret_cast<Explorer*>(obj);
-	e->mController->mSprintDuration = duration;
+	mSprintDuration = duration;
 }
 
 void ExplorerController::SetBaseRotation(const float& x, const float& y, const float& z)

@@ -26,8 +26,8 @@ class Skill : public BaseComponent
 	EXPOSE_CALLBACK_3(Use, float, BaseSceneObject*, vec3f)
 
 public:
-	float mCoolDownMs;
-	float mDurationMs;
+	float mCoolDown;
+	float mDuration;
 	float mLastUsed;
 	
 	UseCallback mCallback;
