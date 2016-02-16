@@ -294,7 +294,7 @@ public:
 				FbxTime startTime		= pTakeInfo->mLocalTimeSpan.GetStart();
 				FbxTime endTime			= pTakeInfo->mLocalTimeSpan.GetStop();
 				FbxLongLong frameCount	= endTime.GetFrameCount(FBX_FPS) - startTime.GetFrameCount(FBX_FPS);
-				FbxFloat duration		= endTime.GetMilliSeconds() - startTime.GetMilliSeconds();
+				FbxLongLong duration		= endTime.GetMilliSeconds() - startTime.GetMilliSeconds();
 
 				// Add a skeletal animation (full character animation)
 				mSkeletalAnimations.push_back(SkeletalAnimation());
@@ -302,7 +302,7 @@ public:
 				// Get pointer to current skeletal animation and set duration
 				SkeletalAnimation* pSkeletalAnimation	= &mSkeletalAnimations.back();
 				pSkeletalAnimation->frameCount			= static_cast<uint32_t>(frameCount);
-				pSkeletalAnimation->duration			= duration;
+				pSkeletalAnimation->duration			= static_cast<float>(duration);
 				pSkeletalAnimation->name				= pTakeInfo->mName.Buffer();
 
 				// Get Joint Info
@@ -317,7 +317,7 @@ public:
 					pCluster->GetTransformLinkMatrix(transformLinkMatrix);		// Model space transform of the current link
 
 					// Transposing for graphics math
-					FbxAMatrix inverseBindPoseMatrix = (transformLinkMatrix.Inverse()  * modelMatrix);
+					FbxAMatrix inverseBindPoseMatrix = (transformLinkMatrix.Inverse()  * transformMatrix * modelMatrix);
 
 					int jointIndex = mSkeleton.GetJointIndexByName(pCluster->GetLink()->GetName());
 					assert(jointIndex > -1);
@@ -350,11 +350,11 @@ public:
 						FbxTime currentTime;
 						currentTime.SetFrame(frameIndex, FBX_FPS);
 
-						FbxAMatrix animModelMatrix	= pNode->EvaluateLocalTransform(currentTime) * modelMatrix;			// Model space pose matrix
-						FbxAMatrix animLinkMatrix	= pCluster->GetLink()->EvaluateLocalTransform(currentTime);			// Joint Space Pose
+						FbxAMatrix animModelMatrix	= pNode->EvaluateGlobalTransform(currentTime) * modelMatrix;					// Model space pose matrix
+						FbxAMatrix animLinkMatrix	= animModelMatrix.Inverse() * pCluster->GetLink()->EvaluateGlobalTransform(currentTime);	// Joint Space Pose
 
-						FbxVector4 clusterScale			= animLinkMatrix.GetS();
 						FbxQuaternion clusterRotation	= animLinkMatrix.GetQ();
+						FbxVector4 clusterScale			= animLinkMatrix.GetS();
 						FbxVector4 clusterTranslation	= animLinkMatrix.GetT();
 
 						// Add a key frame to the current joint animation

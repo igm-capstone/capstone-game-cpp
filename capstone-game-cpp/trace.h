@@ -77,6 +77,7 @@ public:
 	void Render();
 
 	Trace &operator << (int value) { ss << value; return *this; }
+	Trace &operator << (unsigned int value) { ss << value; return *this; }
 	Trace &operator << (short value) { ss << value; return *this; }
 	Trace &operator << (float value) { ss << value; return *this; }
 	Trace &operator << (double value) { ss << value; return *this; }

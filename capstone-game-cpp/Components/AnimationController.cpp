@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "AnimationController.h"
-
+#include "trace.h"
 
 AnimationController::AnimationController() : mCurrentAnimationIndex(-1), mCurrentAnimationPlayTime(0.0f), mIsAnimating(false), mIsLooping(false)
 {
@@ -46,8 +46,8 @@ void AnimationController::Update(double milliseconds)
 		
 		float framesPerMS = static_cast<float>(currentAnimation->frameCount) / currentAnimation->duration;
 
-		uint32_t keyframeIndex = static_cast<int>(floorf(mCurrentAnimationPlayTime));
-
+		uint32_t keyframeIndex = static_cast<int>(floorf(mCurrentAnimationPlayTime * framesPerMS));
+		TRACE_LOG("Key Frame: " << keyframeIndex);
 
 		float u = (mCurrentAnimationPlayTime - keyframeIndex);
 

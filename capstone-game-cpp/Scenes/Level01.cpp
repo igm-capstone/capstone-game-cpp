@@ -17,7 +17,6 @@
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 
-
 Level01::Level01() :
 	mWallCount0(0),
 	mPlaneCount(0),
