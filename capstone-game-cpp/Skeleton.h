@@ -91,23 +91,21 @@ public:
 
 	inline void UpdateAnimationPose()
 	{
-		UpdateAnimationPoseRecusively(&mJoints[0]);
-	}
+		Joint* joints		= &mJoints[0];
+		uint32_t jointCount = mJoints.size();
 
-	void UpdateAnimationPoseRecusively(Joint* joint)
-	{
-		if (joint->parentIndex > -1)
+		for (uint32_t i = 1; i < jointCount; i++)
 		{
-			UpdateAnimationPoseRecusively(&mJoints[joint->parentIndex]);
+			joints[i].animPoseMatrix = joints[i].animPoseMatrix * joints[joints[i].parentIndex].animPoseMatrix;
 		}
-
-		joint->animPoseMatrix = joint->animPoseMatrix * mJoints[joint->parentIndex].animPoseMatrix;
 	}
 
-	void CalculateSkinningMatrices(mat4f* skinningMatrices, uint32_t count)
+	void CalculateSkinningMatrices(mat4f* skinningMatrices)
 	{
-		std::vector<Joint>& joints = mJoints;
-		for (uint32_t i = 0; i < count; i++)
+		Joint* joints		= &mJoints[0];
+		uint32_t jointCount	= mJoints.size();
+
+		for (uint32_t i = 0; i < jointCount; i++)
 		{
 			skinningMatrices[i] = (joints[i].inverseBindPoseMatrix * joints[i].animPoseMatrix).transpose();
 		}

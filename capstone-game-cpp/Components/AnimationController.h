@@ -18,8 +18,9 @@ struct JointAnimation
 
 struct SkeletalAnimation
 {
-	std::string name;
+	uint32_t	frameCount;
 	float		duration;
+	std::string name;
 	std::vector<JointAnimation> jointAnimations;
 };
 

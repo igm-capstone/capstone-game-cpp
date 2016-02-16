@@ -86,15 +86,13 @@ public:
 
 		if (pRootNode)
 		{
-			LoadMesh(pRootNode);
-
 			bool isRigged = LoadSkeletalHierarchy(pRootNode);
 			if (isRigged)
 			{
 				LoadSkeletalAnimations(pRootNode);
 			}
 
-
+			LoadMesh(pRootNode);
 		}
 
 		mImporter->Destroy();
@@ -130,7 +128,9 @@ public:
 			for (int pIndex = 0; pIndex < pMesh->GetPolygonCount(); pIndex++)
 			{
 				int pSize = pMesh->GetPolygonSize(pIndex);
-				assert(pSize == 3);
+				
+				// We only draw triangles, feel me?
+				assert(pSize == 3); 
 
 				FbxVector4 position, normal;
 				FbxVector2 uv;
@@ -157,6 +157,24 @@ public:
 					if (!unmapped)
 					{
 						vertex.UV = { GET_FLOAT(uv.mData[0]), GET_FLOAT(uv.mData[1]) };
+					}
+
+					// Blend info
+
+					std::vector<JointBlendWeight>& controlPointInfluenceJoints = mControlPointJointBlendMap[controlPointIndex];
+					uint32_t controlPointInfluenceJointCount = min(controlPointInfluenceJoints.size(), 4);
+					uint32_t diff = abs(static_cast<int>(4 - controlPointInfluenceJoints.size()));
+
+					for (uint32_t i = 0; i < controlPointInfluenceJointCount; i++)
+					{
+						vertex.BlendIndices[i] = controlPointInfluenceJoints[i].jointIndex;
+						vertex.BlendWeights[i] = controlPointInfluenceJoints[i].jointWeight;
+					}
+
+					for (uint32_t i = controlPointInfluenceJointCount; i < 4; i++)
+					{
+						vertex.BlendIndices[i] = 0;
+						vertex.BlendWeights[i] = 0.0f;
 					}
 
 					mVertices.push_back(vertex);
@@ -275,14 +293,15 @@ public:
 				FbxTakeInfo* pTakeInfo	= mImporter->GetTakeInfo(animStackIndex);
 				FbxTime startTime		= pTakeInfo->mLocalTimeSpan.GetStart();
 				FbxTime endTime			= pTakeInfo->mLocalTimeSpan.GetStop();
-				FbxLongLong duration	= endTime.GetFrameCount(FBX_FPS) - startTime.GetFrameCount(FBX_FPS) + 1;
-
+				FbxLongLong frameCount	= endTime.GetFrameCount(FBX_FPS) - startTime.GetFrameCount(FBX_FPS);
+				FbxFloat duration		= endTime.GetMilliSeconds() - startTime.GetMilliSeconds();
 				// Add a skeletal animation (full character animation)
 				mSkeletalAnimations.push_back(SkeletalAnimation());
 
 				// Get pointer to current skeletal animation and set duration
 				SkeletalAnimation* pSkeletalAnimation	= &mSkeletalAnimations.back();
-				pSkeletalAnimation->duration			= static_cast<float>(duration);
+				pSkeletalAnimation->frameCount			= static_cast<uint32_t>(frameCount);
+				pSkeletalAnimation->duration			= duration;
 				pSkeletalAnimation->name				= pTakeInfo->mName.Buffer();
 
 				// Get Joint Info
@@ -294,10 +313,10 @@ public:
 
 					FbxAMatrix transformMatrix, transformLinkMatrix;
 					pCluster->GetTransformMatrix(transformMatrix);				// Mesh transform at bind time... hopefully identity
-					pCluster->GetTransformLinkMatrix(transformLinkMatrix);		// Transforms from joint to model space
+					pCluster->GetTransformLinkMatrix(transformLinkMatrix);		// Model space transform of the current link
 
 					// Transposing for graphics math
-					FbxAMatrix inverseBindPoseMatrix = (transformLinkMatrix.Inverse() * transformMatrix * modelMatrix).Transpose();
+					FbxAMatrix inverseBindPoseMatrix = (transformLinkMatrix.Inverse()  * modelMatrix);
 
 					int jointIndex = mSkeleton.GetJointIndexByName(pCluster->GetLink()->GetName());
 					assert(jointIndex > -1);
@@ -330,8 +349,8 @@ public:
 						FbxTime currentTime;
 						currentTime.SetFrame(frameIndex, FBX_FPS);
 
-						FbxAMatrix animModelMatrix	= pNode->EvaluateGlobalTransform(currentTime) * modelMatrix;								// Transforms to world space
-						FbxAMatrix animLinkMatrix	= animModelMatrix.Inverse() * pCluster->GetLink()->EvaluateGlobalTransform(currentTime);	// Transforms cluster from world space to model space
+						FbxAMatrix animModelMatrix	= pNode->EvaluateLocalTransform(currentTime) * modelMatrix;			// Model space pose matrix
+						FbxAMatrix animLinkMatrix	= pCluster->GetLink()->EvaluateLocalTransform(currentTime);			// Joint Space Pose
 
 						FbxVector4 clusterScale			= animLinkMatrix.GetS();
 						FbxQuaternion clusterRotation	= animLinkMatrix.GetQ();

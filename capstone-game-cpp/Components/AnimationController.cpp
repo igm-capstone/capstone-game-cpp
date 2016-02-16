@@ -33,10 +33,10 @@ void AnimationController::PlayLoopingAnimation(const char* name)
 
 void AnimationController::Update(double milliseconds)
 {
-	//if (mCurrentAnimationIndex > -1)
-	//{
-	//	return;
-	//}
+	if (mCurrentAnimationIndex < 0)
+	{
+		return;
+	}
 
 	SkeletalAnimation* currentAnimation = &mSkeletalAnimations[mCurrentAnimationIndex];
 
@@ -44,16 +44,19 @@ void AnimationController::Update(double milliseconds)
 	{
 		Skeleton& skeletalHierarchy = mSkeleton;
 		
+		float framesPerMS = static_cast<float>(currentAnimation->frameCount) / currentAnimation->duration;
+
 		uint32_t keyframeIndex = static_cast<int>(floorf(mCurrentAnimationPlayTime));
+
 
 		float u = (mCurrentAnimationPlayTime - keyframeIndex);
 
 		for (JointAnimation jointAnimation : currentAnimation->jointAnimations)
 		{
 			Keyframe& current	= jointAnimation.keyframes[keyframeIndex];
-			Keyframe& next		= jointAnimation.keyframes[keyframeIndex + 1];
+			Keyframe& next		= jointAnimation.keyframes[min(keyframeIndex + 1, currentAnimation->jointAnimations.size() - 1)];
 
-			quatf rotation		= cliqCity::graphicsMath::slerp(current.rotation, next.rotation, u);
+			quatf rotation		= cliqCity::graphicsMath::normalize(cliqCity::graphicsMath::slerp(current.rotation, next.rotation, u));
 			vec3f scale			= cliqCity::graphicsMath::lerp(current.scale, next.scale, u);
 			vec3f translation	= cliqCity::graphicsMath::lerp(current.translation, next.translation, u);
 			
@@ -73,7 +76,7 @@ void AnimationController::Update(double milliseconds)
 		else
 		{
 			mIsAnimating = false;
-			currentAnimation = nullptr;
+			mCurrentAnimationIndex = -1;
 			mCurrentAnimationPlayTime = 0.0f;
 		}
 	}

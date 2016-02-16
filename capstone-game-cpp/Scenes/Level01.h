@@ -8,10 +8,10 @@
 class Level01 : public BaseScene
 {
 	// Cbuffer data
-	CBuffer::Model		mModel;
-	CBuffer::LightPVM	mLightPVM;			// Used for spotlight matrices
-	CBuffer::Light		mLightData;			// Used for spotlight data (color, angle, etc).
-	CBuffer::SpriteSheet mSpriteSheetData;
+	CBuffer::Model			mModel;
+	CBuffer::LightPVM		mLightPVM;			// Used for spotlight matrices
+	CBuffer::Light			mLightData;			// Used for spotlight data (color, angle, etc).
+	CBuffer::SpriteSheet	mSpriteSheetData;
 
 	// Allocators
 	LinearAllocator		mAllocator;
@@ -19,6 +19,7 @@ class Level01 : public BaseScene
 	// Counts
 	uint32_t			mWallCount0;
 	uint32_t			mPlaneCount;
+	uint32_t			mSkinnedMeshMatrixCount;
 	uint32_t			mSpotLightCount;
 	uint32_t			mExplorerCount;
 
@@ -31,6 +32,7 @@ class Level01 : public BaseScene
 	// Wall Data
 	mat4f*				mWallWorldMatrices0;
 	mat4f*				mPlaneWorldMatrices;
+	mat4f*				mSkinnedMeshMatices;
 
 	// Lights
 	mat4f*				mSpotLightWorldMatrices;
@@ -52,7 +54,7 @@ class Level01 : public BaseScene
 	IShaderResource*	mExplorerShaderResource;
 	IShaderResource*	mPLVShaderResource;
 	IShaderResource*	mSpritesShaderResource;
-
+	
 	// Managers
 	CollisionManager	mCollisionManager;
 

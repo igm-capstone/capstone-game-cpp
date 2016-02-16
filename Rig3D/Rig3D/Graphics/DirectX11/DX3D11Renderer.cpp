@@ -958,6 +958,9 @@ void DX3D11Renderer::LoadInputLayout(IShader* vertexShader, const void* byteCode
 			case RGBA_FLOAT32:
 				inputDescription[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 				break;
+			case RGBA_UINT32:
+				inputDescription[i].Format = DXGI_FORMAT_R32G32B32A32_UINT;
+				break;
 			default:
 				inputDescription[i].Format = DXGI_FORMAT_R32_FLOAT;
 				break;

@@ -27,7 +27,7 @@ private:
 
 private:
 	Explorer() : mMesh(nullptr), mNetworkID(nullptr) {
-		mTransform->SetScale(0.005f);				// Temp until we get properly sized models
+		//mTransform->SetScale(50.005f);				// Temp until we get properly sized models
 		mTransform->SetRotation(PI * -0.5, 0.0f, 0.0f);
 		mNetworkID = Factory<NetworkID>::Create();
 		mNetworkID->mSceneObject = this;

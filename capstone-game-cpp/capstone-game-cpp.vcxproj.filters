@@ -337,6 +337,7 @@
     <FxCompile Include="Shaders\SpriteVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\SkinnedMeshVertexShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="capstone-game-cpp.rc">

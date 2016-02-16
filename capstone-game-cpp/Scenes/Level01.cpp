@@ -21,12 +21,14 @@ static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 Level01::Level01() :
 	mWallCount0(0),
 	mPlaneCount(0),
+	mSkinnedMeshMatrixCount(0),
 	mSpotLightCount(0),
 	mExplorerCount(0),
 	mPlaneWidth(0.0f),
 	mPlaneHeight(0.0f),
 	mWallWorldMatrices0(nullptr),
 	mPlaneWorldMatrices(nullptr),
+	mSkinnedMeshMatices(nullptr),
 	mSpotLightWorldMatrices(nullptr),
 	mSpotLightVPTMatrices(nullptr),
 	mWallMesh0(nullptr),
@@ -98,8 +100,6 @@ void Level01::VInitialize()
 	mRenderer->SetDelegate(this);
 
 	InitializeAssets();
-
-
 	InitializeGeometry();
 	InitializeShaderResources();
 	RenderShadowMaps();
@@ -146,8 +146,13 @@ void Level01::InitializeGeometry()
 	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
 
 	// Explorer Mesh
-	FBXMeshResource<Vertex3> explorerFBXResource("Assets/BaseCharacter_RIg_WalkAnim.fbx");
+	FBXMeshResource<SkinnedVertex> explorerFBXResource("Assets/AnimTest.fbx");
+	//FBXMeshResource<SkinnedVertex> explorerFBXResource("Assets/Minion.fbx");
+
 	meshLibrary.LoadMesh(&mExplorerCubeMesh, mRenderer, explorerFBXResource);
+
+	mSkinnedMeshMatices		= reinterpret_cast<mat4f*>(mAllocator.Allocate(sizeof(mat4f) * explorerFBXResource.mSkeleton.mJoints.size(), alignof(mat4f), 0));
+	mSkinnedMeshMatrixCount = explorerFBXResource.mSkeleton.mJoints.size();
 
 	for (Explorer& e : Factory<Explorer>())
 	{
@@ -155,6 +160,7 @@ void Level01::InitializeGeometry()
 		e.mAnimationController->mSkeletalAnimations = explorerFBXResource.mSkeletalAnimations;
 		e.mAnimationController->PlayLoopingAnimation("Take 001");
 	}
+
 
 	// Minion 
 	meshLibrary.NewMesh(&mMinionCubeMesh, mRenderer);
@@ -244,10 +250,10 @@ void Level01::InitializeShaderResources()
 	{
 		mRenderer->VCreateShaderResource(&mExplorerShaderResource, &mAllocator);
 
-		void* cbExplorerData[] = { mCameraManager->GetCBufferPersp(), &mModel };
-		size_t cbExplorerSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::Model) };
+		void* cbExplorerData[] = { mCameraManager->GetCBufferPersp(), &mModel, mSkinnedMeshMatices };
+		size_t cbExplorerSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::Model), sizeof(mat4f) *  mSkinnedMeshMatrixCount};
 
-		mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 2);
+		mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 3);
 	}
 
 	// PVL
@@ -444,19 +450,24 @@ void Level01::RenderWalls()
 
 void Level01::RenderExplorers()
 {
-	mRenderer->VSetInputLayout(mApplication->mExplorerVertexShader);
-	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
+	mRenderer->VSetInputLayout(mApplication->mSkinnedVertexShader);
+	mRenderer->VSetVertexShader(mApplication->mSkinnedVertexShader);
 	mRenderer->VSetPixelShader(mApplication->mExplorerPixelShader);
 
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+	
 	for (Explorer& e : Factory<Explorer>())
 	{
 		mModel.world = e.mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		e.mAnimationController->mSkeleton.CalculateSkinningMatrices(mSkinnedMeshMatices);
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatices, 2);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
 
 		mRenderer->VBindMesh(mExplorerCubeMesh);
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 		mRenderer->VDrawIndexed(0, mExplorerCubeMesh->GetIndexCount());
 	}
 }

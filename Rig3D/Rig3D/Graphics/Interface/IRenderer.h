@@ -36,7 +36,8 @@ namespace Rig3D
 		RGBA_SNORM8,
 		R_TYPELESS8,
 		RG_TYPELESS8,
-		RGBA_TYPELESS8
+		RGBA_TYPELESS8,
+		RGBA_UINT32
 	};
 
 	struct InputElement

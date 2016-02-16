@@ -3,6 +3,7 @@ struct Pixel
 	float4 positionH	: SV_POSITION;
 	float3 positionT	: POSITIONT;
 	float3 normal		: NORMAL;
+	float2 uv			: TEXCOORD;
 };
 
 struct PS_OUT
