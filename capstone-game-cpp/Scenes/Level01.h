@@ -79,5 +79,6 @@ public:
 	void RenderFullScreenQuad();
 	void RenderMinions();
 	void RenderSprites();
+	void ComputeGrid();
 	void VShutdown() override;
 };

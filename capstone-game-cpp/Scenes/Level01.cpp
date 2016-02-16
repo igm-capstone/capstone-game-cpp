@@ -573,7 +573,12 @@ void Level01::RenderSprites()
 }
 #pragma endregion
 
+void Level01::ComputeGrid()
+{
+	//CS stuff will come here
+}
+
 void Level01::VShutdown()
 {
-	
+
 }

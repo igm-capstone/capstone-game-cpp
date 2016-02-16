@@ -143,23 +143,27 @@ namespace Rig3D
 		
 		// VS
 		void	VLoadVertexShader(IShader* vertexShader, const char* filename, InputElement* inputElements, const uint32_t& count);
-		void	LoadVertexShader(IShader* vertexShader, const void* byteCode, size_t byteSize, InputElement* inputElements, const uint32_t& count);
+		void	VLoadVertexShader(IShader* vertexShader, const void* byteCode, size_t byteSize, InputElement* inputElements, const uint32_t& count);
 
 		// IL
-		void	LoadInputLayout(IShader* vertexShader, const void* byteCode, size_t byteSize, InputElement* inputElements, const uint32_t& count);
-
+		void	VLoadInputLayout(IShader* vertexShader, const void* byteCode, size_t byteSize, InputElement* inputElements, const uint32_t& count);
 		void	VLoadVertexShader(IShader* vertexShader, const char* filename, LinearAllocator* allocator);
 		void	VLoadVertexShader(IShader* vertexShader, const char* filename);
 
 		// PS
-		void	VLoadPixelShader(IShader* vertexShader, const char* filename, LinearAllocator* allocator);
+		void	VLoadPixelShader(IShader* pixelShader, const char* filename, LinearAllocator* allocator);
 		void	VLoadPixelShader(IShader* pixelShader, const char* filename);
 		void	VLoadPixelShader(IShader* pixelShader, const void* byteCode, size_t byteSize);
+
+		// CS
+		void	VLoadComputeShader(IShader* computeShader, const char* filename);
+		void	VLoadComputeShader(IShader* computeShader, const void* byteCode, size_t byteSize);
 
 		void	VSetInputLayout(IShader* vertexShader);
 		void	VSetVertexShaderInputLayout(IShader* vertexShader);
 		void	VSetVertexShader(IShader* shader);
 		void	VSetPixelShader(IShader* shader);
+		void	VSetComputeShader(IShader* shader);
 
 #pragma endregion 
 

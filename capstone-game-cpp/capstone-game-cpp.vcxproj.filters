@@ -301,9 +301,6 @@
     <FxCompile Include="Shaders\LineTracePixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\ShadowGridComputeShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\ExplorerPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
@@ -329,6 +326,9 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\SpriteVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\GridComputeShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

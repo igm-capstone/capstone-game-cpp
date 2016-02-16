@@ -956,7 +956,7 @@ void Level00::InitializeWallShaders()
 
 	mDevice->CreatePixelShader(gBillboardPixelShader, sizeof(gBillboardPixelShader), nullptr, &mBillboardPixelShader);
 
-	mDevice->CreateComputeShader(gShadowGridComputeShader, sizeof(gShadowGridComputeShader), nullptr, &mShadowGridComputeShader);
+	mDevice->CreateComputeShader(gGridComputeShader, sizeof(gGridComputeShader), nullptr, &mShadowGridComputeShader);
 
 	D3D11_BUFFER_DESC pointDesc;
 	pointDesc.ByteWidth = sizeof(PointShaderData);

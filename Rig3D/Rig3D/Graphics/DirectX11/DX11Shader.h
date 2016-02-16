@@ -26,6 +26,12 @@ namespace Rig3D
 				ID3D11PixelShader*	mPixelShader;
 				char padding[sizeof(void*)];
 			};
+
+			struct
+			{
+				ID3D11ComputeShader* mComputeShader;
+				char padding[sizeof(void*)];
+			};
 		};
 	};
 }

@@ -19,7 +19,7 @@
 #include "Shaders/obj/SpriteVertexShader.h"
 #include "Shaders/obj/SpritePixelShader.h"
 #include "Shaders/obj/ShadowCasterPixelShader.h"
-#include "Shaders/obj/ShadowGridComputeShader.h"
+#include "Shaders/obj/GridComputeShader.h"
 #include "Shaders/obj/ShadowPixelShader.h"
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 #include <Rig3D/Intersection.h>
@@ -38,6 +38,7 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mDBGPixelShader(nullptr),
 	mSpriteVertexShader(nullptr),
 	mSpritePixelShader(nullptr),
+	mGridComputeShader(nullptr),
 	mLoadingScreen(nullptr),
 	mCurrentScene(nullptr),
 	mSceneToLoad(nullptr),
@@ -101,7 +102,7 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VCreateShader(&mQuadVertexShader, &mGameAllocator);
 	renderer->VCreateShader(&mQuadPixelShader, &mGameAllocator);
 
-	renderer->LoadVertexShader(mQuadVertexShader, gQuadVertexShader, sizeof(gQuadVertexShader), wallInputElements, 7);
+	renderer->VLoadVertexShader(mQuadVertexShader, gQuadVertexShader, sizeof(gQuadVertexShader), wallInputElements, 7);
 	renderer->VLoadPixelShader(mQuadPixelShader, gQuadPixelShader, sizeof(gQuadPixelShader));
 
 	// Explorer Shaders
@@ -116,7 +117,7 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VCreateShader(&mExplorerVertexShader, &mGameAllocator);
 	renderer->VCreateShader(&mExplorerPixelShader, &mGameAllocator);
 
-	renderer->LoadVertexShader(mExplorerVertexShader, gExplorerVertexShader, sizeof(gExplorerVertexShader), explorerInputElements, 3);
+	renderer->VLoadVertexShader(mExplorerVertexShader, gExplorerVertexShader, sizeof(gExplorerVertexShader), explorerInputElements, 3);
 	renderer->VLoadPixelShader(mExplorerPixelShader, gExplorerPixelShader, sizeof(gExplorerPixelShader));
 
 	// Point Light Shaders
@@ -129,7 +130,7 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VCreateShader(&mPLVolumeVertexShader, &mGameAllocator);
 	renderer->VCreateShader(&mPLVolumePixelShader, &mGameAllocator);
 
-	renderer->LoadVertexShader(mPLVolumeVertexShader, gSpotLightVolumeVertexShader, sizeof(gSpotLightVolumeVertexShader), plvInputElements, 1);
+	renderer->VLoadVertexShader(mPLVolumeVertexShader, gSpotLightVolumeVertexShader, sizeof(gSpotLightVolumeVertexShader), plvInputElements, 1);
 	renderer->VLoadPixelShader(mPLVolumePixelShader, gSpotLightVolumePixelShader, sizeof(gSpotLightVolumePixelShader));
 
 	// Normalized Device Quad Shaders
@@ -143,13 +144,11 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VCreateShader(&mNDSQuadVertexShader, &mGameAllocator);
 	renderer->VCreateShader(&mNDSQuadPixelShader, &mGameAllocator);
 
-	renderer->LoadVertexShader(mNDSQuadVertexShader, gNDSQuadVertexShader, sizeof(gNDSQuadVertexShader), ndsqInputElements, 2);
+	renderer->VLoadVertexShader(mNDSQuadVertexShader, gNDSQuadVertexShader, sizeof(gNDSQuadVertexShader), ndsqInputElements, 2);
 	renderer->VLoadPixelShader(mNDSQuadPixelShader, gNDSQuadPixelShader, sizeof(gNDSQuadPixelShader));
 
 	renderer->VCreateShader(&mDBGPixelShader, &mGameAllocator);
 	renderer->VLoadPixelShader(mDBGPixelShader, gDebugTexturePixelShader, sizeof(gDebugTexturePixelShader));
-
-
 
 	// Sprite Shaders
 
@@ -166,8 +165,13 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VCreateShader(&mSpriteVertexShader, &mGameAllocator);
 	renderer->VCreateShader(&mSpritePixelShader, &mGameAllocator);
 
-	renderer->LoadVertexShader(mSpriteVertexShader, gSpriteVertexShader, sizeof(gSpriteVertexShader), spriteInputElements, 6);
-	renderer->VLoadPixelShader(mSpritePixelShader, gSpritePixelShader, sizeof(gSpritePixelShader));
+	renderer->VLoadVertexShader(mSpriteVertexShader, gSpriteVertexShader, sizeof(gSpriteVertexShader), spriteInputElements, 6);
+	renderer->VLoadPixelShader(mSpritePixelShader, gSpritePixelShader, sizeof(gSpritePixelShader));	
+	
+	// Grid Compute Shader
+
+	renderer->VCreateShader(&mGridComputeShader, &mGameAllocator);
+	renderer->VLoadComputeShader(mGridComputeShader, gGridComputeShader, sizeof(gGridComputeShader));
 }
 
 void ScareTacticsApplication::InitializeFMOD()
@@ -274,6 +278,7 @@ void ScareTacticsApplication::VShutdown()
 	mSpriteVertexShader->~IShader();
 	mSpritePixelShader->~IShader();
 	mDBGPixelShader->~IShader();
+	mGridComputeShader->~IShader();
 
 	mSceneAllocator.Free();
 	mGameAllocator.Free();

@@ -22,7 +22,7 @@
 #include "Shaders/obj/QuadPixelShader.h"
 #include "Shaders/obj/QuadVertexShader.h"
 #include "Shaders/obj/ShadowCasterPixelShader.h"
-#include "Shaders/obj/ShadowGridComputeShader.h"
+#include "Shaders/obj/GridComputeShader.h"
 #include "Shaders/obj/ShadowPixelShader.h"
 
 #define UNITY_QUAD_RADIUS	0.85f
