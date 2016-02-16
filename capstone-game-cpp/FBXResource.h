@@ -295,6 +295,7 @@ public:
 				FbxTime endTime			= pTakeInfo->mLocalTimeSpan.GetStop();
 				FbxLongLong frameCount	= endTime.GetFrameCount(FBX_FPS) - startTime.GetFrameCount(FBX_FPS);
 				FbxFloat duration		= endTime.GetMilliSeconds() - startTime.GetMilliSeconds();
+
 				// Add a skeletal animation (full character animation)
 				mSkeletalAnimations.push_back(SkeletalAnimation());
 
