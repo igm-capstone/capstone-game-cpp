@@ -271,7 +271,7 @@ public:
 		FbxVector4 scale		= pNode->GetGeometricScaling(FbxNode::eSourcePivot);
 		FbxVector4 rotation		= pNode->GetGeometricRotation(FbxNode::eSourcePivot);
 		FbxVector4 translation	= pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
-		FbxAMatrix modelMatrix	= FbxAMatrix(translation, rotation, scale);
+		FbxAMatrix geometryMatrix	= FbxAMatrix(translation, rotation, scale);
 
 		// Get Skin Info
 		int deformerCount = pMesh->GetDeformerCount();
@@ -294,7 +294,7 @@ public:
 				FbxTime startTime		= pTakeInfo->mLocalTimeSpan.GetStart();
 				FbxTime endTime			= pTakeInfo->mLocalTimeSpan.GetStop();
 				FbxLongLong frameCount	= endTime.GetFrameCount(FBX_FPS) - startTime.GetFrameCount(FBX_FPS);
-				FbxLongLong duration		= endTime.GetMilliSeconds() - startTime.GetMilliSeconds();
+				FbxLongLong duration	= endTime.GetMilliSeconds() - startTime.GetMilliSeconds();
 
 				// Add a skeletal animation (full character animation)
 				mSkeletalAnimations.push_back(SkeletalAnimation());
@@ -317,7 +317,7 @@ public:
 					pCluster->GetTransformLinkMatrix(transformLinkMatrix);		// Model space transform of the current link
 
 					// Transposing for graphics math
-					FbxAMatrix inverseBindPoseMatrix = (transformLinkMatrix.Inverse()  * transformMatrix * modelMatrix);
+					FbxAMatrix inverseBindPoseMatrix = (transformLinkMatrix.Inverse()  * transformMatrix * geometryMatrix);
 
 					int jointIndex = mSkeleton.GetJointIndexByName(pCluster->GetLink()->GetName());
 					assert(jointIndex > -1);
@@ -350,7 +350,7 @@ public:
 						FbxTime currentTime;
 						currentTime.SetFrame(frameIndex, FBX_FPS);
 
-						FbxAMatrix animModelMatrix	= pNode->EvaluateGlobalTransform(currentTime) * modelMatrix;					// Model space pose matrix
+						FbxAMatrix animModelMatrix	= pNode->EvaluateGlobalTransform(currentTime) * geometryMatrix;					// Model space pose matrix
 						FbxAMatrix animLinkMatrix	= animModelMatrix.Inverse() * pCluster->GetLink()->EvaluateGlobalTransform(currentTime);	// Joint Space Pose
 
 						FbxQuaternion clusterRotation	= animLinkMatrix.GetQ();
