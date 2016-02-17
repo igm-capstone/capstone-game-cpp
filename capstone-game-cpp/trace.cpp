@@ -190,7 +190,7 @@ Trace& Trace::endl(Trace &trace)
 	return trace;
 }
 
-void Trace::TraceBox(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
+void Trace::TraceBox(const vec3f& pos, const vec4f& color)
 {
 	const auto halfSize = 1.0f;
 
@@ -207,7 +207,7 @@ void Trace::TraceBox(const cliqCity::graphicsMath::Vector3& pos, const cliqCity:
 	trace.TraceLine(xmin, ymin, z, xmin, ymax, z, color);
 }
 
-void Trace::TraceSmallBox(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
+void Trace::TraceSmallBox(const vec3f& pos, const vec4f& color)
 {
 	const auto halfSize = 0.5f;
 
@@ -224,7 +224,7 @@ void Trace::TraceSmallBox(const cliqCity::graphicsMath::Vector3& pos, const cliq
 	trace.TraceLine(xmin, ymin, z, xmin, ymax, z, color);
 }
 
-void Trace::TraceXCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
+void Trace::TraceXCross(const vec3f& pos, const vec4f& color)
 {
 	const auto halfSize = 1.0f;
 
@@ -239,7 +239,7 @@ void Trace::TraceXCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCi
 	trace.TraceLine(xmin, ymax, z, xmax, ymin, z, color);
 }
 
-void Trace::TraceSmallXCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
+void Trace::TraceSmallXCross(const vec3f& pos, const vec4f& color)
 {
 	const auto halfSize = 0.5f;
 
@@ -254,7 +254,7 @@ void Trace::TraceSmallXCross(const cliqCity::graphicsMath::Vector3& pos, const c
 	trace.TraceLine(xmin, ymax, z, xmax, ymin, z, color);
 }
 
-void Trace::TraceCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
+void Trace::TraceCross(const vec3f& pos, const vec4f& color)
 {
 	const auto halfSize = 1.0f;
 
@@ -271,7 +271,7 @@ void Trace::TraceCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCit
 	trace.TraceLine(xmin, y, z, xmax, y, z, color);
 }
 
-void Trace::TraceSmallCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
+void Trace::TraceSmallCross(const vec3f& pos, const vec4f& color)
 {
 	const auto halfSize = 0.5f;
 
@@ -288,7 +288,7 @@ void Trace::TraceSmallCross(const cliqCity::graphicsMath::Vector3& pos, const cl
 	trace.TraceLine(xmin, y, z, xmax, y, z, color);
 }
 
-void Trace::TraceDiamond(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
+void Trace::TraceDiamond(const vec3f& pos, const vec4f& color)
 {
 	const auto halfSize = 1.0f;
 
@@ -307,7 +307,7 @@ void Trace::TraceDiamond(const cliqCity::graphicsMath::Vector3& pos, const cliqC
 	trace.TraceLine(x, ymin, z, xmin, y, z, color);
 }
 
-void Trace::TraceSmallDiamond(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color)
+void Trace::TraceSmallDiamond(const vec3f& pos, const vec4f& color)
 {
 	const auto halfSize = 0.5f;
 
@@ -326,7 +326,7 @@ void Trace::TraceSmallDiamond(const cliqCity::graphicsMath::Vector3& pos, const 
 	trace.TraceLine(x, ymin, z, xmin, y, z, color);
 }
 
-void Trace::TraceLine(const cliqCity::graphicsMath::Vector3& from, const cliqCity::graphicsMath::Vector3& to, const cliqCity::graphicsMath::Vector4& color)
+void Trace::TraceLine(const vec3f& from, const vec3f& to, const vec4f& color)
 {
 	Trace::GetTrace().TraceLine(from.x, from.y, from.z, to.x, to.y, to.z, color);
 }

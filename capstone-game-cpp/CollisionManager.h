@@ -16,9 +16,6 @@ struct Collision
 	vec3f minimumOverlap;	// This is a vector in colliderA frame of reference
 };
 
-class Explorer;
-class Wall;
-
 class CollisionManager
 {
 public:

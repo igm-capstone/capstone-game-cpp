@@ -28,6 +28,7 @@ public:
 	IShader* mSpriteVertexShader;
 	IShader* mSpritePixelShader;
 	IShader* mSkinnedVertexShader;
+	IShader* mGridComputeShader;
 
 	IShader* mDBGPixelShader;
 
@@ -64,12 +65,6 @@ public:
 		// Allocate scene 
 		asScene = new (_aligned_malloc(sizeof(TScene), alignof(TScene))) TScene();
 		
-		//asScene = new (mSceneAllocator.Allocate(sizeof(TScene), alignof(TScene), 0)) TScene();
-
-		// Pass the remainer to the scene constructor
-	//	size_t size = (mStaticMemory + STATIC_SCENE_MEMORY) - (asChar + sizeof(TScene));
-	//	asScene->SetStaticMemory(mSceneAllocator.Allocate(size, 2, 0), size);
-
 		mSceneToLoad = asScene;
 	}
 

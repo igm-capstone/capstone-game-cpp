@@ -1,10 +1,11 @@
 ﻿#include "stdafx.h"
 #include "MainMenuScene.h"
-#include "Level00.h"
+#include "Factory.h"
 #include "Level01.h"
 #include <ScareTacticsApplication.h>
 
 #include "Rig3D/Graphics/DirectX11/imgui/imgui.h"
+#include <SceneObjects/Explorer.h>
 
 bool MainMenuScene::gLocalClient = false;
 bool MainMenuScene::gLocalServer = false;

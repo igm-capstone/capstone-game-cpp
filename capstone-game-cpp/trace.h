@@ -20,7 +20,7 @@
 
 #define RENDER_TRACE()                          Trace::GetTrace().Render();
 
-typedef std::function<void(const float&, const float&, const float&, const float&, const float&, const float&, const cliqCity::graphicsMath::Vector4& color)> __TraceFunction;
+typedef std::function<void(const float&, const float&, const float&, const float&, const float&, const float&, const vec4f& color)> __TraceFunction;
 
 using namespace Rig3D;
 
@@ -93,15 +93,15 @@ public:
 
 	static Trace &endl(Trace &trace);
 
-	static void TraceBox(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-	static void TraceSmallBox(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-	static void TraceXCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-	static void TraceSmallXCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-	static void TraceCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-	static void TraceSmallCross(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-	static void TraceDiamond(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-	static void TraceSmallDiamond(const cliqCity::graphicsMath::Vector3& pos, const cliqCity::graphicsMath::Vector4& color);
-	static void TraceLine(const cliqCity::graphicsMath::Vector3& from, const cliqCity::graphicsMath::Vector3& to, const cliqCity::graphicsMath::Vector4& color);
+	static void TraceBox(const vec3f& pos, const vec4f& color);
+	static void TraceSmallBox(const vec3f& pos, const vec4f& color);
+	static void TraceXCross(const vec3f& pos, const vec4f& color);
+	static void TraceSmallXCross(const vec3f& pos, const vec4f& color);
+	static void TraceCross(const vec3f& pos, const vec4f& color);
+	static void TraceSmallCross(const vec3f& pos, const vec4f& color);
+	static void TraceDiamond(const vec3f& pos, const vec4f& color);
+	static void TraceSmallDiamond(const vec3f& pos, const vec4f& color);
+	static void TraceLine(const vec3f& from, const vec3f& to, const vec4f& color);
 	void TraceLine(const float& from_x, const float& from_y, const float& from_z, const float& to_x, const float& to_y, const float& to_z, const vec4f& color);
 };
 

@@ -16,12 +16,16 @@ class ExplorerController : public BaseComponent
 	double mSprintDuration;
 	quatf mModelRotation;
 
+	float mAcceleration;
+	float mBaseMoveSpeed;
+	float mSpeedMultiplier;
+	vec3f mCurrentSpeed;
+
 public:
 	float mSpeed;
 
 	bool Update(double milliseconds);
-
-	static void DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
+	void Sprint(float duration);
 	void SetBaseRotation(const float& x, const float& y, const float& z);
 
 	EXPOSE_CALLBACK_2(Move, vec3f, quatf)

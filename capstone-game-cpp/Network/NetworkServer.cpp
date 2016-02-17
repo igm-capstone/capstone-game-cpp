@@ -1,9 +1,6 @@
 #include "stdafx.h"
 #include "NetworkServer.h"
 
-#include "ScareTacticsApplication.h"
-#include "Scenes/Level00.h"
-
 bool NetworkServer::Init(void) 
 {
 	WSADATA wsaData;

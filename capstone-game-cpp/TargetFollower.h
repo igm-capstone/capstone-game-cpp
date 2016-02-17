@@ -1,5 +1,5 @@
 #pragma once
-#include "Grid.h"
+#include "AIManager.h"
 #include <Rig3D/Common/Transform.h>
 #include <RayCast.h>
 #include <Rig3D/Common/Timer.h>
@@ -12,7 +12,7 @@
 #define MOD(a, n) ((a) - (floorf((a) / (n)) * (n)))
 
 //static Vector3 gRepelOffset = { 0.66f, -0.6f, 0.0f };
-static Vector3 gRepelOffset = { 2.4f, -1.0f, 0.0f };
+static vec3f gRepelOffset = { 2.4f, -1.0f, 0.0f };
 
 static float gRepelFocus = 8.0f;
 static float gRepelCastDistance = 4.0f;
@@ -31,7 +31,6 @@ namespace Rig3D
 	class TargetFollower
 	{
 	public:
-		Grid&				mGrid;
 		Transform&			mTransform;
 		SearchResult<Node>	mSearchResult;
 		QuadColliderComponent*		mAABBs;
@@ -41,7 +40,6 @@ namespace Rig3D
 		float				mRepel = 0;
 
 		TargetFollower(Transform& transform, QuadColliderComponent* aabbs, int aabbbCount) :
-			mGrid(Grid::SharedInstance()),
 			mTransform(transform),
 			mAABBs(aabbs),
 			mAABBCount(aabbbCount),
@@ -101,9 +99,9 @@ namespace Rig3D
 			
 			auto da = abs(MOD(targetAngle - currentAngle + 180.0f, 360.0f) - 180);
 
-			auto targetRotation = Quaternion::rollPitchYaw(targetAngle * DEG_TO_RAD, 0, 0);
+			auto targetRotation = quatf::rollPitchYaw(targetAngle * DEG_TO_RAD, 0, 0);
 
-			Quaternion rotation;
+			quatf rotation;
 			RotateTowards(&rotation, mTransform.GetRotation(), targetRotation, gTurnRate * 5 * deltaTime);
 			mTransform.SetRotation(rotation);
 
@@ -145,7 +143,7 @@ namespace Rig3D
 			//if (reverse)
 			//    return;
 
-			auto moveDirection = Vector3(mRepel, (1 - abs(mRepel)) * (reverse ? -1 : 1), 0);
+			auto moveDirection = vec3f(mRepel, (1 - abs(mRepel)) * (reverse ? -1 : 1), 0);
 
 			// "forward"
 			//Debug.DrawLine(transform.position, transform.position + transform.up);
@@ -167,7 +165,7 @@ namespace Rig3D
 			mTransform.SetPosition(position + moveStep * gMoveSpeed * .1f * deltaTime);
 		}
 
-		static void RotateTowards(Quaternion* out, const Quaternion& from, const Quaternion& to, float maxDegreesDelta)
+		static void RotateTowards(quatf* out, const quatf& from, const quatf& to, float maxDegreesDelta)
 		{
 			float num = angleBetween(from, to);
 			if (double(num) == 0.0)
@@ -179,10 +177,10 @@ namespace Rig3D
 			return Slerp(out, from, to, t);
 		}
 
-		static void Slerp(Quaternion* out, const Quaternion& from, const Quaternion& to, const float u)
+		static void Slerp(quatf* out, const quatf& from, const quatf& to, const float u)
 		{
-			Quaternion q0(from);
-			Quaternion q1(to);
+			quatf q0(from);
+			quatf q1(to);
 
 			float cosAngle = dot(q0, q1);
 			if (cosAngle < 0.0f) {
@@ -212,13 +210,13 @@ namespace Rig3D
 			out->v.z = q0.v.z + q1.v.z;
 		}
 		
-		// TODO! Move angleBetween to GraphicsMath Quaternion.cpp
+		// TODO! Move angleBetween to GraphicsMath quatf.cpp
 		#define M_RAD_TO_DEG 57.2957801818848f
 
 		// Returns the angle in degrees between two rotations /a/ and /b/.
-		static float angleBetween(const Quaternion& lhs, const Quaternion& rhs)
+		static float angleBetween(const quatf& lhs, const quatf& rhs)
 		{
-			return float(double(acos(fmin(abs(cliqCity::graphicsMath::dot(lhs, rhs)), 1.0f))) * 2.0f * M_RAD_TO_DEG);
+			return float(double(acos(fmin(abs(dot(lhs, rhs)), 1.0f))) * 2.0f * M_RAD_TO_DEG);
 		}
 	};
 

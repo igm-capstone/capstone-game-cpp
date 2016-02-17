@@ -126,6 +126,8 @@ void Level01::InitializeAssets()
 
 	mFloorCollider.halfSize = level.extents;
 	mFloorCollider.origin	= level.center;
+
+	mAIManager.InitGrid(level.center.x - level.extents.x, level.center.y - level.extents.y, 2 * level.extents.x, 2 * level.extents.y, mAllocator);
 }
 
 void Level01::InitializeGeometry()
@@ -591,7 +593,12 @@ void Level01::RenderSprites()
 }
 #pragma endregion
 
+void Level01::ComputeGrid()
+{
+	//CS stuff will come here
+}
+
 void Level01::VShutdown()
 {
-	
+
 }

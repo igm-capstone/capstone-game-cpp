@@ -65,7 +65,7 @@ private:
 		auto sprint = Factory<Skill>::Create();
 		sprint->mSceneObject = this;
 		sprint->SetBinding(SkillBinding().Set(KEYCODE_A).Set(MOUSEBUTTON_LEFT));
-		sprint->Setup(2, 1, ExplorerController::DoSprint);
+		sprint->Setup(2, 1, DoSprint);
 		mSkills[0] = sprint;
 	}
 
@@ -139,5 +139,13 @@ public:
 		if (e->mNetworkID->mHasAuthority) {
 			e->mCameraManager->ChangeLookAtTo(e->mTransform->GetPosition());
 		}
+	}
+
+	static void DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+	{
+		TRACE_LOG("Sprint!!");
+
+		auto e = reinterpret_cast<Explorer*>(obj);
+		e->mController->Sprint(duration);
 	}
 };

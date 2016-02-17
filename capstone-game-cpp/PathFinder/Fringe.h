@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include "Graph.h"
 #include <Colors.h>
+#include <trace.h>
 
 namespace PathFinder
 {
@@ -22,15 +23,15 @@ namespace PathFinder
 		float cost;
 	};
 
-	template<class T, int width, int height>
+	template<class T>
 	class Fringe
 	{
 	private:
 		unordered_map<T*, CacheData<T>> cache;
 
 	public:
-		Graph<T, width, height>& graph;
-		Fringe(Graph<T, width, height>& _graph) : graph(_graph) {}
+		Graph<T>& graph;
+		Fringe(Graph<T>& _graph) : graph(_graph) {}
 		~Fringe() {}
 
 		SearchResult<T> FindPath(T* startNode, T* endNode)

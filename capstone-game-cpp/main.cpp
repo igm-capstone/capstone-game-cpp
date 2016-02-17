@@ -4,10 +4,8 @@
 //#include "Scenes\MainMenu.h"
 //#include "Scenes\Credits.h"
 #include <capstone-game-cpp/ScareTacticsApplication.h>
-#include "Scenes\Level00.h"
 #include "Scenes\LoadingScreen.h"
 #include "Scenes\MainMenuScene.h"
-#include "Factory.h"
 #include "capstone-game-cpp.rc.h"
 
 #define STATIC_APP_MEMORY 4000000
