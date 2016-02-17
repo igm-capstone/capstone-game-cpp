@@ -19,7 +19,6 @@ class Level01 : public BaseScene
 	// Counts
 	uint32_t			mWallCount0;
 	uint32_t			mPlaneCount;
-	uint32_t			mSkinnedMeshMatrixCount;
 	uint32_t			mSpotLightCount;
 	uint32_t			mExplorerCount;
 
@@ -32,7 +31,7 @@ class Level01 : public BaseScene
 	// Wall Data
 	mat4f*				mWallWorldMatrices0;
 	mat4f*				mPlaneWorldMatrices;
-	mat4f*				mSkinnedMeshMatices;
+	mat4f				mSkinnedMeshMatices[MAX_SKELETON_JOINTS];
 
 	// Lights
 	mat4f*				mSpotLightWorldMatrices;

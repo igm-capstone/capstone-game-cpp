@@ -20,14 +20,12 @@ static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 Level01::Level01() :
 	mWallCount0(0),
 	mPlaneCount(0),
-	mSkinnedMeshMatrixCount(0),
 	mSpotLightCount(0),
 	mExplorerCount(0),
 	mPlaneWidth(0.0f),
 	mPlaneHeight(0.0f),
 	mWallWorldMatrices0(nullptr),
 	mPlaneWorldMatrices(nullptr),
-	mSkinnedMeshMatices(nullptr),
 	mSpotLightWorldMatrices(nullptr),
 	mSpotLightVPTMatrices(nullptr),
 	mWallMesh0(nullptr),
@@ -44,7 +42,7 @@ Level01::Level01() :
 {
 
 }
-FMOD::Studio::System* studio;
+
 Level01::~Level01()
 {
 	mWallMesh0->~IMesh();
@@ -145,17 +143,12 @@ void Level01::InitializeGeometry()
 	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
 
 	// Explorer Mesh
-	FBXMeshResource<SkinnedVertex> explorerFBXResource("Assets/AnimTest.fbx");
-	//FBXMeshResource<SkinnedVertex> explorerFBXResource("Assets/Minion.fbx");
-
+	FBXMeshResource<SkinnedVertex> explorerFBXResource("Assets/AnimTestNorm.fbx");
 	meshLibrary.LoadMesh(&mExplorerCubeMesh, mRenderer, explorerFBXResource);
-
-	mSkinnedMeshMatices		= reinterpret_cast<mat4f*>(mAllocator.Allocate(sizeof(mat4f) * explorerFBXResource.mSkeletalHierarchy.mJoints.size(), alignof(mat4f), 0));
-	mSkinnedMeshMatrixCount = explorerFBXResource.mSkeletalHierarchy.mJoints.size();
 
 	for (Explorer& e : Factory<Explorer>())
 	{
-		e.mAnimationController->mSkeletalHierarchy			= explorerFBXResource.mSkeletalHierarchy;
+		e.mAnimationController->mSkeletalHierarchy	= explorerFBXResource.mSkeletalHierarchy;
 		e.mAnimationController->mSkeletalAnimations = explorerFBXResource.mSkeletalAnimations;
 		e.mAnimationController->PlayLoopingAnimation("Take 001");
 	}
@@ -250,7 +243,7 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateShaderResource(&mExplorerShaderResource, &mAllocator);
 
 		void* cbExplorerData[] = { mCameraManager->GetCBufferPersp(), &mModel, mSkinnedMeshMatices };
-		size_t cbExplorerSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::Model), sizeof(mat4f) *  mSkinnedMeshMatrixCount};
+		size_t cbExplorerSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::Model), sizeof(mat4f) *  MAX_SKELETON_JOINTS};
 
 		mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 3);
 	}
@@ -444,7 +437,7 @@ void Level01::RenderWalls()
 	mRenderer->VSetVertexShaderInstanceBuffer(mWallShaderResource, 1, 1);
 	mRenderer->VSetPixelShaderResourceView(mWallShaderResource, 1, 0);
 
-//	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPlaneMesh->GetIndexCount(), mPlaneCount, 0, 0, 0);
+	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPlaneMesh->GetIndexCount(), mPlaneCount, 0, 0, 0);
 }
 
 void Level01::RenderExplorers()
@@ -458,7 +451,7 @@ void Level01::RenderExplorers()
 	
 	for (Explorer& e : Factory<Explorer>())
 	{
-		mModel.world = (mat4f::rotateY(PI/2.0f) * mat4f::translate(vec3f(0.0f, 0.0f, -75.0f))).transpose();// e.mTransform->GetWorldMatrix().transpose();
+		mModel.world = e.mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 
