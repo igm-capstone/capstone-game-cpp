@@ -67,7 +67,7 @@ bool ExplorerController::Update(double milliseconds)
 	auto rot = quatf::angleAxis(atan2(dir.y, dir.x), vec3f(0, 0, 1)) * mModelRotation;
 
 	//if (hasMoved)
-		OnMove(pos, rot);
+//		OnMove(pos, rot);
 
 	return hasMoved;
 }

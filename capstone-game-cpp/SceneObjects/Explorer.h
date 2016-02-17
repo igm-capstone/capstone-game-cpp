@@ -27,8 +27,8 @@ private:
 
 private:
 	Explorer() : mMesh(nullptr), mNetworkID(nullptr) {
-		//mTransform->SetScale(5.005f);				// Temp until we get properly sized models
-		//mTransform->SetRotation(PI * -0.5, 0.0f, 0.0f);
+		//mTransform->SetScale(10.005f);				// Temp until we get properly sized models
+		mTransform->SetRotation(0.0f, PI * -0.5, 0.0f);
 		mNetworkID = Factory<NetworkID>::Create();
 		mNetworkID->mSceneObject = this;
 		mNetworkID->mIsActive = false;
@@ -38,7 +38,7 @@ private:
 		mController->mIsActive = false;
 		mController->mSpeed = 0.05f;
 		mController->RegisterMoveCallback(&OnMove);
-		mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
+	//	mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
 
 		mAnimationController = Factory<AnimationController>::Create();
 		mAnimationController->mSceneObject = this;
