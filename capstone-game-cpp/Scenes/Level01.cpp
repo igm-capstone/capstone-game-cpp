@@ -150,12 +150,12 @@ void Level01::InitializeGeometry()
 
 	meshLibrary.LoadMesh(&mExplorerCubeMesh, mRenderer, explorerFBXResource);
 
-	mSkinnedMeshMatices		= reinterpret_cast<mat4f*>(mAllocator.Allocate(sizeof(mat4f) * explorerFBXResource.mSkeleton.mJoints.size(), alignof(mat4f), 0));
-	mSkinnedMeshMatrixCount = explorerFBXResource.mSkeleton.mJoints.size();
+	mSkinnedMeshMatices		= reinterpret_cast<mat4f*>(mAllocator.Allocate(sizeof(mat4f) * explorerFBXResource.mSkeletalHierarchy.mJoints.size(), alignof(mat4f), 0));
+	mSkinnedMeshMatrixCount = explorerFBXResource.mSkeletalHierarchy.mJoints.size();
 
 	for (Explorer& e : Factory<Explorer>())
 	{
-		e.mAnimationController->mSkeleton			= explorerFBXResource.mSkeleton;
+		e.mAnimationController->mSkeletalHierarchy			= explorerFBXResource.mSkeletalHierarchy;
 		e.mAnimationController->mSkeletalAnimations = explorerFBXResource.mSkeletalAnimations;
 		e.mAnimationController->PlayLoopingAnimation("Take 001");
 	}
@@ -444,7 +444,7 @@ void Level01::RenderWalls()
 	mRenderer->VSetVertexShaderInstanceBuffer(mWallShaderResource, 1, 1);
 	mRenderer->VSetPixelShaderResourceView(mWallShaderResource, 1, 0);
 
-	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPlaneMesh->GetIndexCount(), mPlaneCount, 0, 0, 0);
+//	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPlaneMesh->GetIndexCount(), mPlaneCount, 0, 0, 0);
 }
 
 void Level01::RenderExplorers()
@@ -462,7 +462,7 @@ void Level01::RenderExplorers()
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 
-		e.mAnimationController->mSkeleton.CalculateSkinningMatrices(mSkinnedMeshMatices);
+		e.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatices);
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatices, 2);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
 
