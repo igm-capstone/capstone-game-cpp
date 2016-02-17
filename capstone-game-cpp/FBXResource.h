@@ -8,8 +8,7 @@ http://www.gamedev.net/page/resources/_/technical/graphics-programming-and-theor
 
 #pragma once
 #include <fbxsdk.h>
-#include <Skeleton.h>
-#include <Components/AnimationController.h>
+#include <SkeletalHierarchy.h>
 
 #define GET_FLOAT(f) static_cast<float>(f)
 
@@ -28,7 +27,7 @@ public:
 	std::vector<Vertex>										mVertices;
 	std::vector<uint16_t>									mIndices;
 
-	Skeleton												mSkeleton;
+	SkeletalHierarchy										mSkeletalHierarchy;
 	std::vector<SkeletalAnimation>							mSkeletalAnimations;
 
 	const char*		mFilename;
@@ -215,26 +214,18 @@ public:
 		}
 
 		// Add joint to skeleton
-		mSkeleton.mJoints.push_back(Joint());
+		mSkeletalHierarchy.mJoints.push_back(Joint());
 
 		// Set Joint name and parent index
-		Joint* pJoint = &mSkeleton.mJoints.back();
+		Joint* pJoint = &mSkeletalHierarchy.mJoints.back();
 		pJoint->name = pNode->GetName();
 		pJoint->parentIndex = parentIndex;
-		
-		//for (int i = 0; i < depth; ++i)
-		//{
-		//	TRACE(" ");
-		//}
-
-		//TRACE(joint.mName << " " << joint.mParentIndex);
-		//TRACE(Trace::endl);
 
 		// Process children
 		int childNodeCount = pNode->GetChildCount();
 		for (int i = 0; i < childNodeCount; i++)
 		{
-			LoadSkeletalHierarchyRecursively(pNode->GetChild(i), depth + 1, mSkeleton.mJoints.size(), index);
+			LoadSkeletalHierarchyRecursively(pNode->GetChild(i), depth + 1, mSkeletalHierarchy.mJoints.size(), index);
 		}
 	}
 
@@ -267,10 +258,10 @@ public:
 
 		FbxMesh* pMesh = pNode->GetMesh();
 
-		// Model matrix: Most likely identity
-		FbxVector4 scale		= pNode->GetGeometricScaling(FbxNode::eSourcePivot);
-		FbxVector4 rotation		= pNode->GetGeometricRotation(FbxNode::eSourcePivot);
-		FbxVector4 translation	= pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
+		// Geometry matrix: Most likely identity
+		FbxVector4 scale			= pNode->GetGeometricScaling(FbxNode::eSourcePivot);
+		FbxVector4 rotation			= pNode->GetGeometricRotation(FbxNode::eSourcePivot);
+		FbxVector4 translation		= pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
 		FbxAMatrix geometryMatrix	= FbxAMatrix(translation, rotation, scale);
 
 		// Get Skin Info
@@ -313,17 +304,16 @@ public:
 					FbxCluster* pCluster = pSkin->GetCluster(clusterIndex);
 
 					FbxAMatrix transformMatrix, transformLinkMatrix;
-					pCluster->GetTransformMatrix(transformMatrix);				// Mesh transform at bind time... hopefully identity
-					pCluster->GetTransformLinkMatrix(transformLinkMatrix);		// Model space transform of the current link
+					pCluster->GetTransformMatrix(transformMatrix);				// Model Space Transform (Mesh Transform) This is the cluster transform w/r/t the Model
+					pCluster->GetTransformLinkMatrix(transformLinkMatrix);		// Global Space Transform. This is the cluster transform w/r/t the Scene. This traverses each parent.
 
 					// Transposing for graphics math
-					FbxAMatrix inverseBindPoseMatrix = (transformLinkMatrix.Inverse()  * transformMatrix * geometryMatrix);
+					FbxAMatrix inverseBindPoseMatrix = transformLinkMatrix.Inverse(); // Joint Space 
 
-					int jointIndex = mSkeleton.GetJointIndexByName(pCluster->GetLink()->GetName());
+					int jointIndex = mSkeletalHierarchy.GetJointIndexByName(pCluster->GetLink()->GetName());
 					assert(jointIndex > -1);
 
-					Joint* pJoint = &mSkeleton.mJoints[jointIndex];
-
+					Joint* pJoint = &mSkeletalHierarchy.mJoints[jointIndex];
 					pJoint->inverseBindPoseMatrix.u = { GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[3]) };
 					pJoint->inverseBindPoseMatrix.v = { GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[3]) };
 					pJoint->inverseBindPoseMatrix.w = { GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[3]) };
@@ -350,8 +340,11 @@ public:
 						FbxTime currentTime;
 						currentTime.SetFrame(frameIndex, FBX_FPS);
 
-						FbxAMatrix animModelMatrix	= pNode->EvaluateGlobalTransform(currentTime) * geometryMatrix;					// Model space pose matrix
-						FbxAMatrix animLinkMatrix	= animModelMatrix.Inverse() * pCluster->GetLink()->EvaluateGlobalTransform(currentTime);	// Joint Space Pose
+						FbxTime test;
+						test.SetFrame(74, FBX_FPS);
+
+						FbxAMatrix animModelMatrix	=	pNode->EvaluateLocalTransform() * geometryMatrix;					// Model space pose matrix
+						FbxAMatrix animLinkMatrix =		pCluster->GetLink()->EvaluateGlobalTransform(currentTime);			// Global Animated Space. This is the animated joint position w/r/t the scene 
 
 						FbxQuaternion clusterRotation	= animLinkMatrix.GetQ();
 						FbxVector4 clusterScale			= animLinkMatrix.GetS();
@@ -366,6 +359,18 @@ public:
 						keyframe->scale			= { GET_FLOAT(clusterScale.mData[0]), GET_FLOAT(clusterScale.mData[1]), GET_FLOAT(clusterScale.mData[2]) };
 						keyframe->translation	= { GET_FLOAT(clusterTranslation.mData[0]), GET_FLOAT(clusterTranslation.mData[1]), GET_FLOAT(clusterTranslation.mData[2]) };
 						keyframe->time			= GET_FLOAT(currentTime.GetMilliSeconds());
+					
+	/*					if (frameIndex == 1 || (uint32_t)frameIndex == pSkeletalAnimation->frameCount / 2 || (uint32_t)frameIndex == pSkeletalAnimation->frameCount)
+						{
+							vec3f axis;
+							float angle;
+							keyframe->rotation.toAngleAxis(&angle, &axis);
+
+							TRACE("\tFrame: " << (uint32_t)frameIndex << Trace::endl);
+							TRACE("\t\t S: " << keyframe->scale << Trace::endl);
+							TRACE("\t\t Q: " << angle * (180.f / PI) << " " << axis << Trace::endl);
+							TRACE("\t\t T: " << keyframe->translation << Trace::endl);
+						}*/
 					}
 				}
 			}
