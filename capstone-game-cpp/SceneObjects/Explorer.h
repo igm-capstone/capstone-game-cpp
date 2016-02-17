@@ -26,9 +26,8 @@ private:
 	CameraManager*				mCameraManager;
 
 private:
-	Explorer() : mMesh(nullptr), mNetworkID(nullptr) {
-	//	mTransform->SetScale(0.05f);				// Temp until we get properly sized models
-		mTransform->SetRotation(PI * -0.5, 0.0f,  0.0f);
+	Explorer() : mMesh(nullptr), mNetworkID(nullptr) 
+	{
 		mNetworkID = Factory<NetworkID>::Create();
 		mNetworkID->mSceneObject = this;
 		mNetworkID->mIsActive = false;
@@ -38,7 +37,7 @@ private:
 		mController->mIsActive = false;
 		mController->mSpeed = 0.05f;
 		mController->RegisterMoveCallback(&OnMove);
-	//	mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
+		mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
 
 		mAnimationController = Factory<AnimationController>::Create();
 		mAnimationController->mSceneObject = this;
@@ -69,6 +68,7 @@ private:
 		sprint->Setup(2, 1, ExplorerController::DoSprint);
 		mSkills[0] = sprint;
 	}
+
 	~Explorer() {};
 
 public:
