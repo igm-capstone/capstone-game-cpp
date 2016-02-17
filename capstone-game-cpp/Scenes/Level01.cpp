@@ -17,7 +17,6 @@
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 
-
 Level01::Level01() :
 	mWallCount0(0),
 	mPlaneCount(0),
@@ -43,7 +42,7 @@ Level01::Level01() :
 {
 
 }
-FMOD::Studio::System* studio;
+
 Level01::~Level01()
 {
 	mWallMesh0->~IMesh();
@@ -98,8 +97,6 @@ void Level01::VInitialize()
 	mRenderer->SetDelegate(this);
 
 	InitializeAssets();
-
-
 	InitializeGeometry();
 	InitializeShaderResources();
 	RenderShadowMaps();
@@ -148,8 +145,16 @@ void Level01::InitializeGeometry()
 	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
 
 	// Explorer Mesh
-	FBXMeshResource<Vertex3> explorerFBXResource("Assets/BaseExplorerMesh_MM_N.fbx");
+	FBXMeshResource<SkinnedVertex> explorerFBXResource("Assets/AnimTestNorm.fbx");
 	meshLibrary.LoadMesh(&mExplorerCubeMesh, mRenderer, explorerFBXResource);
+
+	for (Explorer& e : Factory<Explorer>())
+	{
+		e.mAnimationController->mSkeletalHierarchy	= explorerFBXResource.mSkeletalHierarchy;
+		e.mAnimationController->mSkeletalAnimations = explorerFBXResource.mSkeletalAnimations;
+		e.mAnimationController->PlayLoopingAnimation("Take 001");
+	}
+
 
 	// Minion 
 	meshLibrary.NewMesh(&mMinionCubeMesh, mRenderer);
@@ -239,10 +244,10 @@ void Level01::InitializeShaderResources()
 	{
 		mRenderer->VCreateShaderResource(&mExplorerShaderResource, &mAllocator);
 
-		void* cbExplorerData[] = { mCameraManager->GetCBufferPersp(), &mModel };
-		size_t cbExplorerSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::Model) };
+		void* cbExplorerData[] = { mCameraManager->GetCBufferPersp(), &mModel, mSkinnedMeshMatices };
+		size_t cbExplorerSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::Model), sizeof(mat4f) *  MAX_SKELETON_JOINTS};
 
-		mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 2);
+		mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 3);
 	}
 
 	// PVL
@@ -290,6 +295,7 @@ void Level01::InitializeShaderResources()
 
 void Level01::VUpdate(double milliseconds)
 {
+	// TO DO: Possibly a Components Update method... if we move this code to application level.
 	for (ExplorerController& ec : Factory<ExplorerController>())
 	{
 		ec.Update(milliseconds);
@@ -300,11 +306,18 @@ void Level01::VUpdate(double milliseconds)
 		skill.Update();
 	}
 
+	for (AnimationController& ac : Factory<AnimationController>())
+	{
+		ac.Update(milliseconds);
+	}
+
+	// TO DO: Ghost Controller Update?
 	if (mInput->GetKeyDown(KEYCODE_O) && mNetworkManager->mMode == NetworkManager::Mode::SERVER)
 	{
 		NetworkCmd::SpawnNewMinion(vec3f(0, 0, 0));
 	}
 
+	// TO DO: Wrap in a collision manager update.
 	mCollisionManager.DetectCollisions();
 	mCollisionManager.ResolveCollisions();
 
@@ -431,19 +444,24 @@ void Level01::RenderWalls()
 
 void Level01::RenderExplorers()
 {
-	mRenderer->VSetInputLayout(mApplication->mExplorerVertexShader);
-	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
+	mRenderer->VSetInputLayout(mApplication->mSkinnedVertexShader);
+	mRenderer->VSetVertexShader(mApplication->mSkinnedVertexShader);
 	mRenderer->VSetPixelShader(mApplication->mExplorerPixelShader);
 
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+	
 	for (Explorer& e : Factory<Explorer>())
 	{
 		mModel.world = e.mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		e.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatices);
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatices, 2);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
 
 		mRenderer->VBindMesh(mExplorerCubeMesh);
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 		mRenderer->VDrawIndexed(0, mExplorerCubeMesh->GetIndexCount());
 	}
 }

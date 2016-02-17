@@ -21,6 +21,7 @@
 #include "Shaders/obj/ShadowCasterPixelShader.h"
 #include "Shaders/obj/GridComputeShader.h"
 #include "Shaders/obj/ShadowPixelShader.h"
+#include "Shaders/obj/SkinnedMeshVertexShader.h"
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 #include <Rig3D/Intersection.h>
 
@@ -35,10 +36,12 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mPLVolumePixelShader(nullptr),
 	mNDSQuadVertexShader(nullptr),
 	mNDSQuadPixelShader(nullptr),
-	mDBGPixelShader(nullptr),
 	mSpriteVertexShader(nullptr),
 	mSpritePixelShader(nullptr),
+	mSkinnedVertexShader(nullptr),
 	mGridComputeShader(nullptr),
+	mDBGPixelShader(nullptr),
+	mStudio(nullptr),
 	mLoadingScreen(nullptr),
 	mCurrentScene(nullptr),
 	mSceneToLoad(nullptr),
@@ -168,6 +171,21 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VLoadVertexShader(mSpriteVertexShader, gSpriteVertexShader, sizeof(gSpriteVertexShader), spriteInputElements, 6);
 	renderer->VLoadPixelShader(mSpritePixelShader, gSpritePixelShader, sizeof(gSpritePixelShader));	
 	
+	// Skinned Vertex Shader
+
+	InputElement skinnedInputElements[] =
+	{
+		{ "BLENDINDICES",	0, 0, 0,	0,	RGBA_UINT32,	INPUT_CLASS_PER_VERTEX },
+		{ "BLENDWEIGHTS",	0, 0, 16,	0,	RGBA_FLOAT32,	INPUT_CLASS_PER_VERTEX },
+		{ "POSITION",		0, 0, 32,	0,	RGB_FLOAT32,	INPUT_CLASS_PER_VERTEX },
+		{ "NORMAL",			0, 0, 44,	0,	RGB_FLOAT32,	INPUT_CLASS_PER_VERTEX },
+		{ "TEXCOORD",		0, 0, 56,	0,	RG_FLOAT32,		INPUT_CLASS_PER_VERTEX }
+	};
+
+	renderer->VCreateShader(&mSkinnedVertexShader, &mGameAllocator);
+
+	renderer->VLoadVertexShader(mSkinnedVertexShader, gSkinnedMeshVertexShader, sizeof(gSkinnedMeshVertexShader), skinnedInputElements, 5);
+
 	// Grid Compute Shader
 
 	renderer->VCreateShader(&mGridComputeShader, &mGameAllocator);
@@ -278,6 +296,7 @@ void ScareTacticsApplication::VShutdown()
 	mSpriteVertexShader->~IShader();
 	mSpritePixelShader->~IShader();
 	mDBGPixelShader->~IShader();
+	mSkinnedVertexShader->~IShader();
 	mGridComputeShader->~IShader();
 
 	mSceneAllocator.Free();

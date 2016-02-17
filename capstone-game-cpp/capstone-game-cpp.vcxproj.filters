@@ -96,6 +96,12 @@
     <ClCompile Include="Components\FmodEventCollection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Components\AnimationController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SkeletalHierarchy.cpp">
+	  <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="AIManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -257,6 +263,12 @@
     <ClInclude Include="Components\FmodEventCollection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Components\AnimationController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SkeletalHierarchy.h">
+	  <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Mathf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -319,6 +331,9 @@
     <FxCompile Include="Shaders\SpriteVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\SkinnedMeshVertexShader.hlsl" />
+	 <Filter>Shaders</Filter>
+    </FxCompile>
     <FxCompile Include="Shaders\GridComputeShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
@@ -334,8 +349,8 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="External\libfbxsdk.ref" />
     <CustomBuild Include="External\fmodstudioL.ref" />
     <CustomBuild Include="External\fmodL.ref" />
-    <CustomBuild Include="External\libfbxsdk.ref" />
   </ItemGroup>
 </Project>

@@ -7,6 +7,7 @@
 #include <Components/Skill.h>
 #include "ScareTacticsApplication.h"
 #include <Components/Health.h>
+#include <Components/AnimationController.h>
 
 class Explorer : public BaseSceneObject
 {
@@ -15,6 +16,7 @@ public:
 	IMesh*						mMesh;
 	NetworkID*					mNetworkID;
 	ExplorerController*			mController;
+	AnimationController*		mAnimationController;
 	SphereColliderComponent*	mCollider;
 	Skill*						mSkills[MAX_EXPLORER_SKILLS];
 	Health*						mHealth;
@@ -24,8 +26,8 @@ private:
 	CameraManager*				mCameraManager;
 
 private:
-	Explorer() : mMesh(nullptr), mNetworkID(nullptr) {
-		mTransform->SetScale(0.005f);				// Temp until we get properly sized models
+	Explorer() : mMesh(nullptr), mNetworkID(nullptr) 
+	{
 		mNetworkID = Factory<NetworkID>::Create();
 		mNetworkID->mSceneObject = this;
 		mNetworkID->mIsActive = false;
@@ -36,6 +38,9 @@ private:
 		mController->mSpeed = 0.05f;
 		mController->RegisterMoveCallback(&OnMove);
 		mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
+
+		mAnimationController = Factory<AnimationController>::Create();
+		mAnimationController->mSceneObject = this;
 
 		mCollider = Factory<SphereColliderComponent>::Create();
 		mCollider->mIsDynamic = true;
@@ -63,6 +68,7 @@ private:
 		sprint->Setup(2, 1, DoSprint);
 		mSkills[0] = sprint;
 	}
+
 	~Explorer() {};
 
 public:

@@ -3,6 +3,7 @@ struct Pixel
 	float4 positionH	: SV_POSITION;
 	float3 positionT	: POSITIONT;
 	float3 normal		: NORMAL;
+	float2 uv			: TEXCOORD;
 };
 
 struct PS_OUT
@@ -17,8 +18,8 @@ PS_OUT main(Pixel pixel)
 	PS_OUT ps_out;
 	
 	ps_out.position = float4(pixel.positionT, 1.0f);
-	ps_out.normal = float4(normalize(pixel.normal), 1.0f);
-	ps_out.color = float4(0.0f, 0.0f, 1.0f, 1.0f);
+	ps_out.normal	= float4(normalize(pixel.normal), 1.0f);
+	ps_out.color	= float4(0.0f, 0.0f, 1.0f, 1.0f);
 
 	return ps_out;
 }

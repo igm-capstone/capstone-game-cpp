@@ -10,6 +10,7 @@ struct Pixel
 	float4 positionH	: SV_POSITION;
 	float3 positionT	: POSITIONT;
 	float3 normal		: NORMAL;
+	float2 uv			: TEXCOORD;
 };
 
 cbuffer camera : register(b0)
@@ -33,6 +34,6 @@ Pixel main( Vertex vertex )
 	pixel.positionH = mul(vertexPos, clip);
 	pixel.positionT = mul(vertexPos, world).xyz;
 	pixel.normal = mul(float4(vertex.normal, 0.0f), world).xyz;
-
+	pixel.uv = vertex.uv;
 	return pixel;
 }
