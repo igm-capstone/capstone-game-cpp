@@ -22,12 +22,12 @@ inline void CullWalls(const Rig3D::Frustum& frustum, std::vector<uint32_t>& indi
 		for (uint32_t p = 0; p < 6; p++)
 		{
 			float pir =
-				w.mBoxCollider->mCollider.halfSize.pCols[0] * abs(cliqCity::graphicsMath::dot(planes[p]->normal, w.mBoxCollider->mCollider.axis[0])) +
-				w.mBoxCollider->mCollider.halfSize.pCols[1] * abs(cliqCity::graphicsMath::dot(planes[p]->normal, w.mBoxCollider->mCollider.axis[1])) +
-				w.mBoxCollider->mCollider.halfSize.pCols[2] * abs(cliqCity::graphicsMath::dot(planes[p]->normal, w.mBoxCollider->mCollider.axis[2]));
+				w.mBoxCollider->mCollider.halfSize.pCols[0] * abs(dot(planes[p]->normal, w.mBoxCollider->mCollider.axis[0])) +
+				w.mBoxCollider->mCollider.halfSize.pCols[1] * abs(dot(planes[p]->normal, w.mBoxCollider->mCollider.axis[1])) +
+				w.mBoxCollider->mCollider.halfSize.pCols[2] * abs(dot(planes[p]->normal, w.mBoxCollider->mCollider.axis[2]));
 
 			// Compute distance from obb center to plane
-			distance = cliqCity::graphicsMath::dot(planes[p]->normal, w.mBoxCollider->mCollider.origin) - planes[p]->distance;			
+			distance = dot(planes[p]->normal, w.mBoxCollider->mCollider.origin) - planes[p]->distance;			
 			if (distance < -pir)
 			{
 				shouldCull = true;
@@ -75,10 +75,10 @@ inline void CullPlanes(const Rig3D::Frustum& frustum, std::vector<uint32_t>& ind
 				aabb.halfSize.pCols[1] * abs(planes[p]->normal.pCols[1]) +
 				aabb.halfSize.pCols[2] * abs(planes[p]->normal.pCols[2]);
 
-			distance = cliqCity::graphicsMath::dot(planes[p]->normal, aabb.origin) - planes[p]->distance;
+			distance = dot(planes[p]->normal, aabb.origin) - planes[p]->distance;
 
 			// Compute distance from obb center to plane
-			distance = cliqCity::graphicsMath::dot(planes[p]->normal, aabb.origin) - planes[p]->distance;
+			distance = dot(planes[p]->normal, aabb.origin) - planes[p]->distance;
 			if (distance < -pir)
 			{
 				shouldCull = true;

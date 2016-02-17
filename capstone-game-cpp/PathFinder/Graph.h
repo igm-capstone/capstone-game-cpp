@@ -1,9 +1,5 @@
 #pragma once
-
-//#include <cstdint>
-//#include <cfloat>
 #include <vector>
-#include "trace.h"
 #include <memory>
 
 namespace PathFinder
@@ -37,30 +33,20 @@ namespace PathFinder
 	};
 
 
-	template<class T, int width, int height>
+	template<class T>
 	class Graph
 	{
-	private:
-
+		T* pList = nullptr;
 	public:
-		T grid[width][height] = {};
-		Graph()
+		int mWidth, mHeight;
+		Graph()	{}
+		~Graph() {}
+		
+		void SetSize(int width, int height, LinearAllocator& allocator)
 		{
-			TRACE("Hello " << 1);
-
-			for (auto i = 0; i < width; i++)
-			{
-				for (auto j = 0; j < height; j++)
-				{
-					grid[i][j].x = i;
-					grid[i][j].y = j;
-				}
-			}
-		}
-
-		~Graph()
-		{
-
+			mWidth = width;
+			mHeight = height;
+			pList = reinterpret_cast<T*>(allocator.Allocate(sizeof(T) * width * height, alignof(T), 0));
 		}
 
 		float Heuristic(T* from, T* to) const
@@ -82,20 +68,22 @@ namespace PathFinder
 			auto y = node->y;
 
 			auto notLeftEdge = x > 0;
-			auto notRightEdge = x < width - 1;
+			auto notRightEdge = x < mWidth - 1;
 			auto notBottomEdge = y > 0;
-			auto notTopEdge = y < height - 1;
+			auto notTopEdge = y < mHeight - 1;
 			auto connections = new vector<Connection<T>>();
 			connections->reserve(8);
 
-			if (notTopEdge) CreateConnectionIfValid(connections, node, &grid[x][y + 1]);
-			if (diagonal && notRightEdge && notTopEdge) CreateConnectionIfValid(connections, node, &grid[x + 1][y + 1]);
-			if (notRightEdge) CreateConnectionIfValid(connections, node, &grid[x + 1][y]);
-			if (diagonal && notRightEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &grid[x + 1][y - 1]);
-			if (notBottomEdge) CreateConnectionIfValid(connections, node, &grid[x][y - 1]);
-			if (diagonal && notLeftEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &grid[x - 1][y - 1]);
-			if (notLeftEdge) CreateConnectionIfValid(connections, node, &grid[x - 1][y]);
-			if (diagonal && notLeftEdge && notTopEdge) CreateConnectionIfValid(connections, node, &grid[x - 1][y + 1]);
+
+
+			if (notTopEdge) CreateConnectionIfValid(connections, node, &(*this)(x, y + 1));
+			if (diagonal && notRightEdge && notTopEdge) CreateConnectionIfValid(connections, node, &(*this)(x + 1, y + 1));
+			if (notRightEdge) CreateConnectionIfValid(connections, node, &(*this)(x + 1, y));
+			if (diagonal && notRightEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &(*this)(x + 1, y - 1));
+			if (notBottomEdge) CreateConnectionIfValid(connections, node, &(*this)(x, y - 1));
+			if (diagonal && notLeftEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &(*this)(x - 1, y - 1));
+			if (notLeftEdge) CreateConnectionIfValid(connections, node, &(*this)(x - 1, y));
+			if (diagonal && notLeftEdge && notTopEdge) CreateConnectionIfValid(connections, node, &(*this)(x - 1, y + 1));
 
 			return connections;
 		}
@@ -112,6 +100,10 @@ namespace PathFinder
 			}
 		}
 
+		T& operator ()(int x, int y)
+		{
+			return pList[x*mHeight + y];
+		}
 	};
 }
 

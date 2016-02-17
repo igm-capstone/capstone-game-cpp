@@ -7,8 +7,6 @@
 #include <Colors.h>
 #include <Mathf.h>
 
-using namespace cliqCity::graphicsMath;
-
 ExplorerController::ExplorerController() :
 	mInput((&Singleton<Engine>::SharedInstance())->GetInput()), 
 	mApplication(&Application::SharedInstance()),
@@ -35,10 +33,10 @@ bool ExplorerController::Update(double milliseconds)
 	bool hasMoved = false;
 
 	// delta time in seconds
-	float dt = milliseconds * 0.001f;
+	float dt = float(milliseconds) * 0.001f;
 
 	// update speed multiplier for the sprint skill
-	mSpeedMultiplier = mSprintDuration ? 2 : 1;
+	mSpeedMultiplier = mSprintDuration ? 2.0f : 1.0f;
 	
 	if (mSprintDuration > 0)
 	{
@@ -46,8 +44,8 @@ bool ExplorerController::Update(double milliseconds)
 	}
 
 	// vertical and horizontal speed components
-	float hSpeed = (mInput->GetKey(KEYCODE_LEFT) ? -1 : 0) + (mInput->GetKey(KEYCODE_RIGHT) ? 1 : 0);
-	float vSpeed = (mInput->GetKey(KEYCODE_DOWN) ? -1 : 0) + (mInput->GetKey(KEYCODE_UP) ? 1 : 0);
+	float hSpeed = (mInput->GetKey(KEYCODE_LEFT) ? -1.0f : 0.0f) + (mInput->GetKey(KEYCODE_RIGHT) ? 1.0f : 0.0f);
+	float vSpeed = (mInput->GetKey(KEYCODE_DOWN) ? -1.0f : 0.0f) + (mInput->GetKey(KEYCODE_UP) ? 1.0f : 0.0f);
 	
 	bool wantToMove = hSpeed || vSpeed;
 

@@ -4,6 +4,7 @@
 #include <Rig3D/Graphics/Camera.h>
 #include <Uniforms.h>
 #include <Vertex.h>
+#include <AIManager.h>
 
 class Level01 : public BaseScene
 {
@@ -55,6 +56,7 @@ class Level01 : public BaseScene
 
 	// Managers
 	CollisionManager	mCollisionManager;
+	AIManager			mAIManager;
 
 public:
 	Level01();

@@ -1,9 +1,6 @@
 #include "stdafx.h"
 #include "NetworkClient.h"
 
-#include "ScareTacticsApplication.h"
-#include "Scenes/Level00.h"
-
 bool NetworkClient::Init(void)
 {
 	WSADATA wsaData;

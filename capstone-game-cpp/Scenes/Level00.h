@@ -7,7 +7,6 @@
 #include "Components/ColliderComponent.h"
 #include "LevelReader.h"
 #include "Colors.h"
-#include "Grid.h"
 #include "Vertex.h"
 #include "TargetFollower.h"
 #include "Rig3D/IApplication.h"

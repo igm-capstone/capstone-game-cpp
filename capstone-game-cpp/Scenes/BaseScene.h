@@ -4,7 +4,6 @@
 #include "Network\NetworkManager.h"
 #include <SceneObjects/BaseSceneObject.h>
 #include <CameraManager.h>
-#include <Components/ColliderComponent.h>
 
 using namespace Rig3D;
 

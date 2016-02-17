@@ -115,14 +115,12 @@
     <ClCompile Include="ScareTacticsApplication.cpp" />
     <ClCompile Include="SceneObjects\Minion.cpp" />
     <ClCompile Include="Scenes\BaseScene.cpp" />
-    <ClCompile Include="Grid.cpp" />
+    <ClCompile Include="AIManager.cpp" />
     <ClCompile Include="LevelReader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Network\NetworkClient.cpp" />
     <ClCompile Include="Network\NetworkManager.cpp" />
     <ClCompile Include="Network\NetworkServer.cpp" />
-    <ClCompile Include="Node.cpp" />
-    <ClCompile Include="Scenes\Level00.cpp" />
     <ClCompile Include="Scenes\Level01.cpp" />
     <ClCompile Include="Scenes\LoadingScreen.cpp" />
     <ClCompile Include="Scenes\MainMenuScene.cpp" />
@@ -172,7 +170,7 @@
     <ClInclude Include="SceneObjects\Wall.h" />
     <ClInclude Include="Scenes\BaseScene.h" />
     <ClInclude Include="Colors.h" />
-    <ClInclude Include="Grid.h" />
+    <ClInclude Include="AIManager.h" />
     <ClInclude Include="json.h" />
     <ClInclude Include="LevelReader.h" />
     <ClInclude Include="Network\NetworkData.h" />
@@ -184,7 +182,6 @@
     <ClInclude Include="PathFinder\Fringe.h" />
     <ClInclude Include="RayCast.h" />
     <ClInclude Include="SceneObjects\BaseSceneObject.h" />
-    <ClInclude Include="Scenes\Level00.h" />
     <ClInclude Include="Scenes\Level01.h" />
     <ClInclude Include="Scenes\LoadingScreen.h" />
     <ClInclude Include="Scenes\MainMenuScene.h" />
