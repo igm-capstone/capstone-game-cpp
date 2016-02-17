@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "AnimationController.h"
 #include "trace.h"
+#include "Rig3D\Common\Input.h"
 
 AnimationController::AnimationController() : mCurrentAnimationIndex(-1), mCurrentAnimationPlayTime(0.0f), mIsAnimating(false), mIsLooping(false)
 {
@@ -37,19 +38,34 @@ void AnimationController::Update(double milliseconds)
 	{
 		return;
 	}
+	static int f = 0;
+
+	
 
 	SkeletalAnimation* currentAnimation = &mSkeletalAnimations[mCurrentAnimationIndex];
 
-	if (mCurrentAnimationPlayTime <= currentAnimation->duration)
+	Input* input = Singleton<Engine>::SharedInstance().GetInput();
+	if (input->GetKeyDown(KEYCODE_RIGHT))
 	{
-		Skeleton& skeletalHierarchy = mSkeleton;
+		f += 10;
+		if (f > currentAnimation->frameCount)
+		{
+			f = 0;
+		}
+	}
+
+	float animationScale = 5.1f;
+	float duration = currentAnimation->duration;
+
+	if (mCurrentAnimationPlayTime <= duration)
+	{
+		SkeletalHierarchy& skeletalHierarchy = mSkeletalHierarchy;
 		
-		float framesPerMS = static_cast<float>(currentAnimation->frameCount) / currentAnimation->duration;
+		float framesPerMS = static_cast<float>(currentAnimation->frameCount) / duration;
 
-		uint32_t keyframeIndex = static_cast<int>(floorf(mCurrentAnimationPlayTime * framesPerMS));
-		TRACE_LOG("Key Frame: " << keyframeIndex);
+		uint32_t keyframeIndex = f;// static_cast<int>(floorf(mCurrentAnimationPlayTime * framesPerMS));
 
-		float u = (mCurrentAnimationPlayTime - keyframeIndex);
+		float u = 0;// (mCurrentAnimationPlayTime - keyframeIndex);
 
 		for (JointAnimation jointAnimation : currentAnimation->jointAnimations)
 		{
@@ -60,10 +76,10 @@ void AnimationController::Update(double milliseconds)
 			vec3f scale			= cliqCity::graphicsMath::lerp(current.scale, next.scale, u);
 			vec3f translation	= cliqCity::graphicsMath::lerp(current.translation, next.translation, u);
 			
-			skeletalHierarchy.mJoints[jointAnimation.jointIndex].animPoseMatrix = mat4f::scale(scale) * rotation.toMatrix4() * mat4f::translate(translation);
+			skeletalHierarchy.mJoints[jointAnimation.jointIndex].animPoseMatrix =  mat4f::scale(scale) * rotation.toMatrix4() * mat4f::translate(translation);
 		}
 
-		skeletalHierarchy.UpdateAnimationPose();
+		//skeletalHierarchy.UpdateAnimationPose();
 
 		mCurrentAnimationPlayTime += static_cast<float>(milliseconds);
 	}
@@ -71,7 +87,7 @@ void AnimationController::Update(double milliseconds)
 	{
 		if (mIsLooping)
 		{
-			mCurrentAnimationPlayTime -= currentAnimation->duration;
+			mCurrentAnimationPlayTime -= duration;
 		}
 		else
 		{

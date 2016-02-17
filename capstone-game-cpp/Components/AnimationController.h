@@ -1,28 +1,6 @@
 #pragma once
 #include "Components/BaseComponent.h"
-#include "Skeleton.h"
-
-struct Keyframe
-{
-	quatf rotation;
-	vec3f scale;
-	vec3f translation;
-	float time;
-};
-
-struct JointAnimation
-{
-	uint32_t jointIndex;
-	std::vector<Keyframe> keyframes;
-};
-
-struct SkeletalAnimation
-{
-	uint32_t	frameCount;
-	float		duration;
-	std::string name;
-	std::vector<JointAnimation> jointAnimations;
-};
+#include "SkeletalHierarchy.h"
 
 class AnimationController :
 	public BaseComponent
@@ -37,7 +15,8 @@ private:
 	~AnimationController();
 public:
 	std::vector<SkeletalAnimation> mSkeletalAnimations;
-	Skeleton mSkeleton;
+	SkeletalHierarchy mSkeletalHierarchy;
+
 	bool mIsAnimating;
 	bool mIsLooping;
 

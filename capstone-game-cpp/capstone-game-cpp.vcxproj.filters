@@ -108,6 +108,9 @@
     <ClCompile Include="Components\AnimationController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SkeletalHierarchy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PathFinder\Fringe.h">
@@ -272,10 +275,10 @@
     <ClInclude Include="Components\FmodEventCollection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Skeleton.h">
+    <ClInclude Include="Components\AnimationController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Components\AnimationController.h">
+    <ClInclude Include="SkeletalHierarchy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
