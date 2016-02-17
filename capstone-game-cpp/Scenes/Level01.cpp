@@ -458,7 +458,7 @@ void Level01::RenderExplorers()
 	
 	for (Explorer& e : Factory<Explorer>())
 	{
-		mModel.world = e.mTransform->GetWorldMatrix().transpose();
+		mModel.world = (mat4f::rotateY(PI/2.0f) * mat4f::translate(vec3f(0.0f, 0.0f, -75.0f))).transpose();// e.mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 
