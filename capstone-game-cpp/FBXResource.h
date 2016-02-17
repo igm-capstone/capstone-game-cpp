@@ -46,7 +46,10 @@ public:
 
 	~FBXMeshResource()
 	{
-		
+		mControlPointJointBlendMap.clear();
+		mVertices.clear();
+		mIndices.clear();
+		mSkeletalAnimations.clear();
 	}
 
 	int Load()
@@ -73,7 +76,8 @@ public:
 			return -1;
 		}
 
-		// Coordinate system conversion
+		// Coordinate system conversion. This only affects the transform of the root node. 
+		// To permeate this change throughout the mesh you need to incorporate the root transform.
 		FbxAxisSystem axisSystem = pScene->GetGlobalSettings().GetAxisSystem();
 		FbxAxisSystem dxAxisSystem(FbxAxisSystem::eDirectX);
 		if (axisSystem != dxAxisSystem)
@@ -82,7 +86,6 @@ public:
 		}
 
 		FbxNode* pRootNode = pScene->GetRootNode();
-
 		if (pRootNode)
 		{
 			bool isRigged = LoadSkeletalHierarchy(pRootNode);
@@ -170,6 +173,7 @@ public:
 						vertex.BlendWeights[i] = controlPointInfluenceJoints[i].jointWeight;
 					}
 
+					// Set remaining indices to zero.
 					for (uint32_t i = controlPointInfluenceJointCount; i < 4; i++)
 					{
 						vertex.BlendIndices[i] = 0;
@@ -304,11 +308,11 @@ public:
 					FbxCluster* pCluster = pSkin->GetCluster(clusterIndex);
 
 					FbxAMatrix transformMatrix, transformLinkMatrix;
-					pCluster->GetTransformMatrix(transformMatrix);				// Model Space Transform (Mesh Transform) This is the cluster transform w/r/t the Model
+					pCluster->GetTransformMatrix(transformMatrix);				// Model Space Transform (Mesh Transform) This is the cluster transform w/r/t the Model. I believe we need this if we convert the scene coordinate system.
 					pCluster->GetTransformLinkMatrix(transformLinkMatrix);		// Global Space Transform. This is the cluster transform w/r/t the Scene. This traverses each parent.
 
 					// Transposing for graphics math
-					FbxAMatrix inverseBindPoseMatrix = transformLinkMatrix.Inverse(); // Joint Space 
+					FbxAMatrix inverseBindPoseMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryMatrix; // Joint Space 
 
 					int jointIndex = mSkeletalHierarchy.GetJointIndexByName(pCluster->GetLink()->GetName());
 					assert(jointIndex > -1);
@@ -320,11 +324,13 @@ public:
 					pJoint->inverseBindPoseMatrix.t = { GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[3]) };
 
 					// Get control points influenced by this joint
-					int controlPointIndexCount = pCluster->GetControlPointIndicesCount();
+					int controlPointIndexCount	= pCluster->GetControlPointIndicesCount();				
+					int* controlPointIndices	= pCluster->GetControlPointIndices();
+					double* controlPointWeights = pCluster->GetControlPointWeights();
 
 					for (int controlPointIndex = 0; controlPointIndex < controlPointIndexCount; controlPointIndex++)
 					{
-						mControlPointJointBlendMap[controlPointIndex].push_back({ jointIndex, GET_FLOAT(pCluster->GetControlPointWeights()[controlPointIndex]) });
+						mControlPointJointBlendMap[controlPointIndices[controlPointIndex]].push_back({ jointIndex, GET_FLOAT(controlPointWeights[controlPointIndex]) });
 					}
 
 					// Add a joint animation to the current skeletal animation
@@ -340,11 +346,8 @@ public:
 						FbxTime currentTime;
 						currentTime.SetFrame(frameIndex, FBX_FPS);
 
-						FbxTime test;
-						test.SetFrame(74, FBX_FPS);
-
-						FbxAMatrix animModelMatrix	=	pNode->EvaluateLocalTransform() * geometryMatrix;					// Model space pose matrix
-						FbxAMatrix animLinkMatrix =		pCluster->GetLink()->EvaluateGlobalTransform(currentTime);			// Global Animated Space. This is the animated joint position w/r/t the scene 
+						FbxAMatrix animModelMatrix	=	pNode->EvaluateGlobalTransform(currentTime) * geometryMatrix;							// Model space pose matrix. This incorporates the transform of coordinate system if we converted the scene earlier.
+						FbxAMatrix animLinkMatrix =		animModelMatrix.Inverse() * pCluster->GetLink()->EvaluateGlobalTransform(currentTime);	// Global Animated Space. This is the animated joint position w/r/t the scene.
 
 						FbxQuaternion clusterRotation	= animLinkMatrix.GetQ();
 						FbxVector4 clusterScale			= animLinkMatrix.GetS();
@@ -359,18 +362,6 @@ public:
 						keyframe->scale			= { GET_FLOAT(clusterScale.mData[0]), GET_FLOAT(clusterScale.mData[1]), GET_FLOAT(clusterScale.mData[2]) };
 						keyframe->translation	= { GET_FLOAT(clusterTranslation.mData[0]), GET_FLOAT(clusterTranslation.mData[1]), GET_FLOAT(clusterTranslation.mData[2]) };
 						keyframe->time			= GET_FLOAT(currentTime.GetMilliSeconds());
-					
-	/*					if (frameIndex == 1 || (uint32_t)frameIndex == pSkeletalAnimation->frameCount / 2 || (uint32_t)frameIndex == pSkeletalAnimation->frameCount)
-						{
-							vec3f axis;
-							float angle;
-							keyframe->rotation.toAngleAxis(&angle, &axis);
-
-							TRACE("\tFrame: " << (uint32_t)frameIndex << Trace::endl);
-							TRACE("\t\t S: " << keyframe->scale << Trace::endl);
-							TRACE("\t\t Q: " << angle * (180.f / PI) << " " << axis << Trace::endl);
-							TRACE("\t\t T: " << keyframe->translation << Trace::endl);
-						}*/
 					}
 				}
 			}
@@ -383,5 +374,4 @@ public:
 			LoadSkeletalAnimationsRecursively(pNode->GetChild(i));
 		}
 	}
-
 };
