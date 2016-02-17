@@ -40,11 +40,16 @@ Pixel main( Vertex vertex )
 //	float3 vertexPosePosition = vertex.position;
 	float3 vertexPosePosition = float3(0.0f, 0.0f, 0.0f);
 
+
+	float lastWeight = 1;
 	[unroll]
-	for (int i = 0; i < MAX_BLEND_MATRICES; i++)
+	for (int i = 0; i < MAX_BLEND_MATRICES - 1; i++)
 	{
 		vertexPosePosition += mul(vertexPosition, skinnedMatrices[vertex.blendIndices[i]]).xyz * vertex.blendWeights[i];
+		lastWeight -= vertex.blendWeights[i];
 	}
+
+	vertexPosePosition += mul(vertexPosition, skinnedMatrices[vertex.blendIndices[MAX_BLEND_MATRICES - 1]]).xyz * lastWeight;
 
 	float4x4 clip = mul(mul(world, view), projection);
 
