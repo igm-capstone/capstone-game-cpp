@@ -44,17 +44,16 @@ void AnimationController::Update(double milliseconds)
 
 	SkeletalAnimation* currentAnimation = &mSkeletalAnimations[mCurrentAnimationIndex];
 
-	Input* input = Singleton<Engine>::SharedInstance().GetInput();
-	if (input->GetKeyDown(KEYCODE_RIGHT))
-	{
-		f += 10;
-		if (f > currentAnimation->frameCount)
-		{
-			f = 0;
-		}
-	}
+	//Input* input = Singleton<Engine>::SharedInstance().GetInput();
+	//if (input->GetKeyDown(KEYCODE_RIGHT))
+	//{
+	//	f += 10;
+	//	if (f > currentAnimation->frameCount)
+	//	{
+	//		f = 0;
+	//	}
+	//}
 
-	float animationScale = 5.1f;
 	float duration = currentAnimation->duration;
 
 	if (mCurrentAnimationPlayTime <= duration)
@@ -63,7 +62,8 @@ void AnimationController::Update(double milliseconds)
 		
 		float framesPerMS = static_cast<float>(currentAnimation->frameCount) / duration;
 
-		uint32_t keyframeIndex = f;// static_cast<int>(floorf(mCurrentAnimationPlayTime * framesPerMS));
+	//	uint32_t keyframeIndex = f;
+		uint32_t keyframeIndex = static_cast<int>(floorf(mCurrentAnimationPlayTime * framesPerMS));
 
 		float u = 0;// (mCurrentAnimationPlayTime - keyframeIndex);
 
@@ -78,8 +78,6 @@ void AnimationController::Update(double milliseconds)
 			
 			skeletalHierarchy.mJoints[jointAnimation.jointIndex].animPoseMatrix =  mat4f::scale(scale) * rotation.toMatrix4() * mat4f::translate(translation);
 		}
-
-		//skeletalHierarchy.UpdateAnimationPose();
 
 		mCurrentAnimationPlayTime += static_cast<float>(milliseconds);
 	}
