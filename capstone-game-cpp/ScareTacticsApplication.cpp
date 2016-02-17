@@ -290,6 +290,7 @@ void ScareTacticsApplication::VShutdown()
 	mSpriteVertexShader->~IShader();
 	mSpritePixelShader->~IShader();
 	mDBGPixelShader->~IShader();
+	mSkinnedVertexShader->~IShader();
 
 	mSceneAllocator.Free();
 	mGameAllocator.Free();
