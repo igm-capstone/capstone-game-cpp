@@ -37,26 +37,23 @@ cbuffer pose : register(b2)
 Pixel main( Vertex vertex )
 {
 	float4 vertexPosition = float4(vertex.position, 1.0f);
-//	float3 vertexPosePosition = vertex.position;
-	float3 vertexPosePosition = float3(0.0f, 0.0f, 0.0f);
+	float3 vertexPosePosition	= float3(0.0f, 0.0f, 0.0f);
+	float3 vertexPoseNormal		= float3(0.0f, 0.0f, 0.0f);
 
-
-	float lastWeight = 1;
 	[unroll]
-	for (int i = 0; i < MAX_BLEND_MATRICES - 1; i++)
+	for (int i = 0; i < MAX_BLEND_MATRICES; i++)
 	{
-		vertexPosePosition += mul(vertexPosition, skinnedMatrices[vertex.blendIndices[i]]).xyz * vertex.blendWeights[i];
-		lastWeight -= vertex.blendWeights[i];
-	}
 
-	vertexPosePosition += mul(vertexPosition, skinnedMatrices[vertex.blendIndices[MAX_BLEND_MATRICES - 1]]).xyz * lastWeight;
+		vertexPosePosition	+=	mul(vertexPosition, skinnedMatrices[vertex.blendIndices[i]]).xyz * vertex.blendWeights[i];
+		vertexPoseNormal	+=	mul(vertex.normal, (float3x3)skinnedMatrices[vertex.blendIndices[i]]) * vertex.blendWeights[i];
+	}
 
 	float4x4 clip = mul(mul(world, view), projection);
 
 	Pixel pixel;
 	pixel.positionH = mul(float4(vertexPosePosition, 1.0f), clip);
 	pixel.positionT = mul(vertexPosePosition, (float3x3)world);
-	pixel.normal	= mul(vertexPosePosition, (float3x3)world);
+	pixel.normal	= mul(vertexPoseNormal, (float3x3)world);
 	pixel.uv		= vertex.uv;
 
 	return pixel;
