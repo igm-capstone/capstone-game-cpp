@@ -175,7 +175,7 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	level.floorWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.floorCount, alignof(mat4f), 0));
 
 	float levelWidth	= level.extents.x * 2.0f;
-	float levelHeight	= level.extents.x * 2.0f;
+	float levelHeight	= level.extents.y * 2.0f;
 
 	level.floorWidth		=	levelWidth / static_cast<float>(TILE_COUNT_X);
 	level.floorHeight	=	levelHeight / static_cast<float>(TILE_COUNT_Y);
@@ -187,7 +187,7 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	{
 		for (int x = 0; x < TILE_COUNT_X; x++)
 		{
-			level.floorWorldMatrices[y * TILE_COUNT_X + x] = (mat4f::rotateX(-PI * 0.5f) * mat4f::translate({ x * level.floorWidth - halfWidth, halfHeight - y * level.floorHeight, 0.0f })).transpose();
+			level.floorWorldMatrices[y * TILE_COUNT_X + x] = (mat4f::rotateX(-PI * 0.5f) * mat4f::translate({ x * level.floorWidth - halfWidth, halfHeight - y * level.floorHeight, 0.5f })).transpose(); //FIXME: hardcoded z value
 		}
 	}
 
