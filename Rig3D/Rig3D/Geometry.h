@@ -166,10 +166,10 @@ namespace Rig3D
 				for (uint32_t x = 0; x < subdivisions - 1; x++)
 				{
 					indices.push_back((z * subdivisions) + x);
+					indices.push_back(((z + 1) * subdivisions) + x + 1);
 					indices.push_back((z * subdivisions) + x + 1);
-					indices.push_back(((z + 1) * subdivisions) + x + 1);
-					indices.push_back(((z + 1) * subdivisions) + x + 1);
 					indices.push_back(((z + 1) * subdivisions) + x);
+					indices.push_back(((z + 1) * subdivisions) + x + 1);
 					indices.push_back((z * subdivisions) + x);
 				}
 			}
@@ -250,10 +250,10 @@ namespace Rig3D
 				for (uint32_t z = 0; z < subdivisions - 1; z++)
 				{
 					indices.push_back((z * subdivisions) + y + faceOffset);
-					indices.push_back(((z + 1) * subdivisions) + y + 1 + faceOffset);
 					indices.push_back((z * subdivisions) + y + 1 + faceOffset);
-					indices.push_back(((z + 1) * subdivisions) + y + faceOffset);
 					indices.push_back(((z + 1) * subdivisions) + y + 1 + faceOffset);
+					indices.push_back(((z + 1) * subdivisions) + y + 1 + faceOffset);
+					indices.push_back(((z + 1) * subdivisions) + y + faceOffset);
 					indices.push_back((z * subdivisions) + y + faceOffset);
 				}
 			}
@@ -306,10 +306,10 @@ namespace Rig3D
 				for (uint32_t x = 0; x < subdivisions - 1; x++)
 				{
 					indices.push_back((y * subdivisions) + x + faceOffset);
-					indices.push_back(((y + 1) * subdivisions) + x + 1 + faceOffset);
 					indices.push_back((y * subdivisions) + x + 1 + faceOffset);
-					indices.push_back(((y + 1) * subdivisions) + x + faceOffset);
 					indices.push_back(((y + 1) * subdivisions) + x + 1 + faceOffset);
+					indices.push_back(((y + 1) * subdivisions) + x + 1 + faceOffset);
+					indices.push_back(((y + 1) * subdivisions) + x + faceOffset);
 					indices.push_back((y * subdivisions) + x + faceOffset);
 				}
 			}
