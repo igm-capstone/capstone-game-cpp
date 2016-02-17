@@ -41,11 +41,14 @@ SkeletalHierarchy& SkeletalHierarchy::operator=(SkeletalHierarchy&& other)
 
 Joint* SkeletalHierarchy::GetJointByName(const char* name)
 {
-	for (Joint joint : mJoints)
+	Joint* joints		= &mJoints[0];
+	uint32_t jointCount = mJoints.size();
+
+	for (uint32_t i = 0; i < mJoints.size(); i++)
 	{
-		if (strcmp(name, joint.name) == 0)
+		if (strcmp(name, joints[i].name) == 0)
 		{
-			return &joint;
+			return &joints[i];
 		}
 	}
 
@@ -63,17 +66,6 @@ int SkeletalHierarchy::GetJointIndexByName(const char* name)
 	}
 
 	return  -1;
-}
-
-void SkeletalHierarchy::UpdateAnimationPose()
-{
-	Joint* joints = &mJoints[0];
-	uint32_t jointCount = mJoints.size();
-
-	for (uint32_t i = 1; i < jointCount; i++)
-	{
-		joints[i].animPoseMatrix = joints[i].animPoseMatrix * joints[joints[i].parentIndex].animPoseMatrix;
-	}
 }
 
 void SkeletalHierarchy::CalculateSkinningMatrices(mat4f* skinningMatrices)

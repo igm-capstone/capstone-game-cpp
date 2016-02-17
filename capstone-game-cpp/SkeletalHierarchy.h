@@ -1,7 +1,6 @@
 #pragma once
 #include <stdint.h>
 #include <Rig3D/GraphicsMath/cgm.h>
-#include <assert.h>
 #include <vector>
 
 struct JointBlendWeight
@@ -54,11 +53,10 @@ public:
 	SkeletalHierarchy& operator=(const SkeletalHierarchy& other);
 	SkeletalHierarchy& operator=(SkeletalHierarchy&& other);
 
-	Joint* GetJointByName(const char* name);
-	int GetJointIndexByName(const char* name);
+	Joint*	GetJointByName(const char* name);
+	int		GetJointIndexByName(const char* name);
 
-	void UpdateAnimationPose();
-	void CalculateSkinningMatrices(mat4f* skinningMatrices);
+	void	CalculateSkinningMatrices(mat4f* skinningMatrices);
 };
 
 
