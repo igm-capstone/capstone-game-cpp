@@ -81,7 +81,7 @@ void NetworkCmd::SpawnNewExplorer(int clientID) {
 
 	Packet p(PacketTypes::SPAWN_EXPLORER);
 	p.UUID = e->mNetworkID->mUUID;
-	p.Position = sp.mTransform->GetPosition();
+	p.AsTransform.Position = sp.mTransform->GetPosition();
 	mNetworkManager->mServer.SendToAll(&p);
 
 	Packet p2(PacketTypes::GRANT_AUTHORITY);
@@ -92,7 +92,7 @@ void NetworkCmd::SpawnNewExplorer(int clientID) {
 	for each(Explorer &exp in Factory<Explorer>()) {
 		if (&exp == e) continue;
 		p.UUID = exp.mNetworkID->mUUID;
-		p.Position = exp.mTransform->GetPosition();
+		p.AsTransform.Position = exp.mTransform->GetPosition();
 		mNetworkManager->mServer.Send(clientID, &p);
 	}
 }
@@ -115,7 +115,7 @@ void NetworkCmd::SpawnNewMinion(vec3f pos) {
 
 	Packet p(PacketTypes::SPAWN_MINION);
 	p.UUID = m->mNetworkID->mUUID;
-	p.Position = pos;
+	p.AsTransform.Position = pos;
 	mNetworkManager->mServer.SendToAll(&p);
 }
 
@@ -135,11 +135,11 @@ void NetworkRpc::GrantAuthority(int UUID) {
 	}
 }
 
-void NetworkRpc::SyncTransform(int UUID, vec3f pos)
+void NetworkRpc::SyncTransform(int UUID, vec3f pos, quatf rot)
 {
 	for each(auto &netID in Factory<NetworkID>()) {
 		if (netID.mUUID == UUID) {
-			netID.OnNetSyncTransform(pos);
+			netID.OnNetSyncTransform(pos, rot);
 		}
 	}
 }

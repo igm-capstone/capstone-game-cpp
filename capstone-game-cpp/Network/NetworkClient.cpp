@@ -101,19 +101,20 @@ void NetworkClient::Update()
 				mID = packet.ClientID;
 				break;
 			case SPAWN_EXPLORER:
-				NetworkRpc::SpawnExistingExplorer(packet.UUID, packet.Position);
+				NetworkRpc::SpawnExistingExplorer(packet.UUID, packet.AsTransform.Position);
 				break;
 			case SPAWN_MINION:
-				NetworkRpc::SpawnExistingMinion(packet.UUID, packet.Position);
+				NetworkRpc::SpawnExistingMinion(packet.UUID, packet.AsTransform.Position);
 				break;
 			case GRANT_AUTHORITY:
 				NetworkRpc::GrantAuthority(packet.UUID);
 				break;
 			case SYNC_TRANSFORM:
-				NetworkRpc::SyncTransform(packet.UUID, packet.Position);
+				NetworkRpc::SyncTransform(packet.UUID,
+					packet.AsTransform.Position, packet.AsTransform.Rotation);
 				break;
 			case SYNC_HEALTH:
-				NetworkRpc::SyncHealth(packet.UUID, packet.Value);
+				NetworkRpc::SyncHealth(packet.UUID, packet.AsFloat);
 				break;
 			default:
 				printf("error in packet types\n");

@@ -25,11 +25,17 @@ struct Packet {
 	union {
 		unsigned int ClientID = 0;
 	}; // Data
-	
-	union {
-		vec3f Position = { 0 };
-		float Value;
-	}; // Float Data
+
+	union
+	{
+		struct 
+		{
+			vec3f Position = { 0 };
+			quatf Rotation = { 0, 0, 0, 1 };
+		} AsTransform;
+		
+		float AsFloat;
+	}; // Package Specific Data
 
 	Packet() : Type(UNKNOWN) {};
 	Packet(PacketTypes t) : Type(t) {};

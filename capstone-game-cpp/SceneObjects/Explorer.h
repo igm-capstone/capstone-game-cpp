@@ -55,7 +55,7 @@ private:
 		mHealth->SetMaxHealth(1000.0f);
 		mHealth->RegisterHealthChangeCallback(OnHealthChange);
 
-		memset(mSkills, 0, sizeof(Skill*) * MAX_EXPLORER_SKILLS);
+		memset(mSkills, 0, sizeof(mSkills));
 
 		auto sprint = Factory<Skill>::Create();
 		sprint->mSceneObject = this;
@@ -88,7 +88,8 @@ public:
 			e->mCameraManager->ChangeLookAtTo(newPos);
 			Packet p(PacketTypes::SYNC_TRANSFORM);
 			p.UUID = e->mNetworkID->mUUID;
-			p.Position = newPos;
+			p.AsTransform.Position = newPos;
+			p.AsTransform.Rotation = newRot;
 			e->mNetworkClient->SendData(&p);
 
 			e->mHealth->TakeDamage(1.0f);
@@ -103,10 +104,11 @@ public:
 		e->mCameraManager->MoveCamera(e->mTransform->GetPosition(), e->mTransform->GetPosition() + vec3f(0,-10,-20));
 	}
 
-	static void OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos)
+	static void OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 	{
 		auto e = static_cast<Explorer*>(obj);
 		e->mTransform->SetPosition(newPos);
+		e->mTransform->SetRotation(newRot);
 		e->mCollider->mCollider.origin = newPos;
 	}
 
@@ -122,7 +124,7 @@ public:
 		if (e->mNetworkID->mHasAuthority) {
 			Packet p(PacketTypes::SYNC_HEALTH);
 			p.UUID = e->mNetworkID->mUUID;
-			p.Value = newVal;
+			p.AsFloat = newVal;
 			e->mNetworkClient->SendData(&p);
 		}
 	}

@@ -48,7 +48,7 @@ public:
 	static void SpawnExistingMinion(int UUID, vec3f pos);
 
 	static void GrantAuthority(int UUID);
-	static void SyncTransform(int UUID, vec3f pos);
+	static void SyncTransform(int UUID, vec3f pos, quatf rot);
 	static void SyncHealth(int UUID, float val);
 };
 
