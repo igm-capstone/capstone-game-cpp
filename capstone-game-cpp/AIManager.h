@@ -15,6 +15,7 @@ public:
 	Fringe<Node> mPathFinder;
 
 	void InitGrid(float left, float top, float width, float height, LinearAllocator& allocator);
+	void ResetGridData();
 	void Update();
 
 	Node* GetNodeAt(vec3f pos);

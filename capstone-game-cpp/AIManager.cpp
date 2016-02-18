@@ -16,14 +16,19 @@ void AIManager::InitGrid(float left, float top, float width, float height, Linea
 	mLeft = left;
 	mGrid.SetSize(mNumNodesX, mNumNodesY, allocator);
 
+	ResetGridData();
+}
+
+void AIManager::ResetGridData()
+{
 	//Populate nodes
 	for (int x = 0; x < mNumNodesX; x++) {
 		for (int y = 0; y < mNumNodesY; y++) {
 			vec3f nodePos = vec3f(mLeft + (mNodeRadius * 2) * x + mNodeRadius, mTop + (mNodeRadius * 2) * y + mNodeRadius, 0);
-			mGrid(x,y).x = x;
-			mGrid(x,y).y = y;
-			mGrid(x,y).weight = -10;
-			mGrid(x,y).worldPos = vec3f(nodePos, 0);
+			mGrid(x, y).x = x;
+			mGrid(x, y).y = y;
+			mGrid(x, y).weight = -10;
+			mGrid(x, y).worldPos = vec3f(nodePos, 0);
 		}
 	}
 }
@@ -37,6 +42,7 @@ Node* AIManager::GetNodeAt(vec3f pos)
 }
 
 void AIManager::Update() {
+
 
 }
 
