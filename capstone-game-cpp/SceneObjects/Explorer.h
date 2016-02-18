@@ -135,7 +135,7 @@ public:
 		}
 	}
 
-	static void OnCollisionExit(BaseSceneObject* obj, Collision*)
+	static void OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other)
 	{
 		auto e = static_cast<Explorer*>(obj);
 		if (e->mNetworkID->mHasAuthority) {

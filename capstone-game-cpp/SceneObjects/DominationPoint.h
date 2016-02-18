@@ -39,7 +39,7 @@ private:
 	~DominationPoint() {}
 
 	// TODO: change this to collision stay as soon as it is implemented
-	static void OnCollisionEnter(BaseSceneObject* obj, Collision* collision)
+	static void OnCollisionEnter(BaseSceneObject* obj, BaseSceneObject* other, vec3f overlap)
 	{
 		auto dom = static_cast<DominationPoint*>(obj);
 		if (dom->mController->isDominated)
@@ -52,7 +52,7 @@ private:
 		// For this case, I'm assuming that we only have collisions
 		// between DominationPoints AND EXPLORER.
 		// This code needs to be revised otherwise.
-		auto exp = static_cast<Explorer*>(collision->colliderA.BaseCollider->mSceneObject);
+		auto exp = static_cast<Explorer*>(other);
 
 		dom->mController->AddExplorer(exp);
 	}

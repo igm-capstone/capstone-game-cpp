@@ -42,8 +42,7 @@ void CollisionManager::DetectCollisions()
 				vec3f AtoB = (e2.mCollider->mCollider.origin - e1.mCollider->mCollider.origin);
 				pCollisions[collisionsCount].minimumOverlap = - AtoB * overlap;
 
-				e1.mCollider->OnCollisionEnter(&pCollisions[collisionsCount]);
-
+				e1.mCollider->OnCollisionEnter(&e2, overlap);
 				collisionsCount++;
 			}
 		}
@@ -63,8 +62,7 @@ void CollisionManager::DetectCollisions()
 				vec3f AtoB = (d.mCollider->mCollider.origin - e.mCollider->mCollider.origin);
 				pCollisions[collisionsCount].minimumOverlap = -AtoB * overlap;
 
-				e.mCollider->OnCollisionEnter(&pCollisions[collisionsCount]);
-				d.mCollider->OnCollisionEnter(&pCollisions[collisionsCount]);
+				d.mCollider->OnCollisionEnter(&e, overlap);
 
 				collisionsCount++;
 			}
@@ -91,7 +89,7 @@ void CollisionManager::DetectCollisions()
 				vec3f r = normalize(d) * e.mCollider->mCollider.radius;
 				pCollisions[collisionsCount].minimumOverlap = d - r;
 
-				e.mCollider->OnCollisionEnter(&pCollisions[collisionsCount]);
+				e.mCollider->OnCollisionEnter(&w, d - r);
 
 				collisionsCount++;
 			}
@@ -139,8 +137,9 @@ void CollisionManager::ResolveCollisions()
 			pCollisions[i].colliderB.SphereCollider->mSceneObject->mTransform->SetPosition(posB);
 			pCollisions[i].colliderB.SphereCollider->mCollider.origin = posB;
 		}
-		pCollisions[i].colliderA.BaseCollider->OnCollisionExit(&pCollisions[i]);
-		pCollisions[i].colliderB.BaseCollider->OnCollisionExit(&pCollisions[i]);
+
+		pCollisions[i].colliderA.BaseCollider->OnCollisionExit(pCollisions[i].colliderB.BaseCollider->mSceneObject);
+		pCollisions[i].colliderB.BaseCollider->OnCollisionExit(pCollisions[i].colliderA.BaseCollider->mSceneObject);
 	}
 
 	// Last thing
