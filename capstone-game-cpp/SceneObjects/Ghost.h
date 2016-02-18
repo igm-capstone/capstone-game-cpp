@@ -38,7 +38,7 @@ private:
 
 		mEvents = Factory<FmodEventCollection>::Create();
 		mEvents->mSceneObject = this;
-		mEvents->Register("Spawn", "Explosions/Single Explosion", FmodEventType::FIRE_AND_FORGET);
+		mEvents->Register("Spawn", "Basic Minion/Idle", FmodEventType::FIRE_AND_FORGET);
 
 		memset(mSkills, 0, sizeof(Skill*) * MAX_GHOST_SKILLS);
 
