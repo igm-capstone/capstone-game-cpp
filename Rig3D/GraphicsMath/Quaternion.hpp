@@ -46,9 +46,10 @@ namespace cliqCity
 			Quaternion conjugate() const;
 			Quaternion inverse() const;
 
-			Matrix4 toMatrix4() const;
-			Matrix3 toMatrix3() const;
-			Vector3 toEuler() const;
+			Matrix4		toMatrix4() const;
+			Matrix3		toMatrix3() const;
+			Vector3		toEuler() const;
+			void		toAngleAxis(float* outAngle, Vector3* outAxis) const;
 
 			Quaternion& operator+=(const Quaternion& rhs);
 			Quaternion& operator*=(const Quaternion& rhs);
@@ -70,6 +71,8 @@ namespace cliqCity
 		CGM_DLL Vector3 operator*(const Quaternion& lhs, const Vector3& rhs);
 
 		CGM_DLL Quaternion operator*(const Quaternion& lhs, const float& rhs);
+		CGM_DLL Quaternion operator*(const float& lhs, const Quaternion& rhs);
+
 		CGM_DLL Quaternion operator/(const Quaternion& lhs, const float& rhs);
 	}
 }

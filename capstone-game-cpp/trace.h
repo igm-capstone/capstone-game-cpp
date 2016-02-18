@@ -4,7 +4,7 @@
 
 #include <sstream>
 
-#define TRACE(message)                          Trace::GetTrace() << message << Trace::endl
+#define TRACE(message)                          Trace::GetTrace() << message
 #define TRACE_ERROR(message)                    Trace::GetTrace() << "[Error] " << message << Trace::endl
 #define TRACE_WARN(message)                     Trace::GetTrace() << "[Warning] " << message << Trace::endl
 #define TRACE_LOG(message)                      Trace::GetTrace() << "[Log] " << message << Trace::endl
@@ -77,6 +77,7 @@ public:
 	void Render();
 
 	Trace &operator << (int value) { ss << value; return *this; }
+	Trace &operator << (unsigned int value) { ss << value; return *this; }
 	Trace &operator << (short value) { ss << value; return *this; }
 	Trace &operator << (float value) { ss << value; return *this; }
 	Trace &operator << (double value) { ss << value; return *this; }

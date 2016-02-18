@@ -56,7 +56,7 @@ vec3f CameraManager::GetForward()
 {
 	if (true)
 	{
-		mForward = vec3f(0, 0, 1) * mat3f(mCBufferPersp.view);
+		mForward = vec3f(0, 0, 1) * mat3f(mCameraPersp.GetViewMatrix());
 	}
 
 	return mForward;

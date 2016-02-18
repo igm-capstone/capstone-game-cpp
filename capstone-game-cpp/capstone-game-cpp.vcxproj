@@ -100,6 +100,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Components\AnimationController.cpp" />
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="Components\ColliderComponent.cpp" />
@@ -125,6 +126,7 @@
     <ClCompile Include="Scenes\Level01.cpp" />
     <ClCompile Include="Scenes\LoadingScreen.cpp" />
     <ClCompile Include="Scenes\MainMenuScene.cpp" />
+    <ClCompile Include="SkeletalHierarchy.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -138,6 +140,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Components\AnimationController.h" />
     <ClInclude Include="CameraManager.h" />
     <ClInclude Include="CollisionManager.h" />
     <ClInclude Include="Components\BaseComponent.h" />
@@ -187,6 +190,7 @@
     <ClInclude Include="Scenes\Level01.h" />
     <ClInclude Include="Scenes\LoadingScreen.h" />
     <ClInclude Include="Scenes\MainMenuScene.h" />
+    <ClInclude Include="SkeletalHierarchy.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TargetFollower.h" />
     <ClInclude Include="trace.h" />
@@ -211,6 +215,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shaders\NDSQuadVertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\SkinnedMeshVertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
     </FxCompile>

@@ -27,6 +27,7 @@ public:
 	IShader* mNDSQuadPixelShader;
 	IShader* mSpriteVertexShader;
 	IShader* mSpritePixelShader;
+	IShader* mSkinnedVertexShader;
 	IShader* mGridComputeShader;
 
 	IShader* mDBGPixelShader;
@@ -77,8 +78,6 @@ private:
 
 	LinearAllocator mGameAllocator;
 	LinearAllocator mSceneAllocator;	// Not sure if this is the best guy for the job, but we will see.
-	PoolAllocator	mShaderAllocator;
-	PoolAllocator	mMeshAllocator;
 
 	char*			mStaticMemory;
 	size_t			mStaticMemorySize;

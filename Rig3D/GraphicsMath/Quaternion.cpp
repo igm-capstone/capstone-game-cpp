@@ -145,6 +145,27 @@ Vector3 Quaternion::toEuler() const
 	return euler;
 }
 
+inline void Quaternion::toAngleAxis(float* outAngle, Vector3* outAxis) const
+{
+	Quaternion quat = (*this);
+	if (quat.w > 1)
+	{
+		normalize(quat);
+	}
+
+	*outAngle = 2.0f * acos(quat.w);
+
+	float s = sqrt(1 - quat.w * quat.w);
+	if (s < 0.001f)
+	{
+		*outAxis = quat.v;
+	}
+	else
+	{
+		*outAxis = quat.v / s;
+	}
+}
+
 inline Quaternion& Quaternion::operator+=(const Quaternion& rhs)
 {
 	w += rhs.w;
@@ -231,7 +252,7 @@ bool cliqCity::graphicsMath::operator!=(const Quaternion& lhs, const Quaternion&
 
 inline Quaternion cliqCity::graphicsMath::operator+(const Quaternion& lhs, const Quaternion& rhs)
 {
-	return { lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w };
+	return { lhs.w + rhs.w, lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z,  };
 }
 
 inline Quaternion cliqCity::graphicsMath::operator*(const Quaternion& lhs, const Quaternion& rhs)
@@ -260,6 +281,11 @@ inline Vector3 cliqCity::graphicsMath::operator*(const Quaternion& lhs, const Ve
 inline Quaternion cliqCity::graphicsMath::operator*(const Quaternion& lhs, const float& rhs)
 {
 	return { lhs.w * rhs, lhs.x * rhs, lhs.y * rhs, lhs.z * rhs };
+}
+
+inline Quaternion cliqCity::graphicsMath::operator*(const float& lhs, const Quaternion& rhs)
+{
+	return{ rhs.w * lhs, rhs.x * lhs, rhs.y * lhs, rhs.z * lhs };
 }
 
 inline Quaternion cliqCity::graphicsMath::operator/(const Quaternion& lhs, const float& rhs)

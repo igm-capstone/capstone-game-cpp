@@ -32,3 +32,12 @@ struct Sprite
 	vec2f scale;
 	float id;
 };
+
+struct SkinnedVertex
+{
+	uint32_t	BlendIndices[4];
+	float		BlendWeights[4];
+	vec3f		Position;
+	vec3f		Normal;
+	vec3f		UV;
+};
