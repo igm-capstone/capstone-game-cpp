@@ -219,6 +219,16 @@ Quaternion cliqCity::graphicsMath::slerp(Quaternion q0, Quaternion q1, const flo
 	return q0 + q1;
 }
 
+bool cliqCity::graphicsMath::operator==(const Quaternion& lhs, const Quaternion& rhs)
+{
+	return lhs.w == rhs.w && lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
+}
+
+bool cliqCity::graphicsMath::operator!=(const Quaternion& lhs, const Quaternion& rhs)
+{
+	return lhs.w != rhs.w || lhs.x != rhs.x && lhs.y != rhs.y || lhs.z != rhs.z;
+}
+
 inline Quaternion cliqCity::graphicsMath::operator+(const Quaternion& lhs, const Quaternion& rhs)
 {
 	return { lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w };

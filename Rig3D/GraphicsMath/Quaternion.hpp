@@ -60,6 +60,9 @@ namespace cliqCity
 
 		CGM_DLL Quaternion slerp(Quaternion q0, Quaternion q1, const float& t);
 
+		CGM_DLL bool operator==(const Quaternion& lhs, const Quaternion& rhs);
+		CGM_DLL bool operator!=(const Quaternion& lhs, const Quaternion& rhs);
+
 		CGM_DLL Quaternion operator+(const Quaternion& lhs, const Quaternion& rhs);
 		CGM_DLL Quaternion operator*(const Quaternion& lhs, const Quaternion& rhs);
 
