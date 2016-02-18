@@ -337,7 +337,7 @@
     <FxCompile Include="Shaders\SpriteVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\SkinnedMeshVertexShader.hlsl" />
+    <FxCompile Include="Shaders\SkinnedMeshVertexShader.hlsl">
 	 <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\GridComputeShader.hlsl">
