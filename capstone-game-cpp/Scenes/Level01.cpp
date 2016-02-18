@@ -13,6 +13,7 @@
 #include <SceneObjects/Lamp.h>
 #include <SceneObjects/Minion.h>
 #include <trace.h>
+#include <Components/DominationPointController.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -290,12 +291,18 @@ void Level01::InitializeShaderResources()
 
 void Level01::VUpdate(double milliseconds)
 {
-	for (ExplorerController& ec : Factory<ExplorerController>())
+	for (auto& ec : Factory<ExplorerController>())
 	{
 		ec.Update(milliseconds);
 	}
 
-	for (Skill& skill : Factory<Skill>())
+	for (auto& dc : Factory<DominationPointController>())
+	{
+		dc.Update(milliseconds);
+	}
+
+
+	for (auto& skill : Factory<Skill>())
 	{
 		skill.Update();
 	}

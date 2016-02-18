@@ -9,12 +9,13 @@ class BaseColliderComponent :
 {
 public:
 	bool mIsDynamic;
+	bool mIsTrigger;
 
 	EXPOSE_CALLBACK_1(CollisionEnter, Collision*)
 	EXPOSE_CALLBACK_1(CollisionExit, Collision*)
 
 protected:
-	BaseColliderComponent() : mIsDynamic(true) {};
+	BaseColliderComponent() : mIsDynamic(true), mIsTrigger(false) {};
 	~BaseColliderComponent() {};
 };
 

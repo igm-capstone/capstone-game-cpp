@@ -7,6 +7,6 @@ public:
 	bool			mHasAuthority;
 
 	EXPOSE_CALLBACK_1(NetAuthorityChange, bool)
-	EXPOSE_CALLBACK_1(NetSyncTransform, vec3f)
+	EXPOSE_CALLBACK_2(NetSyncTransform, vec3f, quatf)
 	EXPOSE_CALLBACK_1(NetHealthChange, float)
 };

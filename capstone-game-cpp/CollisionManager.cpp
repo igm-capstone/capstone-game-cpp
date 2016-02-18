@@ -3,6 +3,9 @@
 #include "SceneObjects/Wall.h"
 #include <Rig3D/Intersection.h>
 #include "SceneObjects/Explorer.h"
+#include "SceneObjects/DominationPoint.h"
+
+class DominationPoint;
 
 CollisionManager::CollisionManager() : mCollisionsCount(0)
 {
@@ -46,6 +49,28 @@ void CollisionManager::DetectCollisions()
 		}
 	}
 
+	for (Explorer& e : Factory<Explorer>())
+	{
+		for (DominationPoint& d : Factory<DominationPoint>())
+		{
+			if (IntersectSphereSphere(e.mCollider->mCollider, d.mCollider->mCollider))
+			{
+				pCollisions[collisionsCount].colliderA.SphereCollider = e.mCollider;
+				pCollisions[collisionsCount].colliderB.SphereCollider = d.mCollider;
+
+				float overlap = (e.mCollider->mCollider.radius + d.mCollider->mCollider.radius)
+					- magnitude(e.mCollider->mCollider.origin - d.mCollider->mCollider.origin);
+				vec3f AtoB = (d.mCollider->mCollider.origin - e.mCollider->mCollider.origin);
+				pCollisions[collisionsCount].minimumOverlap = -AtoB * overlap;
+
+				e.mCollider->OnCollisionEnter(&pCollisions[collisionsCount]);
+				d.mCollider->OnCollisionEnter(&pCollisions[collisionsCount]);
+
+				collisionsCount++;
+			}
+		}
+	}
+
 	// Minion / Minion Collisions
 
 	// Explorer / Minion Collisions
@@ -82,6 +107,12 @@ void CollisionManager::ResolveCollisions()
 
 	for (uint32_t i = 0; i < mCollisionsCount; i++)
 	{
+		// Provisory: (stub solution for triggers)
+		if (mCollisions[i].colliderA.SphereCollider->mIsTrigger || mCollisions[i].colliderB.SphereCollider->mIsTrigger)
+		{
+			continue;
+		}
+
 		// If object A and B are dynamic move both. If only A or B is dynamic only move A or B.
 		if (pCollisions[i].colliderA.SphereCollider->mIsDynamic && pCollisions[i].colliderB.SphereCollider->mIsDynamic)
 		{

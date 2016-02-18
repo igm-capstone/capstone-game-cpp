@@ -85,6 +85,7 @@ void loadDomPoints(jarr_t objs)
 
 		dom->mDominationTime = obj["captureTime"].get<float>();
 		dom->mTier = obj["tier"].get<int>();
+		dom->mCollider->mCollider.origin = dom->mTransform->GetPosition();
 	}
 }
 

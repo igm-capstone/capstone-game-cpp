@@ -103,6 +103,7 @@
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="Components\ColliderComponent.cpp" />
+    <ClCompile Include="Components\DominationPointController.cpp" />
     <ClCompile Include="Components\ExplorerController.cpp" />
     <ClCompile Include="Components\FmodEvent.cpp" />
     <ClCompile Include="Components\FmodEventCollection.cpp" />
@@ -141,6 +142,7 @@
     <ClInclude Include="CollisionManager.h" />
     <ClInclude Include="Components\BaseComponent.h" />
     <ClInclude Include="Components\ColliderComponent.h" />
+    <ClInclude Include="Components\DominationPointController.h" />
     <ClInclude Include="Components\FmodEvent.h" />
     <ClInclude Include="Components\FmodEventCollection.h" />
     <ClInclude Include="Components\GhostController.h" />

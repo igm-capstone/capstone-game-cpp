@@ -8,7 +8,6 @@ class BaseSceneObject
 {
 	int __pool_padding = 0xBABACACA;
 public:
-
 	union
 	{
 		Transform*		mTransform;

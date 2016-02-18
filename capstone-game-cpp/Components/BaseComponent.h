@@ -13,6 +13,14 @@ protected:
 };
 
 
+#define EXPOSE_CALLBACK_0(name) 	\
+typedef void(*name##Callback)(BaseSceneObject*); \
+public: \
+	void Register##name##Callback(name##Callback handler) { m##name = handler; } \
+	void On##name() { if (m##name) return m##name(mSceneObject); };\
+private: \
+	name##Callback m##name = nullptr;
+
 #define EXPOSE_CALLBACK_1(name, argtype) 	\
 typedef void(*name##Callback)(BaseSceneObject*, argtype); \
 public: \

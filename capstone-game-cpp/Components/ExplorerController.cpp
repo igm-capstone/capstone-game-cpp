@@ -7,6 +7,8 @@
 #include <Colors.h>
 #include <Mathf.h>
 
+using namespace cliqCity::graphicsMath;
+
 ExplorerController::ExplorerController() :
 	mInput((&Singleton<Engine>::SharedInstance())->GetInput()), 
 	mApplication(&Application::SharedInstance()),
@@ -15,7 +17,8 @@ ExplorerController::ExplorerController() :
 	mBaseMoveSpeed(20.0f), 
 	mSpeedMultiplier(1), 
 	mCurrentSpeed(0), 
-	mSpeed(0.01f)
+	mSpeed(0.01f),
+	mIsInteracting(false)
 {
 
 }
@@ -25,19 +28,11 @@ ExplorerController::~ExplorerController()
 	
 }
 
-// dt in milliseconds
-bool ExplorerController::Update(double milliseconds)
+bool ExplorerController::Move(float dt, vec3f& pos)
 {
-	if (!mIsActive) return false;
-
-	bool hasMoved = false;
-
-	// delta time in seconds
-	float dt = float(milliseconds) * 0.001f;
-
 	// update speed multiplier for the sprint skill
 	mSpeedMultiplier = mSprintDuration ? 2.0f : 1.0f;
-	
+
 	if (mSprintDuration > 0)
 	{
 		mSprintDuration -= min(dt, mSprintDuration);
@@ -46,7 +41,7 @@ bool ExplorerController::Update(double milliseconds)
 	// vertical and horizontal speed components
 	float hSpeed = (mInput->GetKey(KEYCODE_LEFT) ? -1.0f : 0.0f) + (mInput->GetKey(KEYCODE_RIGHT) ? 1.0f : 0.0f);
 	float vSpeed = (mInput->GetKey(KEYCODE_DOWN) ? -1.0f : 0.0f) + (mInput->GetKey(KEYCODE_UP) ? 1.0f : 0.0f);
-	
+
 	bool wantToMove = hSpeed || vSpeed;
 
 	vec3f dirVector = wantToMove ? normalize(vec2f(hSpeed, vSpeed)) : vec3f();
@@ -54,12 +49,17 @@ bool ExplorerController::Update(double milliseconds)
 	// speed per second
 	vec3f targetSpeed = wantToMove ? mBaseMoveSpeed * mSpeedMultiplier * dirVector : vec3f();
 	mCurrentSpeed = Mathf::Lerp(mCurrentSpeed, targetSpeed, mAcceleration * dt);
-	
+
 	// delta space for the current frame
 	vec3f ds = mCurrentSpeed * dt;
-	
-	auto pos = mSceneObject->mTransform->GetPosition() + ds;
 
+	pos += ds;
+
+	return magnitude(ds) > 0;
+}
+
+bool ExplorerController::Rotate(float dt, vec3f& pos, quatf& rot)
+{
 	// rotate towards mouse
 	auto mousePosition = mApplication->mGroundMousePosition;
 	mousePosition.z = 0;
@@ -67,12 +67,48 @@ bool ExplorerController::Update(double milliseconds)
 	TRACE_LINE(pos, mousePosition, Colors::red);
 
 	auto dir = mousePosition - pos;
-	auto rot = quatf::angleAxis(atan2(dir.y, dir.x), vec3f(0, 0, 1)) * mModelRotation;
+	quatf newRot = normalize(quatf::angleAxis(atan2(dir.y, dir.x), vec3f(0, 0, 1)) * mModelRotation);
 
-	//if (hasMoved)
+	auto hasRotated = rot == newRot;
+	rot = newRot;
+
+	return hasRotated;
+}
+
+void ExplorerController::UpdateInteractWill()
+{
+	if (mInput->GetKeyDown(KEYCODE_OEM_PERIOD))
+	{
+		mIsInteracting = true;
+	}
+	else if (mInput->GetKeyUp(KEYCODE_OEM_PERIOD))
+	{
+		mIsInteracting = false;
+	}
+}
+
+// dt in milliseconds
+bool ExplorerController::Update(double milliseconds)
+{
+	if (!mIsActive) return false;
+
+	// delta time in seconds
+	float dt = float(milliseconds) * 0.001f;
+
+	auto pos = mSceneObject->mTransform->GetPosition();
+	auto rot = mSceneObject->mTransform->GetRotation();
+
+	bool hasMoved   = Move(dt, pos);
+	bool hasRotated = Rotate(dt, pos, rot);
+
+	if (hasMoved || hasRotated)
+	{
 		OnMove(pos, rot);
+	}
 
-	return hasMoved;
+	UpdateInteractWill();
+
+	return hasMoved || hasRotated;
 }
 
 void ExplorerController::Sprint(float duration)
