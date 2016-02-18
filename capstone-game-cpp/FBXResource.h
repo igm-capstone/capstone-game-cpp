@@ -33,7 +33,6 @@ public:
 	const char*		mFilename;
 	FbxImporter*	mImporter;
 
-
 	FBXMeshResource(const char* filename) : mFilename(filename), mImporter(nullptr)
 	{
 
@@ -50,6 +49,36 @@ public:
 		mVertices.clear();
 		mIndices.clear();
 		mSkeletalAnimations.clear();
+	}
+
+	void PrintNodesRecursively(FbxNode* node, int depth)
+	{
+		if (node->GetChildCount() == 0)
+		{
+			return;
+		}
+
+		for (int i = 0; i < depth; i++)
+		{
+			TRACE(" ");
+		}
+
+		TRACE(node->GetName());
+
+		FbxNodeAttribute* pNodeAttribute = node->GetNodeAttribute();
+		if (pNodeAttribute)
+		{
+			TRACE("\t" << pNodeAttribute->GetAttributeType() << Trace::endl);
+		}
+		else
+		{
+			TRACE(Trace::endl);
+		}
+
+		for (int i = 0; i < node->GetChildCount(); i++)
+		{
+			PrintNodesRecursively(node->GetChild(i), depth + 1);
+		}
 	}
 
 	int Load()
@@ -86,6 +115,10 @@ public:
 		}
 
 		FbxNode* pRootNode = pScene->GetRootNode();
+
+		PrintNodesRecursively(pRootNode, 0);
+
+
 		if (pRootNode)
 		{
 			bool isRigged = LoadSkeletalHierarchy(pRootNode);
@@ -104,21 +137,30 @@ public:
 
 	void LoadMesh(FbxNode* pRootNode)
 	{
-		for (int cIndex = 0; cIndex < pRootNode->GetChildCount(); cIndex++)
+		int childNodeCount = pRootNode->GetChildCount();
+		if (childNodeCount == 0)
 		{
-			FbxNode* pChildNode = pRootNode->GetChild(cIndex);
-			if (!pChildNode->GetNodeAttribute())
-			{
-				continue;
-			}
+			return;
+		}
 
-			FbxNodeAttribute::EType AttributeType = pChildNode->GetNodeAttribute()->GetAttributeType();
-			if (AttributeType != FbxNodeAttribute::eMesh)
-			{
-				continue;
-			}
+		for (int i = 0; i < childNodeCount; i++)
+		{
+			LoadMeshRecusively(pRootNode->GetChild(i));
+		}
+	}
 
-			FbxMesh* pMesh = reinterpret_cast<FbxMesh*>(pChildNode->GetNodeAttribute());
+	void LoadMeshRecusively(FbxNode* pNode)
+	{
+		FbxNodeAttribute* pNodeAttribute = pNode->GetNodeAttribute();
+		if (!pNodeAttribute)
+		{
+			return;
+		}
+
+		FbxNodeAttribute::EType AttributeType = pNode->GetNodeAttribute()->GetAttributeType();
+		if (AttributeType == FbxNodeAttribute::eMesh)
+		{
+			FbxMesh* pMesh = pNode->GetMesh();
 
 			FbxVector4* pVertices = pMesh->GetControlPoints();
 
@@ -130,9 +172,9 @@ public:
 			for (int pIndex = 0; pIndex < pMesh->GetPolygonCount(); pIndex++)
 			{
 				int pSize = pMesh->GetPolygonSize(pIndex);
-				
+
 				// We only draw triangles, feel me?
-				assert(pSize == 3); 
+				assert(pSize == 3);
 
 				FbxVector4 position, normal;
 				FbxVector2 uv;
@@ -185,6 +227,13 @@ public:
 				}
 			}
 		}
+
+		// Process children
+		int childNodeCount = pNode->GetChildCount();
+		for (int i = 0; i < childNodeCount; i++)
+		{
+			LoadMeshRecusively(pNode->GetChild(i));
+		}
 	}
 
 	bool LoadSkeletalHierarchy(FbxNode* pRootNode)
@@ -212,18 +261,16 @@ public:
 		}
 
 		FbxNodeAttribute::EType AttributeType = pNode->GetNodeAttribute()->GetAttributeType();
-		if (AttributeType != FbxNodeAttribute::eSkeleton)
+		if (AttributeType == FbxNodeAttribute::eSkeleton)
 		{
-			return;
+			// Add joint to skeleton
+			mSkeletalHierarchy.mJoints.push_back(Joint());
+
+			// Set Joint name and parent index
+			Joint* pJoint = &mSkeletalHierarchy.mJoints.back();
+			pJoint->name = pNode->GetName();
+			pJoint->parentIndex = parentIndex;
 		}
-
-		// Add joint to skeleton
-		mSkeletalHierarchy.mJoints.push_back(Joint());
-
-		// Set Joint name and parent index
-		Joint* pJoint = &mSkeletalHierarchy.mJoints.back();
-		pJoint->name = pNode->GetName();
-		pJoint->parentIndex = parentIndex;
 
 		// Process children
 		int childNodeCount = pNode->GetChildCount();
@@ -255,113 +302,111 @@ public:
 		}
 
 		FbxNodeAttribute::EType AttributeType = pNode->GetNodeAttribute()->GetAttributeType();
-		if (AttributeType != FbxNodeAttribute::eMesh)
+		if (AttributeType == FbxNodeAttribute::eMesh)
 		{
-			return;
-		}
+			FbxMesh* pMesh = pNode->GetMesh();
 
-		FbxMesh* pMesh = pNode->GetMesh();
+			// Geometry matrix: Most likely identity
+			FbxVector4 scale = pNode->GetGeometricScaling(FbxNode::eSourcePivot);
+			FbxVector4 rotation = pNode->GetGeometricRotation(FbxNode::eSourcePivot);
+			FbxVector4 translation = pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
+			FbxAMatrix geometryMatrix = FbxAMatrix(translation, rotation, scale);
 
-		// Geometry matrix: Most likely identity
-		FbxVector4 scale			= pNode->GetGeometricScaling(FbxNode::eSourcePivot);
-		FbxVector4 rotation			= pNode->GetGeometricRotation(FbxNode::eSourcePivot);
-		FbxVector4 translation		= pNode->GetGeometricTranslation(FbxNode::eSourcePivot);
-		FbxAMatrix geometryMatrix	= FbxAMatrix(translation, rotation, scale);
+			// Get Skin Info
+			int deformerCount = pMesh->GetDeformerCount();
 
-		// Get Skin Info
-		int deformerCount = pMesh->GetDeformerCount();
-
-		for (int deformerIndex = 0; deformerIndex < deformerCount; deformerIndex++)
-		{
-			FbxSkin* pSkin = reinterpret_cast<FbxSkin*>(pMesh->GetDeformer(deformerIndex, FbxDeformer::eSkin));
-			if (!pSkin)
+			for (int deformerIndex = 0; deformerIndex < deformerCount; deformerIndex++)
 			{
-				continue;
-			}
-
-			// Get Joint Animation Info (Keyframes per animation per joint)
-			// Each Skeletal Animation is composed of a set of keyframe per joint (Joint Animation)
-			int animStackCount = mImporter->GetAnimStackCount();
-
-			for (int animStackIndex = 0; animStackIndex < animStackCount; animStackIndex++)
-			{
-				FbxTakeInfo* pTakeInfo	= mImporter->GetTakeInfo(animStackIndex);
-				FbxTime startTime		= pTakeInfo->mLocalTimeSpan.GetStart();
-				FbxTime endTime			= pTakeInfo->mLocalTimeSpan.GetStop();
-				FbxLongLong frameCount	= endTime.GetFrameCount(FBX_FPS) - startTime.GetFrameCount(FBX_FPS);
-				FbxLongLong duration	= endTime.GetMilliSeconds() - startTime.GetMilliSeconds();
-
-				// Add a skeletal animation (full character animation)
-				mSkeletalAnimations.push_back(SkeletalAnimation());
-
-				// Get pointer to current skeletal animation and set duration
-				SkeletalAnimation* pSkeletalAnimation	= &mSkeletalAnimations.back();
-				pSkeletalAnimation->frameCount			= static_cast<uint32_t>(frameCount);
-				pSkeletalAnimation->duration			= static_cast<float>(duration);
-				pSkeletalAnimation->name				= pTakeInfo->mName.Buffer();
-
-				// Get Joint Info
-				int clusterCount = pSkin->GetClusterCount();
-
-				for (int clusterIndex = 0; clusterIndex < clusterCount; clusterIndex++)
+				FbxSkin* pSkin = reinterpret_cast<FbxSkin*>(pMesh->GetDeformer(deformerIndex, FbxDeformer::eSkin));
+				if (!pSkin)
 				{
-					FbxCluster* pCluster = pSkin->GetCluster(clusterIndex);
+					continue;
+				}
 
-					FbxAMatrix transformMatrix, transformLinkMatrix;
-					pCluster->GetTransformMatrix(transformMatrix);				// Model Space Transform (Mesh Transform) This is the cluster transform w/r/t the Model. I believe we need this if we convert the scene coordinate system.
-					pCluster->GetTransformLinkMatrix(transformLinkMatrix);		// Global Space Transform. This is the cluster transform w/r/t the Scene. This traverses each parent.
+				// Get Joint Animation Info (Keyframes per animation per joint)
+				// Each Skeletal Animation is composed of a set of keyframe per joint (Joint Animation)
+				int animStackCount = mImporter->GetAnimStackCount();
 
-					// Transposing for graphics math
-					FbxAMatrix inverseBindPoseMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryMatrix; // Joint Space 
+				for (int animStackIndex = 0; animStackIndex < animStackCount; animStackIndex++)
+				{
+					FbxTakeInfo* pTakeInfo = mImporter->GetTakeInfo(animStackIndex);
+					FbxTime startTime = pTakeInfo->mLocalTimeSpan.GetStart();
+					FbxTime endTime = pTakeInfo->mLocalTimeSpan.GetStop();
+					FbxLongLong frameCount = endTime.GetFrameCount(FBX_FPS) - startTime.GetFrameCount(FBX_FPS);
+					FbxLongLong duration = endTime.GetMilliSeconds() - startTime.GetMilliSeconds();
 
-					int jointIndex = mSkeletalHierarchy.GetJointIndexByName(pCluster->GetLink()->GetName());
-					assert(jointIndex > -1);
+					// Add a skeletal animation (full character animation)
+					mSkeletalAnimations.push_back(SkeletalAnimation());
 
-					Joint* pJoint = &mSkeletalHierarchy.mJoints[jointIndex];
-					pJoint->inverseBindPoseMatrix.u = { GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[3]) };
-					pJoint->inverseBindPoseMatrix.v = { GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[3]) };
-					pJoint->inverseBindPoseMatrix.w = { GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[3]) };
-					pJoint->inverseBindPoseMatrix.t = { GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[3]) };
+					// Get pointer to current skeletal animation and set duration
+					SkeletalAnimation* pSkeletalAnimation = &mSkeletalAnimations.back();
+					pSkeletalAnimation->frameCount = static_cast<uint32_t>(frameCount);
+					pSkeletalAnimation->duration = static_cast<float>(duration);
+					pSkeletalAnimation->name = pTakeInfo->mName.Buffer();
 
-					// Get control points influenced by this joint
-					int controlPointIndexCount	= pCluster->GetControlPointIndicesCount();				
-					int* controlPointIndices	= pCluster->GetControlPointIndices();
-					double* controlPointWeights = pCluster->GetControlPointWeights();
+					// Get Joint Info
+					int clusterCount = pSkin->GetClusterCount();
 
-					for (int controlPointIndex = 0; controlPointIndex < controlPointIndexCount; controlPointIndex++)
+					for (int clusterIndex = 0; clusterIndex < clusterCount; clusterIndex++)
 					{
-						mControlPointJointBlendMap[controlPointIndices[controlPointIndex]].push_back({ jointIndex, GET_FLOAT(controlPointWeights[controlPointIndex]) });
-					}
+						FbxCluster* pCluster = pSkin->GetCluster(clusterIndex);
 
-					// Add a joint animation to the current skeletal animation
-					pSkeletalAnimation->jointAnimations.push_back(JointAnimation());
+						FbxAMatrix transformMatrix, transformLinkMatrix;
+						pCluster->GetTransformMatrix(transformMatrix);				// Model Space Transform (Mesh Transform) This is the cluster transform w/r/t the Model. I believe we need this if we convert the scene coordinate system.
+						pCluster->GetTransformLinkMatrix(transformLinkMatrix);		// Global Space Transform. This is the cluster transform w/r/t the Scene. This traverses each parent.
 
-					// Get pointer to current joint animation and set index
-					JointAnimation* pJointAnimation = &pSkeletalAnimation->jointAnimations.back();
-					pJointAnimation->jointIndex = jointIndex;
+																					// Transposing for graphics math
+						FbxAMatrix inverseBindPoseMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryMatrix; // Joint Space 
 
-					// Get each frame for the joint animation
-					for (FbxLongLong frameIndex = startTime.GetFrameCount(FBX_FPS); frameIndex <= endTime.GetFrameCount(FBX_FPS); frameIndex++)
-					{
-						FbxTime currentTime;
-						currentTime.SetFrame(frameIndex, FBX_FPS);
+						int jointIndex = mSkeletalHierarchy.GetJointIndexByName(pCluster->GetLink()->GetName());
+						assert(jointIndex > -1);
 
-						FbxAMatrix animModelMatrix	=	pNode->EvaluateGlobalTransform(currentTime) * geometryMatrix;							// Model space pose matrix. This incorporates the transform of coordinate system if we converted the scene earlier.
-						FbxAMatrix animLinkMatrix =		animModelMatrix.Inverse() * pCluster->GetLink()->EvaluateGlobalTransform(currentTime);	// Global Animated Space. This is the animated joint position w/r/t the scene.
+						Joint* pJoint = &mSkeletalHierarchy.mJoints[jointIndex];
+						pJoint->inverseBindPoseMatrix.u = { GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[3]) };
+						pJoint->inverseBindPoseMatrix.v = { GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[3]) };
+						pJoint->inverseBindPoseMatrix.w = { GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[3]) };
+						pJoint->inverseBindPoseMatrix.t = { GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[3]) };
 
-						FbxQuaternion clusterRotation	= animLinkMatrix.GetQ();
-						FbxVector4 clusterScale			= animLinkMatrix.GetS();
-						FbxVector4 clusterTranslation	= animLinkMatrix.GetT();
+						// Get control points influenced by this joint
+						int controlPointIndexCount = pCluster->GetControlPointIndicesCount();
+						int* controlPointIndices = pCluster->GetControlPointIndices();
+						double* controlPointWeights = pCluster->GetControlPointWeights();
 
-						// Add a key frame to the current joint animation
-						pJointAnimation->keyframes.push_back(Keyframe());
+						for (int controlPointIndex = 0; controlPointIndex < controlPointIndexCount; controlPointIndex++)
+						{
+							mControlPointJointBlendMap[controlPointIndices[controlPointIndex]].push_back({ jointIndex, GET_FLOAT(controlPointWeights[controlPointIndex]) });
+						}
 
-						// Get pointer to current key frame and set properties
-						Keyframe* keyframe		= &pJointAnimation->keyframes.back();
-						keyframe->rotation		= { GET_FLOAT(clusterRotation.mData[3]), GET_FLOAT(clusterRotation.mData[0]), GET_FLOAT(clusterRotation.mData[1]), GET_FLOAT(clusterRotation.mData[2]) };
-						keyframe->scale			= { GET_FLOAT(clusterScale.mData[0]), GET_FLOAT(clusterScale.mData[1]), GET_FLOAT(clusterScale.mData[2]) };
-						keyframe->translation	= { GET_FLOAT(clusterTranslation.mData[0]), GET_FLOAT(clusterTranslation.mData[1]), GET_FLOAT(clusterTranslation.mData[2]) };
-						keyframe->time			= GET_FLOAT(currentTime.GetMilliSeconds());
+						// Add a joint animation to the current skeletal animation
+						pSkeletalAnimation->jointAnimations.push_back(JointAnimation());
+
+						// Get pointer to current joint animation and set index
+						JointAnimation* pJointAnimation = &pSkeletalAnimation->jointAnimations.back();
+						pJointAnimation->jointIndex = jointIndex;
+
+						// Get each frame for the joint animation
+						for (FbxLongLong frameIndex = startTime.GetFrameCount(FBX_FPS); frameIndex <= endTime.GetFrameCount(FBX_FPS); frameIndex++)
+						{
+							FbxTime currentTime;
+							currentTime.SetFrame(frameIndex, FBX_FPS);
+
+							FbxAMatrix animModelMatrix = pNode->EvaluateGlobalTransform(currentTime) * geometryMatrix;							// Model space pose matrix. This incorporates the transform of coordinate system if we converted the scene earlier.
+							FbxAMatrix animLinkMatrix = animModelMatrix.Inverse() * pCluster->GetLink()->EvaluateGlobalTransform(currentTime);	// Global Animated Space. This is the animated joint position w/r/t the scene.
+
+							FbxQuaternion clusterRotation = animLinkMatrix.GetQ();
+							FbxVector4 clusterScale = animLinkMatrix.GetS();
+							FbxVector4 clusterTranslation = animLinkMatrix.GetT();
+
+							// Add a key frame to the current joint animation
+							pJointAnimation->keyframes.push_back(Keyframe());
+
+							// Get pointer to current key frame and set properties
+							Keyframe* keyframe = &pJointAnimation->keyframes.back();
+							keyframe->rotation = { GET_FLOAT(clusterRotation.mData[3]), GET_FLOAT(clusterRotation.mData[0]), GET_FLOAT(clusterRotation.mData[1]), GET_FLOAT(clusterRotation.mData[2]) };
+							keyframe->scale = { GET_FLOAT(clusterScale.mData[0]), GET_FLOAT(clusterScale.mData[1]), GET_FLOAT(clusterScale.mData[2]) };
+							keyframe->translation = { GET_FLOAT(clusterTranslation.mData[0]), GET_FLOAT(clusterTranslation.mData[1]), GET_FLOAT(clusterTranslation.mData[2]) };
+							keyframe->time = GET_FLOAT(currentTime.GetMilliSeconds());
+						}
 					}
 				}
 			}
