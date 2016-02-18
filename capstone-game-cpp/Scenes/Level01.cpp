@@ -377,9 +377,12 @@ void Level01::RenderShadowMaps()
 		// Set projection matrix for light frustum
 		mLightPVM.projection = mSpotLightVPTMatrices[i].transpose();
 		
-		std::vector<uint32_t> indices;
+		// Create frustum object for culling.
 		Rig3D::Frustum frustum;
 		Rig3D::ExtractNormalizedFrustumLH(&frustum, mSpotLightVPTMatrices[i]);
+
+		// Storage for the indices of objects we will draw
+		std::vector<uint32_t> indices;
 
 		// Walls
 
@@ -486,11 +489,9 @@ void Level01::RenderSpotLightVolumes()
 	mRenderer->VSetVertexShader(mApplication->mPLVolumeVertexShader);
 	mRenderer->VSetPixelShader(mApplication->mPLVolumePixelShader);
 
-	
-
 	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
-
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
+
 	uint32_t i = 0;
 	for (Lamp& l : Factory<Lamp>())
 	{
@@ -507,8 +508,9 @@ void Level01::RenderSpotLightVolumes()
 		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
 
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
-		mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
 		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
 		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);		// Position
 		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);		// Normal
@@ -572,6 +574,7 @@ void Level01::RenderSprites()
 	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferOrto(), 0);
 	
 	mRenderer->VSetVertexShaderConstantBuffers(mSpritesShaderResource);
+
 	UINT sCount = 0;
 	for (Health& h : Factory<Health>())
 	{
@@ -598,11 +601,12 @@ void Level01::RenderSprites()
 	mRenderer->VSetVertexShaderInstanceBuffer(mSpritesShaderResource, 0, 1);
 	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), sCount, 0, 0, 0);
 }
+
 #pragma endregion
 
 void Level01::ComputeGrid()
 {
-	//CS stuff will come here
+	// CS stuff will come here
 }
 
 void Level01::VShutdown()
