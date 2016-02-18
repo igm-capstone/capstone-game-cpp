@@ -70,6 +70,7 @@ int SkeletalHierarchy::GetJointIndexByName(const char* name)
 
 void SkeletalHierarchy::CalculateSkinningMatrices(mat4f* skinningMatrices)
 {
+	if (mJoints.size() == 0) return; //Fix the crash
 	Joint* joints = &mJoints[0];
 	uint32_t jointCount = mJoints.size();
 
