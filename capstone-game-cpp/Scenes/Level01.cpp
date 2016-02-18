@@ -145,7 +145,7 @@ void Level01::InitializeGeometry()
 	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
 
 	// Explorer Mesh
-	FBXMeshResource<SkinnedVertex> explorerFBXResource("Assets/AnimTestNorm.fbx");
+	FBXMeshResource<SkinnedVertex> explorerFBXResource("Assets/AnimTest.fbx");
 	meshLibrary.LoadMesh(&mExplorerCubeMesh, mRenderer, explorerFBXResource);
 
 	for (Explorer& e : Factory<Explorer>())
