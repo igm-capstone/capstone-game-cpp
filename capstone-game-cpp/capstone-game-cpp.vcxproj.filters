@@ -356,6 +356,7 @@
     <ResourceCompile Include="capstone-game-cpp.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
     <ClCompile Include="CameraManager.cpp" />
