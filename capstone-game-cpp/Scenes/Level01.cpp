@@ -31,7 +31,6 @@ Level01::Level01() :
 	mSpotLightVPTMatrices(nullptr),
 	mWallMesh0(nullptr),
 	mPlaneMesh(nullptr),
-	mExplorerCubeMesh(nullptr),
 	mMinionCubeMesh(nullptr),
 	mNDSQuadMesh(nullptr),
 	mGBufferContext(nullptr),
@@ -40,16 +39,16 @@ Level01::Level01() :
 	mExplorerShaderResource(nullptr),
 	mPLVShaderResource(nullptr), 
 	mSpritesShaderResource(nullptr),
-	mGridShaderResource(nullptr)
+	mGridShaderResource(nullptr),
+	mModelManager(Application::SharedInstance().GetModelManager())
 {
-
+	mAIManager.SetAllocator(&mAllocator);
 }
 
 Level01::~Level01()
 {
 	mWallMesh0->~IMesh();
 	mPlaneMesh->~IMesh();
-	mExplorerCubeMesh->~IMesh();
 	mMinionCubeMesh->~IMesh();
 	mNDSQuadMesh->~IMesh();
 
@@ -136,7 +135,7 @@ void Level01::InitializeAssets()
 	mFloorCollider.halfSize = level.extents;
 	mFloorCollider.origin	= level.center;
 
-	mAIManager.InitGrid(level.center.x - level.extents.x, level.center.y + level.extents.y, 2 * level.extents.x, 2 * level.extents.y, mAllocator);
+	mAIManager.InitGrid(level.center.x - level.extents.x, level.center.y + level.extents.y, 2 * level.extents.x, 2 * level.extents.y);
 }
 
 void Level01::InitializeGeometry()
@@ -154,13 +153,11 @@ void Level01::InitializeGeometry()
 	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
 
 	// Explorer Mesh
-	FBXMeshResource<SkinnedVertex> explorerFBXResource("Assets/AnimTest.fbx");
-	meshLibrary.LoadMesh(&mExplorerCubeMesh, mRenderer, explorerFBXResource);
-
+	auto modelCluster = mModelManager->AddModel("AnimTest");
+	
 	for (Explorer& e : Factory<Explorer>())
 	{
-		e.mAnimationController->mSkeletalHierarchy	= explorerFBXResource.mSkeletalHierarchy;
-		e.mAnimationController->mSkeletalAnimations = explorerFBXResource.mSkeletalAnimations;
+		modelCluster->Link(&e);
 		e.mAnimationController->PlayLoopingAnimation("Take 001");
 	}
 
@@ -367,7 +364,7 @@ void Level01::VUpdate(double milliseconds)
 
 	for (auto& dc : Factory<DominationPointController>())
 	{
-		dc.Update(milliseconds);
+		dc.Update(float(milliseconds));
 	}
 
 
@@ -524,12 +521,12 @@ void Level01::RenderExplorers()
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 
-		e.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatices);
+		e.GetModelCluster()->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatices);
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatices, 2);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
 
-		mRenderer->VBindMesh(mExplorerCubeMesh);
-		mRenderer->VDrawIndexed(0, mExplorerCubeMesh->GetIndexCount());
+		mRenderer->VBindMesh(e.GetModelCluster()->mMesh);
+		mRenderer->VDrawIndexed(0, e.GetModelCluster()->mMesh->GetIndexCount());
 	}
 }
 

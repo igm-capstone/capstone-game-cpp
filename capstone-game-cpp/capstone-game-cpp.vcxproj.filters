@@ -53,6 +53,8 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TargetFollower.cpp" />
     <ClCompile Include="trace.cpp" />
+    <ClCompile Include="ModelManager.cpp" />
+    <ClCompile Include="SceneObjects\BaseSceneObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -112,6 +114,7 @@
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="SceneObjects\StaticCollider.h" />
     <ClInclude Include="SceneObjects\StaticMesh.h" />
+    <ClInclude Include="ModelManager.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="External\fmodstudioL.ref" />

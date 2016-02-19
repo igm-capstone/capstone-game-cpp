@@ -5,6 +5,7 @@
 #include <Uniforms.h>
 #include <Vertex.h>
 #include <AIManager.h>
+#include <ModelManager.h>
 
 class Level01 : public BaseScene
 {
@@ -41,7 +42,6 @@ class Level01 : public BaseScene
 	// Mesh
 	IMesh*				mWallMesh0;
 	IMesh*				mPlaneMesh;
-	IMesh*				mExplorerCubeMesh; //better solution when will come when we start to handle models
 	IMesh*				mMinionCubeMesh; 
 	IMesh*				mNDSQuadMesh;
 
@@ -68,6 +68,9 @@ class Level01 : public BaseScene
 	// Managers
 	CollisionManager	mCollisionManager;
 	AIManager			mAIManager;
+
+	// Manager alias
+	ModelManager*		mModelManager;
 
 public:
 	Level01();

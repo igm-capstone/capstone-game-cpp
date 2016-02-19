@@ -70,6 +70,7 @@ void ScareTacticsApplication::SetStaticMemory(void* start, size_t size)
 	mStaticMemorySize = size;
 	mSceneAllocator.SetMemory(start, mStaticMemory + STATIC_SCENE_MEMORY + SCENE_ALIGNMENT_PADDING);				// Extra padding for alignment
 	mGameAllocator.SetMemory(mStaticMemory + STATIC_SCENE_MEMORY + SCENE_ALIGNMENT_PADDING, mStaticMemory + size);	
+	mModelManager.SetAllocator(&mGameAllocator);
 }
 
 void ScareTacticsApplication::UnloadScene()
