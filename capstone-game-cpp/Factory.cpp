@@ -15,7 +15,8 @@
 #define REGISTER_FACTORY(type, size)\
 static byte __g##type##Buffer[(size) * (sizeof(##type)) + alignof(##type)];\
 ##type* Factory<##type##>::sBuffer = reinterpret_cast<##type*>(__g##type##Buffer);\
-size_t Factory<##type##>::sCount = size;\
+size_t Factory<##type##>::sMaxCount = size;\
+size_t Factory<##type##>::sCount = 0;\
 PoolAllocator Factory<##type##>::sAllocator(__g##type##Buffer, __g##type##Buffer + (size) * (sizeof(##type)) + alignof(##type), sizeof(##type), alignof(##type));
 
 #pragma endregion

@@ -40,7 +40,7 @@ private:
 		mEvents->mSceneObject = this;
 		mEvents->Register("Spawn", "Basic Minion/Idle", FmodEventType::FIRE_AND_FORGET);
 
-		memset(mSkills, 0, sizeof(Skill*) * MAX_GHOST_SKILLS);
+		memset(mSkills, 0, sizeof(mSkills));
 
 		auto spawnMinion = Factory<Skill>::Create();
 		spawnMinion->mSceneObject = this;
