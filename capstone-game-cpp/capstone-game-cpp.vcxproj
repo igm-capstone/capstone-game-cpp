@@ -100,6 +100,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BVHTree.cpp" />
     <ClCompile Include="Components\AnimationController.cpp" />
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="CollisionManager.cpp" />
@@ -142,6 +143,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BVHTree.h" />
     <ClInclude Include="Components\AnimationController.h" />
     <ClInclude Include="CameraManager.h" />
     <ClInclude Include="CollisionManager.h" />
@@ -156,7 +158,6 @@
     <ClInclude Include="FBXResource.h" />
     <ClInclude Include="fmodwrap.h" />
     <ClInclude Include="Mathf.h" />
-    <ClInclude Include="SceneObjectIntersection.h" />
     <ClInclude Include="SceneObjects\Ghost.h" />
     <ClInclude Include="Components\Skill.h" />
     <ClInclude Include="capstone-game-cpp.rc.h" />

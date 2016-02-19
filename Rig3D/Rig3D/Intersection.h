@@ -27,15 +27,15 @@ namespace Rig3D
 		}
 	}
 
-	template<class Vector>
-	void ClosestOBBPointToPoint(const OBB<Vector>& obb, const Vector& point, Vector& cp)
+	template<class Vector, int Dimension>
+	void ClosestOBBPointToPoint(const OBB<Vector, Dimension>& obb, const Vector& point, Vector& cp)
 	{
 		Vector d = point - obb.origin;
 
 		// Start result @ obb origin
 		cp = obb.origin;
 
-		int numAxis = sizeof(Vector) / sizeof(float);
+		int numAxis = Dimension;
 
 		for (int i = 0; i < numAxis; i++)
 		{
@@ -312,8 +312,8 @@ namespace Rig3D
 		return cliqCity::graphicsMath::dot(d, d) <= sphere.radius * sphere.radius;
 	}
 
-	template<class Vector>
-	int IntersectSphereOBB(const Sphere<Vector>& sphere, const OBB<Vector>& obb, Vector& cp)
+	template<class Vector, int Dimension>
+	int IntersectSphereOBB(const Sphere<Vector>& sphere, const OBB<Vector, Dimension>& obb, Vector& cp)
 	{
 		// Get closest point on AABB to sphere center
 		ClosestOBBPointToPoint(obb, sphere.origin, cp);
@@ -350,10 +350,13 @@ namespace Rig3D
 	template <class Vector>
 	int IntersectAABBPlane(const AABB<Vector>& aabb, const Plane<Vector>& plane)
 	{
-		float pir =
-			aabb.halfSize.pCols[0] * abs(plane.normal.pCols[0]) +
-			aabb.halfSize.pCols[1] * abs(plane.normal.pCols[1]) +
-			aabb.halfSize.pCols[2] * abs(plane.normal.pCols[2]);
+		int numElements = cliqCity::graphicsMath::Components<Vector>::FloatCount();
+
+		float pir = 0.0f;
+		for (int i = 0; i < numElements; i++)
+		{
+			pir += aabb.halfSize.pCols[i] * abs(plane.normal.pCols[i]);
+		}
 
 		float distance = cliqCity::graphicsMath::dot(plane.normal, aabb.origin) - plane.distance;
 
@@ -364,22 +367,205 @@ namespace Rig3D
 
 #pragma region OBB - Primitive Tests
 
-	template<class Vector>
-	int IntesectOBBPlane(const OBB<Vector>& obb, const Plane<Vector>& plane)
+	template<class Vector, int Dimension>
+	int IntesectOBBPlane(const OBB<Vector, Dimension>& obb, const Plane<Vector>& plane)
 	{
-		// Should iterate components here to support 2D.
-
 		// Compute projection interval radius
-		float pir =
-			obb.halfSize.pCols[0] * abs(cliqCity::graphicsMath::dot(plane.normal, obb.axis[0])) +
-			obb.halfSize.pCols[1] * abs(cliqCity::graphicsMath::dot(plane.normal, obb.axis[1])) +
-			obb.halfSize.pCols[2] * abs(cliqCity::graphicsMath::dot(plane.normal, obb.axis[2]));
+		float pir = 0.0f;
+		for (int i = 0; i < Dimension; i++)
+		{
+			pir += obb.halfSize.pCols[i] * abs(cliqCity::graphicsMath::dot(plane.normal, obb.axis[i]));
+		}
 
 		// Compute distance from obb center to plane
 		float distance = cliqCity::graphicsMath::dot(plane.normal, obb.origin) - plane.distance;
 
 		// Intersection occurs when -pir <= distance <= +pir
 		return (abs(distance) <= pir);
+	}
+
+	template<class Vector, int Dimension>
+	int IntersectOBBOBB(const OBB<Vector, Dimension>& a, const OBB<Vector, Dimension>& b)
+	{
+		// Projected extents of a and b respectively
+		float ra, rb;
+
+		// Rotation matrices
+		Vector R[Dimension], AbsR[Dimension];
+
+		// Compute rotation matrix expressing b in a's coordinate frame
+
+		for (int i = 0; i < Dimension; i++)
+		{
+			for (int j = 0; j < Dimension; j++)
+			{
+				R[i].pCols[j] = cliqCity::graphicsMath::dot(a.axis[i], b.axis[j]);
+			}
+		}
+
+		// Compute translation vector
+
+		Vector BtoA = b.origin - a.origin;
+
+		// Transform Vector into a's coordinate frame
+
+		Vector t;
+		for (int i = 0; i < Dimension; i++)
+		{
+			t.pCols[i] = cliqCity::graphicsMath::dot(BtoA, a.axis[i]);
+		}
+
+		// Compute axis for SAT
+
+		for (int i = 0; i < Dimension; i++)
+		{
+			for (int j = 0; j < Dimension; j++)
+			{
+				AbsR[i].pCols[j] = abs(R[i].pCols[j]) + FLT_EPSILON;
+			}
+		}
+
+		// Test basis Axis A
+
+		for (int i = 0; i < Dimension; i++)
+		{
+			ra = a.halfSize.pCols[i];
+			rb = 0.0f;
+			for (int j = 0; j < Dimension; j++)
+			{
+				rb += b.halfSize[j] * AbsR[i].pCols[j];
+			}
+
+			if (abs(t[i]) > ra + rb)
+			{
+				return 0;
+			}
+		}
+
+		// Test basis Axis B
+
+		for (int i = 0; i < Dimension; i++)
+		{
+			rb = b.halfSize.pCols[i];
+			ra = 0.0f;
+
+			float tAccu = 0.0f;
+
+			for (int j = 0; j < Dimension; j++)
+			{
+				ra += b.halfSize[j] * AbsR[j].pCols[i];
+				tAccu += abs(t[j] * R[j].pCols[i]);
+			}
+
+			if (abs(tAccu) > ra + rb)
+			{
+				return 0;
+			}
+		}
+
+		// If 2D we can bail here
+		if (Dimension == 2)
+		{
+			return 1;
+		}
+
+		// A0 X B0
+
+		ra = (a.halfSize.pCols[1] * AbsR[2].pCols[0]) + (a.halfSize.pCols[2] * AbsR[1].pCols[0]);
+		rb = (b.halfSize.pCols[1] * AbsR[0].pCols[2]) + (b.halfSize.pCols[2] * AbsR[0].pCols[1]);
+		if (abs((t[2] * R[1].pCols[0]) - (t[1] * R[2].pCols[0])) > ra + rb)
+		{
+			return 0;
+		}
+
+		// A0 X B1
+
+		ra = (a.halfSize.pCols[1] * AbsR[2].pCols[1]) + (a.halfSize.pCols[2] * AbsR[1].pCols[1]);
+		rb = (b.halfSize.pCols[0] * AbsR[0].pCols[2]) + (b.halfSize.pCols[2] * AbsR[0].pCols[0]);
+		if (abs((t[2] * R[1].pCols[1]) - (t[1] * R[2].pCols[1])) > ra + rb)
+		{
+			return 0;
+		}
+
+		// A0 X B2
+
+		ra = (a.halfSize.pCols[1] * AbsR[2].pCols[2]) + (a.halfSize.pCols[2] * AbsR[1].pCols[2]);
+		rb = (b.halfSize.pCols[0] * AbsR[0].pCols[1]) + (b.halfSize.pCols[1] * AbsR[0].pCols[0]);
+		if (abs((t[2] * R[1].pCols[2]) - (t[1] * R[2].pCols[2])) > ra + rb)
+		{
+			return 0;
+		}
+
+		// A1 X B0
+
+		ra = (a.halfSize.pCols[0] * AbsR[2].pCols[0]) + (a.halfSize.pCols[2] * AbsR[0].pCols[0]);
+		rb = (b.halfSize.pCols[1] * AbsR[1].pCols[2]) + (b.halfSize.pCols[2] * AbsR[1].pCols[1]);
+		if (abs((t[0] * R[2].pCols[0]) - (t[2] * R[0].pCols[0])) > ra + rb)
+		{
+			return 0;
+		}
+
+		// A1 X B1
+
+		ra = (a.halfSize.pCols[0] * AbsR[2].pCols[1]) + (a.halfSize.pCols[2] * AbsR[0].pCols[1]);
+		rb = (b.halfSize.pCols[0] * AbsR[1].pCols[2]) + (b.halfSize.pCols[2] * AbsR[1].pCols[0]);
+		if (abs((t[0] * R[2].pCols[1]) - (t[2] * R[0].pCols[1])) > ra + rb)
+		{
+			return 0;
+		}
+
+		// A1 X B2
+
+		ra = (a.halfSize.pCols[0] * AbsR[2].pCols[2]) + (a.halfSize.pCols[2] * AbsR[0].pCols[2]);
+		rb = (b.halfSize.pCols[0] * AbsR[1].pCols[1]) + (b.halfSize.pCols[1] * AbsR[1].pCols[0]);
+		if (abs((t[0] * R[2].pCols[2]) - (t[2] * R[0].pCols[2])) > ra + rb)
+		{
+			return 0;
+		}
+
+		// A2 X B0
+
+		ra = (a.halfSize.pCols[0] * AbsR[1].pCols[0]) + (a.halfSize.pCols[1] * AbsR[0].pCols[0]);
+		rb = (b.halfSize.pCols[1] * AbsR[2].pCols[2]) + (b.halfSize.pCols[2] * AbsR[2].pCols[1]);
+		if (abs((t[1] * R[0].pCols[0]) - (t[0] * R[1].pCols[0])) > ra + rb)
+		{
+			return 0;
+		}
+
+		// A2 X B1
+
+		ra = (a.halfSize.pCols[0] * AbsR[1].pCols[1]) + (a.halfSize.pCols[1] * AbsR[0].pCols[1]);
+		rb = (b.halfSize.pCols[0] * AbsR[2].pCols[2]) + (b.halfSize.pCols[2] * AbsR[2].pCols[0]);
+		if (abs((t[1] * R[0].pCols[1]) - (t[0] * R[1].pCols[1])) > ra + rb)
+		{
+			return 0;
+		}
+
+		// A2 X B2
+
+		ra = (a.halfSize.pCols[0] * AbsR[1].pCols[2]) + (a.halfSize.pCols[1] * AbsR[0].pCols[2]);
+		rb = (b.halfSize.pCols[0] * AbsR[2].pCols[1]) + (b.halfSize.pCols[1] * AbsR[2].pCols[0]);
+		if (abs((t[1] * R[0].pCols[2]) - (t[0] * R[1].pCols[2])) > ra + rb)
+		{
+			return 0;
+		}
+
+		return 1;
+	}
+
+	template <class Vector, int Dimension>
+	int IntersectOBBAABB(const OBB<Vector, Dimension>& obb, const AABB<Vector>& aabb)
+	{
+		OBB<Vector, Dimension> o;
+		o.origin = aabb.origin;
+		o.halfSize = aabb.halfSize;
+
+		for (int i = 0; i < Dimension; i++)
+		{
+			o.axis[i].pCols[i] = 1.0f;
+		}
+
+		return IntersectOBBOBB(o, obb);
 	}
 
 #pragma endregion 
