@@ -54,7 +54,17 @@ class Level01 : public BaseScene
 	IShaderResource*	mExplorerShaderResource;
 	IShaderResource*	mPLVShaderResource;
 	IShaderResource*	mSpritesShaderResource;
+	IShaderResource*	mGridShaderResource;
 	
+	ID3D11ShaderResourceView* mNullSRV[4] = { nullptr, nullptr, nullptr, nullptr };
+
+	// Grid Compute Shader (not handled by ShaderResource, this is where it is not currently helpful)
+	ID3D11Buffer*				mSrcDataGPUBuffer;
+	ID3D11ShaderResourceView*	mSrcDataGPUBufferView;
+	ID3D11Buffer*				mDestDataGPUBuffer;
+	ID3D11Buffer*				mDestDataGPUBufferCPURead;
+	ID3D11UnorderedAccessView*	mDestDataGPUBufferView;
+
 	// Managers
 	CollisionManager	mCollisionManager;
 	AIManager			mAIManager;
@@ -69,10 +79,8 @@ public:
 	void InitializeAssets();
 	void InitializeGeometry();
 	void InitializeShaderResources();
-	void InitializePlayers();
 	
 	void VUpdate(double milliseconds) override;
-	void UpdateCamera();
 
 	void VRender() override;
 	void RenderShadowMaps();	// Not called per frame

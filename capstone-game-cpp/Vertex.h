@@ -41,3 +41,12 @@ struct SkinnedVertex
 	vec3f		Normal;
 	vec3f		UV;
 };
+
+struct GridVertex
+{
+	float weight;
+	int x;
+	int y;
+	vec3f worldPos;
+	bool hasLight;
+};

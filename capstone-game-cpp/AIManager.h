@@ -29,8 +29,8 @@ public:
 private:
 	float mTop;
 	float mLeft;
-	int mNumNodesX;
-	int mNumNodesY;
+	int mNumCols;
+	int mNumRows;
 	const float mNodeRadius = 1.0f;
 };
 

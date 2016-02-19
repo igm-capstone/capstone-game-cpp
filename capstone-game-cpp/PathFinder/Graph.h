@@ -8,8 +8,8 @@ namespace PathFinder
 
 	struct INode {
 		float weight;
-		int16_t x;
-		int16_t y;
+		int x;
+		int y;
 		
 		INode() : weight(1), x(0), y(0) {}
 		INode(int16_t _x, int16_t _y) : weight(1), x(_x), y(_y) {}
@@ -36,17 +36,17 @@ namespace PathFinder
 	template<class T>
 	class Graph
 	{
-		T* pList = nullptr;
 	public:
-		int mWidth, mHeight;
+		T* pList = nullptr;
+		int mNumCols, mNumRows;
 		Graph()	{}
 		~Graph() {}
 		
-		void SetSize(int width, int height, LinearAllocator& allocator)
+		void SetSize(int numCols, int numRows, LinearAllocator& allocator)
 		{
-			mWidth = width;
-			mHeight = height;
-			pList = reinterpret_cast<T*>(allocator.Allocate(sizeof(T) * width * height, alignof(T), 0));
+			mNumCols = numCols;
+			mNumRows = numRows;
+			pList = reinterpret_cast<T*>(allocator.Allocate(sizeof(T) * numCols * numRows, alignof(T), 0));
 		}
 
 		float Heuristic(T* from, T* to) const
@@ -68,9 +68,9 @@ namespace PathFinder
 			auto y = node->y;
 
 			auto notLeftEdge = x > 0;
-			auto notRightEdge = x < mWidth - 1;
+			auto notRightEdge = x < mNumCols - 1;
 			auto notBottomEdge = y > 0;
-			auto notTopEdge = y < mHeight - 1;
+			auto notTopEdge = y < mNumRows - 1;
 			auto connections = new vector<Connection<T>>();
 			connections->reserve(8);
 
@@ -102,7 +102,7 @@ namespace PathFinder
 
 		T& operator ()(int x, int y)
 		{
-			return pList[x*mHeight + y];
+			return pList[x*mNumCols + y];
 		}
 	};
 }

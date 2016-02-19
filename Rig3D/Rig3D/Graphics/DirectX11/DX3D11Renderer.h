@@ -193,6 +193,9 @@ namespace Rig3D
 		void	VSetPixelShaderConstantBuffers(IShaderResource* shaderResource);
 		void	VSetPixelShaderConstantBuffer(IShaderResource* shaderResource, const uint32_t& atIndex, const uint32_t& toBindingIndex);
 
+		void	VSetComputeShaderConstantBuffers(IShaderResource* shaderResource);
+		void	VSetComputeShaderConstantBuffer(IShaderResource* shaderResource, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+
 		void	VSetVertexShaderInstanceBuffers(IShaderResource* shaderResource);
 		void	VSetVertexShaderInstanceBuffer(IShaderResource* shaderResource, const uint32_t& atIndex, const uint32_t& toBindingIndex);
 
@@ -200,6 +203,7 @@ namespace Rig3D
 
 		void	VSetVertexShaderResourceView(IShaderResource* shaderResource, const uint32_t& atIndex, const uint32_t& toBindingIndex);
 		void	VSetPixelShaderResourceView(IShaderResource* shaderResource, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+		void	VSetComputeShaderResourceView(IShaderResource* shaderResource, const uint32_t& atIndex, const uint32_t& toBindingIndex);
 
 		void	VAddShaderLinearSamplerState(IShaderResource* shaderResource, SamplerStateAddressType addressType, float* color = nullptr);
 		void	VAddShaderPointSamplerState(IShaderResource* shaderResource, SamplerStateAddressType addressType, float* color = nullptr);
@@ -244,12 +248,15 @@ namespace Rig3D
 
 		void	VSetVertexShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
 		void	VSetPixelShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+		void	VSetComputeShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
 
 		void	VSetVertexShaderResourceViews(IRenderContext* renderContext);
 		void	VSetPixelShaderResourceViews(IRenderContext* renderContext);
+		void	VSetComputeShaderResourceViews(IRenderContext* renderContext);
 
 		void	VSetVertexShaderResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
 		void	VSetPixelShaderResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+		void	VSetComputeShaderResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
 
 #pragma endregion 
 
