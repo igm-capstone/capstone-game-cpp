@@ -101,6 +101,7 @@ public:
 private:
 	static PoolAllocator sAllocator;
 	static pointer sBuffer;
+	static size_t sMaxCount;
 	static size_t sCount;
 
 	//void operator=(const Factory&) = delete;
@@ -112,12 +113,14 @@ public:
 	static pointer Create()
 	{
 		auto ptr = reinterpret_cast<pointer>(sAllocator.Allocate());
+		sCount += 1;
 		return new (ptr) value_type();
 	}
 
 	static void Destroy(pointer object)
 	{
 		sAllocator.Free(object);
+		sCount -= 1;
 	}
 
 	//static Container GetContainer()
@@ -130,7 +133,7 @@ public:
 		const int PADDING_VALUE = 0xBABACACA;
 
 		pointer start = reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type)));
-		pointer end = reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type))) + sCount;
+		pointer end = reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type))) + sMaxCount;
 
 		while (start != end && *reinterpret_cast<int*>(start) != PADDING_VALUE)
 		{
@@ -142,7 +145,7 @@ public:
 
 	static iterator EndIterator()
 	{
-		return iterator(reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type))) + sCount);
+		return iterator(reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type))) + sMaxCount);
 	}
 
 	iterator begin() { return Factory::BeginIterator(); }
