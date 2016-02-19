@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Factory.h"
-#include "SceneObjects\Explorer.h"
+
 #include "SceneObjects\Minion.h"
 #include "SceneObjects\Wall.h"
 #include "SceneObjects\MoveableBlock.h"
@@ -9,6 +9,18 @@
 #include "SceneObjects\DominationPoint.h"
 #include "SceneObjects\Lamp.h"
 #include "SceneObjects\Ghost.h"
+
+#include "Components\NetworkID.h"
+#include "Components\ColliderComponent.h"
+#include "Components\ExplorerController.h"
+#include "Components\GhostController.h"
+#include "Components\MinionController.h"
+#include "Components\DominationPointController.h"
+#include "Components\Skill.h"
+#include "Components\Health.h"
+#include "Components\FmodEvent.h"
+#include "Components\FmodEventCollection.h"
+#include "Components\AnimationController.h"
 
 #pragma region REGISTER_FACTORY Macro
 

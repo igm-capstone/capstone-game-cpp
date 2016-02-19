@@ -14,6 +14,10 @@
 #include <SceneObjects/Minion.h>
 #include <trace.h>
 #include <Components/DominationPointController.h>
+#include <Components/ExplorerController.h>
+#include <Components/Skill.h>
+#include <Components/AnimationController.h>
+#include <Components/Health.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };

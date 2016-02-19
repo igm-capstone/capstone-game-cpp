@@ -4,6 +4,7 @@
 #include <SceneObjects/SpawnPoint.h>
 #include <SceneObjects/Explorer.h>
 #include <SceneObjects/Minion.h>
+#include <Components/NetworkID.h>
 
 NetworkManager::NetworkManager()
 {

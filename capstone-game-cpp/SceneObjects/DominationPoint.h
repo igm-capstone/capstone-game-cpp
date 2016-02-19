@@ -3,6 +3,7 @@
 #include "Explorer.h"
 #include "CollisionManager.h"
 #include <Components/DominationPointController.h>
+#include <Components/ExplorerController.h>
 
 
 class DominationPoint : public BaseSceneObject

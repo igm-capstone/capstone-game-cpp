@@ -115,6 +115,8 @@
     <ClCompile Include="Factory.cpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="ScareTacticsApplication.cpp" />
+    <ClCompile Include="SceneObjects\Explorer.cpp" />
+    <ClCompile Include="SceneObjects\Ghost.cpp" />
     <ClCompile Include="SceneObjects\Minion.cpp" />
     <ClCompile Include="Scenes\BaseScene.cpp" />
     <ClCompile Include="AIManager.cpp" />

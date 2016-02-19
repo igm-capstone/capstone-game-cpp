@@ -6,6 +6,7 @@
 
 #include "Rig3D/Graphics/DirectX11/imgui/imgui.h"
 #include <SceneObjects/Explorer.h>
+#include <Components/ExplorerController.h>
 
 bool MainMenuScene::gLocalClient = false;
 bool MainMenuScene::gLocalServer = false;
