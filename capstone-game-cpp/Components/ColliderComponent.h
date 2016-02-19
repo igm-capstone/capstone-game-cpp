@@ -11,14 +11,17 @@ public:
 	bool mIsDynamic;
 	bool mIsTrigger;
 
-	EXPOSE_CALLBACK_1(CollisionEnter, Collision*)
-	EXPOSE_CALLBACK_1(CollisionExit, Collision*)
+	EXPOSE_CALLBACK_2(CollisionEnter, BaseSceneObject*, vec3f)
+	EXPOSE_CALLBACK_1(CollisionExit, BaseSceneObject*)
+
+	EXPOSE_CALLBACK_1(TriggerEnter, BaseSceneObject*)
+	EXPOSE_CALLBACK_1(TriggerStay, BaseSceneObject*)
+	EXPOSE_CALLBACK_1(TriggerExit, BaseSceneObject*)
 
 protected:
 	BaseColliderComponent() : mIsDynamic(true), mIsTrigger(false) {};
 	~BaseColliderComponent() {};
 };
-
 
 class BoxColliderComponent :
 	public BaseColliderComponent

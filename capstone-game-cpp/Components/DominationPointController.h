@@ -35,7 +35,7 @@ public:
 	float mProgress;
 	bool isDominated;
 
-	void Update(float milliseconds);
+	void Update(double milliseconds);
 	bool AddExplorer(Explorer* exp);
 	bool RemoveExplorer(Explorer* exp);
 

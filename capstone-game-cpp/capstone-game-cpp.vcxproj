@@ -156,6 +156,7 @@
     <ClInclude Include="FBXResource.h" />
     <ClInclude Include="fmodwrap.h" />
     <ClInclude Include="Mathf.h" />
+    <ClInclude Include="SceneObjectIntersection.h" />
     <ClInclude Include="SceneObjects\Ghost.h" />
     <ClInclude Include="Components\Skill.h" />
     <ClInclude Include="capstone-game-cpp.rc.h" />

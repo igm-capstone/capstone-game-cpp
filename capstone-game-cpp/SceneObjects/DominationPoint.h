@@ -30,7 +30,9 @@ private:
 		mCollider->mCollider.radius = 5;
 		mCollider->mIsActive = true;
 		mCollider->mIsTrigger = true;
-		mCollider->RegisterCollisionEnterCallback(&OnCollisionEnter);
+		mCollider->RegisterTriggerEnterCallback(&OnTriggerEnter);
+		mCollider->RegisterTriggerStayCallback(&OnTriggerStay);
+		mCollider->RegisterTriggerExitCallback(&OnTriggerExit);
 
 		mController = Factory<DominationPointController>::Create();
 		mController->mSceneObject = this;
@@ -40,8 +42,16 @@ private:
 	~DominationPoint() {}
 
 	// TODO: change this to collision stay as soon as it is implemented
-	static void OnCollisionEnter(BaseSceneObject* obj, Collision* collision)
+	static void OnTriggerEnter(BaseSceneObject* obj, BaseSceneObject* other)
 	{
+		TRACE_LOG("OnTriggerEnter");
+
+	}
+
+	static void OnTriggerStay(BaseSceneObject* obj, BaseSceneObject* other)
+	{
+		TRACE_LOG("OnTriggerStay");
+
 		auto dom = static_cast<DominationPoint*>(obj);
 		if (dom->mController->isDominated)
 		{
@@ -53,9 +63,15 @@ private:
 		// For this case, I'm assuming that we only have collisions
 		// between DominationPoints AND EXPLORER.
 		// This code needs to be revised otherwise.
-		auto exp = static_cast<Explorer*>(collision->colliderA.BaseCollider->mSceneObject);
+		auto exp = static_cast<Explorer*>(other);
 
 		dom->mController->AddExplorer(exp);
+	}
+
+	static void OnTriggerExit(BaseSceneObject* obj, BaseSceneObject* other)
+	{
+		TRACE_LOG("OnTriggerExit");
+
 	}
 
 	static bool IsExplorerInteracting(Explorer* exp)

@@ -113,7 +113,7 @@ void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal)
 	}
 }
 
-void Explorer::OnCollisionExit(BaseSceneObject* obj, Collision*)
+void Explorer::OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other)
 {
 	auto e = static_cast<Explorer*>(obj);
 	if (e->mNetworkID->mHasAuthority) {
