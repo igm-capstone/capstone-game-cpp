@@ -307,7 +307,6 @@ void Level01::VUpdate(double milliseconds)
 		dc.Update(milliseconds);
 	}
 
-
 	for (auto& skill : Factory<Skill>())
 	{
 		skill.Update();
@@ -324,10 +323,7 @@ void Level01::VUpdate(double milliseconds)
 		NetworkCmd::SpawnNewMinion(vec3f(0, 0, 0));
 	}
 
-	// TO DO: Wrap in a collision manager update.
-	mCollisionManager.DetectCollisions();
-	mCollisionManager.ResolveCollisions();
-
+	mCollisionManager.Update(milliseconds);
 	mNetworkManager->Update();
 }
 #pragma endregion

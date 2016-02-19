@@ -5,7 +5,7 @@
 #include "Mathf.h"
 #include <Colors.h>
 
-void DominationPointController::Update(float milliseconds)
+void DominationPointController::Update(double milliseconds)
 {
 	if (isDominated)
 	{

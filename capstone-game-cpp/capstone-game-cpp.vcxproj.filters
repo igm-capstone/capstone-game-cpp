@@ -100,7 +100,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SkeletalHierarchy.cpp">
-	  <Filter>Source Files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AIManager.cpp">
       <Filter>Source Files</Filter>
@@ -270,7 +270,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SkeletalHierarchy.h">
-	  <Filter>Header Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mathf.h">
       <Filter>Header Files</Filter>
@@ -279,6 +279,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Components\DominationPointController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneObjectIntersection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -338,7 +341,7 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\SkinnedMeshVertexShader.hlsl">
-	 <Filter>Shaders</Filter>
+      <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\GridComputeShader.hlsl">
       <Filter>Shaders</Filter>
