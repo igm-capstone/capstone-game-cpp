@@ -67,6 +67,9 @@ private:
 		sprint->SetBinding(SkillBinding().Set(KEYCODE_A).Set(MOUSEBUTTON_LEFT));
 		sprint->Setup(2, 1, DoSprint);
 		mSkills[0] = sprint;
+
+		auto model = Application::SharedInstance().GetModelManager()->RequestModel("AnimTest");
+		model->Link(this);
 	}
 
 	~Explorer() {};
@@ -81,6 +84,8 @@ public:
 
 		mNetworkID->mIsActive = true;
 		mNetworkID->mUUID = UUID;
+
+		mAnimationController->PlayLoopingAnimation("Take 001");
 	};
 
 	static void OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)

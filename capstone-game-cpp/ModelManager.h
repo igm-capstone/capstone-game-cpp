@@ -5,6 +5,7 @@
 
 class ModelCluster
 {
+	friend class ModelManager;
 public:
 	class Rig3D::IMesh* mMesh;
 	std::vector<SkeletalAnimation> mSkeletalAnimations;
@@ -37,6 +38,7 @@ public:
 
 	ModelCluster* AddModel(const char* name);
 	ModelCluster* RequestModel(const char* name);
+	std::vector<BaseSceneObject*>* RequestAllUsingModel(const char* name);
 };
 
 

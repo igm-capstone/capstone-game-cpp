@@ -153,14 +153,7 @@ void Level01::InitializeGeometry()
 	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
 
 	// Explorer Mesh
-	auto modelCluster = mModelManager->AddModel("AnimTest");
-	
-	for (Explorer& e : Factory<Explorer>())
-	{
-		modelCluster->Link(&e);
-		e.mAnimationController->PlayLoopingAnimation("Take 001");
-	}
-
+	auto modelCluster = mModelManager->RequestModel("AnimTest");
 
 	// Minion 
 	meshLibrary.NewMesh(&mMinionCubeMesh, mRenderer);
