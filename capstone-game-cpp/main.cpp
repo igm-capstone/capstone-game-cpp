@@ -34,6 +34,10 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 		MainMenuScene::gLocalClient = true;
 		MainMenuScene::gLocalServer = true;
 	}
+	else if (strcmp(cmdLine, "--local-debug") == 0)
+	{
+		MainMenuScene::gDebugBoth = true;
+	}
 
 	struct stat s;
 	if (stat("Assets", &s) != 0) {

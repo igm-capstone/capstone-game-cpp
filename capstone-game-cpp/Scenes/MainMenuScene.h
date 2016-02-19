@@ -9,6 +9,7 @@ class MainMenuScene : public BaseScene
 public:
 	static bool gLocalClient;
 	static bool gLocalServer;
+	static bool gDebugBoth;
 
 	MainMenuScene() {};
 	~MainMenuScene() override {}

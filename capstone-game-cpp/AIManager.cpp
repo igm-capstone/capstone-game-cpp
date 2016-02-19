@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "AIManager.h"
 #include <cmath>
+#include "Factory.h"
+#include "SceneObjects/Explorer.h"
 
 AIManager::AIManager()
 	: mPathFinder(mGrid)
@@ -26,21 +28,25 @@ void AIManager::ResetGridData()
 	//Populate nodes
 	for (int x = 0; x < mNumRows; x++) {
 		for (int y = 0; y < mNumCols; y++) {
-			vec3f nodePos = vec3f(mLeft + (mNodeRadius * 2) * y + mNodeRadius, mTop + (mNodeRadius * 2) * x + mNodeRadius, 0);
+			vec3f nodePos = vec3f(mLeft + (mNodeRadius * 2) * y + mNodeRadius, mTop - (mNodeRadius * 2) * x + mNodeRadius, 0);
 			mGrid(x, y).x = x;
 			mGrid(x, y).y = y;
 			mGrid(x, y).weight = -10;
 			mGrid(x, y).worldPos = vec3f(nodePos, 0);
 		}
 	}
+
+	for each(auto &e in Factory<Explorer>()) {
+		GetNodeAt(e.mTransform->GetPosition())->weight = 0;
+	}
 }
 
 Node* AIManager::GetNodeAt(vec3f pos)
 {
-	float x = (pos.x - mNodeRadius - mLeft) / (mNodeRadius * 2);
-	float y = (pos.y - mNodeRadius - mTop) / (mNodeRadius * 2);
+	float i = abs((pos.y - mNodeRadius - mTop) / (mNodeRadius * 2));
+	float j = abs((pos.x - mNodeRadius - mLeft) / (mNodeRadius * 2));
 
-	return &(mGrid((int)round(x), (int)round(y)));
+	return &(mGrid((int)round(i), (int)round(j)));
 }
 
 void AIManager::Update() {

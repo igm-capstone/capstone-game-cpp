@@ -136,7 +136,7 @@ void Level01::InitializeAssets()
 	mFloorCollider.halfSize = level.extents;
 	mFloorCollider.origin	= level.center;
 
-	mAIManager.InitGrid(level.center.x - level.extents.x, level.center.y - level.extents.y, 2 * level.extents.x, 2 * level.extents.y, mAllocator);
+	mAIManager.InitGrid(level.center.x - level.extents.x, level.center.y + level.extents.y, 2 * level.extents.x, 2 * level.extents.y, mAllocator);
 }
 
 void Level01::InitializeGeometry()
@@ -300,7 +300,7 @@ void Level01::InitializeShaderResources()
 	{
 		mRenderer->VCreateShaderResource(&mGridShaderResource, &mAllocator);
 
-		int	gridData[2] = { mAIManager.mGrid.mNumCols , mAIManager.mGrid.mNumRows };
+		int	gridData[4] = { mAIManager.mGrid.mNumCols , mAIManager.mGrid.mNumRows, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight() };
 		void*  cbGridData[] = { mCameraManager->GetCBufferPersp(), gridData };
 		size_t cbGridSizes[] = { sizeof(CBuffer::Camera), sizeof(int) * 4 };
 
@@ -410,9 +410,10 @@ void Level01::VRender()
 	RenderFullScreenQuad();
 	RenderIMGUI(); 
 	RenderSprites();
-
+	
 	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, mNullSRV);
 
+	RenderGrid();
 	RENDER_TRACE();
 	mRenderer->VSwapBuffers();
 }
@@ -656,6 +657,37 @@ void Level01::RenderSprites()
 	mRenderer->VSetVertexShaderInstanceBuffer(mSpritesShaderResource, 0, 1);
 	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), sCount, 0, 0, 0);
 }
+
+void Level01::RenderGrid()
+{
+#ifdef _DEBUG
+	for (auto i = 0; i < mAIManager.mGrid.mNumRows; i++)
+		for (auto j = 0; j < mAIManager.mGrid.mNumCols; j++)
+		{
+			auto n = mAIManager.mGrid(i, j);
+			vec4f c;
+			switch ((int)n.weight) {
+			case -10:
+				c = Colors::magenta;
+				break;
+			case -2:
+				c = Colors::red;
+				break;
+			case -1:
+				c = Colors::yellow;
+				break;
+			case 0:
+				c = Colors::green;
+				break;
+			default:
+				c = vec4f(0, 0, n.weight*0.1f, 1);
+				break;
+			}
+			TRACE_SMALL_BOX(n.worldPos, c * vec4f(1, 1, 1, 0.4f));
+			if (n.hasLight) { TRACE_SMALL_CROSS(n.worldPos, Colors::yellow * vec4f(1, 1, 1, 0.4f)); }
+		}
+#endif
+}
 #pragma endregion
 
 void Level01::ComputeGrid()
@@ -664,13 +696,13 @@ void Level01::ComputeGrid()
 	
 	mRenderer->VSetComputeShader(mApplication->mGridComputeShader);
 
-	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferPersp(), 0);
+	mRenderer->VUpdateShaderConstantBuffer(mGridShaderResource, mCameraManager->GetCBufferPersp(), 0);
 	mRenderer->VSetComputeShaderConstantBuffers(mGridShaderResource);
 	
 	mDeviceContext->UpdateSubresource(mSrcDataGPUBuffer, 0, NULL, mAIManager.mGrid.pList, 0, 0);
 	mDeviceContext->CSSetShaderResources(0, 1, &mSrcDataGPUBufferView);
-	mRenderer->VSetComputeShaderResourceView(mGBufferContext, 0, 1);
-	mRenderer->VSetComputeShaderResourceView(mGBufferContext, 1, 2);
+	mRenderer->VSetComputeShaderResourceView(mGBufferContext, 3, 1);
+	mRenderer->VSetComputeShaderResourceView(mGBufferContext, 3, 2);
 	mDeviceContext->CSSetUnorderedAccessViews(0, 1, &mDestDataGPUBufferView, NULL);
 	//Compute 
 

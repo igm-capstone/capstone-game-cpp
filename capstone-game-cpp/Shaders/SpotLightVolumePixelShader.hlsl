@@ -58,7 +58,7 @@ float4 main(Pixel pixel) : SV_TARGET
 
 	if (lightDepthValue > depth)
 	{
-		return float4(0.0f, 0.0f, 0.0f, 0.0f); // Alpha must be zero for grid purposes (Tiago).
+		return float4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
 	float4 diffuse = lightColor;

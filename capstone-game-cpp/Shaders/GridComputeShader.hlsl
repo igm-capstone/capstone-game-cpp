@@ -60,9 +60,9 @@ void GetConnections(GridNode node, out Connection conns[8], out int count)
 	int y = node.y;
 
 	bool notLeftEdge = x > 0;
-	bool notRightEdge = x < gridNumCols - 1;
+	bool notRightEdge = x < gridNumRows - 1;
 	bool notBottomEdge = y > 0;
-	bool notTopEdge = y < gridNumRows - 1;
+	bool notTopEdge = y < gridNumCols - 1;
 
 	Connection c;
 	count = 0;
@@ -123,12 +123,13 @@ void main(uint3 id : SV_DispatchThreadID)
 		screenPos.y = round(((1 - screenPos.y) / 2.0f) * screenHeight);
 
 		//Sample shadow map
-		bool isShadow = Shadows.Load(int3(screenPos.x, screenPos.y, 0)).a == 0;
-		bool isObstacle = Obstacles.Load(int3(screenPos.x, screenPos.y, 0)).x == 0;
+		float4 color = Shadows.Load(int3(screenPos.x, screenPos.y, 0));
+		bool isShadow = (color.r+color.g+color.b) == 0;
+		//bool isObstacle = Obstacles.Load(int3(screenPos.x, screenPos.y, 0)).x == 0;
 
 		//Update and output
 		n.hasLight = !isShadow;
-		n.weight = isObstacle ? -2 : -1;
+		n.weight =/* isObstacle ? -2 :*/ -1;
 	}
 	else if (n.weight == -1) {
 		Connection conns[8];

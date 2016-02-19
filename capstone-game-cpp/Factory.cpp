@@ -36,7 +36,7 @@ REGISTER_FACTORY ( Lamp,			17	)
 REGISTER_FACTORY ( Transform,	200 )
 
 // register component factories
-REGISTER_FACTORY ( NetworkID,						MAX_EXPLORERS)
+REGISTER_FACTORY ( NetworkID,						1 + MAX_EXPLORERS + MAX_MINIONS)
 REGISTER_FACTORY ( BoxColliderComponent,			100	)
 REGISTER_FACTORY ( OrientedBoxColliderComponent,	100 )
 REGISTER_FACTORY ( SphereColliderComponent,			100 )
