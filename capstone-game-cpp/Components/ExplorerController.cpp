@@ -101,7 +101,7 @@ bool ExplorerController::Update(double milliseconds)
 	bool hasMoved   = Move(dt, pos);
 	bool hasRotated = Rotate(dt, pos, rot);
 
-	if (hasMoved || hasRotated)
+	if (hasMoved /*|| hasRotated*/)
 	{
 		OnMove(pos, rot);
 	}

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Resource.h"
 #include "json.h"
-#include "SceneObjects/Wall.h"
 #include "SceneObjects/MoveableBlock.h"
 #include "SceneObjects/SpawnPoint.h"
 #include "SceneObjects/Pickup.h"
@@ -9,6 +8,8 @@
 #include "trace.h"
 #include "SceneObjects/Lamp.h"
 #include <GraphicsMath/cgm.h>
+#include "SceneObjects/StaticMesh.h"
+#include "SceneObjects/StaticCollider.h"
 
 using namespace std;
 using namespace Rig3D;
@@ -114,23 +115,33 @@ void loadSpawnPoints(jarr_t objs)
 }
 
 
-void loadWalls(jarr_t objs)
+void loadStaticMeshes(jarr_t objs)
 {
-	TRACE_LOG("Loading " << int(objs->size()) << " walls...");
+	TRACE_LOG("Loading " << int(objs->size()) << " static meshes...");
 	for (auto obj : *objs)
 	{
-		auto wall = Factory<Wall>::Create();
+		auto staticMesh = Factory<StaticMesh>::Create();
+		parseTransform(obj, staticMesh->mTransform);
+	}
+}
+
+
+void loadStaticColliders(jarr_t objs)
+{
+	TRACE_LOG("Loading " << int(objs->size()) << " static colliders...");
+	for (auto obj : *objs)
+	{
+		auto wall = Factory<StaticCollider>::Create();
 		parseTransform(obj, wall->mTransform);
 		wall->mBoxCollider->mCollider.origin = wall->mTransform->GetPosition();
 		wall->mBoxCollider->mCollider.halfSize = wall->mTransform->GetScale() * 0.5f;
-		
+
 		mat3f axis = wall->mTransform->GetRotationMatrix();
 		wall->mBoxCollider->mCollider.axis[0] = axis.pRows[0];
 		wall->mBoxCollider->mCollider.axis[1] = axis.pRows[1];
 		wall->mBoxCollider->mCollider.axis[2] = axis.pRows[2];
 	}
 }
-
 
 void loadBlocks(jarr_t objs)
 {
@@ -192,7 +203,7 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		}
 	}
 
-	auto lamps = obj["lamp"].get_ptr<jarr_t>();
+	auto lamps = obj["lamps"].get_ptr<jarr_t>();
 	if (lamps != nullptr)
 	{
 		loadLamps(lamps);
@@ -217,42 +228,42 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		}
 	}
 
-	auto domination = obj["domination"].get_ptr<jarr_t>();
+	auto domination = obj["dominationPoints"].get_ptr<jarr_t>();
 	if (domination != nullptr)
 	{
 		loadDomPoints(domination);
 	}
 
-	auto pickups = obj["pickup"].get_ptr<jarr_t>();
+	auto pickups = obj["pickups"].get_ptr<jarr_t>();
 	if (pickups != nullptr)
 	{
 		loadPickups(pickups);
 	}
 
-	auto spawnPoints = obj["spawnPoint"].get_ptr<jarr_t>();
+	auto spawnPoints = obj["spawnPoints"].get_ptr<jarr_t>();
 	if (spawnPoints != nullptr)
 	{
 		loadSpawnPoints(spawnPoints);
 	}
 
-	auto moveableBlocks = obj["moveableBlock"].get_ptr<jarr_t>();
+	auto moveableBlocks = obj["moveableBlocks"].get_ptr<jarr_t>();
 	if (moveableBlocks != nullptr)
 	{
 		loadBlocks(moveableBlocks);
 	}
 
-	auto walls = obj["wall"].get_ptr<jarr_t>();
+	auto walls = obj["walls"].get_ptr<jarr_t>();
 	if (walls != nullptr)
 	{
-		loadWalls(walls);
+		loadStaticMeshes(walls);
 
-		level.wallCount = static_cast<short>(walls->size());
-		level.wallWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.wallCount, alignof(mat4f), 0));
+		level.staticMeshCount = static_cast<short>(walls->size());
+		level.staticMeshWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.staticMeshCount, alignof(mat4f), 0));
 
 		int i = 0;
-		for (Wall& w : Factory<Wall>())
+		for (StaticMesh& w : Factory<StaticMesh>())
 		{
-			level.wallWorldMatrices[i++] = w.mTransform->GetWorldMatrix().transpose();
+			level.staticMeshWorldMatrices[i++] = w.mTransform->GetWorldMatrix().transpose();
 		}
 	}
 

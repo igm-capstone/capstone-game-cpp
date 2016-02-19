@@ -48,6 +48,9 @@ Explorer::Explorer(): mMesh(nullptr), mNetworkID(nullptr)
 	sprint->SetBinding(SkillBinding().Set(KEYCODE_A).Set(MOUSEBUTTON_LEFT));
 	sprint->Setup(2, 1, DoSprint);
 	mSkills[0] = sprint;
+
+	auto model = Application::SharedInstance().GetModelManager()->RequestModel("AnimTest");
+	model->Link(this);
 }
 
 void Explorer::Spawn(vec3f pos, int UUID)

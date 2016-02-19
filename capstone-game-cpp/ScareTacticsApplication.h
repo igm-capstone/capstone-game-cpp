@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <Rig3D/Graphics/Interface/IShader.h>
 #include "fmodwrap.h"
+#include "ModelManager.h"
 
 #define STATIC_SCENE_MEMORY		1000000
 #define SCENE_ALIGNMENT_PADDING 6
@@ -70,6 +71,7 @@ public:
 
 	void UnloadScene();
 	BaseScene*	GetCurrentScene() const { return mCurrentScene; }
+	ModelManager*	GetModelManager() { return &mModelManager; }
 
 private:
 	BaseScene*		mLoadingScreen;
@@ -81,6 +83,8 @@ private:
 
 	char*			mStaticMemory;
 	size_t			mStaticMemorySize;
+
+	ModelManager	mModelManager;
 };
 
 typedef Singleton<ScareTacticsApplication> Application;

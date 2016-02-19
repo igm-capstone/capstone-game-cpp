@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "CollisionManager.h"
-#include "SceneObjects/Wall.h"
 #include <Rig3D/Intersection.h>
 #include "SceneObjects/Explorer.h"
 #include "SceneObjects/DominationPoint.h"
+#include "SceneObjects/StaticCollider.h"
 #include <algorithm>
 
 // Functor used to find matching collisions
@@ -199,7 +199,7 @@ void CollisionManager::DetectCollisions()
 
 	for (Explorer& e : Factory<Explorer>())
 	{
-		for (Wall& w : Factory<Wall>())
+		for (StaticCollider& w : Factory<StaticCollider>())
 		{
 			vec3f cp;
 			
