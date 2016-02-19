@@ -19,13 +19,13 @@ static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 
 Level01::Level01() :
-	mWallCount0(0),
+	mStaticMeshCount0(0),
 	mPlaneCount(0),
 	mSpotLightCount(0),
 	mExplorerCount(0),
 	mPlaneWidth(0.0f),
 	mPlaneHeight(0.0f),
-	mWallWorldMatrices0(nullptr),
+	mStaticMeshWorldMatrices0(nullptr),
 	mPlaneWorldMatrices(nullptr),
 	mSpotLightWorldMatrices(nullptr),
 	mSpotLightVPTMatrices(nullptr),
@@ -36,7 +36,7 @@ Level01::Level01() :
 	mNDSQuadMesh(nullptr),
 	mGBufferContext(nullptr),
 	mShadowContext(nullptr),
-	mWallShaderResource(nullptr),
+	mStaticMeshShaderResource(nullptr),
 	mExplorerShaderResource(nullptr),
 	mPLVShaderResource(nullptr), 
 	mSpritesShaderResource(nullptr),
@@ -68,7 +68,7 @@ Level01::~Level01()
 		//m.mMesh->~IMesh();
 	}
 
-	mWallShaderResource->~IShaderResource();
+	mStaticMeshShaderResource->~IShaderResource();
 	mExplorerShaderResource->~IShaderResource();
 	mPLVShaderResource->~IShaderResource();
 	mSpritesShaderResource->~IShaderResource();
@@ -119,10 +119,10 @@ void Level01::VInitialize()
 
 void Level01::InitializeAssets()
 {
-	auto level = Resource::LoadLevel("Assets/Level01.json", mAllocator);
+	auto level = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 
-	mWallWorldMatrices0 = level.wallWorldMatrices;
-	mWallCount0			= level.wallCount;
+	mStaticMeshWorldMatrices0 = level.staticMeshWorldMatrices;
+	mStaticMeshCount0			= level.staticMeshCount;
 
 	mPlaneWorldMatrices = level.floorWorldMatrices;
 	mPlaneWidth			= level.floorWidth;
@@ -220,31 +220,31 @@ void Level01::InitializeShaderResources()
 	// Walls
 	{
 		// Allocate wall shader resource
-		mRenderer->VCreateShaderResource(&mWallShaderResource, &mAllocator);
+		mRenderer->VCreateShaderResource(&mStaticMeshShaderResource, &mAllocator);
 
 		// Instance buffer data
-		void*	ibWallData[] = { mWallWorldMatrices0, mPlaneWorldMatrices };
-		size_t	ibWallSizes[] = { sizeof(mat4f) * mWallCount0, sizeof(mat4f) * mPlaneCount };
+		void*	ibWallData[] = { mStaticMeshWorldMatrices0, mPlaneWorldMatrices };
+		size_t	ibWallSizes[] = { sizeof(mat4f) * mStaticMeshCount0, sizeof(mat4f) * mPlaneCount };
 		size_t	ibWallStrides[] = { sizeof(mat4f), sizeof(mat4f) };
 		size_t	ibWallOffsets[] = { 0, 0 };
 
 		// Create the instance buffer
-		mRenderer->VCreateDynamicShaderInstanceBuffers(mWallShaderResource, ibWallData, ibWallSizes, ibWallStrides, ibWallOffsets, 2);
+		mRenderer->VCreateDynamicShaderInstanceBuffers(mStaticMeshShaderResource, ibWallData, ibWallSizes, ibWallStrides, ibWallOffsets, 2);
 
 		// Set data for instance buffer once
-		mRenderer->VUpdateShaderInstanceBuffer(mWallShaderResource, mWallWorldMatrices0, ibWallSizes[0], 0);
-		mRenderer->VUpdateShaderInstanceBuffer(mWallShaderResource, mPlaneWorldMatrices, ibWallSizes[1], 1);
+		mRenderer->VUpdateShaderInstanceBuffer(mStaticMeshShaderResource, mStaticMeshWorldMatrices0, ibWallSizes[0], 0);
+		mRenderer->VUpdateShaderInstanceBuffer(mStaticMeshShaderResource, mPlaneWorldMatrices, ibWallSizes[1], 1);
 
 		// Constant buffer data
-		void*	cbWallData[] = { mCameraManager->GetCBufferPersp() };
-		size_t	cbWallSizes[] = { sizeof(CBuffer::Camera) };
+		void*	cStaticMeshData[] = { mCameraManager->GetCBufferPersp() };
+		size_t	cbStaticMeshSizes[] = { sizeof(CBuffer::Camera) };
 
-		mRenderer->VCreateShaderConstantBuffers(mWallShaderResource, cbWallData, cbWallSizes, 1);
+		mRenderer->VCreateShaderConstantBuffers(mStaticMeshShaderResource, cStaticMeshData, cbStaticMeshSizes, 1);
 
 		// Textures
 		const char* filenames[] = { "Assets/tileable5d.png", "Assets/wood floor 2.png" };
-		mRenderer->VAddShaderTextures2D(mWallShaderResource, filenames, 2);
-		mRenderer->VAddShaderLinearSamplerState(mWallShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
+		mRenderer->VAddShaderTextures2D(mStaticMeshShaderResource, filenames, 2);
+		mRenderer->VAddShaderLinearSamplerState(mStaticMeshShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 	}
 
 	// Explorers
@@ -449,7 +449,7 @@ void Level01::RenderShadowMaps()
 
 		for (uint32_t j : indices)
 		{
-			mLightPVM.world = mWallWorldMatrices0[j];
+			mLightPVM.world = mStaticMeshWorldMatrices0[j];
 			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
 			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM.world, 1);
 
@@ -492,19 +492,19 @@ void Level01::RenderWalls()
 	mRenderer->VSetPixelShader(mApplication->mQuadPixelShader);
 
 	// This can probably go into the render method...
-	mRenderer->VUpdateShaderConstantBuffer(mWallShaderResource, mCameraManager->GetCBufferPersp(), 0);
+	mRenderer->VUpdateShaderConstantBuffer(mStaticMeshShaderResource, mCameraManager->GetCBufferPersp(), 0);
 
 	mRenderer->VBindMesh(mWallMesh0);
-	mRenderer->VSetVertexShaderInstanceBuffer(mWallShaderResource, 0, 1);
-	mRenderer->VSetVertexShaderConstantBuffer(mWallShaderResource, 0, 0);
-	mRenderer->VSetPixelShaderResourceView(mWallShaderResource, 0, 0);
-	mRenderer->VSetPixelShaderSamplerStates(mWallShaderResource);
+	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 0, 1);
+	mRenderer->VSetVertexShaderConstantBuffer(mStaticMeshShaderResource, 0, 0);
+	mRenderer->VSetPixelShaderResourceView(mStaticMeshShaderResource, 0, 0);
+	mRenderer->VSetPixelShaderSamplerStates(mStaticMeshShaderResource);
 
-	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mWallMesh0->GetIndexCount(), mWallCount0, 0, 0, 0);
+	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mWallMesh0->GetIndexCount(), mStaticMeshCount0, 0, 0, 0);
 
 	mRenderer->VBindMesh(mPlaneMesh);
-	mRenderer->VSetVertexShaderInstanceBuffer(mWallShaderResource, 1, 1);
-	mRenderer->VSetPixelShaderResourceView(mWallShaderResource, 1, 0);
+	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 1, 1);
+	mRenderer->VSetPixelShaderResourceView(mStaticMeshShaderResource, 1, 0);
 
 	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPlaneMesh->GetIndexCount(), mPlaneCount, 0, 0, 0);
 }

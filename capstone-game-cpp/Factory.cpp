@@ -2,7 +2,8 @@
 #include "Factory.h"
 #include "SceneObjects\Explorer.h"
 #include "SceneObjects\Minion.h"
-#include "SceneObjects\Wall.h"
+#include "SceneObjects\StaticCollider.h"
+#include "SceneObjects\StaticMesh.h"
 #include "SceneObjects\MoveableBlock.h"
 #include "SceneObjects\SpawnPoint.h"
 #include "SceneObjects\Pickup.h"
@@ -25,7 +26,8 @@ PoolAllocator Factory<##type##>::sAllocator(__g##type##Buffer, __g##type##Buffer
 REGISTER_FACTORY ( Ghost,			1	)
 REGISTER_FACTORY ( Explorer,		MAX_EXPLORERS)
 REGISTER_FACTORY ( Minion,			MAX_MINIONS	)
-REGISTER_FACTORY ( Wall,			100	)
+REGISTER_FACTORY ( StaticMesh,		750	)
+REGISTER_FACTORY ( StaticCollider,	100	)
 REGISTER_FACTORY ( MoveableBlock,	10	)
 REGISTER_FACTORY ( SpawnPoint,		5	)
 REGISTER_FACTORY ( Pickup,			7	)
@@ -33,7 +35,7 @@ REGISTER_FACTORY ( DominationPoint,	6	)
 REGISTER_FACTORY ( Lamp,			17	)
 
 // register transform factory
-REGISTER_FACTORY ( Transform,	200 )
+REGISTER_FACTORY ( Transform,	1000 )
 
 // register component factories
 REGISTER_FACTORY ( NetworkID,						1 + MAX_EXPLORERS + MAX_MINIONS)

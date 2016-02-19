@@ -7,7 +7,7 @@ class Resource
 {
 	struct LevelInfo
 	{
-		mat4f* wallWorldMatrices;
+		mat4f* staticMeshWorldMatrices;
 		mat4f* floorWorldMatrices;
 		mat4f* lampWorldMatrices;
 		mat4f* lampVPTMatrices;
@@ -15,7 +15,7 @@ class Resource
 
 		vec3f center, extents;
 		float floorWidth, floorHeight;
-		short wallCount;
+		short staticMeshCount;
 		short floorCount;
 		short lampCount;
 	};

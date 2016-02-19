@@ -18,7 +18,7 @@ class Level01 : public BaseScene
 	LinearAllocator		mAllocator;
 	
 	// Counts
-	uint32_t			mWallCount0;
+	uint32_t			mStaticMeshCount0;
 	uint32_t			mPlaneCount;
 	uint32_t			mSpotLightCount;
 	uint32_t			mExplorerCount;
@@ -30,7 +30,7 @@ class Level01 : public BaseScene
 	Sprite				mSpriteInstanceData[MAX_SPRITES];
 
 	// Wall Data
-	mat4f*				mWallWorldMatrices0;
+	mat4f*				mStaticMeshWorldMatrices0;
 	mat4f*				mPlaneWorldMatrices;
 	mat4f				mSkinnedMeshMatices[MAX_SKELETON_JOINTS];
 
@@ -50,7 +50,7 @@ class Level01 : public BaseScene
 	IRenderContext*		mShadowContext;
 	
 	// ShaderResource
-	IShaderResource*	mWallShaderResource;
+	IShaderResource*	mStaticMeshShaderResource;
 	IShaderResource*	mExplorerShaderResource;
 	IShaderResource*	mPLVShaderResource;
 	IShaderResource*	mSpritesShaderResource;

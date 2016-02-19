@@ -172,7 +172,8 @@
     <ClInclude Include="SceneObjects\Explorer.h" />
     <ClInclude Include="SceneObjects\MoveableBlock.h" />
     <ClInclude Include="SceneObjects\Lamp.h" />
-    <ClInclude Include="SceneObjects\Wall.h" />
+    <ClInclude Include="SceneObjects\StaticCollider.h" />
+    <ClInclude Include="SceneObjects\StaticMesh.h" />
     <ClInclude Include="Scenes\BaseScene.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="AIManager.h" />
