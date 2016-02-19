@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.07.00">
+    <object class="Workspace" id="{5182e442-15e8-4e3b-a79f-fb44e4151bfa}">
+        <property name="builtBanksOutputDirectory">
+            <value>../Assets/FMOD/</value>
+        </property>
+        <property name="outputFormat">
+            <value>6</value>
+        </property>
+        <relationship name="masterEventFolder">
+            <destination>{271b011a-31fb-4a4b-8bf2-325e226d0e34}</destination>
+        </relationship>
+        <relationship name="masterTagFolder">
+            <destination>{d4ee2b06-ccef-4ae2-a21b-f70e503a620a}</destination>
+        </relationship>
+        <relationship name="masterBankFolder">
+            <destination>{35c279aa-d4a8-423d-b01c-0b2cb73c03ff}</destination>
+        </relationship>
+        <relationship name="audioBinManager">
+            <destination>{f8f39586-8dec-4f7e-9810-e03587448177}</destination>
+        </relationship>
+        <relationship name="mixer">
+            <destination>{e67778a0-89ed-4ced-8a5b-d050c9d931d5}</destination>
+        </relationship>
+    </object>
+    <object class="AudioBinManager" id="{f8f39586-8dec-4f7e-9810-e03587448177}">
+        <relationship name="masterAudioBinFolder">
+            <destination>{bd79a35e-1acc-4ca9-a734-31d55c114d36}</destination>
+        </relationship>
+    </object>
+</objects>

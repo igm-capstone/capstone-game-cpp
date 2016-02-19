@@ -199,15 +199,10 @@ void ScareTacticsApplication::InitializeFMOD()
 
 	// can be async with: FMOD_STUDIO_LOAD_BANK_NONBLOCKING
 	FMOD::Studio::Bank* bank = nullptr;
-	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Master Bank.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
-	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Master Bank.strings.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	FMOD_CHECK(mStudio->loadBankFile("Assets/FMOD/Desktop/Master Bank.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	FMOD_CHECK(mStudio->loadBankFile("Assets/FMOD/Desktop/Master Bank.strings.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
 	
-	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Character.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
-	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Music.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
-	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Surround_Ambience.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
-	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/UI_Menu.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
-	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Vehicles.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
-	FMOD_CHECK(mStudio->loadBankFile("Assets/Audio/Weapons.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
+	FMOD_CHECK(mStudio->loadBankFile("Assets/FMOD/Desktop/Minions.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
 }
 
 void ScareTacticsApplication::VInitialize()

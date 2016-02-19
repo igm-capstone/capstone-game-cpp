@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Factory.h"
-#include "SceneObjects\Explorer.h"
+
 #include "SceneObjects\Minion.h"
 #include "SceneObjects\Wall.h"
 #include "SceneObjects\MoveableBlock.h"
@@ -10,12 +10,25 @@
 #include "SceneObjects\Lamp.h"
 #include "SceneObjects\Ghost.h"
 
+#include "Components\NetworkID.h"
+#include "Components\ColliderComponent.h"
+#include "Components\ExplorerController.h"
+#include "Components\GhostController.h"
+#include "Components\MinionController.h"
+#include "Components\DominationPointController.h"
+#include "Components\Skill.h"
+#include "Components\Health.h"
+#include "Components\FmodEvent.h"
+#include "Components\FmodEventCollection.h"
+#include "Components\AnimationController.h"
+
 #pragma region REGISTER_FACTORY Macro
 
 #define REGISTER_FACTORY(type, size)\
 static byte __g##type##Buffer[(size) * (sizeof(##type)) + alignof(##type)];\
 ##type* Factory<##type##>::sBuffer = reinterpret_cast<##type*>(__g##type##Buffer);\
-size_t Factory<##type##>::sCount = size;\
+size_t Factory<##type##>::sMaxCount = size;\
+size_t Factory<##type##>::sCount = 0;\
 PoolAllocator Factory<##type##>::sAllocator(__g##type##Buffer, __g##type##Buffer + (size) * (sizeof(##type)) + alignof(##type), sizeof(##type), alignof(##type));
 
 #pragma endregion
@@ -35,7 +48,7 @@ REGISTER_FACTORY ( Lamp,			17	)
 REGISTER_FACTORY ( Transform,	200 )
 
 // register component factories
-REGISTER_FACTORY ( NetworkID,						MAX_EXPLORERS)
+REGISTER_FACTORY ( NetworkID,						1 + MAX_EXPLORERS + MAX_MINIONS)
 REGISTER_FACTORY ( BoxColliderComponent,			100	)
 REGISTER_FACTORY ( OrientedBoxColliderComponent,	100 )
 REGISTER_FACTORY ( SphereColliderComponent,			100 )

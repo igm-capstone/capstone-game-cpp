@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.07.00">
+    <object class="AudioBinFolder" id="{66cee54a-83ed-4cc1-a78e-08e1a30d53b9}">
+        <property name="name">
+            <value>Minions</value>
+        </property>
+        <relationship name="container">
+            <destination>{bd79a35e-1acc-4ca9-a734-31d55c114d36}</destination>
+        </relationship>
+    </object>
+</objects>

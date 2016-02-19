@@ -1393,6 +1393,23 @@ void DX3D11Renderer::VSetPixelShaderConstantBuffer(IShaderResource* shaderResour
 	mDeviceContext->PSSetConstantBuffers(toBindingIndex, 1, &constantBuffers[atIndex]);
 }
 
+void DX3D11Renderer::VSetComputeShaderConstantBuffers(IShaderResource* shaderResource)
+{
+	DX11ShaderResource* resource = static_cast<DX11ShaderResource*>(shaderResource);
+
+	uint8_t constBufferCount = resource->GetConstantBufferCount();
+	if (constBufferCount)
+	{
+		mDeviceContext->CSSetConstantBuffers(0, constBufferCount, resource->GetConstantBuffers());
+	}
+}
+
+void DX3D11Renderer::VSetComputeShaderConstantBuffer(IShaderResource* shaderResource, const uint32_t& atIndex, const uint32_t& toBindingIndex)
+{
+	ID3D11Buffer** constantBuffers = static_cast<DX11ShaderResource*>(shaderResource)->GetConstantBuffers();
+	mDeviceContext->CSSetConstantBuffers(toBindingIndex, 1, &constantBuffers[atIndex]);
+}
+
 void DX3D11Renderer::VSetVertexShaderInstanceBuffers(IShaderResource* shaderResource)
 {
 	DX11ShaderResource* resource = static_cast<DX11ShaderResource*>(shaderResource);
@@ -1435,6 +1452,12 @@ void DX3D11Renderer::VSetPixelShaderResourceView(IShaderResource* shaderResource
 {
 	ID3D11ShaderResourceView** SRVs = static_cast<DX11ShaderResource*>(shaderResource)->GetShaderResourceViews();
 	mDeviceContext->PSSetShaderResources(toBindingIndex, 1, &SRVs[atIndex]);
+}
+
+void DX3D11Renderer::VSetComputeShaderResourceView(IShaderResource* shaderResource, const uint32_t& atIndex, const uint32_t& toBindingIndex)
+{
+	ID3D11ShaderResourceView** SRVs = static_cast<DX11ShaderResource*>(shaderResource)->GetShaderResourceViews();
+	mDeviceContext->CSSetShaderResources(toBindingIndex, 1, &SRVs[atIndex]);
 }
 
 void DX3D11Renderer::VAddShaderLinearSamplerState(IShaderResource* shaderResource, SamplerStateAddressType addressType, float* color)
@@ -1762,6 +1785,12 @@ void DX3D11Renderer::VSetPixelShaderDepthResourceView(IRenderContext* renderCont
 	mDeviceContext->PSSetShaderResources(toBindingIndex, 1, &SRVs[atIndex]);
 }
 
+void DX3D11Renderer::VSetComputeShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex)
+{
+	ID3D11ShaderResourceView** SRVs = static_cast<DX11RenderContext*>(renderContext)->GetDepthStencilResourceViews();
+	mDeviceContext->CSSetShaderResources(toBindingIndex, 1, &SRVs[atIndex]);
+}
+
 void DX3D11Renderer::VSetVertexShaderResourceViews(IRenderContext* renderContext)
 {
 	DX11RenderContext* context = static_cast<DX11RenderContext*>(renderContext);
@@ -1772,6 +1801,12 @@ void DX3D11Renderer::VSetPixelShaderResourceViews(IRenderContext* renderContext)
 {
 	DX11RenderContext* context = static_cast<DX11RenderContext*>(renderContext);
 	mDeviceContext->PSSetShaderResources(0, context->GetShaderResourceViewCount(), context->GetShaderResourceViews());
+}
+
+void DX3D11Renderer::VSetComputeShaderResourceViews(IRenderContext* renderContext)
+{
+	DX11RenderContext* context = static_cast<DX11RenderContext*>(renderContext);
+	mDeviceContext->CSSetShaderResources(0, context->GetShaderResourceViewCount(), context->GetShaderResourceViews());
 }
 
 void DX3D11Renderer::VSetVertexShaderResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex)
@@ -1786,6 +1821,11 @@ void DX3D11Renderer::VSetPixelShaderResourceView(IRenderContext* renderContext, 
 	mDeviceContext->PSSetShaderResources(toBindingIndex, 1, &SRVs[atIndex]);
 }
 
+void DX3D11Renderer::VSetComputeShaderResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex)
+{
+	ID3D11ShaderResourceView** SRVs = static_cast<DX11RenderContext*>(renderContext)->GetShaderResourceViews();
+	mDeviceContext->CSSetShaderResources(toBindingIndex, 1, &SRVs[atIndex]);
+}
 #pragma endregion 
 
 void DX3D11Renderer::VSwapBuffers()

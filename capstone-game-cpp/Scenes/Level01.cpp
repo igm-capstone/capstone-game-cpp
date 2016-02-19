@@ -14,6 +14,10 @@
 #include <SceneObjects/Minion.h>
 #include <trace.h>
 #include <Components/DominationPointController.h>
+#include <Components/ExplorerController.h>
+#include <Components/Skill.h>
+#include <Components/AnimationController.h>
+#include <Components/Health.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -39,7 +43,8 @@ Level01::Level01() :
 	mWallShaderResource(nullptr),
 	mExplorerShaderResource(nullptr),
 	mPLVShaderResource(nullptr), 
-	mSpritesShaderResource(nullptr)
+	mSpritesShaderResource(nullptr),
+	mGridShaderResource(nullptr)
 {
 
 }
@@ -71,9 +76,16 @@ Level01::~Level01()
 	mExplorerShaderResource->~IShaderResource();
 	mPLVShaderResource->~IShaderResource();
 	mSpritesShaderResource->~IShaderResource();
+	mGridShaderResource->~IShaderResource();
 	
 	mGBufferContext->~IRenderContext();
 	mShadowContext->~IRenderContext();
+
+	ReleaseMacro(mSrcDataGPUBuffer);
+	ReleaseMacro(mSrcDataGPUBufferView);
+	ReleaseMacro(mDestDataGPUBuffer);
+	ReleaseMacro(mDestDataGPUBufferCPURead);
+	ReleaseMacro(mDestDataGPUBufferView);
 
 	mAllocator.Free();
 }
@@ -128,7 +140,7 @@ void Level01::InitializeAssets()
 	mFloorCollider.halfSize = level.extents;
 	mFloorCollider.origin	= level.center;
 
-	mAIManager.InitGrid(level.center.x - level.extents.x, level.center.y - level.extents.y, 2 * level.extents.x, 2 * level.extents.y, mAllocator);
+	mAIManager.InitGrid(level.center.x - level.extents.x, level.center.y + level.extents.y, 2 * level.extents.x, 2 * level.extents.y, mAllocator);
 }
 
 void Level01::InitializeGeometry()
@@ -189,8 +201,6 @@ void Level01::InitializeGeometry()
 		coneVertices.clear();
 		indices.clear();
 	}
-
-	// Full Screen Quad
 
 	// Billboard Quad
 	std::vector<NDSVertex> ndsVertices;
@@ -289,6 +299,63 @@ void Level01::InitializeShaderResources()
 		// Create the instance buffer
 		mRenderer->VCreateDynamicShaderInstanceBuffers(mSpritesShaderResource, ibSpriteData, ibSpriteSizes, ibSpriteStrides, ibSpriteOffsets, 1);
 	}
+
+	// Grid CS
+	{
+		mRenderer->VCreateShaderResource(&mGridShaderResource, &mAllocator);
+
+		int	gridData[4] = { mAIManager.mGrid.mNumCols , mAIManager.mGrid.mNumRows, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight() };
+		void*  cbGridData[] = { mCameraManager->GetCBufferPersp(), gridData };
+		size_t cbGridSizes[] = { sizeof(CBuffer::Camera), sizeof(int) * 4 };
+
+		mRenderer->VCreateShaderConstantBuffers(mGridShaderResource, cbGridData, cbGridSizes, 2);
+
+		{
+			D3D11_BUFFER_DESC descGPUBuffer;
+			ZeroMemory(&descGPUBuffer, sizeof(descGPUBuffer));
+			descGPUBuffer.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+			descGPUBuffer.ByteWidth = mAIManager.mGrid.mNumCols * mAIManager.mGrid.mNumRows * sizeof(GridVertex);
+			descGPUBuffer.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+			descGPUBuffer.StructureByteStride = sizeof(GridVertex);
+			mDevice->CreateBuffer(&descGPUBuffer, NULL, &mDestDataGPUBuffer);
+
+			descGPUBuffer.Usage = D3D11_USAGE_STAGING;
+			descGPUBuffer.BindFlags = 0;
+			descGPUBuffer.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+			mDevice->CreateBuffer(&descGPUBuffer, NULL, &mDestDataGPUBufferCPURead);
+
+			D3D11_UNORDERED_ACCESS_VIEW_DESC descView;
+			ZeroMemory(&descView, sizeof(descView));
+			descView.Format = DXGI_FORMAT_UNKNOWN;
+			descView.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+			descView.Buffer.NumElements = mAIManager.mGrid.mNumCols * mAIManager.mGrid.mNumRows;
+
+			mDevice->CreateUnorderedAccessView(mDestDataGPUBuffer, &descView, &mDestDataGPUBufferView);
+		}
+
+		{
+			D3D11_BUFFER_DESC descGPUBuffer;
+			ZeroMemory(&descGPUBuffer, sizeof(descGPUBuffer));
+			descGPUBuffer.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+			descGPUBuffer.ByteWidth = mAIManager.mGrid.mNumCols * mAIManager.mGrid.mNumRows * sizeof(GridVertex);
+			descGPUBuffer.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+			descGPUBuffer.StructureByteStride = sizeof(Node);
+
+			D3D11_SUBRESOURCE_DATA InitData;
+			InitData.pSysMem = mAIManager.mGrid.pList;
+
+			mDevice->CreateBuffer(&descGPUBuffer, &InitData, &mSrcDataGPUBuffer);
+
+			D3D11_SHADER_RESOURCE_VIEW_DESC descView;
+			ZeroMemory(&descView, sizeof(descView));
+			descView.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+			descView.BufferEx.FirstElement = 0;
+			descView.Format = DXGI_FORMAT_UNKNOWN;
+			descView.BufferEx.NumElements = mAIManager.mGrid.mNumCols * mAIManager.mGrid.mNumRows;
+
+			mDevice->CreateShaderResourceView(mSrcDataGPUBuffer, &descView, &mSrcDataGPUBufferView);
+		}
+	}
 }
 #pragma endregion
 
@@ -323,6 +390,10 @@ void Level01::VUpdate(double milliseconds)
 		NetworkCmd::SpawnNewMinion(vec3f(0, 0, 0));
 	}
 
+
+
+	ComputeGrid();
+	mAIManager.Update();
 	mCollisionManager.Update(milliseconds);
 	mNetworkManager->Update();
 }
@@ -346,10 +417,10 @@ void Level01::VRender()
 	RenderFullScreenQuad();
 	RenderIMGUI(); 
 	RenderSprites();
+	
+	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, mNullSRV);
 
-	ID3D11ShaderResourceView* nullSRV[4] = { nullptr, nullptr, nullptr, nullptr };
-	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, nullSRV);
-
+	RenderGrid();
 	RENDER_TRACE();
 	mRenderer->VSwapBuffers();
 }
@@ -568,7 +639,6 @@ void Level01::RenderSprites()
 	mRenderer->VSetPixelShader(mApplication->mSpritePixelShader);
 
 	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferOrto(), 0);
-	
 	mRenderer->VSetVertexShaderConstantBuffers(mSpritesShaderResource);
 
 	UINT sCount = 0;
@@ -598,11 +668,71 @@ void Level01::RenderSprites()
 	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), sCount, 0, 0, 0);
 }
 
+void Level01::RenderGrid()
+{
+#ifdef _DEBUG
+	for (auto i = 0; i < mAIManager.mGrid.mNumRows; i++)
+		for (auto j = 0; j < mAIManager.mGrid.mNumCols; j++)
+		{
+			auto n = mAIManager.mGrid(i, j);
+			vec4f c;
+			switch ((int)n.weight) {
+			case -10:
+				c = Colors::magenta;
+				break;
+			case -2:
+				c = Colors::red;
+				break;
+			case -1:
+				c = Colors::yellow;
+				break;
+			case 0:
+				c = Colors::green;
+				break;
+			default:
+				c = vec4f(0, 0, n.weight*0.1f, 1);
+				break;
+			}
+			TRACE_SMALL_BOX(n.worldPos, c * vec4f(1, 1, 1, 0.4f));
+			if (n.hasLight) { TRACE_SMALL_CROSS(n.worldPos, Colors::yellow * vec4f(1, 1, 1, 0.4f)); }
+		}
+#endif
+}
+
 #pragma endregion
 
 void Level01::ComputeGrid()
 {
-	// CS stuff will come here
+	mAIManager.ResetGridData();
+	
+	mRenderer->VSetComputeShader(mApplication->mGridComputeShader);
+
+	mRenderer->VUpdateShaderConstantBuffer(mGridShaderResource, mCameraManager->GetCBufferPersp(), 0);
+	mRenderer->VSetComputeShaderConstantBuffers(mGridShaderResource);
+	
+	mDeviceContext->UpdateSubresource(mSrcDataGPUBuffer, 0, NULL, mAIManager.mGrid.pList, 0, 0);
+	mDeviceContext->CSSetShaderResources(0, 1, &mSrcDataGPUBufferView);
+	mRenderer->VSetComputeShaderResourceView(mGBufferContext, 3, 1);
+	mRenderer->VSetComputeShaderResourceView(mGBufferContext, 3, 2);
+	mDeviceContext->CSSetUnorderedAccessViews(0, 1, &mDestDataGPUBufferView, NULL);
+	//Compute 
+
+	for (int i = 0; i < 100; i++) {
+		mRenderer->GetDeviceContext()->Dispatch(mAIManager.mGrid.mNumRows / GRID_MULT_OF, mAIManager.mGrid.mNumCols / GRID_MULT_OF, 1);
+		mDeviceContext->CopyResource(mSrcDataGPUBuffer, mDestDataGPUBuffer);
+	}
+	mDeviceContext->CSSetShader(NULL, NULL, 0);
+	mDeviceContext->CSSetShaderResources(0, 3, mNullSRV);
+	
+	//Copy results to a CPU friendly buffer
+	mDeviceContext->CopyResource(mDestDataGPUBufferCPURead, mDestDataGPUBuffer);
+
+	//Map and update
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	mDeviceContext->Map(mDestDataGPUBufferCPURead, 0, D3D11_MAP_READ, 0, &mappedResource);
+	GridVertex* ints = reinterpret_cast<GridVertex*>(mappedResource.pData);
+	memcpy(mAIManager.mGrid.pList, mappedResource.pData, mAIManager.mGrid.mNumCols * mAIManager.mGrid.mNumRows * sizeof(GridVertex));
+	mDeviceContext->Unmap(mDestDataGPUBufferCPURead, 0);
 }
 
 void Level01::VShutdown()

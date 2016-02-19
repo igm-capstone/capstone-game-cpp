@@ -6,9 +6,11 @@
 
 #include "Rig3D/Graphics/DirectX11/imgui/imgui.h"
 #include <SceneObjects/Explorer.h>
+#include <Components/ExplorerController.h>
 
 bool MainMenuScene::gLocalClient = false;
 bool MainMenuScene::gLocalServer = false;
+bool MainMenuScene::gDebugBoth = false;
 
 void MainMenuScene::VInitialize()
 {
@@ -93,7 +95,7 @@ void MainMenuScene::RenderMainMenu(BaseScene* s)
 	ImGui::PopFont();
 	ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
 	ImGui::SetCursorPosX(50);
-	if (ImGui::Button("Server -> Create Explorer", ImVec2(200, 0)))
+	if (ImGui::Button("Server -> Create Explorer", ImVec2(200, 0)) || (gDebugBoth))
 	{
 		scene->StartServer();
 		auto e = Factory<Explorer>::Create();

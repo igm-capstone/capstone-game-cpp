@@ -1,9 +1,9 @@
 struct GridNode
 {
-	float3 worldPos;
+	float weight;
 	int x;
 	int y;
-	float weight;
+	float3 worldPos;
 	bool hasLight;
 };
 
@@ -13,10 +13,18 @@ struct Connection
 	GridNode nodeTo;
 };
 
-cbuffer transform : register(b0)
+cbuffer camera : register(b0)
 {
-	matrix view;
 	matrix projection;
+	matrix view;
+}
+
+cbuffer gridData : register(b1)
+{
+	int gridNumCols;
+	int gridNumRows;
+	int screenWidth;
+	int screenHeight;
 }
 
 StructuredBuffer<GridNode> BufferIn : register(t0);
@@ -25,11 +33,9 @@ RWStructuredBuffer<GridNode> BufferOut : register(u0);
 Texture2D Shadows : register(t1);
 Texture2D Obstacles : register(t2);
 
-static const int numThreads = 52;
-static const int numGroups = 34;
 
 GridNode getNode(int x, int y) {
-	int flatID = x + y * numThreads;
+	int flatID = x * gridNumCols + y;
 	return BufferIn[flatID];
 }
 
@@ -54,9 +60,9 @@ void GetConnections(GridNode node, out Connection conns[8], out int count)
 	int y = node.y;
 
 	bool notLeftEdge = x > 0;
-	bool notRightEdge = x < numThreads - 1;
+	bool notRightEdge = x < gridNumRows - 1;
 	bool notBottomEdge = y > 0;
-	bool notTopEdge = y < numGroups - 1;
+	bool notTopEdge = y < gridNumCols - 1;
 
 	Connection c;
 	count = 0;
@@ -96,13 +102,15 @@ void GetConnections(GridNode node, out Connection conns[8], out int count)
 }
 
 
-[numthreads(numThreads, 1, 1)]
-void main(uint3 idX : SV_GroupThreadID, uint3 idY : SV_GroupID)
+[numthreads(10, 10, 1)] 
+void main(uint3 id : SV_DispatchThreadID)
 {
-	int x = idX.x;
-	int y = idY.x;
-	int flatID = x + y * numThreads;
+	int x = id.x;
+	int y = id.y;
+	int flatID = x * gridNumCols + y;
+	//GridNode n = getNode(0, 0);
 
+	
 	//Get node
 	GridNode n = getNode(x, y);
 
@@ -111,18 +119,17 @@ void main(uint3 idX : SV_GroupThreadID, uint3 idY : SV_GroupID)
 		matrix clip = mul(view, projection);
 		float4 screenPos = mul(float4(n.worldPos, 1.0f), clip);
 		screenPos = screenPos / screenPos.w;
-		screenPos.y = -1 * screenPos.y;
-		screenPos = screenPos + 1;
-		screenPos = screenPos / 2;
-		screenPos.x = screenPos.x * 1600;
-		screenPos.y = screenPos.y * 1000;
+		screenPos.x = round(((screenPos.x + 1) / 2.0f) * screenWidth);
+		screenPos.y = round(((1 - screenPos.y) / 2.0f) * screenHeight);
+
 		//Sample shadow map
-		bool isShadow = Shadows.Load(int3(screenPos.x, screenPos.y, 0)).x == 0;
-		bool isObstacle = Obstacles.Load(int3(screenPos.x, screenPos.y, 0)).x == 0;
+		float4 color = Shadows.Load(int3(screenPos.x, screenPos.y, 0));
+		bool isShadow = (color.r+color.g+color.b) == 0;
+		//bool isObstacle = Obstacles.Load(int3(screenPos.x, screenPos.y, 0)).x == 0;
 
 		//Update and output
 		n.hasLight = !isShadow;
-		n.weight = isObstacle ? -2 : -1;
+		n.weight =/* isObstacle ? -2 :*/ -1;
 	}
 	else if (n.weight == -1) {
 		Connection conns[8];
@@ -138,6 +145,7 @@ void main(uint3 idX : SV_GroupThreadID, uint3 idY : SV_GroupID)
 			n.weight = c.nodeTo.weight + c.cost;
 		}
 	}
-
+	
 	BufferOut[flatID] = n;
+
 }
