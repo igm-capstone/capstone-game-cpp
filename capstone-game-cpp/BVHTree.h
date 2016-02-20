@@ -1,29 +1,17 @@
 #pragma once
-
-
-enum BVHLayer : short
-{
-	BVH_LAYER_ROOT,
-	BVH_LAYER_FLOOR,
-	BVH_LAYER_WALL,
-	BVH_LAYER_EXPLORER,
-	BVH_LAYER_MINION,
-	BVH_LAYER_SKILL,
-	BVH_LAYER_LAMP
-};
+#include <SceneObjects/BaseSceneObject.h>
+#include <Components/ColliderComponent.h>
 
 struct BVHNode
 {
 	class BaseColliderComponent*	object;
-	BVHLayer						layer;
 	short							parentIndex;
 };
 
-class BVHTree
+class BVHTree : public BaseSceneObject
 {
 public:
-	BVHNode*	mNodes;
-	int			mNodeCount;
+	std::vector<BVHNode> mNodes;
 
 	vec3f mOrigin;
 	vec3f mExtents;
@@ -37,5 +25,6 @@ public:
 
 	void BuildBoundingVolumeHierarchy();
 
-	void AddNode(class BaseColliderComponent* pSceneObject, BVHLayer layer, const int& index, const int& parentIndex, const int& depth);
+	void AddNodes(OrientedBoxCollider* boundingVolume, const int& layerIndex, const int& index, const int& parentIndex, const int& depth);
+	void AddNode(class BaseColliderComponent* pSceneObject, const int& index, const int& parentIndex, const int& depth);
 };
