@@ -7,12 +7,18 @@
 #include <Components/Health.h>
 #include <Components/Skill.h>
 
-Explorer::Explorer(): mMesh(nullptr), mNetworkID(nullptr)
+Explorer::Explorer(): mMesh(nullptr)
 {
+	mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
+	mCameraManager = &Singleton<CameraManager>::SharedInstance();
+
 	mNetworkID = Factory<NetworkID>::Create();
 	mNetworkID->mSceneObject = this;
 	mNetworkID->mIsActive = false;
-
+	mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
+	mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
+	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
+	
 	mController = Factory<ExplorerController>::Create();
 	mController->mSceneObject = this;
 	mController->mIsActive = false;
@@ -28,13 +34,6 @@ Explorer::Explorer(): mMesh(nullptr), mNetworkID(nullptr)
 	mCollider->mSceneObject = this;
 	mCollider->mIsActive = false;
 	mCollider->RegisterCollisionExitCallback(&OnCollisionExit);
-	
-	mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
-	mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
-	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
-
-	mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
-	mCameraManager = &Singleton<CameraManager>::SharedInstance();
 
 	mHealth = Factory<Health>::Create();
 	mHealth->mSceneObject = this;

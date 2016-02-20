@@ -1,5 +1,4 @@
 #pragma once
-#include "Rig3D/Graphics/Interface/IMesh.h"
 #include "Factory.h"
 
 using namespace Rig3D;

@@ -70,8 +70,9 @@ namespace Rig3D
 		void HandleEvent(const IEvent& iEvent) override;
 
 	public:
-		// don't look at me... I WAS FORCED!
 		ScreenPoint mousePosition;
+		ScreenPoint prevMousePosition;
+		ScreenPoint delta;
 
 		bool GetKeyDown(KeyCode key);
 		bool GetKeyUp(KeyCode key);

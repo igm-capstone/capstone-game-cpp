@@ -3,6 +3,7 @@
 #include <Rig3D/Visibility.h>
 #include <Rig3D/Intersection.h>
 #include "RayCast.h"
+#include "Mathf.h"
 
 CameraManager::CameraManager()
 {
@@ -62,7 +63,7 @@ vec3f CameraManager::GetForward()
 	return mForward;
 }
 
-vec2f CameraManager::World2Screen(vec3f world)
+vec2f CameraManager::World2Screen(const vec3f& world)
 {
 	mat4f viewProjectionMatrix = mCameraPersp.GetViewMatrix() * mCameraPersp.GetProjectionMatrix();
 
@@ -75,21 +76,46 @@ vec2f CameraManager::World2Screen(vec3f world)
 	return vec2f(winX, winY);
 }
 
-vec3f CameraManager::Screen2WorldAtZ0(vec2f screen)
+vec2f CameraManager::Screen2Viewport(const vec2f& screen)
 {
-	Screen2Ray(screen);
+	return {
+		2.0f * screen.x / mRenderer->GetWindowWidth() - 1,
+		1 - 2.0f * screen.y / mRenderer->GetWindowHeight()
+	};
+}
+
+vec3f CameraManager::Screen2WorldAtZ0(const vec2f& screen)
+{
+	vec2f viewport = Screen2Viewport(screen);
+	
+	Viewport2Ray(viewport);
 
 	vec3f world;
 	IntersectRayPlane(pRay, pPlane, world, pDist);
 	return world;
 }
 
-Ray<vec3f> CameraManager::Screen2Ray(vec2f screen)
+vec3f CameraManager::Viewport2WorldAtZ0(const vec2f& viewport)
 {
-	float x = 2.0f * screen.x / mRenderer->GetWindowWidth() - 1;
-	float y = 1 - 2.0f * screen.y / mRenderer->GetWindowHeight();
+	vec2f clamped = Mathf::Clamp01(viewport);
+	Viewport2Ray(clamped);
 
-	vec4f ray_clip = vec4f(x, y, -1.0f, 1.0f) * (mCameraPersp.GetProjectionMatrix()).inverse();
+	vec3f world;
+	IntersectRayPlane(pRay, pPlane, world, pDist);
+	return world;
+}
+
+
+Ray<vec3f> CameraManager::Screen2Ray(const vec2f& screen)
+{
+	vec2f viewport = Screen2Viewport(screen);
+
+	return Viewport2Ray(viewport);
+}
+
+Ray<vec3f> CameraManager::Viewport2Ray(const vec2f& viewport)
+{
+	vec4f ray_clip = vec4f(viewport.x, viewport.y, -1.0f, 1.0f) * (mCameraPersp.GetProjectionMatrix()).inverse();
 	ray_clip.w = 0;
 
 	pRay.normal = ray_clip * (mCameraPersp.GetViewMatrix()).inverse();
@@ -97,3 +123,5 @@ Ray<vec3f> CameraManager::Screen2Ray(vec2f screen)
 
 	return pRay;
 }
+
+

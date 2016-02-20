@@ -400,8 +400,10 @@ void Input::Flush()
 	mKeysUp->clear();
 
 	// copy current mouse state to previous mouse state
+	delta.x = mousePosition.x - prevMousePosition.x;
+	delta.y = mousePosition.y - prevMousePosition.y;
+	prevMousePosition = mousePosition;
 	mPrevMouseState = mCurrMouseState;
-
 
 	// copy current joypad state
 	for (auto i = 0; i< XUSER_MAX_COUNT; i++)

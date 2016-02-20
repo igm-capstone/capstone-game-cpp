@@ -38,7 +38,7 @@ public:
 	BaseSceneState				mState;
 
 	// Miscelanious
-	BoxCollider					mFloorCollider;
+	BoxCollider2D				mFloorCollider;
 
 	BaseScene();
 	virtual ~BaseScene();

@@ -5,7 +5,7 @@
 #include "Mathf.h"
 #include <Colors.h>
 
-void DominationPointController::Update(float milliseconds)
+void DominationPointController::Update(double milliseconds)
 {
 	if (isDominated)
 	{
@@ -34,7 +34,7 @@ void DominationPointController::Update(float milliseconds)
 	TRACE_LINE(dom->mTransform->GetPosition() + vec3f(dom->mCollider->mCollider.radius, 0, 0), dom->mTransform->GetPosition() + vec3f(-dom->mCollider->mCollider.radius, 0, 0), Colors::red);
 
 	// progress variation
-	float dp = 0;
+	double dp = 0;
 	if (count > 0)
 	{
 		switch (mActivationType)
