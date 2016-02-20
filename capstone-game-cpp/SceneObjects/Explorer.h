@@ -5,7 +5,6 @@ class Explorer : public BaseSceneObject
 {
 	friend class Factory<Explorer>;
 public:
-	class IMesh*						mMesh;
 	class NetworkID*					mNetworkID;
 	class ExplorerController*			mController;
 	class AnimationController*			mAnimationController;

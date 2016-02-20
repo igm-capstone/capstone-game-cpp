@@ -130,6 +130,7 @@ void Level01::InitializeAssets()
 	mModelManager->LoadModel<GPU::Vertex3>("Models/Wall_SingleDoor");
 	mModelManager->LoadModel<GPU::Vertex3>("Models/Wall_W_SingleWindwo");
 	mModelManager->LoadModel<GPU::Vertex3>("Models/CurvedWall");
+	mModelManager->LoadModel<GPU::SkinnedVertex>("Models/Minion_Test");
 
 	auto level = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 
@@ -637,8 +638,8 @@ void Level01::RenderFullScreenQuad()
 
 void Level01::RenderMinions()
 {
-	mRenderer->VSetInputLayout (mApplication->mExplorerVertexShader);
-	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
+	mRenderer->VSetInputLayout (mApplication->mSkinnedVertexShader);
+	mRenderer->VSetVertexShader(mApplication->mSkinnedVertexShader);
 	mRenderer->VSetPixelShader (mApplication->mExplorerPixelShader);
 
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
@@ -648,9 +649,14 @@ void Level01::RenderMinions()
 		mModel.world = m.mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 
-		mRenderer->VBindMesh(mMinionCubeMesh);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
-		mRenderer->VDrawIndexed(0, mMinionCubeMesh->GetIndexCount());
+
+		m.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatices);
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatices, 2);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
+
+		mRenderer->VBindMesh(m.mModel->mMesh);
+		mRenderer->VDrawIndexed(0, m.mModel->mMesh->GetIndexCount());
 	}
 }
 

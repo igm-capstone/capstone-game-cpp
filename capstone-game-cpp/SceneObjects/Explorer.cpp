@@ -8,7 +8,7 @@
 #include <Components/Skill.h>
 #include <Vertex.h>
 
-Explorer::Explorer(): mMesh(nullptr)
+Explorer::Explorer()
 {
 	mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
 	mCameraManager = &Singleton<CameraManager>::SharedInstance();

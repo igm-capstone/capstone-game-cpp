@@ -7,10 +7,7 @@ class StaticMesh : public BaseSceneObject
 
 	friend class Factory<StaticMesh>;
 
-public:
-	class IMesh* mMesh;
-
 private:
-	StaticMesh() : mMesh(nullptr) {};
+	StaticMesh() {};
 	~StaticMesh() {};
 };
