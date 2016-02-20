@@ -6,6 +6,7 @@
 
 class Resource
 {
+public:	
 	struct LevelInfo
 	{
 		mat4f* staticMeshWorldMatrices;

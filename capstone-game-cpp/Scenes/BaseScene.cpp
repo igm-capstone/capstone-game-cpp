@@ -11,8 +11,7 @@
 BaseScene::BaseScene() : 
 	mStaticMemory(nullptr),
 	mStaticMemorySize(0),
-	mState(BASE_SCENE_STATE_CONSTRUCTED),
-	mMe(nullptr)
+	mState(BASE_SCENE_STATE_CONSTRUCTED)
 {
 	mEngine = &Singleton<Engine>::SharedInstance();
 
@@ -26,15 +25,6 @@ BaseScene::BaseScene() :
 	mCameraManager = &Singleton<CameraManager>::SharedInstance();
 	
 	mNetworkManager = &Singleton<NetworkManager>::SharedInstance();
-
-	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
-		Packet p(PacketTypes::INIT_CONNECTION);
-		mNetworkManager->mClient.SendData(&p);
-	} 
-	else if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
-		mMe = Factory<Ghost>::Create();
-	}
-
 }
 
 BaseScene::~BaseScene()

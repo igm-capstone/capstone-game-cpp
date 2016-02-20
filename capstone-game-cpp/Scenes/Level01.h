@@ -1,7 +1,6 @@
 #pragma once
 #include "Scenes/BaseScene.h"
 #include "capstone-game-cpp/CollisionManager.h"
-#include <Rig3D/Graphics/Camera.h>
 #include <Uniforms.h>
 #include <Vertex.h>
 #include <AIManager.h>
@@ -15,34 +14,15 @@ class Level01 : public BaseScene
 	CBuffer::Light			mLightData;			// Used for spotlight data (color, angle, etc).
 	CBuffer::SpriteSheet	mSpriteSheetData;
 
-	// Allocators
-	LinearAllocator		mAllocator;
-	
-	// Counts
-	uint32_t			mStaticMeshCount0;
-	uint32_t			mPlaneCount;
-	uint32_t			mSpotLightCount;
-	uint32_t			mExplorerCount;
-
-	float				mPlaneWidth;
-	float				mPlaneHeight;
-
-	// Sprite Data
-	GPU::Sprite				mSpriteInstanceData[MAX_SPRITES];
-
-	// Wall Data
-	mat4f*				mStaticMeshWorldMatrices0;
-	mat4f*				mPlaneWorldMatrices;
+	// GPU Data
+	GPU::Sprite			mSpriteInstanceData[MAX_SPRITES];
 	mat4f				mSkinnedMeshMatices[MAX_SKELETON_JOINTS];
 
-	// Lights
-	mat4f*				mSpotLightWorldMatrices;
-	mat4f*				mSpotLightVPTMatrices;
+	// Allocators
+	LinearAllocator		mAllocator;
 
 	// Mesh
-	IMesh*				mWallMesh0;
 	IMesh*				mPlaneMesh;
-	IMesh*				mMinionCubeMesh; 
 	IMesh*				mNDSQuadMesh;
 
 	// RenderContext
@@ -74,6 +54,7 @@ class Level01 : public BaseScene
 
 	// Manager alias
 	ModelManager*		mModelManager;
+	
 
 public:
 	Level01();

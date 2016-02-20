@@ -19,24 +19,13 @@
 #include <Components/AnimationController.h>
 #include <Components/Health.h>
 #include <Components/GhostController.h>
+#include <SceneObjects/Ghost.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 
 Level01::Level01() :
-	mStaticMeshCount0(0),
-	mPlaneCount(0),
-	mSpotLightCount(0),
-	mExplorerCount(0),
-	mPlaneWidth(0.0f),
-	mPlaneHeight(0.0f),
-	mStaticMeshWorldMatrices0(nullptr),
-	mPlaneWorldMatrices(nullptr),
-	mSpotLightWorldMatrices(nullptr),
-	mSpotLightVPTMatrices(nullptr),
-	mWallMesh0(nullptr),
 	mPlaneMesh(nullptr),
-	mMinionCubeMesh(nullptr),
 	mNDSQuadMesh(nullptr),
 	mGBufferContext(nullptr),
 	mShadowContext(nullptr),
@@ -52,9 +41,7 @@ Level01::Level01() :
 
 Level01::~Level01()
 {
-	mWallMesh0->~IMesh();
 	mPlaneMesh->~IMesh();
-	mMinionCubeMesh->~IMesh();
 	mNDSQuadMesh->~IMesh();
 
 	for (Lamp& l : Factory<Lamp>())
@@ -118,6 +105,14 @@ void Level01::VInitialize()
 
 	mCollisionManager.Initialize();
 
+	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
+		Packet p(PacketTypes::INIT_CONNECTION);
+		mNetworkManager->mClient.SendData(&p);
+	}
+	else if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
+		auto ghost = Factory<Ghost>::Create();
+	}
+
 	VOnResize();
 
 	mState = BASE_SCENE_STATE_RUNNING;
@@ -132,50 +127,23 @@ void Level01::InitializeAssets()
 	mModelManager->LoadModel<GPU::Vertex3>("Models/CurvedWall");
 	mModelManager->LoadModel<GPU::SkinnedVertex>("Models/Minion_Test");
 
-	auto level = Resource::LoadLevel("Assets/Level02.json", mAllocator);
+	mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 
-	mStaticMeshWorldMatrices0 = level.staticMeshWorldMatrices;
-	mStaticMeshCount0			= level.staticMeshCount;
 
-	mPlaneWorldMatrices = level.floorWorldMatrices;
-	mPlaneWidth			= level.floorWidth;
-	mPlaneHeight		= level.floorHeight;
-	mPlaneCount			= level.floorCount;
+	mFloorCollider.halfSize = mLevel.extents;
+	mFloorCollider.origin = mLevel.center;
 
-	mSpotLightWorldMatrices = level.lampWorldMatrices;
-	mSpotLightVPTMatrices	= level.lampVPTMatrices;
-	mSpotLightCount			= level.lampCount;
-
-	mFloorCollider.halfSize = level.extents;
-	mFloorCollider.origin	= level.center;
-
-	mAIManager.InitGrid(level.center.x - level.extents.x, level.center.y + level.extents.y, 2 * level.extents.x, 2 * level.extents.y);
+	mAIManager.InitGrid(mLevel.center.x - mLevel.extents.x, mLevel.center.y + mLevel.extents.y, 2 * mLevel.extents.x, 2 * mLevel.extents.y);
 }
 
 void Level01::InitializeGeometry()
 {
-	// Wall Mesh
 	MeshLibrary<LinearAllocator> meshLibrary(&mAllocator);
-	meshLibrary.NewMesh(&mWallMesh0, mRenderer);
-
 	std::vector<GPU::Vertex3> vertices;
 	std::vector<uint16_t> indices;
 
-	Geometry::Cube(vertices, indices, 2);
-
-	mRenderer->VSetMeshVertexBuffer(mWallMesh0, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
-	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
-	
-	// Minion 
-	meshLibrary.NewMesh(&mMinionCubeMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mMinionCubeMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
-	mRenderer->VSetMeshIndexBuffer(mMinionCubeMesh, &indices[0], indices.size());
-
-	vertices.clear();
-	indices.clear();
-
 	// Floor
-	Geometry::Plane(vertices, indices, mPlaneWidth, mPlaneHeight, 5, 5);
+	Geometry::Plane(vertices, indices, mLevel.floorWidth, mLevel.floorHeight, 5, 5);
 
 	meshLibrary.NewMesh(&mPlaneMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mPlaneMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
@@ -216,7 +184,7 @@ void Level01::InitializeShaderResources()
 	mRenderer->VCreateRenderContext(&mShadowContext, &mAllocator);
 
 	// Shadow Maps for each light
-	mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mSpotLightCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+	mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mLevel.lampCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 
 	// Walls
 	{
@@ -224,8 +192,8 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateShaderResource(&mStaticMeshShaderResource, &mAllocator);
 
 		// Instance buffer data
-		void*	ibWallData[] = { mStaticMeshWorldMatrices0, mPlaneWorldMatrices };
-		size_t	ibWallSizes[] = { sizeof(mat4f) * mStaticMeshCount0, sizeof(mat4f) * mPlaneCount };
+		void*	ibWallData[] = { mLevel.staticMeshWorldMatrices, mLevel.floorWorldMatrices };
+		size_t	ibWallSizes[] = { sizeof(mat4f) * mLevel.staticMeshCount, sizeof(mat4f) * mLevel.floorCount };
 		size_t	ibWallStrides[] = { sizeof(mat4f), sizeof(mat4f) };
 		size_t	ibWallOffsets[] = { 0, 0 };
 
@@ -233,8 +201,8 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateDynamicShaderInstanceBuffers(mStaticMeshShaderResource, ibWallData, ibWallSizes, ibWallStrides, ibWallOffsets, 2);
 
 		// Set data for instance buffer once
-		mRenderer->VUpdateShaderInstanceBuffer(mStaticMeshShaderResource, mStaticMeshWorldMatrices0, ibWallSizes[0], 0);
-		mRenderer->VUpdateShaderInstanceBuffer(mStaticMeshShaderResource, mPlaneWorldMatrices, ibWallSizes[1], 1);
+		mRenderer->VUpdateShaderInstanceBuffer(mStaticMeshShaderResource, mLevel.staticMeshWorldMatrices, ibWallSizes[0], 0);
+		mRenderer->VUpdateShaderInstanceBuffer(mStaticMeshShaderResource, mLevel.floorWorldMatrices, ibWallSizes[1], 1);
 
 		// Constant buffer data
 		void*	cStaticMeshData[] = { mCameraManager->GetCBufferPersp() };
@@ -467,11 +435,11 @@ void Level01::RenderShadowMaps()
 		mRenderer->VClearDepthStencil(mShadowContext, i, 1.0f, 0);
 
 		// Set projection matrix for light frustum
-		mLightPVM.projection = mSpotLightVPTMatrices[i].transpose();
+		mLightPVM.projection = mLevel.lampVPTMatrices[i].transpose();
 		
 		// Create frustum object for culling.
 		Rig3D::Frustum frustum;
-		Rig3D::ExtractNormalizedFrustumLH(&frustum, mSpotLightVPTMatrices[i]);
+		Rig3D::ExtractNormalizedFrustumLH(&frustum, mLevel.lampVPTMatrices[i]);
 
 		// Storage for the indices of objects we will draw
 		std::vector<uint32_t> indices;
@@ -480,29 +448,31 @@ void Level01::RenderShadowMaps()
 
 		CullWalls(frustum, indices);
 
-		mRenderer->VBindMesh(mWallMesh0);
+		auto cluster = mModelManager->GetModel("Models/Wall");
+		mRenderer->VBindMesh(cluster->mMesh);
 
 		for (uint32_t j : indices)
 		{
-			mLightPVM.world = mStaticMeshWorldMatrices0[j];
+
+			mLightPVM.world = mLevel.staticMeshWorldMatrices[j];
 			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
 			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM.world, 1);
 
 			mRenderer->VSetVertexShaderConstantBuffers(mExplorerShaderResource);
-			mRenderer->VDrawIndexed(0, mWallMesh0->GetIndexCount());
+			mRenderer->VDrawIndexed(0, cluster->mMesh->GetIndexCount());
 		}
 
 		indices.clear();
 
 		// Planes
 
-		CullPlanes(frustum, indices, mPlaneWorldMatrices, mPlaneWidth, mPlaneHeight, mPlaneCount);
+		CullPlanes(frustum, indices, mLevel.floorWorldMatrices, mLevel.floorWidth, mLevel.floorHeight, mLevel.floorCount);
 
 		mRenderer->VBindMesh(mPlaneMesh);
 		
 		for (uint32_t j : indices)
 		{
-			mLightPVM.world = mPlaneWorldMatrices[j];
+			mLightPVM.world = mLevel.floorWorldMatrices[j];
 			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM.world, 1);
 			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 			mRenderer->VDrawIndexed(0, mPlaneMesh->GetIndexCount());
@@ -536,13 +506,13 @@ void Level01::RenderWalls()
 	mRenderer->VSetPixelShaderResourceView(mStaticMeshShaderResource, 0, 0);
 	mRenderer->VSetPixelShaderSamplerStates(mStaticMeshShaderResource);
 
-	mRenderer->GetDeviceContext()->DrawIndexedInstanced(model->mMesh->GetIndexCount(), mStaticMeshCount0, 0, 0, 0);
+	mRenderer->GetDeviceContext()->DrawIndexedInstanced(model->mMesh->GetIndexCount(), mLevel.staticMeshCount, 0, 0, 0);
 
 	mRenderer->VBindMesh(mPlaneMesh);
 	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 1, 1);
 	mRenderer->VSetPixelShaderResourceView(mStaticMeshShaderResource, 1, 0);
 
-	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPlaneMesh->GetIndexCount(), mPlaneCount, 0, 0, 0);
+	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPlaneMesh->GetIndexCount(), mLevel.floorCount, 0, 0, 0);
 }
 
 void Level01::RenderExplorers()
@@ -588,11 +558,11 @@ void Level01::RenderSpotLightVolumes()
 	uint32_t i = 0;
 	for (Lamp& l : Factory<Lamp>())
 	{
-		mModel.world = mSpotLightWorldMatrices[i];
+		mModel.world = mLevel.lampWorldMatrices[i];
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 
 		// Set Light data
-		mLightData.viewProjection	= (mSpotLightVPTMatrices[i]).transpose();
+		mLightData.viewProjection	= (mLevel.lampWorldMatrices[i]).transpose();
 		mLightData.color			= l.mLightColor;
 		mLightData.direction		= l.mLightDirection;
 		mLightData.range			= l.mLightRadius;
@@ -772,7 +742,7 @@ void Level01::ComputeGrid()
 		mDeviceContext->CopyResource(mOutputDataCPURead, mOutputData);
 
 		//Map and update
-		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		/*D3D11_MAPPED_SUBRESOURCE mappedResource;
 		mDeviceContext->Map(mOutputDataCPURead, 0, D3D11_MAP_READ, 0, &mappedResource);
 		GPU::SimpleNode* simpleNodes = reinterpret_cast<GPU::SimpleNode*>(mappedResource.pData);
 		for (auto i = 0; i < mAIManager.mGrid.Count(); i++)
@@ -782,8 +752,8 @@ void Level01::ComputeGrid()
 			a.weight = b.weight;
 			a.hasLight = b.hasLight;
 		}
-		//memcpy(mAIManager.mGrid.pList, mappedResource.pData, mAIManager.mGrid.mNumCols * mAIManager.mGrid.mNumRows * sizeof(Node));
-		mDeviceContext->Unmap(mOutputDataCPURead, 0);
+		memcpy(mAIManager.mGrid.pList, mappedResource.pData, mAIManager.mGrid.mNumCols * mAIManager.mGrid.mNumRows * sizeof(Node));
+		mDeviceContext->Unmap(mOutputDataCPURead, 0);*/
 	}
 }
 
