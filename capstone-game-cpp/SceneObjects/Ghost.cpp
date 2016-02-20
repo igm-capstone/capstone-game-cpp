@@ -14,7 +14,6 @@ Ghost::Ghost() : mNetworkID(nullptr)
 	mNetworkID->mIsActive = false;
 
 	mCameraManager = &Singleton<CameraManager>::SharedInstance();
-	mCameraManager->MoveCamera(vec3f(0, 0, 0), vec3f(0.0f, 0.0f, -100.0f));
 
 	mEvents = Factory<FmodEventCollection>::Create();
 	mEvents->mSceneObject = this;
