@@ -32,4 +32,4 @@
 
 #define MAX_SKELETON_JOINTS 64
 
-#define GRID_MULT_OF	10
+#define GRID_MULT_OF	12

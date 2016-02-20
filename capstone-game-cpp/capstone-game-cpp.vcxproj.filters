@@ -9,7 +9,6 @@
     <FxCompile Include="Shaders\SkinnedMeshVertexShader.hlsl" />
     <FxCompile Include="Shaders\SpotLightVolumePixelShader.hlsl" />
     <FxCompile Include="Shaders\SpotLightVolumeVertexShader.hlsl" />
-    <FxCompile Include="Shaders\GridComputeShader.hlsl" />
     <FxCompile Include="Shaders\CircleVertexShader.hlsl" />
     <FxCompile Include="Shaders\LineTracePixelShader.hlsl" />
     <FxCompile Include="Shaders\LineTraceVertexShader.hlsl" />
@@ -21,6 +20,8 @@
     <FxCompile Include="Shaders\BillboardVertexShader.hlsl" />
     <FxCompile Include="Shaders\SpritePixelShader.hlsl" />
     <FxCompile Include="Shaders\SpriteVertexShader.hlsl" />
+    <FxCompile Include="Shaders\GridPass1ComputeShader.hlsl" />
+    <FxCompile Include="Shaders\GridPass2ComputeShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
@@ -55,6 +56,8 @@
     <ClCompile Include="trace.cpp" />
     <ClCompile Include="ModelManager.cpp" />
     <ClCompile Include="SceneObjects\BaseSceneObject.cpp" />
+    <ClCompile Include="SceneObjects\Explorer.cpp" />
+    <ClCompile Include="SceneObjects\Ghost.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />

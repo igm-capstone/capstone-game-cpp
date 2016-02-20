@@ -80,11 +80,13 @@ Level01::~Level01()
 	mGBufferContext->~IRenderContext();
 	mShadowContext->~IRenderContext();
 
-	ReleaseMacro(mSrcDataGPUBuffer);
-	ReleaseMacro(mSrcDataGPUBufferView);
-	ReleaseMacro(mDestDataGPUBuffer);
-	ReleaseMacro(mDestDataGPUBufferCPURead);
-	ReleaseMacro(mDestDataGPUBufferView);
+	ReleaseMacro(mFullSrcData);
+	ReleaseMacro(mFullSrcDataSRV);
+	ReleaseMacro(mSimpleSrcData);
+	ReleaseMacro(mSimpleSrcDataSRV);
+	ReleaseMacro(mOutputData);
+	ReleaseMacro(mOutputDataCPURead);
+	ReleaseMacro(mOutputDataSRV);
 
 	mAllocator.Free();
 }
@@ -148,12 +150,12 @@ void Level01::InitializeGeometry()
 	MeshLibrary<LinearAllocator> meshLibrary(&mAllocator);
 	meshLibrary.NewMesh(&mWallMesh0, mRenderer);
 
-	std::vector<Vertex3> vertices;
+	std::vector<GPU::Vertex3> vertices;
 	std::vector<uint16_t> indices;
 
 	Geometry::Cube(vertices, indices, 2);
 
-	mRenderer->VSetMeshVertexBuffer(mWallMesh0, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
+	mRenderer->VSetMeshVertexBuffer(mWallMesh0, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
 	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
 
 	// Explorer Mesh
@@ -161,7 +163,7 @@ void Level01::InitializeGeometry()
 
 	// Minion 
 	meshLibrary.NewMesh(&mMinionCubeMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mMinionCubeMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
+	mRenderer->VSetMeshVertexBuffer(mMinionCubeMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
 	mRenderer->VSetMeshIndexBuffer(mMinionCubeMesh, &indices[0], indices.size());
 
 	vertices.clear();
@@ -171,21 +173,21 @@ void Level01::InitializeGeometry()
 	Geometry::Plane(vertices, indices, mPlaneWidth, mPlaneHeight, 5, 5);
 
 	meshLibrary.NewMesh(&mPlaneMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mPlaneMesh, &vertices[0], sizeof(Vertex3) * vertices.size(), sizeof(Vertex3));
+	mRenderer->VSetMeshVertexBuffer(mPlaneMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
 	mRenderer->VSetMeshIndexBuffer(mPlaneMesh, &indices[0], indices.size());
 
 	vertices.clear();
 	indices.clear();
 
 	// Spot Light Volume 
-	std::vector<Vertex1> coneVertices;
+	std::vector<GPU::Vertex1> coneVertices;
 
 	for (Lamp& l : Factory<Lamp>())
 	{
 		Geometry::SpotlightCone(coneVertices, indices, 6, 1.0f, l.mLightAngle);
 
 		meshLibrary.NewMesh(&l.mConeMesh, mRenderer);
-		mRenderer->VSetMeshVertexBuffer(l.mConeMesh, &coneVertices[0], sizeof(Vertex1) * coneVertices.size(), sizeof(Vertex1));
+		mRenderer->VSetMeshVertexBuffer(l.mConeMesh, &coneVertices[0], sizeof(GPU::Vertex1) * coneVertices.size(), sizeof(GPU::Vertex1));
 		mRenderer->VSetMeshIndexBuffer(l.mConeMesh, &indices[0], indices.size());
 
 		coneVertices.clear();
@@ -193,12 +195,12 @@ void Level01::InitializeGeometry()
 	}
 
 	// Billboard Quad
-	std::vector<NDSVertex> ndsVertices;
+	std::vector<GPU::NDSVertex> ndsVertices;
 
 	Geometry::NDSQuad(ndsVertices, indices);
 
 	meshLibrary.NewMesh(&mNDSQuadMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mNDSQuadMesh, &ndsVertices[0], sizeof(NDSVertex) * ndsVertices.size(), sizeof(NDSVertex));
+	mRenderer->VSetMeshVertexBuffer(mNDSQuadMesh, &ndsVertices[0], sizeof(GPU::NDSVertex) * ndsVertices.size(), sizeof(GPU::NDSVertex));
 	mRenderer->VSetMeshIndexBuffer(mNDSQuadMesh, &indices[0], indices.size());
 }
 
@@ -282,8 +284,8 @@ void Level01::InitializeShaderResources()
 
 		// Instance buffer data
 		void*	ibSpriteData[] = { &mSpriteInstanceData };
-		size_t	ibSpriteSizes[] = { sizeof(Sprite) * MAX_SPRITES };
-		size_t	ibSpriteStrides[] = { sizeof(Sprite) };
+		size_t	ibSpriteSizes[] = { sizeof(GPU::Sprite) * MAX_SPRITES };
+		size_t	ibSpriteStrides[] = { sizeof(GPU::Sprite) };
 		size_t	ibSpriteOffsets[] = { 0 };
 
 		// Create the instance buffer
@@ -300,50 +302,73 @@ void Level01::InitializeShaderResources()
 
 		mRenderer->VCreateShaderConstantBuffers(mGridShaderResource, cbGridData, cbGridSizes, 2);
 
-		{
+		{ //Full Grid
 			D3D11_BUFFER_DESC descGPUBuffer;
 			ZeroMemory(&descGPUBuffer, sizeof(descGPUBuffer));
 			descGPUBuffer.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-			descGPUBuffer.ByteWidth = mAIManager.mGrid.mNumCols * mAIManager.mGrid.mNumRows * sizeof(GridVertex);
+			descGPUBuffer.ByteWidth = mAIManager.mGrid.Count() * sizeof(GPU::Node);
 			descGPUBuffer.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-			descGPUBuffer.StructureByteStride = sizeof(GridVertex);
-			mDevice->CreateBuffer(&descGPUBuffer, NULL, &mDestDataGPUBuffer);
-
-			descGPUBuffer.Usage = D3D11_USAGE_STAGING;
-			descGPUBuffer.BindFlags = 0;
-			descGPUBuffer.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-			mDevice->CreateBuffer(&descGPUBuffer, NULL, &mDestDataGPUBufferCPURead);
-
-			D3D11_UNORDERED_ACCESS_VIEW_DESC descView;
-			ZeroMemory(&descView, sizeof(descView));
-			descView.Format = DXGI_FORMAT_UNKNOWN;
-			descView.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-			descView.Buffer.NumElements = mAIManager.mGrid.mNumCols * mAIManager.mGrid.mNumRows;
-
-			mDevice->CreateUnorderedAccessView(mDestDataGPUBuffer, &descView, &mDestDataGPUBufferView);
-		}
-
-		{
-			D3D11_BUFFER_DESC descGPUBuffer;
-			ZeroMemory(&descGPUBuffer, sizeof(descGPUBuffer));
-			descGPUBuffer.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-			descGPUBuffer.ByteWidth = mAIManager.mGrid.mNumCols * mAIManager.mGrid.mNumRows * sizeof(GridVertex);
-			descGPUBuffer.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-			descGPUBuffer.StructureByteStride = sizeof(Node);
+			descGPUBuffer.StructureByteStride = sizeof(GPU::Node);
 
 			D3D11_SUBRESOURCE_DATA InitData;
 			InitData.pSysMem = mAIManager.mGrid.pList;
 
-			mDevice->CreateBuffer(&descGPUBuffer, &InitData, &mSrcDataGPUBuffer);
+			mDevice->CreateBuffer(&descGPUBuffer, &InitData, &mFullSrcData);
 
 			D3D11_SHADER_RESOURCE_VIEW_DESC descView;
 			ZeroMemory(&descView, sizeof(descView));
 			descView.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
 			descView.BufferEx.FirstElement = 0;
 			descView.Format = DXGI_FORMAT_UNKNOWN;
-			descView.BufferEx.NumElements = mAIManager.mGrid.mNumCols * mAIManager.mGrid.mNumRows;
+			descView.BufferEx.NumElements = mAIManager.mGrid.Count();
 
-			mDevice->CreateShaderResourceView(mSrcDataGPUBuffer, &descView, &mSrcDataGPUBufferView);
+			mDevice->CreateShaderResourceView(mFullSrcData, &descView, &mFullSrcDataSRV);
+		}
+
+		{ //Simple Grid
+			D3D11_BUFFER_DESC descGPUBuffer;
+			ZeroMemory(&descGPUBuffer, sizeof(descGPUBuffer));
+			descGPUBuffer.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+			descGPUBuffer.ByteWidth = mAIManager.mGrid.Count() * sizeof(GPU::SimpleNode);
+			descGPUBuffer.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+			descGPUBuffer.StructureByteStride = sizeof(GPU::SimpleNode);
+
+			D3D11_SUBRESOURCE_DATA InitData;
+			InitData.pSysMem = mAIManager.mGrid.pList;
+
+			mDevice->CreateBuffer(&descGPUBuffer, &InitData, &mSimpleSrcData);
+
+			D3D11_SHADER_RESOURCE_VIEW_DESC descView;
+			ZeroMemory(&descView, sizeof(descView));
+			descView.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+			descView.BufferEx.FirstElement = 0;
+			descView.Format = DXGI_FORMAT_UNKNOWN;
+			descView.BufferEx.NumElements = mAIManager.mGrid.Count();
+
+			mDevice->CreateShaderResourceView(mSimpleSrcData, &descView, &mSimpleSrcDataSRV);
+		}
+
+		{ //Output
+			D3D11_BUFFER_DESC descGPUBuffer;
+			ZeroMemory(&descGPUBuffer, sizeof(descGPUBuffer));
+			descGPUBuffer.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+			descGPUBuffer.ByteWidth = mAIManager.mGrid.Count() * sizeof(GPU::SimpleNode);
+			descGPUBuffer.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+			descGPUBuffer.StructureByteStride = sizeof(GPU::SimpleNode);
+			mDevice->CreateBuffer(&descGPUBuffer, NULL, &mOutputData);
+
+			descGPUBuffer.Usage = D3D11_USAGE_STAGING;
+			descGPUBuffer.BindFlags = 0;
+			descGPUBuffer.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+			mDevice->CreateBuffer(&descGPUBuffer, NULL, &mOutputDataCPURead);
+
+			D3D11_UNORDERED_ACCESS_VIEW_DESC descView;
+			ZeroMemory(&descView, sizeof(descView));
+			descView.Format = DXGI_FORMAT_UNKNOWN;
+			descView.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+			descView.Buffer.NumElements = mAIManager.mGrid.Count();
+
+			mDevice->CreateUnorderedAccessView(mOutputData, &descView, &mOutputDataSRV);
 		}
 	}
 }
@@ -647,7 +672,7 @@ void Level01::RenderSprites()
 		sCount++;
 	}
 
-	mRenderer->VUpdateShaderInstanceBuffer(mSpritesShaderResource, &mSpriteInstanceData, sizeof(Sprite) * sCount, 0);
+	mRenderer->VUpdateShaderInstanceBuffer(mSpritesShaderResource, &mSpriteInstanceData, sizeof(GPU::Sprite) * sCount, 0);
 
 	mRenderer->VSetVertexShaderResourceView(mSpritesShaderResource, 0, 0);
 	mRenderer->VSetPixelShaderResourceView(mSpritesShaderResource, 0, 0);
@@ -693,36 +718,57 @@ void Level01::RenderGrid()
 
 void Level01::ComputeGrid()
 {
-	mAIManager.ResetGridData();
-	
-	/*mRenderer->VSetComputeShader(mApplication->mGridComputeShader);
+	if (mNetworkManager->mMode != NetworkManager::SERVER) return;
+	if (lastUpdate < 100) lastUpdate++; //Lazy, yeah
+	else {
+		lastUpdate = 0;
+		mAIManager.ResetGridData();
 
-	mRenderer->VUpdateShaderConstantBuffer(mGridShaderResource, mCameraManager->GetCBufferPersp(), 0);
-	mRenderer->VSetComputeShaderConstantBuffers(mGridShaderResource);
-	
-	mDeviceContext->UpdateSubresource(mSrcDataGPUBuffer, 0, NULL, mAIManager.mGrid.pList, 0, 0);
-	mDeviceContext->CSSetShaderResources(0, 1, &mSrcDataGPUBufferView);
-	mRenderer->VSetComputeShaderResourceView(mGBufferContext, 3, 1);
-	mRenderer->VSetComputeShaderResourceView(mGBufferContext, 3, 2);
-	mDeviceContext->CSSetUnorderedAccessViews(0, 1, &mDestDataGPUBufferView, NULL);
-	//Compute 
+		//Pass 1
+		mRenderer->VSetComputeShader(mApplication->mGridPass1ComputeShader);
 
-	for (int i = 0; i < 100; i++) {
+		mRenderer->VUpdateShaderConstantBuffer(mGridShaderResource, mCameraManager->GetCBufferPersp(), 0);
+		mRenderer->VSetComputeShaderConstantBuffers(mGridShaderResource);
+
+		mDeviceContext->UpdateSubresource(mFullSrcData, 0, NULL, mAIManager.mGrid.pList, 0, 0);
+		mDeviceContext->CSSetShaderResources(0, 1, &mFullSrcDataSRV);			//Full grid data
+		mRenderer->VSetComputeShaderResourceView(mGBufferContext, 3, 1);		//Shadow Map
+		mDeviceContext->CSSetUnorderedAccessViews(0, 1, &mOutputDataSRV, NULL);	//Output
+		
 		mRenderer->GetDeviceContext()->Dispatch(mAIManager.mGrid.mNumRows / GRID_MULT_OF, mAIManager.mGrid.mNumCols / GRID_MULT_OF, 1);
-		mDeviceContext->CopyResource(mSrcDataGPUBuffer, mDestDataGPUBuffer);
-	}
-	mDeviceContext->CSSetShader(NULL, NULL, 0);
-	mDeviceContext->CSSetShaderResources(0, 3, mNullSRV);
-	
-	//Copy results to a CPU friendly buffer
-	mDeviceContext->CopyResource(mDestDataGPUBufferCPURead, mDestDataGPUBuffer);
 
-	//Map and update
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	mDeviceContext->Map(mDestDataGPUBufferCPURead, 0, D3D11_MAP_READ, 0, &mappedResource);
-	GridVertex* ints = reinterpret_cast<GridVertex*>(mappedResource.pData);
-	memcpy(mAIManager.mGrid.pList, mappedResource.pData, mAIManager.mGrid.mNumCols * mAIManager.mGrid.mNumRows * sizeof(GridVertex));
-	mDeviceContext->Unmap(mDestDataGPUBufferCPURead, 0);*/
+		//Pass 2
+		mRenderer->VSetComputeShader(mApplication->mGridPass2ComputeShader);
+
+		mDeviceContext->CopyResource(mSimpleSrcData, mOutputData);
+		mDeviceContext->CSSetShaderResources(0, 1, &mSimpleSrcDataSRV);			//Simple grid data
+		mDeviceContext->CSSetUnorderedAccessViews(0, 1, &mOutputDataSRV, NULL);	//Output
+
+		for (int i = 0; i < 100; i++) {
+			mRenderer->GetDeviceContext()->Dispatch(mAIManager.mGrid.mNumRows / GRID_MULT_OF, mAIManager.mGrid.mNumCols / GRID_MULT_OF, 1);
+			mDeviceContext->CopyResource(mSimpleSrcData, mOutputData);
+		}
+		
+		mDeviceContext->CSSetShader(NULL, NULL, 0);
+		mDeviceContext->CSSetShaderResources(0, 3, mNullSRV);
+
+		//Copy results to a CPU friendly buffer
+		mDeviceContext->CopyResource(mOutputDataCPURead, mOutputData);
+
+		//Map and update
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		mDeviceContext->Map(mOutputDataCPURead, 0, D3D11_MAP_READ, 0, &mappedResource);
+		GPU::SimpleNode* simpleNodes = reinterpret_cast<GPU::SimpleNode*>(mappedResource.pData);
+		for (auto i = 0; i < mAIManager.mGrid.Count(); i++)
+		{
+			auto &a = mAIManager.mGrid.pList[i];
+			auto &b = simpleNodes[i];
+			a.weight = b.weight;
+			a.hasLight = b.hasLight;
+		}
+		//memcpy(mAIManager.mGrid.pList, mappedResource.pData, mAIManager.mGrid.mNumCols * mAIManager.mGrid.mNumRows * sizeof(Node));
+		mDeviceContext->Unmap(mOutputDataCPURead, 0);
+	}
 }
 
 void Level01::VShutdown()

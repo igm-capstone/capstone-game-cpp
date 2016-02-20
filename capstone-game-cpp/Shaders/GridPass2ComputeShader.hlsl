@@ -1,23 +1,16 @@
-struct GridNode
+struct SimpleNode
 {
 	float weight;
 	int x;
 	int y;
-	float3 worldPos;
 	bool hasLight;
 };
 
 struct Connection
 {
 	float cost;
-	GridNode nodeTo;
+	SimpleNode nodeTo;
 };
-
-cbuffer camera : register(b0)
-{
-	matrix projection;
-	matrix view;
-}
 
 cbuffer gridData : register(b1)
 {
@@ -27,19 +20,16 @@ cbuffer gridData : register(b1)
 	int screenHeight;
 }
 
-StructuredBuffer<GridNode> BufferIn : register(t0);
-RWStructuredBuffer<GridNode> BufferOut : register(u0);
-
-Texture2D Shadows : register(t1);
-Texture2D Obstacles : register(t2);
+StructuredBuffer<SimpleNode> BufferIn : register(t0);
+RWStructuredBuffer<SimpleNode> BufferOut : register(u0);
 
 
-GridNode getNode(int x, int y) {
+SimpleNode getNode(int x, int y) {
 	int flatID = x * gridNumCols + y;
 	return BufferIn[flatID];
 }
 
-bool CreateConnectionIfValid(out Connection conn, GridNode nodeFrom, GridNode nodeTo)
+bool CreateConnectionIfValid(out Connection conn, SimpleNode nodeFrom, SimpleNode nodeTo)
 {
 	conn.cost = 0;
 	conn.nodeTo = nodeFrom;
@@ -53,7 +43,7 @@ bool CreateConnectionIfValid(out Connection conn, GridNode nodeFrom, GridNode no
 	return false;
 }
 
-void GetConnections(GridNode node, out Connection conns[8], out int count)
+void GetConnections(SimpleNode node, out Connection conns[8], out int count)
 {
 	bool diagonal = true;
 	int x = node.x;
@@ -102,36 +92,17 @@ void GetConnections(GridNode node, out Connection conns[8], out int count)
 }
 
 
-[numthreads(10, 10, 1)] 
+[numthreads(12, 12, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
 	int x = id.x;
 	int y = id.y;
 	int flatID = x * gridNumCols + y;
-	//GridNode n = getNode(0, 0);
 
-	
 	//Get node
-	GridNode n = getNode(x, y);
-
-	if (n.weight == -10) {
-		//Get node screenPos
-		matrix clip = mul(view, projection);
-		float4 screenPos = mul(float4(n.worldPos, 1.0f), clip);
-		screenPos = screenPos / screenPos.w;
-		screenPos.x = round(((screenPos.x + 1) / 2.0f) * screenWidth);
-		screenPos.y = round(((1 - screenPos.y) / 2.0f) * screenHeight);
-
-		//Sample shadow map
-		float4 color = Shadows.Load(int3(screenPos.x, screenPos.y, 0));
-		bool isShadow = (color.r+color.g+color.b) == 0;
-		//bool isObstacle = Obstacles.Load(int3(screenPos.x, screenPos.y, 0)).x == 0;
-
-		//Update and output
-		n.hasLight = !isShadow;
-		n.weight =/* isObstacle ? -2 :*/ -1;
-	}
-	else if (n.weight == -1) {
+	SimpleNode n = getNode(x, y);
+		
+	if (n.weight == -1) {
 		Connection conns[8];
 		int count;
 		GetConnections(n, conns, count);
@@ -145,7 +116,7 @@ void main(uint3 id : SV_DispatchThreadID)
 			n.weight = c.nodeTo.weight + c.cost;
 		}
 	}
-	
+
 	BufferOut[flatID] = n;
 
 }

@@ -28,7 +28,7 @@ class Level01 : public BaseScene
 	float				mPlaneHeight;
 
 	// Sprite Data
-	Sprite				mSpriteInstanceData[MAX_SPRITES];
+	GPU::Sprite				mSpriteInstanceData[MAX_SPRITES];
 
 	// Wall Data
 	mat4f*				mStaticMeshWorldMatrices0;
@@ -59,11 +59,14 @@ class Level01 : public BaseScene
 	ID3D11ShaderResourceView* mNullSRV[4] = { nullptr, nullptr, nullptr, nullptr };
 
 	// Grid Compute Shader (not handled by ShaderResource, this is where it is not currently helpful)
-	ID3D11Buffer*				mSrcDataGPUBuffer;
-	ID3D11ShaderResourceView*	mSrcDataGPUBufferView;
-	ID3D11Buffer*				mDestDataGPUBuffer;
-	ID3D11Buffer*				mDestDataGPUBufferCPURead;
-	ID3D11UnorderedAccessView*	mDestDataGPUBufferView;
+	ID3D11Buffer*				mFullSrcData;
+	ID3D11ShaderResourceView*	mFullSrcDataSRV;
+	ID3D11Buffer*				mSimpleSrcData;
+	ID3D11ShaderResourceView*	mSimpleSrcDataSRV;
+	ID3D11Buffer*				mOutputData;
+	ID3D11Buffer*				mOutputDataCPURead;
+	ID3D11UnorderedAccessView*	mOutputDataSRV;
+	int lastUpdate = 0;
 
 	// Managers
 	CollisionManager	mCollisionManager;

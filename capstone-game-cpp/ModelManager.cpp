@@ -32,7 +32,7 @@ ModelCluster* ModelManager::RequestModel(const char* name)
 		c = static_cast<ModelCluster*>(mAllocator->Allocate(sizeof(ModelCluster), alignof(ModelCluster), 0));
 		char filename[40];
 		sprintf_s(filename, "Assets/%s.fbx", name);
-		FBXMeshResource<SkinnedVertex> fbxResource(filename);
+		FBXMeshResource<GPU::SkinnedVertex> fbxResource(filename);
 		mMeshLibrary.LoadMesh(&c->mMesh, mRenderer, fbxResource);
 		c->mSkeletalHierarchy = fbxResource.mSkeletalHierarchy;
 		c->mSkeletalAnimations = fbxResource.mSkeletalAnimations;

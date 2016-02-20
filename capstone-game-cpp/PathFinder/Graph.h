@@ -49,6 +49,8 @@ namespace PathFinder
 			pList = reinterpret_cast<T*>(allocator->Allocate(sizeof(T) * numCols * numRows, alignof(T), 0));
 		}
 
+		int Count() { return mNumCols * mNumRows; }
+
 		float Heuristic(T* from, T* to) const
 		{
 			auto dx = abs(from->x - to->x);

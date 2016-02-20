@@ -1,52 +1,64 @@
 #pragma once
 #include "Rig3D/GraphicsMath/cgm.h"
 
-struct Vertex1
-{
-	vec3f Position;
-};
+namespace GPU {
 
-struct QuadVertex
-{
-	vec3f Position;
-	vec3f Color;
-};
+	struct Vertex1
+	{
+		vec3f Position;
+	};
 
-struct Vertex3
-{
-	vec3f Position;
-	vec3f Normal;
-	vec2f UV;
-};
+	struct QuadVertex
+	{
+		vec3f Position;
+		vec3f Color;
+	};
 
-struct NDSVertex
-{
-	vec3f Position;
-	vec2f UV;
-};
+	struct Vertex3
+	{
+		vec3f Position;
+		vec3f Normal;
+		vec2f UV;
+	};
 
-struct Sprite
-{
-	vec3f pointpos;
-	vec2f size;
-	vec2f scale;
-	float id;
-};
+	struct NDSVertex
+	{
+		vec3f Position;
+		vec2f UV;
+	};
 
-struct SkinnedVertex
-{
-	uint32_t	BlendIndices[4];
-	float		BlendWeights[4];
-	vec3f		Position;
-	vec3f		Normal;
-	vec3f		UV;
-};
+	struct Sprite
+	{
+		vec3f pointpos;
+		vec2f size;
+		vec2f scale;
+		float id;
+	};
 
-struct GridVertex
-{
-	float weight;
-	int x;
-	int y;
-	vec3f worldPos;
-	bool hasLight;
-};
+	struct SkinnedVertex
+	{
+		uint32_t	BlendIndices[4];
+		float		BlendWeights[4];
+		vec3f		Position;
+		vec3f		Normal;
+		vec3f		UV;
+	};
+
+	struct Node
+	{
+		float weight;
+		int x;
+		int y;
+		vec3f worldPos;
+		bool hasLight;
+	};
+
+	struct SimpleNode
+	{
+		float weight;
+		int x;
+		int y;
+		bool hasLight;
+	};
+
+}
