@@ -196,12 +196,12 @@ public:
 					pMesh->GetPolygonVertexUV(pIndex, polygonVertexIndex, uvSetNameList.GetStringAt(0), uv, unmapped);
 
 					Vertex vertex;
-					vertex.Position = { GET_FLOAT(position.mData[0]), GET_FLOAT(position.mData[1]), GET_FLOAT(position.mData[2]) };
-					vertex.Normal = { GET_FLOAT(normal.mData[0]), GET_FLOAT(normal.mData[1]), GET_FLOAT(normal.mData[2]) };
+					vertex.SetPosition(vec3f(GET_FLOAT(position.mData[0]), GET_FLOAT(position.mData[1]), GET_FLOAT(position.mData[2])));
+					vertex.SetNormal(vec3f(GET_FLOAT(normal.mData[0]), GET_FLOAT(normal.mData[1]), GET_FLOAT(normal.mData[2])));
 
 					if (!unmapped)
 					{
-						vertex.UV = { GET_FLOAT(uv.mData[0]), GET_FLOAT(uv.mData[1]) };
+						vertex.SetUV(vec2f(GET_FLOAT(uv.mData[0]), GET_FLOAT(uv.mData[1])));
 					}
 
 					// Blend info
@@ -212,15 +212,15 @@ public:
 
 					for (uint32_t i = 0; i < controlPointInfluenceJointCount; i++)
 					{
-						vertex.BlendIndices[i] = controlPointInfluenceJoints[i].jointIndex;
-						vertex.BlendWeights[i] = controlPointInfluenceJoints[i].jointWeight;
+						vertex.SetBlendIndices(i, controlPointInfluenceJoints[i].jointIndex);
+						vertex.SetBlendWeights(i, controlPointInfluenceJoints[i].jointWeight);
 					}
 
 					// Set remaining indices to zero.
 					for (uint32_t i = controlPointInfluenceJointCount; i < 4; i++)
 					{
-						vertex.BlendIndices[i] = 0;
-						vertex.BlendWeights[i] = 0.0f;
+						vertex.SetBlendIndices(i, 0);
+						vertex.SetBlendWeights(i, 0.0f);
 					}
 
 					mVertices.push_back(vertex);

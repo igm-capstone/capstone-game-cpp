@@ -35,6 +35,8 @@ SOFTWARE.
 @version 1.0.0
 */
 
+#undef isnan //FBX conflict
+
 #ifndef NLOHMANN_JSON_HPP
 #define NLOHMANN_JSON_HPP
 

@@ -2,6 +2,7 @@
  
 #define TILE_COUNT_X 2
 #define TILE_COUNT_Y 2
+#include "ModelManager.h"
 
 class Resource
 {
@@ -22,6 +23,7 @@ class Resource
 
 public:
 	static LevelInfo LoadLevel(std::string path, LinearAllocator& allocator);
+	static ModelManager* mModelManager;
 
 private:
 	Resource(Resource const&) = delete;

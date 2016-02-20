@@ -53,7 +53,7 @@ ScareTacticsApplication::ScareTacticsApplication() :
 {
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->AddFontDefault();
-	io.Fonts->AddFontFromFileTTF("Assets\\Wil2ghan.ttf", 30.0f, NULL, NULL);
+	io.Fonts->AddFontFromFileTTF("Assets/Wil2ghan.ttf", 30.0f, NULL, NULL);
 }
 
 ScareTacticsApplication::~ScareTacticsApplication()

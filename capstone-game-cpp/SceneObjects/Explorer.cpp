@@ -6,6 +6,7 @@
 #include <Components/ColliderComponent.h>
 #include <Components/Health.h>
 #include <Components/Skill.h>
+#include <Vertex.h>
 
 Explorer::Explorer(): mMesh(nullptr)
 {
@@ -26,7 +27,8 @@ Explorer::Explorer(): mMesh(nullptr)
 	mController->RegisterMoveCallback(&OnMove);
 	mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
 
-	Application::SharedInstance().GetModelManager()->RequestModel("AnimTest")->Link(this);
+	Application::SharedInstance().GetModelManager()->LoadModel<GPU::SkinnedVertex>("AnimTest");
+	Application::SharedInstance().GetModelManager()->GetModel("AnimTest")->Link(this);
 		
 	mAnimationController = Factory<AnimationController>::Create();
 	mAnimationController->mSceneObject = this;

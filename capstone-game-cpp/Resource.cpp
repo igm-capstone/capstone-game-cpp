@@ -122,6 +122,7 @@ void loadStaticMeshes(jarr_t objs)
 	{
 		auto staticMesh = Factory<StaticMesh>::Create();
 		parseTransform(obj, staticMesh->mTransform);
+		Resource::mModelManager->GetModel(("Models/" + obj["mesh"].get<string>()).c_str())->Link(staticMesh);
 	}
 }
 
@@ -162,8 +163,11 @@ void loadBlocks(jarr_t objs)
 }
 
 
+ModelManager* Resource::mModelManager;
+
 Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 {
+	mModelManager = Application::SharedInstance().GetModelManager();
 	auto fstream = ifstream(path);
 	auto obj = json::parse(fstream);
 	fstream.close();

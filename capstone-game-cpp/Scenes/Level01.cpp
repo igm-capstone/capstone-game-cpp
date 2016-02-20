@@ -125,6 +125,12 @@ void Level01::VInitialize()
 
 void Level01::InitializeAssets()
 {
+	mModelManager->LoadModel<GPU::Vertex3>("Models/Wall");
+	mModelManager->LoadModel<GPU::Vertex3>("Models/Wall_DoubleDoor");
+	mModelManager->LoadModel<GPU::Vertex3>("Models/Wall_SingleDoor");
+	mModelManager->LoadModel<GPU::Vertex3>("Models/Wall_W_SingleWindwo");
+	mModelManager->LoadModel<GPU::Vertex3>("Models/CurvedWall");
+
 	auto level = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 
 	mStaticMeshWorldMatrices0 = level.staticMeshWorldMatrices;
@@ -158,10 +164,7 @@ void Level01::InitializeGeometry()
 
 	mRenderer->VSetMeshVertexBuffer(mWallMesh0, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
 	mRenderer->VSetMeshIndexBuffer(mWallMesh0, &indices[0], indices.size());
-
-	// Explorer Mesh
-	auto modelCluster = mModelManager->RequestModel("AnimTest");
-
+	
 	// Minion 
 	meshLibrary.NewMesh(&mMinionCubeMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mMinionCubeMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
@@ -525,13 +528,14 @@ void Level01::RenderWalls()
 	// This can probably go into the render method...
 	mRenderer->VUpdateShaderConstantBuffer(mStaticMeshShaderResource, mCameraManager->GetCBufferPersp(), 0);
 
-	mRenderer->VBindMesh(mWallMesh0);
+	auto model = mModelManager->GetModel("Models/Wall");
+	mRenderer->VBindMesh(model->mMesh);
 	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 0, 1);
 	mRenderer->VSetVertexShaderConstantBuffer(mStaticMeshShaderResource, 0, 0);
 	mRenderer->VSetPixelShaderResourceView(mStaticMeshShaderResource, 0, 0);
 	mRenderer->VSetPixelShaderSamplerStates(mStaticMeshShaderResource);
 
-	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mWallMesh0->GetIndexCount(), mStaticMeshCount0, 0, 0, 0);
+	mRenderer->GetDeviceContext()->DrawIndexedInstanced(model->mMesh->GetIndexCount(), mStaticMeshCount0, 0, 0, 0);
 
 	mRenderer->VBindMesh(mPlaneMesh);
 	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 1, 1);

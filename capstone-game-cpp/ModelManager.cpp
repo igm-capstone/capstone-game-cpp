@@ -24,28 +24,16 @@ void ModelManager::SetAllocator(LinearAllocator* allocator)
 	mMeshLibrary.SetAllocator(allocator);
 }
 
-ModelCluster* ModelManager::RequestModel(const char* name)
+ModelCluster* ModelManager::GetModel(std::string name)
 {
 	ModelCluster* c = mModelMap[name];
-	if (!c)
-	{
-		c = static_cast<ModelCluster*>(mAllocator->Allocate(sizeof(ModelCluster), alignof(ModelCluster), 0));
-		char filename[40];
-		sprintf_s(filename, "Assets/%s.fbx", name);
-		FBXMeshResource<GPU::SkinnedVertex> fbxResource(filename);
-		mMeshLibrary.LoadMesh(&c->mMesh, mRenderer, fbxResource);
-		c->mSkeletalHierarchy = fbxResource.mSkeletalHierarchy;
-		c->mSkeletalAnimations = fbxResource.mSkeletalAnimations;
-
-		mModelMap[name] = c;
-	}
-
+	assert(c != nullptr); //Model not load, try LoadModel first!
 	return c;
 }
 
-std::vector<BaseSceneObject*>* ModelManager::RequestAllUsingModel(const char* name)
+std::vector<BaseSceneObject*>* ModelManager::RequestAllUsingModel(std::string name)
 {
 	ModelCluster* c = mModelMap[name];
-	if (!c) return nullptr;
+	assert(c != nullptr); //Model not load, try LoadModel first!
 	return &c->mObjects;
 }
