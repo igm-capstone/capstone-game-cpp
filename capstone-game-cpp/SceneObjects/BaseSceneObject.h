@@ -14,12 +14,10 @@ public:
 		mat4f*			mWorldMatrix;
 	};
 
-private:
-	friend class ModelCluster;
+	// DO NOT set this variable manually. 
+	// Use Application::SharedInstance().GetModelManager()->RequestModel("ModelName")->Link(this);
+	// mModel will be populated.
 	class ModelCluster*	mModel;
-
-public:
-	ModelCluster* GetModelCluster() { return mModel; }
 
 protected:
 	BaseSceneObject();

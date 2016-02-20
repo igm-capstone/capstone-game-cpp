@@ -36,7 +36,6 @@ public:
 	~ModelManager();
 	void SetAllocator(LinearAllocator* allocator);
 
-	ModelCluster* AddModel(const char* name);
 	ModelCluster* RequestModel(const char* name);
 	std::vector<BaseSceneObject*>* RequestAllUsingModel(const char* name);
 };

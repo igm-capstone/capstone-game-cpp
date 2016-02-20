@@ -1,5 +1,6 @@
 #pragma once
 #include "Components/BaseComponent.h"
+#include "SkeletalHierarchy.h"
 
 class AnimationController :
 	public BaseComponent
@@ -12,8 +13,10 @@ private:
 
 	AnimationController();
 	~AnimationController();
-
 public:
+	std::vector<SkeletalAnimation>* mSkeletalAnimations;
+	SkeletalHierarchy mSkeletalHierarchy;
+
 	bool mIsAnimating;
 	bool mIsLooping;
 

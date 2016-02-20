@@ -20,8 +20,12 @@ Explorer::Explorer(): mMesh(nullptr), mNetworkID(nullptr)
 	mController->RegisterMoveCallback(&OnMove);
 	mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
 
+	Application::SharedInstance().GetModelManager()->RequestModel("AnimTest")->Link(this);
+		
 	mAnimationController = Factory<AnimationController>::Create();
 	mAnimationController->mSceneObject = this;
+	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
+	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
 
 	mCollider = Factory<SphereColliderComponent>::Create();
 	mCollider->mIsDynamic = true;
@@ -48,9 +52,6 @@ Explorer::Explorer(): mMesh(nullptr), mNetworkID(nullptr)
 	sprint->SetBinding(SkillBinding().Set(KEYCODE_A).Set(MOUSEBUTTON_LEFT));
 	sprint->Setup(2, 1, DoSprint);
 	mSkills[0] = sprint;
-
-	auto model = Application::SharedInstance().GetModelManager()->RequestModel("AnimTest");
-	model->Link(this);
 }
 
 void Explorer::Spawn(vec3f pos, int UUID)

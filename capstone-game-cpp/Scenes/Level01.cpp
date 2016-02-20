@@ -549,12 +549,12 @@ void Level01::RenderExplorers()
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 
-		e.GetModelCluster()->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatices);
+		e.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatices);
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatices, 2);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
-
-		mRenderer->VBindMesh(e.GetModelCluster()->mMesh);
-		mRenderer->VDrawIndexed(0, e.GetModelCluster()->mMesh->GetIndexCount());
+		
+		mRenderer->VBindMesh(e.mModel->mMesh);
+		mRenderer->VDrawIndexed(0, e.mModel->mMesh->GetIndexCount());
 	}
 }
 
