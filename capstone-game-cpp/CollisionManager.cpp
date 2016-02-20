@@ -38,10 +38,14 @@ void CollisionManager::Initialize()
 {
 	mCollisions.reserve(MAX_COLLISIONS);
 	mTriggers.reserve(MAX_COLLISIONS);
+
+	mBVHTree.Initialize();
 }
 
 void CollisionManager::Update(double milliseconds)
 {
+	mBVHTree.Update();
+
 	std::vector<Collision> frameCollisions;
 
 	DetectTriggers(frameCollisions);
