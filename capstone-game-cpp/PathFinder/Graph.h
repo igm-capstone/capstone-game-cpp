@@ -42,12 +42,14 @@ namespace PathFinder
 		Graph()	{}
 		~Graph() {}
 		
-		void SetSize(int numCols, int numRows, LinearAllocator& allocator)
+		void SetSize(int numCols, int numRows, LinearAllocator* allocator)
 		{
 			mNumCols = numCols;
 			mNumRows = numRows;
-			pList = reinterpret_cast<T*>(allocator.Allocate(sizeof(T) * numCols * numRows, alignof(T), 0));
+			pList = reinterpret_cast<T*>(allocator->Allocate(sizeof(T) * numCols * numRows, alignof(T), 0));
 		}
+
+		int Count() { return mNumCols * mNumRows; }
 
 		float Heuristic(T* from, T* to) const
 		{

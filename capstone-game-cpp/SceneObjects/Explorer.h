@@ -29,7 +29,7 @@ public:
 	static void OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot);
 	static void OnNetHealthChange(BaseSceneObject* obj, float newVal);
 	static void OnHealthChange(BaseSceneObject* obj, float newVal);
-	static void OnCollisionExit(BaseSceneObject* obj, struct Collision*);
+	static void OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other);
 
 	static void DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
 };

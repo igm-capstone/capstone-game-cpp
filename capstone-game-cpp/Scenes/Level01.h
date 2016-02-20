@@ -5,6 +5,7 @@
 #include <Uniforms.h>
 #include <Vertex.h>
 #include <AIManager.h>
+#include <ModelManager.h>
 
 class Level01 : public BaseScene
 {
@@ -18,7 +19,7 @@ class Level01 : public BaseScene
 	LinearAllocator		mAllocator;
 	
 	// Counts
-	uint32_t			mWallCount0;
+	uint32_t			mStaticMeshCount0;
 	uint32_t			mPlaneCount;
 	uint32_t			mSpotLightCount;
 	uint32_t			mExplorerCount;
@@ -27,10 +28,10 @@ class Level01 : public BaseScene
 	float				mPlaneHeight;
 
 	// Sprite Data
-	Sprite				mSpriteInstanceData[MAX_SPRITES];
+	GPU::Sprite				mSpriteInstanceData[MAX_SPRITES];
 
 	// Wall Data
-	mat4f*				mWallWorldMatrices0;
+	mat4f*				mStaticMeshWorldMatrices0;
 	mat4f*				mPlaneWorldMatrices;
 	mat4f				mSkinnedMeshMatices[MAX_SKELETON_JOINTS];
 
@@ -41,7 +42,6 @@ class Level01 : public BaseScene
 	// Mesh
 	IMesh*				mWallMesh0;
 	IMesh*				mPlaneMesh;
-	IMesh*				mExplorerCubeMesh; //better solution when will come when we start to handle models
 	IMesh*				mMinionCubeMesh; 
 	IMesh*				mNDSQuadMesh;
 
@@ -50,7 +50,7 @@ class Level01 : public BaseScene
 	IRenderContext*		mShadowContext;
 	
 	// ShaderResource
-	IShaderResource*	mWallShaderResource;
+	IShaderResource*	mStaticMeshShaderResource;
 	IShaderResource*	mExplorerShaderResource;
 	IShaderResource*	mPLVShaderResource;
 	IShaderResource*	mSpritesShaderResource;
@@ -59,15 +59,21 @@ class Level01 : public BaseScene
 	ID3D11ShaderResourceView* mNullSRV[4] = { nullptr, nullptr, nullptr, nullptr };
 
 	// Grid Compute Shader (not handled by ShaderResource, this is where it is not currently helpful)
-	ID3D11Buffer*				mSrcDataGPUBuffer;
-	ID3D11ShaderResourceView*	mSrcDataGPUBufferView;
-	ID3D11Buffer*				mDestDataGPUBuffer;
-	ID3D11Buffer*				mDestDataGPUBufferCPURead;
-	ID3D11UnorderedAccessView*	mDestDataGPUBufferView;
+	ID3D11Buffer*				mFullSrcData;
+	ID3D11ShaderResourceView*	mFullSrcDataSRV;
+	ID3D11Buffer*				mSimpleSrcData;
+	ID3D11ShaderResourceView*	mSimpleSrcDataSRV;
+	ID3D11Buffer*				mOutputData;
+	ID3D11Buffer*				mOutputDataCPURead;
+	ID3D11UnorderedAccessView*	mOutputDataSRV;
+	int lastUpdate = 0;
 
 	// Managers
 	CollisionManager	mCollisionManager;
 	AIManager			mAIManager;
+
+	// Manager alias
+	ModelManager*		mModelManager;
 
 public:
 	Level01();

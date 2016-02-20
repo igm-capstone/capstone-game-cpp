@@ -19,7 +19,8 @@
 #include "Shaders/obj/SpriteVertexShader.h"
 #include "Shaders/obj/SpritePixelShader.h"
 #include "Shaders/obj/ShadowCasterPixelShader.h"
-#include "Shaders/obj/GridComputeShader.h"
+#include "Shaders/obj/GridPass1ComputeShader.h"
+#include "Shaders/obj/GridPass2ComputeShader.h"
 #include "Shaders/obj/ShadowPixelShader.h"
 #include "Shaders/obj/SkinnedMeshVertexShader.h"
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
@@ -39,7 +40,8 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mSpriteVertexShader(nullptr),
 	mSpritePixelShader(nullptr),
 	mSkinnedVertexShader(nullptr),
-	mGridComputeShader(nullptr),
+	mGridPass1ComputeShader(nullptr),
+	mGridPass2ComputeShader(nullptr),
 	mDBGPixelShader(nullptr),
 	mStudio(nullptr),
 	mLoadingScreen(nullptr),
@@ -70,6 +72,7 @@ void ScareTacticsApplication::SetStaticMemory(void* start, size_t size)
 	mStaticMemorySize = size;
 	mSceneAllocator.SetMemory(start, mStaticMemory + STATIC_SCENE_MEMORY + SCENE_ALIGNMENT_PADDING);				// Extra padding for alignment
 	mGameAllocator.SetMemory(mStaticMemory + STATIC_SCENE_MEMORY + SCENE_ALIGNMENT_PADDING, mStaticMemory + size);	
+	mModelManager.SetAllocator(&mGameAllocator);
 }
 
 void ScareTacticsApplication::UnloadScene()
@@ -188,8 +191,10 @@ void ScareTacticsApplication::InitializeShaders()
 
 	// Grid Compute Shader
 
-	renderer->VCreateShader(&mGridComputeShader, &mGameAllocator);
-	renderer->VLoadComputeShader(mGridComputeShader, gGridComputeShader, sizeof(gGridComputeShader));
+	renderer->VCreateShader(&mGridPass1ComputeShader, &mGameAllocator);
+	renderer->VLoadComputeShader(mGridPass1ComputeShader, gGridPass1ComputeShader, sizeof(gGridPass1ComputeShader));
+	renderer->VCreateShader(&mGridPass2ComputeShader, &mGameAllocator);
+	renderer->VLoadComputeShader(mGridPass2ComputeShader, gGridPass2ComputeShader, sizeof(gGridPass2ComputeShader));
 }
 
 void ScareTacticsApplication::InitializeFMOD()
@@ -292,7 +297,8 @@ void ScareTacticsApplication::VShutdown()
 	mSpritePixelShader->~IShader();
 	mDBGPixelShader->~IShader();
 	mSkinnedVertexShader->~IShader();
-	mGridComputeShader->~IShader();
+	mGridPass1ComputeShader->~IShader();
+	mGridPass2ComputeShader->~IShader();
 
 	mSceneAllocator.Free();
 	mGameAllocator.Free();

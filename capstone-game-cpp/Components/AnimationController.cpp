@@ -15,9 +15,9 @@ AnimationController::~AnimationController()
 void AnimationController::PlayAnimation(const char* name)
 {
 	int index = -1;
-	for (uint32_t i = 0; i < mSkeletalAnimations.size(); i++)
+	for (uint32_t i = 0; i < (*mSkeletalAnimations).size(); i++)
 	{
-		if (strcmp(name, mSkeletalAnimations[i].name.c_str()) == 0)
+		if (strcmp(name, (*mSkeletalAnimations)[i].name.c_str()) == 0)
 		{
 			index = static_cast<int>(i);
 		}
@@ -42,7 +42,7 @@ void AnimationController::Update(double milliseconds)
 
 	
 
-	SkeletalAnimation* currentAnimation = &mSkeletalAnimations[mCurrentAnimationIndex];
+	SkeletalAnimation* currentAnimation = &(*mSkeletalAnimations)[mCurrentAnimationIndex];
 
 	//Input* input = Singleton<Engine>::SharedInstance().GetInput();
 	//if (input->GetKeyDown(KEYCODE_RIGHT))

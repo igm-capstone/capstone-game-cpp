@@ -1,7 +1,6 @@
 #pragma once
 #include <Components/ColliderComponent.h>
 
-
 struct Collision
 {
 	union Collider
@@ -14,7 +13,14 @@ struct Collision
 	} colliderA, colliderB;
 
 	vec3f minimumOverlap;	// This is a vector in colliderA frame of reference
+
+	bool operator==(const Collision& other) const
+	{
+		return ((colliderA.BaseCollider == other.colliderA.BaseCollider && colliderB.BaseCollider == other.colliderB.BaseCollider) ||
+			(colliderB.BaseCollider == other.colliderA.BaseCollider && colliderA.BaseCollider == other.colliderB.BaseCollider));
+	}
 };
+
 
 class CollisionManager
 {
@@ -23,11 +29,20 @@ public:
 	~CollisionManager();
 
 	void Initialize();
+
+	void Update(double milliseconds);
+
+	void DetectTriggers(std::vector<Collision>& frameCollisions);
+	void DispatchTriggers(std::vector<Collision>& frameCollisions);
+	inline void DispatchTriggerEnter(Collision* collision);
+	inline void DispatchTriggerStay(Collision* collision);
+	inline void DispatchTriggerExit(Collision* collision);
+
 	void DetectCollisions();
 	void ResolveCollisions();
 
 private:
-	Collision mCollisions[MAX_COLLISIONS];
-	uint32_t  mCollisionsCount;
+	std::vector<Collision>	mCollisions;
+	std::vector<Collision>  mTriggers;
 };
 

@@ -14,7 +14,7 @@ private:
 	AnimationController();
 	~AnimationController();
 public:
-	std::vector<SkeletalAnimation> mSkeletalAnimations;
+	std::vector<SkeletalAnimation>* mSkeletalAnimations;
 	SkeletalHierarchy mSkeletalHierarchy;
 
 	bool mIsAnimating;

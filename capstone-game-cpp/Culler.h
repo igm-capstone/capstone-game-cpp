@@ -1,6 +1,6 @@
 #pragma once
 #include <Rig3D/Visibility.h>
-#include <SceneObjects/Wall.h>
+#include "SceneObjects/StaticCollider.h"
 
 inline void CullWalls(const Rig3D::Frustum& frustum, std::vector<uint32_t>& indices)
 {
@@ -16,7 +16,7 @@ inline void CullWalls(const Rig3D::Frustum& frustum, std::vector<uint32_t>& indi
 	};
 
 	uint32_t index = 0;
-	for (Wall& w : Factory<Wall>())
+	for (StaticCollider& w : Factory<StaticCollider>())
 	{
 		bool shouldCull = false;
 		for (uint32_t p = 0; p < 6; p++)

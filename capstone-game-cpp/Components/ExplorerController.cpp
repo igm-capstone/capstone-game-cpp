@@ -49,9 +49,11 @@ bool ExplorerController::Move(float dt, vec3f& pos)
 	// delta space for the current frame
 	vec3f ds = mCurrentSpeed * dt;
 
-	pos += ds;
-
-	return magnitude(ds) > 0;
+	if (magnitude(ds) > 0.001f) {
+		pos += ds;
+		return true;
+	}
+	return false;
 }
 
 bool ExplorerController::Rotate(float dt, vec3f& pos, quatf& rot)
@@ -97,7 +99,7 @@ bool ExplorerController::Update(double milliseconds)
 	bool hasMoved   = Move(dt, pos);
 	bool hasRotated = Rotate(dt, pos, rot);
 
-	if (hasMoved || hasRotated)
+	if (hasMoved /*|| hasRotated*/)
 	{
 		OnMove(pos, rot);
 	}

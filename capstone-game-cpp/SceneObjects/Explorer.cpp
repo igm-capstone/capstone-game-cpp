@@ -26,8 +26,12 @@ Explorer::Explorer(): mMesh(nullptr)
 	mController->RegisterMoveCallback(&OnMove);
 	mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
 
+	Application::SharedInstance().GetModelManager()->RequestModel("AnimTest")->Link(this);
+		
 	mAnimationController = Factory<AnimationController>::Create();
 	mAnimationController->mSceneObject = this;
+	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
+	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
 
 	mCollider = Factory<SphereColliderComponent>::Create();
 	mCollider->mIsDynamic = true;
@@ -58,6 +62,8 @@ void Explorer::Spawn(vec3f pos, int UUID)
 
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
+
+	mAnimationController->PlayLoopingAnimation("Take 001");
 }
 
 void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
@@ -112,7 +118,7 @@ void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal)
 	}
 }
 
-void Explorer::OnCollisionExit(BaseSceneObject* obj, Collision*)
+void Explorer::OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other)
 {
 	auto e = static_cast<Explorer*>(obj);
 	if (e->mNetworkID->mHasAuthority) {

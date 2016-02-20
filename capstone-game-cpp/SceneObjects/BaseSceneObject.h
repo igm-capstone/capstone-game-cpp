@@ -6,6 +6,7 @@ using namespace Rig3D;
 class BaseSceneObject
 {
 	int __pool_padding = 0xBABACACA;
+
 public:
 	union
 	{
@@ -13,12 +14,12 @@ public:
 		mat4f*			mWorldMatrix;
 	};
 
-protected:
-	BaseSceneObject() : mTransform(nullptr)
-	{
-		mTransform = Factory<Transform>::Create();
-	}
+	// DO NOT set this variable manually. 
+	// Use Application::SharedInstance().GetModelManager()->RequestModel("ModelName")->Link(this);
+	// mModel will be populated.
+	class ModelCluster*	mModel;
 
-	// All COM objects should be released in destructor
-	~BaseSceneObject() {};
+protected:
+	BaseSceneObject();
+	~BaseSceneObject();
 };
