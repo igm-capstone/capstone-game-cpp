@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "BVHTree.h"
-#include "SceneObjects/Wall.h"
+#include "SceneObjects/StaticCollider.h"
 
 #include <Resource.h>
 #include <SceneObjects/BaseSceneObject.h>
@@ -55,6 +55,7 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 	pOBB->mCollider.axis[2]		= kDefaultOrientation[2];
 
 
+
 	vec3f halfExtents = mExtents * 0.5f;
 
 	AABB<vec3f> quadrants[4];
@@ -63,9 +64,11 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 	quadrants[2] = { mOrigin - halfExtents, halfExtents };
 	quadrants[3] = { { mOrigin.x + halfExtents.x, mOrigin.y - halfExtents.y, mOrigin.z }, halfExtents };
 
+
+
 	for (int i = 0; i < 4; i++)
 	{
-		for (Wall& wall : Factory<Wall>())
+		for (StaticCollider& wall : Factory<StaticCollider>())
 		{
 			if (IntersectOBBAABB(wall.mBoxCollider->mCollider, quadrants[i]))
 			{

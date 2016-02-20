@@ -433,7 +433,7 @@ namespace Rig3D
 			rb = 0.0f;
 			for (int j = 0; j < Dimension; j++)
 			{
-				rb += b.halfSize[j] * AbsR[i].pCols[j];
+				rb += b.halfSize.pCols[j] * AbsR[i].pCols[j];
 			}
 
 			if (abs(t[i]) > ra + rb)
@@ -453,7 +453,7 @@ namespace Rig3D
 
 			for (int j = 0; j < Dimension; j++)
 			{
-				ra += b.halfSize[j] * AbsR[j].pCols[i];
+				ra += b.halfSize.pCols[j] * AbsR[j].pCols[i];
 				tAccu += abs(t[j] * R[j].pCols[i]);
 			}
 

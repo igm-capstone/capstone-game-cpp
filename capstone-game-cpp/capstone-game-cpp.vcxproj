@@ -114,8 +114,10 @@
     <ClCompile Include="Components\Skill.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="Factory.cpp" />
+    <ClCompile Include="ModelManager.cpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="ScareTacticsApplication.cpp" />
+    <ClCompile Include="SceneObjects\BaseSceneObject.cpp" />
     <ClCompile Include="SceneObjects\Explorer.cpp" />
     <ClCompile Include="SceneObjects\Ghost.cpp" />
     <ClCompile Include="SceneObjects\Minion.cpp" />
@@ -158,6 +160,7 @@
     <ClInclude Include="FBXResource.h" />
     <ClInclude Include="fmodwrap.h" />
     <ClInclude Include="Mathf.h" />
+    <ClInclude Include="ModelManager.h" />
     <ClInclude Include="SceneObjects\Ghost.h" />
     <ClInclude Include="Components\Skill.h" />
     <ClInclude Include="capstone-game-cpp.rc.h" />
@@ -176,7 +179,8 @@
     <ClInclude Include="SceneObjects\Explorer.h" />
     <ClInclude Include="SceneObjects\MoveableBlock.h" />
     <ClInclude Include="SceneObjects\Lamp.h" />
-    <ClInclude Include="SceneObjects\Wall.h" />
+    <ClInclude Include="SceneObjects\StaticCollider.h" />
+    <ClInclude Include="SceneObjects\StaticMesh.h" />
     <ClInclude Include="Scenes\BaseScene.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="AIManager.h" />

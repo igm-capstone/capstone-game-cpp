@@ -8,13 +8,13 @@ using namespace PathFinder;
 #pragma once
 class AIManager
 {
+	LinearAllocator* mAllocator;
 public:
-	LinearAllocator	mAIAllocator;
 
 	Graph<Node> mGrid;
 	Fringe<Node> mPathFinder;
 
-	void InitGrid(float left, float top, float width, float height, LinearAllocator& allocator);
+	void InitGrid(float left, float top, float width, float height);
 	void ResetGridData();
 	void Update();
 
@@ -25,6 +25,7 @@ public:
 	AIManager(AIManager const&) = delete;
 	void operator=(AIManager const&) = delete;
 	~AIManager();
+	void SetAllocator(LinearAllocator* allocator);
 
 private:
 	float mTop;

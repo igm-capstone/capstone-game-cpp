@@ -10,7 +10,7 @@ AIManager::AIManager()
 	Update();
 }
 
-void AIManager::InitGrid(float left, float top, float width, float height, LinearAllocator& allocator)
+void AIManager::InitGrid(float left, float top, float width, float height)
 {
 	mNumCols = int(ceilf(width / mNodeRadius / 2));
 	mNumRows = int(ceilf(height / mNodeRadius / 2));
@@ -18,7 +18,7 @@ void AIManager::InitGrid(float left, float top, float width, float height, Linea
 	mNumRows += mNumRows % GRID_MULT_OF != 0 ? GRID_MULT_OF - mNumRows % GRID_MULT_OF : 0;
 	mTop = top;
 	mLeft = left;
-	mGrid.SetSize(mNumCols, mNumRows, allocator);
+	mGrid.SetSize(mNumCols, mNumRows, mAllocator);
 
 	ResetGridData();
 }
@@ -69,4 +69,9 @@ SearchResult<Node> AIManager::GetPath(vec3f from, vec3f to) {
 
 AIManager::~AIManager()
 {
+}
+
+void AIManager::SetAllocator(LinearAllocator* allocator)
+{
+	mAllocator = allocator;
 }

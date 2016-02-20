@@ -2,6 +2,7 @@
 #include "AnimationController.h"
 #include "trace.h"
 #include "Rig3D\Common\Input.h"
+#include <ModelManager.h>
 
 AnimationController::AnimationController() : mCurrentAnimationIndex(-1), mCurrentAnimationPlayTime(0.0f), mIsAnimating(false), mIsLooping(false)
 {
@@ -14,10 +15,12 @@ AnimationController::~AnimationController()
 
 void AnimationController::PlayAnimation(const char* name)
 {
+	std::vector<SkeletalAnimation>& skeletalAnimations = mSceneObject->GetModelCluster()->mSkeletalAnimations;
+
 	int index = -1;
-	for (uint32_t i = 0; i < mSkeletalAnimations.size(); i++)
+	for (uint32_t i = 0; i < skeletalAnimations.size(); i++)
 	{
-		if (strcmp(name, mSkeletalAnimations[i].name.c_str()) == 0)
+		if (strcmp(name, skeletalAnimations[i].name.c_str()) == 0)
 		{
 			index = static_cast<int>(i);
 		}
@@ -42,7 +45,7 @@ void AnimationController::Update(double milliseconds)
 
 	
 
-	SkeletalAnimation* currentAnimation = &mSkeletalAnimations[mCurrentAnimationIndex];
+	SkeletalAnimation* currentAnimation = &mSceneObject->GetModelCluster()->mSkeletalAnimations[mCurrentAnimationIndex];
 
 	//Input* input = Singleton<Engine>::SharedInstance().GetInput();
 	//if (input->GetKeyDown(KEYCODE_RIGHT))
@@ -58,7 +61,7 @@ void AnimationController::Update(double milliseconds)
 
 	if (mCurrentAnimationPlayTime <= duration)
 	{
-		SkeletalHierarchy& skeletalHierarchy = mSkeletalHierarchy;
+		SkeletalHierarchy& skeletalHierarchy = mSceneObject->GetModelCluster()->mSkeletalHierarchy;
 		
 		float framesPerMS = static_cast<float>(currentAnimation->frameCount) / duration;
 

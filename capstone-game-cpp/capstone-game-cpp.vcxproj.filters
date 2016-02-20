@@ -210,8 +210,8 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TargetFollower.cpp" />
     <ClCompile Include="trace.cpp" />
-    <ClCompile Include="SceneObjects\Ghost.cpp" />
-    <ClCompile Include="SceneObjects\Explorer.cpp" />
+    <ClCompile Include="ModelManager.cpp" />
+    <ClCompile Include="SceneObjects\BaseSceneObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -246,7 +246,6 @@
     <ClInclude Include="SceneObjects\Explorer.h" />
     <ClInclude Include="SceneObjects\MoveableBlock.h" />
     <ClInclude Include="SceneObjects\Lamp.h" />
-    <ClInclude Include="SceneObjects\Wall.h" />
     <ClInclude Include="Scenes\BaseScene.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="AIManager.h" />
@@ -270,6 +269,9 @@
     <ClInclude Include="trace.h" />
     <ClInclude Include="Uniforms.h" />
     <ClInclude Include="Vertex.h" />
+    <ClInclude Include="SceneObjects\StaticCollider.h" />
+    <ClInclude Include="SceneObjects\StaticMesh.h" />
+    <ClInclude Include="ModelManager.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="External\fmodstudioL.ref" />

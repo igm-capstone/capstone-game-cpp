@@ -48,6 +48,9 @@ Explorer::Explorer(): mMesh(nullptr), mNetworkID(nullptr)
 	sprint->SetBinding(SkillBinding().Set(KEYCODE_A).Set(MOUSEBUTTON_LEFT));
 	sprint->Setup(2, 1, DoSprint);
 	mSkills[0] = sprint;
+
+	auto model = Application::SharedInstance().GetModelManager()->RequestModel("Minion_Test");
+	model->Link(this);
 }
 
 void Explorer::Spawn(vec3f pos, int UUID)
@@ -59,6 +62,8 @@ void Explorer::Spawn(vec3f pos, int UUID)
 
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
+
+	mAnimationController->PlayLoopingAnimation("Minion_01_Animation_Pass_1_1_1.0007");
 }
 
 void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
