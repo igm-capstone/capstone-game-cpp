@@ -79,9 +79,7 @@ inline Vector2& Vector2::operator=(const Vector2& rhs)
 
 inline Vector2 Vector2::operator-()
 {
-	x = -x;
-	y = -y;
-	return *this;
+	return { -x, -y };
 }
 
 inline float& Vector2::operator[](const unsigned int& index)
@@ -170,10 +168,7 @@ inline Vector3& Vector3::operator=(const Vector3& rhs)
 
 inline Vector3 Vector3::operator-()
 {
-	x = -x;
-	y = -y;
-	z = -z;
-	return *this;
+	return { -x, -y, -z };
 }
 
 inline float& Vector3::operator[](const unsigned int& index)
@@ -305,12 +300,8 @@ inline Vector4 Vector4::operator-()
 #ifdef SIMD
 	this->v = simd::Negate(this->v);
 #else
-	x = -x;
-	y = -y;
-	z = -z;
-	w = -w;
+	return{ -x, -y, -z, -w };
 #endif
-	return *this;
 }
 
 inline float& Vector4::operator[](const unsigned int& index)

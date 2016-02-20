@@ -9,8 +9,9 @@ class ExplorerController : public BaseComponent
 	ExplorerController();
 	~ExplorerController();
 
-	Input* mInput;
+	class Input* mInput;
 	Application* mApplication;
+	
 	double mSprintDuration;
 	quatf mModelRotation;
 
@@ -19,14 +20,15 @@ class ExplorerController : public BaseComponent
 	float mSpeedMultiplier;
 	vec3f mCurrentSpeed;
 
+	void UpdateInteractWill();
+
 	// delta time in seconds
 	bool Move(float dt, vec3f& pos);
 	bool Rotate(float dt, vec3f& pos, quatf& rot);
-	void UpdateInteractWill();
 
 public:
 	float mSpeed;
-	bool mIsInteracting;
+	bool  mIsInteracting;
 
 	bool Update(double milliseconds);
 	void Sprint(float duration);

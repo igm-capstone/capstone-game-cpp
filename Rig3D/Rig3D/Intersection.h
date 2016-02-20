@@ -383,4 +383,48 @@ namespace Rig3D
 	}
 
 #pragma endregion 
+
+#pragma region Contains Tests
+
+template<class Vector>
+int ContainsPoint(Vector point, AABB<Vector> bounds)
+{
+	int numElements = sizeof(Vector) / sizeof(float);
+
+	Vector min = bounds.origin - bounds.halfSize;
+	Vector max = bounds.origin + bounds.halfSize;
+
+	for (int i = 0; i < numElements; i++)
+	{
+		if (point[i] < min[i] || point[i] > max[i])
+		{
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+template<class Vector>
+int ContainsAABB(AABB<Vector> inner, AABB<Vector> bounds)
+{
+	int numElements = sizeof(Vector) / sizeof(float);
+
+	Vector minOuter = bounds.origin - bounds.halfSize;
+	Vector maxOuter = bounds.origin + bounds.halfSize;
+	Vector minInner = inner.origin - inner.halfSize;
+	Vector maxInner = inner.origin + inner.halfSize;
+
+	for (int i = 0; i < numElements; i++)
+	{
+		if (minInner[i] < minOuter[i] || maxInner[i] > maxOuter[i])
+		{
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+#pragma endregion
 }

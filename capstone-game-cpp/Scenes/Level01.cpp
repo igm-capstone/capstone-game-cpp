@@ -18,6 +18,7 @@
 #include <Components/Skill.h>
 #include <Components/AnimationController.h>
 #include <Components/Health.h>
+#include <Components/GhostController.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -382,6 +383,11 @@ void Level01::VUpdate(double milliseconds)
 	for (ExplorerController& ec : Factory<ExplorerController>())
 	{
 		ec.Update(milliseconds);
+	}
+
+	for (auto& gc : Factory<GhostController>())
+	{
+		gc.Update(milliseconds);
 	}
 
 	for (auto& dc : Factory<DominationPointController>())

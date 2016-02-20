@@ -195,11 +195,9 @@ inline Quaternion& Quaternion::operator/=(const float& rhs)
 	return *this;
 }
 
-inline Quaternion& Quaternion::operator-()
+inline Quaternion Quaternion::operator-()
 {
-	w = -w;
-	v = -v;
-	return *this;
+	return { -w, -x, -y, -z };
 }
 
 inline Quaternion& Quaternion::operator=(const Quaternion& rhs)

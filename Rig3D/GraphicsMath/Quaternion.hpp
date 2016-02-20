@@ -56,7 +56,7 @@ namespace cliqCity
 			Quaternion& operator*=(const float& rhs);
 			Quaternion& operator/=(const float& rhs);
 			Quaternion& operator=(const Quaternion& rhs);
-			Quaternion& operator-();
+			Quaternion operator-();
 		};
 
 		CGM_DLL Quaternion slerp(Quaternion q0, Quaternion q1, const float& t);

@@ -1,11 +1,7 @@
 ﻿#include <stdafx.h>
 #include "ExplorerController.h"
-#include <SceneObjects/Explorer.h>
-#include <ScareTacticsApplication.h>
-#include <Rig3D/Intersection.h>
-#include <trace.h>
-#include <Colors.h>
 #include <Mathf.h>
+#include <Colors.h>
 
 using namespace cliqCity::graphicsMath;
 

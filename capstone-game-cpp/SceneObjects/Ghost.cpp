@@ -3,6 +3,7 @@
 #include <Components/FmodEventCollection.h>
 #include <Components/Skill.h>
 #include <Components/NetworkID.h>
+#include <Components/GhostController.h>
 #include <CameraManager.h>
 
 //#include <CameraManager.h>
@@ -15,6 +16,9 @@ Ghost::Ghost() : mNetworkID(nullptr)
 
 	mCameraManager = &Singleton<CameraManager>::SharedInstance();
 	mCameraManager->MoveCamera(vec3f(0, 0, 0), vec3f(0.0f, 0.0f, -100.0f));
+
+	mController = Factory<GhostController>::Create();
+	mController->mSceneObject = this;
 
 	mEvents = Factory<FmodEventCollection>::Create();
 	mEvents->mSceneObject = this;
