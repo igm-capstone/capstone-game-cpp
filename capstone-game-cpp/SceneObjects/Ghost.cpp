@@ -32,12 +32,12 @@ Ghost::Ghost() : mNetworkID(nullptr)
 	mSkills[0] = spawnMinion;
 }
 
-void Ghost::Spawn(vec3f pos, int UUID)
+void Ghost::Spawn(BaseScene * scene)
 {
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = -1;
 
-	auto level = Application::SharedInstance().GetCurrentScene()->mLevel;
+	auto level = scene->mLevel;
 	mCameraManager->MoveCamera(level.center, level.center - vec3f(0.0f, 0.0f, 100.0f));
 }
 

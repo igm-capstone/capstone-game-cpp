@@ -20,7 +20,7 @@ private:
 	~Ghost() {};
 
 public:
-	void Spawn(vec3f pos, int UUID);
+	void Spawn(class BaseScene* scene);
 
 	static void DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
 };

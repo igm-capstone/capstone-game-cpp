@@ -71,6 +71,7 @@ public:
 
 	void VRender() override;
 	void RenderShadowMaps();	// Not called per frame
+	void RenderStaticMeshes();
 	void RenderWalls();
 	void RenderExplorers();
 	void RenderSpotLightVolumes();

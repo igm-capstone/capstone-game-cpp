@@ -19,6 +19,7 @@ public:
 	void Link(BaseSceneObject * obj) { mObjects.push_back(obj); obj->mModel = this; }
 	//erase-remove idiom https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
 	void Unlink(BaseSceneObject * obj) { mObjects.erase(remove(mObjects.begin(), mObjects.end(), obj), mObjects.end()); obj->mModel = nullptr; }
+	int ShareCount() { return mObjects.size(); }
 };
 
 
@@ -47,7 +48,7 @@ public:
 		if (!c)
 		{
 			c = static_cast<ModelCluster*>(mAllocator->Allocate(sizeof(ModelCluster), alignof(ModelCluster), 0));
-			std::string path = "Assets/" + name + ".fbx";
+			std::string path = "Assets/Models/" + name + ".fbx";
 			FBXMeshResource<Vertex> fbxResource(path.c_str());
 			mMeshLibrary.LoadMesh(&c->mMesh, mRenderer, fbxResource);
 			c->mSkeletalHierarchy = fbxResource.mSkeletalHierarchy;

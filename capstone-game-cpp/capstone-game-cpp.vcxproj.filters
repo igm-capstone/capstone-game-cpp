@@ -42,7 +42,6 @@
     <ClCompile Include="SceneObjects\Minion.cpp" />
     <ClCompile Include="Scenes\BaseScene.cpp" />
     <ClCompile Include="AIManager.cpp" />
-    <ClCompile Include="LevelReader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Network\NetworkClient.cpp" />
     <ClCompile Include="Network\NetworkManager.cpp" />
@@ -96,7 +95,6 @@
     <ClInclude Include="Colors.h" />
     <ClInclude Include="AIManager.h" />
     <ClInclude Include="json.h" />
-    <ClInclude Include="LevelReader.h" />
     <ClInclude Include="Network\NetworkData.h" />
     <ClInclude Include="Network\NetworkClient.h" />
     <ClInclude Include="Network\NetworkManager.h" />

@@ -47,7 +47,7 @@ REGISTER_FACTORY ( DominationPoint,	6	)
 REGISTER_FACTORY ( Lamp,			17	)
 
 // register transform factory
-REGISTER_FACTORY ( Transform,	1000 )
+REGISTER_FACTORY ( Transform,	100 + MAX_STATIC_MESHES + MAX_EXPLORERS + MAX_MINIONS)
 
 // register component factories
 REGISTER_FACTORY ( NetworkID,						1 + MAX_EXPLORERS + MAX_MINIONS)

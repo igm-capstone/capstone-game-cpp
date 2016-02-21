@@ -17,9 +17,9 @@ public:
 
 		vec3f center, extents;
 		float floorWidth, floorHeight;
-		short staticMeshCount;
-		short floorCount;
-		short lampCount;
+		short staticMeshCount = 0;
+		short floorCount = 0;
+		short lampCount = 0;
 	};
 
 public:

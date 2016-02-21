@@ -20,6 +20,7 @@
 #include <Components/Health.h>
 #include <Components/GhostController.h>
 #include <SceneObjects/Ghost.h>
+#include <SceneObjects/StaticMesh.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -111,6 +112,7 @@ void Level01::VInitialize()
 	}
 	else if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
 		auto ghost = Factory<Ghost>::Create();
+		ghost->Spawn(this);
 	}
 
 	VOnResize();
@@ -120,12 +122,13 @@ void Level01::VInitialize()
 
 void Level01::InitializeAssets()
 {
-	mModelManager->LoadModel<GPU::Vertex3>("Models/Wall");
-	mModelManager->LoadModel<GPU::Vertex3>("Models/Wall_DoubleDoor");
-	mModelManager->LoadModel<GPU::Vertex3>("Models/Wall_SingleDoor");
-	mModelManager->LoadModel<GPU::Vertex3>("Models/Wall_W_SingleWindwo");
-	mModelManager->LoadModel<GPU::Vertex3>("Models/CurvedWall");
-	mModelManager->LoadModel<GPU::SkinnedVertex>("Models/Minion_Test");
+	mModelManager->LoadModel<GPU::Vertex3>("Wall");
+	mModelManager->LoadModel<GPU::Vertex3>("Wall_DoubleDoor");
+	mModelManager->LoadModel<GPU::Vertex3>("Wall_SingleDoor");
+	mModelManager->LoadModel<GPU::Vertex3>("Wall_W_SingleWindwo");
+	mModelManager->LoadModel<GPU::Vertex3>("CurvedWall");
+	mModelManager->LoadModel<GPU::Vertex3>("Floor");
+	//mModelManager->LoadModel<GPU::SkinnedVertex>("Minion_Test");
 
 	mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 
@@ -385,7 +388,7 @@ void Level01::VUpdate(double milliseconds)
 
 
 
-	ComputeGrid();
+	//ComputeGrid();
 	mAIManager.Update();
 	mCollisionManager.Update(milliseconds);
 	mNetworkManager->Update();
@@ -403,7 +406,7 @@ void Level01::VRender()
 
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, Colors::transparent.pCols, 0xffffffff);
 
-	RenderWalls();
+	RenderStaticMeshes();
 	RenderExplorers();
 	RenderMinions();
 	RenderSpotLightVolumes();
@@ -448,7 +451,7 @@ void Level01::RenderShadowMaps()
 
 		CullWalls(frustum, indices);
 
-		auto cluster = mModelManager->GetModel("Models/Wall");
+		auto cluster = mModelManager->GetModel("Wall");
 		mRenderer->VBindMesh(cluster->mMesh);
 
 		for (uint32_t j : indices)
@@ -482,7 +485,7 @@ void Level01::RenderShadowMaps()
 	}
 }
 
-void Level01::RenderWalls()
+void Level01::RenderStaticMeshes()
 {
 	mRenderer->SetViewport();
 	mRenderer->VSetRenderContextTargetsWithDepth(mGBufferContext, 0);
@@ -496,23 +499,32 @@ void Level01::RenderWalls()
 	mRenderer->VSetVertexShader(mApplication->mQuadVertexShader);
 	mRenderer->VSetPixelShader(mApplication->mQuadPixelShader);
 
-	// This can probably go into the render method...
 	mRenderer->VUpdateShaderConstantBuffer(mStaticMeshShaderResource, mCameraManager->GetCBufferPersp(), 0);
 
-	auto model = mModelManager->GetModel("Models/Wall");
-	mRenderer->VBindMesh(model->mMesh);
-	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 0, 1);
 	mRenderer->VSetVertexShaderConstantBuffer(mStaticMeshShaderResource, 0, 0);
+	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 0, 1);
 	mRenderer->VSetPixelShaderResourceView(mStaticMeshShaderResource, 0, 0);
 	mRenderer->VSetPixelShaderSamplerStates(mStaticMeshShaderResource);
 
-	mRenderer->GetDeviceContext()->DrawIndexedInstanced(model->mMesh->GetIndexCount(), mLevel.staticMeshCount, 0, 0, 0);
+	int instanceCount = 0;
+	for (Factory<StaticMesh>::iterator it = Factory<StaticMesh>().begin(); it != Factory<StaticMesh>().end();)
+	{
+		auto& staticMesh = *it;
+		auto modelCluster = staticMesh.mModel;
+		auto numElements = modelCluster->ShareCount();
+		
+		mRenderer->VBindMesh(modelCluster->mMesh);
+		mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, 0);
+		instanceCount += numElements;
 
-	mRenderer->VBindMesh(mPlaneMesh);
+		for (auto i = 0; i < numElements; i++) ++it;
+	}
+		
+	/*mRenderer->VBindMesh(mPlaneMesh);
 	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 1, 1);
 	mRenderer->VSetPixelShaderResourceView(mStaticMeshShaderResource, 1, 0);
 
-	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPlaneMesh->GetIndexCount(), mLevel.floorCount, 0, 0, 0);
+	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPlaneMesh->GetIndexCount(), mLevel.floorCount, 0, 0, 0);*/
 }
 
 void Level01::RenderExplorers()
