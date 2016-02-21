@@ -262,16 +262,14 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	{
 		loadStaticMeshes(walls);
 
-		//level.staticMeshCount = static_cast<short>(walls->size());
-		//level.staticMeshWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.staticMeshCount, alignof(mat4f), 0));
+		level.staticMeshCount = static_cast<short>(walls->size());
+		level.staticMeshWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.staticMeshCount, alignof(mat4f), 0));
 
-		//int i = 0;
-		//for (StaticMesh& w : Factory<StaticMesh>())
-		//{
-		//	level.staticMeshWorldMatrices[i++] = w.mTransform->GetWorldMatrix().transpose();
-		//}
-
-	
+		int i = 0;
+		for (StaticMesh& w : Factory<StaticMesh>())
+		{
+			level.staticMeshWorldMatrices[i++] = w.mTransform->GetWorldMatrix().transpose();
+		}
 	}
 
 	auto colliders = obj["colliders"].get_ptr<jarr_t>();
@@ -279,14 +277,16 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	{
 		loadStaticColliders(colliders);
 
-		level.staticMeshCount = static_cast<short>(colliders->size());
-		level.staticMeshWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.staticMeshCount, alignof(mat4f), 0));
+		// This is here for debugging.
 
-		int i = 0;
-		for (StaticCollider& w : Factory<StaticCollider>())
-		{
-			level.staticMeshWorldMatrices[i++] = w.mTransform->GetWorldMatrix().transpose();
-		}
+		//level.staticMeshCount = static_cast<short>(colliders->size());
+		//level.staticMeshWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.staticMeshCount, alignof(mat4f), 0));
+
+		//int i = 0;
+		//for (StaticCollider& w : Factory<StaticCollider>())
+		//{
+		//	level.staticMeshWorldMatrices[i++] = w.mTransform->GetWorldMatrix().transpose();
+		//}
 	}
 
 	return level;
