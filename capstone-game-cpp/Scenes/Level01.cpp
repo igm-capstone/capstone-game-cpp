@@ -8,7 +8,6 @@
 #include <Rig3D/Graphics/Interface/IShaderResource.h>
 #include <SceneObjects/Explorer.h>
 #include <Rig3D/Graphics/Interface/IRenderContext.h>
-#include <FBXResource.h>
 #include <Culler.h>
 #include <SceneObjects/Lamp.h>
 #include <SceneObjects/Minion.h>
@@ -530,7 +529,7 @@ void Level01::RenderStaticMeshes()
 		auto numElements = modelCluster->ShareCount();
 		
 		mRenderer->VBindMesh(modelCluster->mMesh);
-		mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, 0);
+		mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
 		instanceCount += numElements;
 
 		for (auto i = 0; i < numElements; i++) ++it;

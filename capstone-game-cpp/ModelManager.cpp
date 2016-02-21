@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "ModelManager.h"
 #include "Vertex.h"
-#include "FBXResource.h"
 
 
 ModelManager::ModelManager()

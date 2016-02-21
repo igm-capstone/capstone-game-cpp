@@ -16,7 +16,7 @@ class CameraManager
 	vec3f mOrigin;
 	vec3f mLookAt;
 
-	const float mFOV = 0.25f * PI;
+	const float mFOV = 0.33f * PI;
 	const float mNearPlane = 0.1f;
 	const float mFarPlane = 200;
 
