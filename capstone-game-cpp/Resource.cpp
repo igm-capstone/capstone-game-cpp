@@ -128,7 +128,7 @@ void loadStaticMeshes(jarr_t objs, std::string model)
 }
 
 
-void loadStaticColliders(jarr_t objs)
+void loadStaticColliders(jarr_t objs, CLayer layer)
 {
 	TRACE_LOG("Loading " << int(objs->size()) << " static colliders...");
 	for (auto obj : *objs)
@@ -143,7 +143,7 @@ void loadStaticColliders(jarr_t objs)
 		collider->mBoxCollider->mCollider.axis[1] = axis.pRows[1];
 		collider->mBoxCollider->mCollider.axis[2] = axis.pRows[2];
 
-		collider->mBoxCollider->mLayer = static_cast<CLayer>(obj["layer"].get<short>());
+		collider->mBoxCollider->mLayer = layer;
 	}
 }
 
@@ -282,12 +282,22 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		}
 	}
 
-	auto colliders = obj["colliders"].get_ptr<jarr_t>();
+
+	auto regions = obj["regions"].get_ptr<jarr_t>();
+	if (regions != nullptr)
+	{
+		level.staticColliderCount += static_cast<short>(regions->size());
+		loadStaticColliders(regions, COLLISION_LAYER_FLOOR);
+	}
+
+	auto colliders = obj["staticColliders"].get_ptr<jarr_t>();
 	if (colliders != nullptr)
 	{
-		level.staticColliderCount = static_cast<short>(colliders->size());
-		loadStaticColliders(colliders);
+		level.staticColliderCount += static_cast<short>(colliders->size());
+		loadStaticColliders(colliders, COLLISION_LAYER_WALL);
 	}
+
+
 
 	return level;
 }

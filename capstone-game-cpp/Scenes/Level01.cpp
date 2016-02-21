@@ -565,6 +565,7 @@ void Level01::RenderStaticColliders()
 
 	for (StaticCollider& e : Factory<StaticCollider>())
 	{
+		if (e.mBoxCollider->mLayer != COLLISION_LAYER_WALL) continue;
 		mModel.world = e.mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);

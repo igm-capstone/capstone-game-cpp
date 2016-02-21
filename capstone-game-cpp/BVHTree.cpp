@@ -98,7 +98,7 @@ void BVHTree::Update()
 
 	for (Explorer& explorer : Factory<Explorer>())
 	{
-		AddNodeRecursively(explorer.mCollider, 1, 1, 0, 0, SphereComponentTest);
+		AddNodeRecursively(explorer.mCollider, 2, 1, 0, 0, SphereComponentTest);
 	}
 }
 
@@ -115,6 +115,8 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 	AddNode(pOBB, -1, 0);	
 
 	vec3f halfExtents = mExtents * 0.5f;
+
+
 
 	vec3f quadrants[PARTITION_COUNT];
 	quadrants[0] = { mOrigin.x - halfExtents.x, mOrigin.y + halfExtents.y, mOrigin.z };
@@ -142,7 +144,18 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 
 	for (StaticCollider& collider : Factory<StaticCollider>())
 	{
-		AddNodeRecursively(collider.mBoxCollider, 1, 0, 0, 0, OBBComponentTest);
+		if (collider.mBoxCollider->mLayer == COLLISION_LAYER_FLOOR)
+		{
+			AddNodeRecursively(collider.mBoxCollider, 1, 0, 0, 0, OBBComponentTest);
+		}
+	}
+
+	for (StaticCollider& collider : Factory<StaticCollider>())
+	{
+		if (collider.mBoxCollider->mLayer == COLLISION_LAYER_WALL)
+		{
+			AddNodeRecursively(collider.mBoxCollider, 2, 0, 0, 0, OBBComponentTest);
+		}
 	}
 }
 
