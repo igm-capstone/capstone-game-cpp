@@ -27,6 +27,7 @@ Explorer::Explorer(): mMesh(nullptr), mNetworkID(nullptr)
 	mCollider->mIsDynamic = true;
 	mCollider->mSceneObject = this;
 	mCollider->mIsActive = false;
+	mCollider->mLayer = COLLISION_LAYER_EXPLORER;
 	mCollider->RegisterCollisionExitCallback(&OnCollisionExit);
 	
 	mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
