@@ -38,7 +38,7 @@ PoolAllocator Factory<##type##>::sAllocator(__g##type##Buffer, __g##type##Buffer
 REGISTER_FACTORY ( Ghost,			1	)
 REGISTER_FACTORY ( Explorer,		MAX_EXPLORERS)
 REGISTER_FACTORY ( Minion,			MAX_MINIONS	)
-REGISTER_FACTORY ( StaticMesh,		750	)
+REGISTER_FACTORY ( StaticMesh,		MAX_STATIC_MESHES)
 REGISTER_FACTORY ( StaticCollider,	100	)
 REGISTER_FACTORY ( MoveableBlock,	10	)
 REGISTER_FACTORY ( SpawnPoint,		5	)
@@ -51,7 +51,7 @@ REGISTER_FACTORY ( Transform,	1000 )
 
 // register component factories
 REGISTER_FACTORY ( NetworkID,						1 + MAX_EXPLORERS + MAX_MINIONS)
-REGISTER_FACTORY ( BoxColliderComponent,			100	)
+REGISTER_FACTORY ( BoxColliderComponent,			100 + MAX_STATIC_MESHES)
 REGISTER_FACTORY ( OrientedBoxColliderComponent,	100 )
 REGISTER_FACTORY ( SphereColliderComponent,			100 )
 REGISTER_FACTORY ( ExplorerController,				MAX_EXPLORERS)

@@ -24,6 +24,8 @@
 
 #define MAX_MINIONS 50
 
+#define MAX_STATIC_MESHES 750
+
 #define SHADOW_MAP_SIZE 1024
 
 #define MAX_COLLISIONS 128

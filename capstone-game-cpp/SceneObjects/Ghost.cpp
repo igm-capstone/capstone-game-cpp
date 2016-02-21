@@ -15,7 +15,6 @@ Ghost::Ghost() : mNetworkID(nullptr)
 	mNetworkID->mIsActive = false;
 
 	mCameraManager = &Singleton<CameraManager>::SharedInstance();
-	mCameraManager->MoveCamera(vec3f(0, 0, 0), vec3f(0.0f, 0.0f, -100.0f));
 
 	mController = Factory<GhostController>::Create();
 	mController->mSceneObject = this;
@@ -37,6 +36,9 @@ void Ghost::Spawn(vec3f pos, int UUID)
 {
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = -1;
+
+	auto level = Application::SharedInstance().GetCurrentScene()->mLevel;
+	mCameraManager->MoveCamera(level.center, level.center - vec3f(0.0f, 0.0f, 100.0f));
 }
 
 void Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
