@@ -24,6 +24,8 @@
 
 #define MAX_MINIONS 50
 
+#define MAX_STATIC_MESHES 1500
+
 #define SHADOW_MAP_SIZE 1024
 
 #define MAX_COLLISIONS 128
@@ -32,4 +34,4 @@
 
 #define MAX_SKELETON_JOINTS 64
 
-#define GRID_MULT_OF	10
+#define GRID_MULT_OF	12

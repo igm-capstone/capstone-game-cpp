@@ -2,9 +2,11 @@
  
 #define TILE_COUNT_X 2
 #define TILE_COUNT_Y 2
+#include "ModelManager.h"
 
 class Resource
 {
+public:	
 	struct LevelInfo
 	{
 		mat4f* staticMeshWorldMatrices;
@@ -15,14 +17,16 @@ class Resource
 
 		vec3f center, extents;
 		float floorWidth, floorHeight;
-		short staticMeshCount;
-		short staticColliderCount;
-		short floorCount;
-		short lampCount;
+
+		short staticColliderCount	= 0;
+		short staticMeshCount		= 0;
+		short floorCount			= 0;
+		short lampCount				= 0;
 	};
 
 public:
 	static LevelInfo LoadLevel(std::string path, LinearAllocator& allocator);
+	static ModelManager* mModelManager;
 
 private:
 	Resource(Resource const&) = delete;

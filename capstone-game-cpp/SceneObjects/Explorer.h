@@ -5,7 +5,6 @@ class Explorer : public BaseSceneObject
 {
 	friend class Factory<Explorer>;
 public:
-	class IMesh*						mMesh;
 	class NetworkID*					mNetworkID;
 	class ExplorerController*			mController;
 	class AnimationController*			mAnimationController;
@@ -19,12 +18,11 @@ private:
 
 private:
 	Explorer();
-
 	~Explorer() {};
 
 public:
-	void Spawn(vec3f pos, int UUID);;
-	
+	void Spawn(vec3f pos, int UUID);
+
 	static void OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot);
 	static void OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth);
 	static void OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot);

@@ -3,6 +3,9 @@
 #include <Components/NetworkID.h>
 #include <Components/ColliderComponent.h>
 #include <Components/MinionController.h>
+#include <Components/AnimationController.h>
+#include <ScareTacticsApplication.h>
+#include <Vertex.h>
 
 
 Minion::Minion()
@@ -21,6 +24,13 @@ Minion::Minion()
 	mController->mSceneObject = this;
 	mController->mIsActive = false;
 	mController->RegisterMoveCallback(&OnMove);
+	
+	Application::SharedInstance().GetModelManager()->GetModel("Minion_Test")->Link(this);
+
+	mAnimationController = Factory<AnimationController>::Create();
+	mAnimationController->mSceneObject = this;
+	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
+	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
 }
 
 Minion::~Minion()
@@ -36,6 +46,8 @@ void Minion::Spawn(vec3f pos, int UUID)
 
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
+
+	mAnimationController->PlayLoopingAnimation("Minion_01_Animation_Pass_1_1_1.0007");
 }
 
 void Minion::OnMove(BaseSceneObject* obj, vec3f newPos)

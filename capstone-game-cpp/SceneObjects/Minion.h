@@ -6,10 +6,10 @@ class Minion : public BaseSceneObject
 	friend class Factory<Minion>;
 
 public:
-	class IMesh*					mMesh;
 	class NetworkID*				mNetworkID;
 	class MinionController*			mController;
 	class SphereColliderComponent*	mCollider;
+	class AnimationController*		mAnimationController;
 
 private:
 	Minion();

@@ -44,7 +44,8 @@ void parseTransform(json obj, Transform* transform)
 	auto rotation = obj["rotation"];
 	if (!rotation.empty())
 	{
-		transform->SetRotation(parseQuatf(rotation));
+		transform->SetRotation(parseQuatf(rotation)*quatf::rollPitchYaw(0, -0.5*PI, -PI));
+		//transform->SetRotation(quatf::rollPitchYaw(0, 0, 0.5*PI)*parseQuatf(rotation));
 	}
 
 	auto scale = obj["scale"];
@@ -115,13 +116,14 @@ void loadSpawnPoints(jarr_t objs)
 }
 
 
-void loadStaticMeshes(jarr_t objs)
+void loadStaticMeshes(jarr_t objs, std::string model)
 {
 	TRACE_LOG("Loading " << int(objs->size()) << " static meshes...");
 	for (auto obj : *objs)
 	{
 		auto staticMesh = Factory<StaticMesh>::Create();
 		parseTransform(obj, staticMesh->mTransform);
+		Resource::mModelManager->GetModel(model.c_str())->Link(staticMesh);
 	}
 }
 
@@ -164,8 +166,11 @@ void loadBlocks(jarr_t objs)
 }
 
 
+ModelManager* Resource::mModelManager;
+
 Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 {
+	mModelManager = Application::SharedInstance().GetModelManager();
 	auto fstream = ifstream(path);
 	auto obj = json::parse(fstream);
 	fstream.close();
@@ -204,9 +209,6 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 			level.floorWorldMatrices[y * TILE_COUNT_X + x] = (mat4f::rotateX(-PI * 0.5f) * mat4f::translate({ level.center.x + (x * level.floorWidth - halfWidth) , level.center.y + (halfHeight - y * level.floorHeight), 0.5f })).transpose(); //FIXME: hardcoded z value
 		}
 	}
-
-	auto counts = obj["metadata"]["count"];
-	level.staticColliderCount = counts["colliders"].get<short>();
 
 	auto lamps = obj["lamps"].get_ptr<jarr_t>();
 	if (lamps != nullptr)
@@ -257,17 +259,25 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		loadBlocks(moveableBlocks);
 	}
 
-	auto walls = obj["walls"].get_ptr<jarr_t>();
-	if (walls != nullptr)
+	auto staticMeshes = obj["staticMeshes"];
+	if (staticMeshes != nullptr)
 	{
-		loadStaticMeshes(walls);
+		for (json::iterator it = staticMeshes.begin(); it != staticMeshes.end(); ++it) {
+			std::cout << it.key() << " : " << it.value() << "\n";
 
-		level.staticMeshCount = static_cast<short>(walls->size());
+			auto model = it.key();
+			auto meshes = obj["staticMeshes"][it.key()].get_ptr<jarr_t>();
+			if (model == "Floor") continue;
+			if (meshes) {
+				loadStaticMeshes(meshes, model);
+				level.staticMeshCount += static_cast<short>(meshes->size());
+			}
+		}
+
 		level.staticMeshWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.staticMeshCount, alignof(mat4f), 0));
 
 		int i = 0;
-		for (StaticMesh& w : Factory<StaticMesh>())
-		{
+		for (StaticMesh& w : Factory<StaticMesh>()) {
 			level.staticMeshWorldMatrices[i++] = w.mTransform->GetWorldMatrix().transpose();
 		}
 	}
@@ -275,18 +285,8 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	auto colliders = obj["colliders"].get_ptr<jarr_t>();
 	if (colliders != nullptr)
 	{
+		level.staticColliderCount = static_cast<short>(colliders->size());
 		loadStaticColliders(colliders);
-
-		// This is here for debugging.
-
-		//level.staticMeshCount = static_cast<short>(colliders->size());
-		//level.staticMeshWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.staticMeshCount, alignof(mat4f), 0));
-
-		//int i = 0;
-		//for (StaticCollider& w : Factory<StaticCollider>())
-		//{
-		//	level.staticMeshWorldMatrices[i++] = w.mTransform->GetWorldMatrix().transpose();
-		//}
 	}
 
 	return level;

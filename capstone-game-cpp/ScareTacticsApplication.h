@@ -3,7 +3,6 @@
 #include "capstone-game-cpp/Scenes/BaseScene.h"
 #include <Rig3D/Singleton.h>
 #include <assert.h>
-#include <unordered_map>
 #include <Rig3D/Graphics/Interface/IShader.h>
 #include "fmodwrap.h"
 #include "ModelManager.h"
@@ -29,7 +28,8 @@ public:
 	IShader* mSpriteVertexShader;
 	IShader* mSpritePixelShader;
 	IShader* mSkinnedVertexShader;
-	IShader* mGridComputeShader;
+	IShader* mGridPass1ComputeShader;
+	IShader* mGridPass2ComputeShader;
 
 	IShader* mDBGPixelShader;
 

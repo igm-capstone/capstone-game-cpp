@@ -3,6 +3,7 @@
 #include <Components/FmodEventCollection.h>
 #include <Components/Skill.h>
 #include <Components/NetworkID.h>
+#include <Components/GhostController.h>
 #include <CameraManager.h>
 
 //#include <CameraManager.h>
@@ -14,6 +15,9 @@ Ghost::Ghost() : mNetworkID(nullptr)
 	mNetworkID->mIsActive = false;
 
 	mCameraManager = &Singleton<CameraManager>::SharedInstance();
+
+	mController = Factory<GhostController>::Create();
+	mController->mSceneObject = this;
 
 	mEvents = Factory<FmodEventCollection>::Create();
 	mEvents->mSceneObject = this;
@@ -28,10 +32,13 @@ Ghost::Ghost() : mNetworkID(nullptr)
 	mSkills[0] = spawnMinion;
 }
 
-void Ghost::Spawn(vec3f pos, int UUID)
+void Ghost::Spawn(BaseScene * scene)
 {
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = -1;
+
+	auto level = scene->mLevel;
+	mCameraManager->MoveCamera(level.center, level.center - vec3f(0.0f, 0.0f, 100.0f));
 }
 
 void Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)

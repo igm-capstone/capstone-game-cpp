@@ -18,7 +18,7 @@ void LoadingScreen::VUpdate(double milliseconds)
 
 void LoadingScreen::VRender()
 {
-	float bg[4] = { 0.2f, 0.2f, 0.2f, 0.5f };
+	float bg[4] = { 0.2f, 0.8f, 0.2f, 0.5f };
 
 	mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_TRIANGLE);
 

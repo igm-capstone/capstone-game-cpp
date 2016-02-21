@@ -2,8 +2,8 @@
 #include "stdafx.h"
 
 #include "Network\NetworkManager.h"
-#include <SceneObjects/BaseSceneObject.h>
 #include <CameraManager.h>
+#include <Resource.h>
 
 using namespace Rig3D;
 
@@ -29,7 +29,6 @@ protected:
 
 	CameraManager*				mCameraManager;
 	NetworkManager*				mNetworkManager;
-	BaseSceneObject*			mMe;
 
 	uint8_t*					mStaticMemory;
 	size_t						mStaticMemorySize;
@@ -38,7 +37,8 @@ public:
 	BaseSceneState				mState;
 
 	// Miscelanious
-	BoxCollider					mFloorCollider;
+	Resource::LevelInfo			mLevel;
+	BoxCollider2D				mFloorCollider;
 
 	BaseScene();
 	virtual ~BaseScene();

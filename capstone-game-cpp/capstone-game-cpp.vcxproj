@@ -123,7 +123,6 @@
     <ClCompile Include="SceneObjects\Minion.cpp" />
     <ClCompile Include="Scenes\BaseScene.cpp" />
     <ClCompile Include="AIManager.cpp" />
-    <ClCompile Include="LevelReader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Network\NetworkClient.cpp" />
     <ClCompile Include="Network\NetworkManager.cpp" />
@@ -185,7 +184,6 @@
     <ClInclude Include="Colors.h" />
     <ClInclude Include="AIManager.h" />
     <ClInclude Include="json.h" />
-    <ClInclude Include="LevelReader.h" />
     <ClInclude Include="Network\NetworkData.h" />
     <ClInclude Include="Network\NetworkClient.h" />
     <ClInclude Include="Network\NetworkManager.h" />
@@ -218,6 +216,14 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="Shaders\GridPass1ComputeShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\GridPass2ComputeShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shaders\NDSQuadPixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
@@ -237,10 +243,6 @@
     <FxCompile Include="Shaders\SpotLightVolumeVertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Shaders\GridComputeShader.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
     </FxCompile>
     <FxCompile Include="Shaders\CircleVertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>

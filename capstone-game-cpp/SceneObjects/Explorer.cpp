@@ -4,14 +4,22 @@
 #include <Components/ExplorerController.h>
 #include <Components/AnimationController.h>
 #include <Components/ColliderComponent.h>
+#include <ModelManager.h>
 #include <Components/Health.h>
 #include <Components/Skill.h>
+#include <Vertex.h>
 
-Explorer::Explorer(): mMesh(nullptr), mNetworkID(nullptr)
+Explorer::Explorer()
 {
+	mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
+	mCameraManager = &Singleton<CameraManager>::SharedInstance();
+
 	mNetworkID = Factory<NetworkID>::Create();
 	mNetworkID->mSceneObject = this;
 	mNetworkID->mIsActive = false;
+	mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
+	mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
+	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
 
 	mController = Factory<ExplorerController>::Create();
 	mController->mSceneObject = this;
@@ -20,8 +28,13 @@ Explorer::Explorer(): mMesh(nullptr), mNetworkID(nullptr)
 	mController->RegisterMoveCallback(&OnMove);
 	mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
 
+	Application::SharedInstance().GetModelManager()->LoadModel<GPU::SkinnedVertex>("Minion_Test");
+	Application::SharedInstance().GetModelManager()->GetModel("Minion_Test")->Link(this);
+
 	mAnimationController = Factory<AnimationController>::Create();
 	mAnimationController->mSceneObject = this;
+	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
+	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
 
 	mCollider = Factory<SphereColliderComponent>::Create();
 	mCollider->mIsDynamic = true;
@@ -29,13 +42,6 @@ Explorer::Explorer(): mMesh(nullptr), mNetworkID(nullptr)
 	mCollider->mIsActive = false;
 	mCollider->mLayer = COLLISION_LAYER_EXPLORER;
 	mCollider->RegisterCollisionExitCallback(&OnCollisionExit);
-	
-	mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
-	mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
-	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
-
-	mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
-	mCameraManager = &Singleton<CameraManager>::SharedInstance();
 
 	mHealth = Factory<Health>::Create();
 	mHealth->mSceneObject = this;
@@ -49,9 +55,6 @@ Explorer::Explorer(): mMesh(nullptr), mNetworkID(nullptr)
 	sprint->SetBinding(SkillBinding().Set(KEYCODE_A).Set(MOUSEBUTTON_LEFT));
 	sprint->Setup(2, 1, DoSprint);
 	mSkills[0] = sprint;
-
-	auto model = Application::SharedInstance().GetModelManager()->RequestModel("Minion_Test");
-	model->Link(this);
 }
 
 void Explorer::Spawn(vec3f pos, int UUID)

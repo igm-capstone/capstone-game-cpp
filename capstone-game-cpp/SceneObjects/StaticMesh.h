@@ -4,13 +4,11 @@
 
 class StaticMesh : public BaseSceneObject
 {
-
 	friend class Factory<StaticMesh>;
 
-public:
-	class IMesh* mMesh;
+	class BoxColliderComponent* mCullingBoxCollider;
 
 private:
-	StaticMesh() : mMesh(nullptr) {};
+	StaticMesh() : mCullingBoxCollider(Factory<BoxColliderComponent>::Create()) {};
 	~StaticMesh() {};
 };

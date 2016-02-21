@@ -38,9 +38,20 @@ public:
 	void MoveCamera(const vec3f& lookAt, const vec3f& origin);
 	void OnResize();
 	vec3f GetForward();
-	vec2f World2Screen(vec3f world);
-	vec3f Screen2WorldAtZ0(vec2f screen);
-	Rig3D::Ray<vec3f> Screen2Ray(vec2f screen);
+	
+	// to screen
+	vec2f World2Screen(const vec3f& world);
+	
+	// to viewport
+	vec2f Screen2Viewport(const vec2f& screen);
+
+	// to world at z0
+	vec3f Viewport2WorldAtZ0(const vec2f& viewport);
+	vec3f Screen2WorldAtZ0(const vec2f& screen);
+
+	// to ray
+	Rig3D::Ray<vec3f> Viewport2Ray(const vec2f& viewport);
+	Rig3D::Ray<vec3f> Screen2Ray(const vec2f& screen);
 
 private:
 	//For Screen2World/Pixel2Unit calculation
