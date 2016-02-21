@@ -112,7 +112,7 @@ public:
 		FbxAxisSystem dxAxisSystem(FbxAxisSystem::eDirectX);
 		if (axisSystem != dxAxisSystem)
 		{
-			dxAxisSystem.ConvertScene(pScene);
+			//dxAxisSystem.ConvertScene(pScene);
 		}
 
 		FbxNode* pRootNode = pScene->GetRootNode();
@@ -182,9 +182,11 @@ public:
 				int controlPointIndex;
 				bool unmapped;
 
+				int ccw[] = { 0, 2, 1 };
+
 				for (int polygonVertexIndex = 0; polygonVertexIndex < pSize; polygonVertexIndex++)
 				{
-					controlPointIndex = pMesh->GetPolygonVertex(pIndex, polygonVertexIndex);
+					controlPointIndex = pMesh->GetPolygonVertex(pIndex, ccw[polygonVertexIndex]);
 
 					// Position
 					position = pMesh->GetControlPointAt(controlPointIndex);
@@ -196,8 +198,8 @@ public:
 					pMesh->GetPolygonVertexUV(pIndex, polygonVertexIndex, uvSetNameList.GetStringAt(0), uv, unmapped);
 
 					Vertex vertex;
-					vertex.SetPosition(vec3f(GET_FLOAT(position.mData[0]), GET_FLOAT(position.mData[1]), GET_FLOAT(position.mData[2])));
-					vertex.SetNormal(vec3f(GET_FLOAT(normal.mData[0]), GET_FLOAT(normal.mData[1]), GET_FLOAT(normal.mData[2])));
+					vertex.SetPosition(vec3f(-GET_FLOAT(position.mData[0]), GET_FLOAT(position.mData[1]), GET_FLOAT(position.mData[2])));
+					vertex.SetNormal(vec3f(-GET_FLOAT(normal.mData[0]), GET_FLOAT(normal.mData[1]), GET_FLOAT(normal.mData[2])));
 
 					if (!unmapped)
 					{

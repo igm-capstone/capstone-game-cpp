@@ -44,8 +44,7 @@ void parseTransform(json obj, Transform* transform)
 	auto rotation = obj["rotation"];
 	if (!rotation.empty())
 	{
-		transform->SetRotation(parseQuatf(rotation)*quatf::rollPitchYaw(0, -0.5*PI, -PI));
-		//transform->SetRotation(quatf::rollPitchYaw(0, 0, 0.5*PI)*parseQuatf(rotation));
+		transform->SetRotation(parseQuatf(rotation)*quatf::rollPitchYaw(0, -0.5*PI, 0));
 	}
 
 	auto scale = obj["scale"];

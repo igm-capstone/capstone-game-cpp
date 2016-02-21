@@ -38,7 +38,7 @@ void Ghost::Spawn(BaseScene * scene)
 	mNetworkID->mUUID = -1;
 
 	auto level = scene->mLevel;
-	mCameraManager->MoveCamera(level.center, level.center - vec3f(0.0f, 0.0f, 100.0f));
+	mCameraManager->MoveCamera(level.center, level.center + vec3f(0.0f, 0.0f, -85.5f));
 }
 
 void Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
