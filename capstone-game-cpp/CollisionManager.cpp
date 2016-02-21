@@ -177,7 +177,10 @@ void CollisionManager::DetectCollisions()
 
 	indices.reserve(MAX_EXPLORERS);
 	
-	mBVHTree.GetNodeIndices(indices, [](const BVHNode& other) { return other.object->mLayer == COLLISION_LAYER_EXPLORER; });
+	mBVHTree.GetNodeIndices(indices, [](const BVHNode& other)
+	{
+		return other.object->mLayer == COLLISION_LAYER_EXPLORER;
+	});
 
 	// Explorer / Explorer Collisions
 
@@ -268,8 +271,8 @@ void CollisionManager::DetectCollisions()
 			if (IntersectSphereOBB(pSphereComponent->mCollider, pObbComponent->mCollider, cp))
 			{
 				vec3f d = cp - pSphereComponent->mCollider.origin;
-				vec3f nd = normalize(d);
-				vec3f r = nd * pSphereComponent->mCollider.radius;
+				vec3f r = normalize(d) * pSphereComponent->mCollider.radius;
+
 				collisions.push_back(Collision());
 
 				Collision* pCollision = &collisions.back();
