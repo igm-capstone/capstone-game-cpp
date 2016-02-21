@@ -139,6 +139,9 @@ void Level01::InitializeAssets()
 	mFloorCollider.halfSize = level.extents;
 	mFloorCollider.origin	= level.center;
 
+	mCameraManager->MoveCamera(level.center, level.center - vec3f(0.0f, 0.0f, 100.0f));
+
+	mCollisionManager.mBVHTree.SetRootBoundingVolume(level.center, level.extents, level.staticColliderCount);
 	mAIManager.InitGrid(level.center.x - level.extents.x, level.center.y + level.extents.y, 2 * level.extents.x, 2 * level.extents.y);
 }
 

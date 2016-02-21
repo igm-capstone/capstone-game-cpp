@@ -131,15 +131,17 @@ void loadStaticColliders(jarr_t objs)
 	TRACE_LOG("Loading " << int(objs->size()) << " static colliders...");
 	for (auto obj : *objs)
 	{
-		auto wall = Factory<StaticCollider>::Create();
-		parseTransform(obj, wall->mTransform);
-		wall->mBoxCollider->mCollider.origin = wall->mTransform->GetPosition();
-		wall->mBoxCollider->mCollider.halfSize = wall->mTransform->GetScale() * 0.5f;
+		auto collider = Factory<StaticCollider>::Create();
+		parseTransform(obj, collider->mTransform);
+		collider->mBoxCollider->mCollider.origin = collider->mTransform->GetPosition();
+		collider->mBoxCollider->mCollider.halfSize = collider->mTransform->GetScale() * 0.5f;
 
-		mat3f axis = wall->mTransform->GetRotationMatrix();
-		wall->mBoxCollider->mCollider.axis[0] = axis.pRows[0];
-		wall->mBoxCollider->mCollider.axis[1] = axis.pRows[1];
-		wall->mBoxCollider->mCollider.axis[2] = axis.pRows[2];
+		mat3f axis = collider->mTransform->GetRotationMatrix();
+		collider->mBoxCollider->mCollider.axis[0] = axis.pRows[0];
+		collider->mBoxCollider->mCollider.axis[1] = axis.pRows[1];
+		collider->mBoxCollider->mCollider.axis[2] = axis.pRows[2];
+
+		collider->mBoxCollider->mLayer = static_cast<CLayer>(obj["layer"].get<short>());
 	}
 }
 
@@ -199,9 +201,12 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	{
 		for (int x = 0; x < TILE_COUNT_X; x++)
 		{
-			level.floorWorldMatrices[y * TILE_COUNT_X + x] = (mat4f::rotateX(-PI * 0.5f) * mat4f::translate({ x * level.floorWidth - halfWidth, halfHeight - y * level.floorHeight, 0.5f })).transpose(); //FIXME: hardcoded z value
+			level.floorWorldMatrices[y * TILE_COUNT_X + x] = (mat4f::rotateX(-PI * 0.5f) * mat4f::translate({ level.center.x + (x * level.floorWidth - halfWidth) , level.center.y + (halfHeight - y * level.floorHeight), 0.5f })).transpose(); //FIXME: hardcoded z value
 		}
 	}
+
+	auto counts = obj["metadata"]["count"];
+	level.staticColliderCount = counts["colliders"].get<short>();
 
 	auto lamps = obj["lamps"].get_ptr<jarr_t>();
 	if (lamps != nullptr)
@@ -257,11 +262,28 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	{
 		loadStaticMeshes(walls);
 
-		level.staticMeshCount = static_cast<short>(walls->size());
+		//level.staticMeshCount = static_cast<short>(walls->size());
+		//level.staticMeshWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.staticMeshCount, alignof(mat4f), 0));
+
+		//int i = 0;
+		//for (StaticMesh& w : Factory<StaticMesh>())
+		//{
+		//	level.staticMeshWorldMatrices[i++] = w.mTransform->GetWorldMatrix().transpose();
+		//}
+
+	
+	}
+
+	auto colliders = obj["colliders"].get_ptr<jarr_t>();
+	if (colliders != nullptr)
+	{
+		loadStaticColliders(colliders);
+
+		level.staticMeshCount = static_cast<short>(colliders->size());
 		level.staticMeshWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.staticMeshCount, alignof(mat4f), 0));
 
 		int i = 0;
-		for (StaticMesh& w : Factory<StaticMesh>())
+		for (StaticCollider& w : Factory<StaticCollider>())
 		{
 			level.staticMeshWorldMatrices[i++] = w.mTransform->GetWorldMatrix().transpose();
 		}

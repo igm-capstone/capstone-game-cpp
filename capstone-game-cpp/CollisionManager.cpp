@@ -6,6 +6,9 @@
 #include "SceneObjects/StaticCollider.h"
 #include <algorithm>
 
+
+
+
 // Functor used to find matching collisions
 namespace
 {
@@ -210,13 +213,19 @@ void CollisionManager::DetectCollisions()
 			if (IntersectSphereOBB(e.mCollider->mCollider, w.mBoxCollider->mCollider, cp))
 			{
 				vec3f d = cp - e.mCollider->mCollider.origin;
-				vec3f r = normalize(d) * e.mCollider->mCollider.radius;
+				vec3f nd = normalize(d);
+				vec3f r = nd * e.mCollider->mCollider.radius;
 				collisions.push_back(Collision());
 
 				Collision* pCollision = &collisions.back();
 				pCollision->colliderA.SphereCollider	= e.mCollider;
 				pCollision->colliderB.OBBCollider		= w.mBoxCollider;
 				pCollision->minimumOverlap				= d - r;
+
+				if (IS_NAN(pCollision->minimumOverlap.x))
+				{
+					printf("");
+				}
 
 				e.mCollider->OnCollisionEnter(&w, d - r);
 			}

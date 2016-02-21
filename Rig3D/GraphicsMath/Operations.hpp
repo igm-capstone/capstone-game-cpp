@@ -5,6 +5,8 @@
 //#include "Quaternion.hpp"
 //#include "SIMDVector.hpp"
 
+#define IS_NAN(x) (((x) < 0) == ((x) >= 0))
+
 namespace cliqCity
 {
 	namespace graphicsMath
@@ -114,8 +116,13 @@ namespace cliqCity
 		template<class Vector>
 		inline Vector normalize(const Vector& vector)
 		{
-			float invMag = 1.0f / magnitude(vector);
-			return vector * invMag;
+			float invMag =  magnitude(vector);
+			if (invMag == 0.0f)
+			{
+				return Vector(0.0f);
+			}
+
+			return vector * (1.0f/invMag);
 		}
 
 		template<class Vector>

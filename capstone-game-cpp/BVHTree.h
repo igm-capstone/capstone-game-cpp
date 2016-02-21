@@ -2,10 +2,22 @@
 #include <SceneObjects/BaseSceneObject.h>
 #include <Components/ColliderComponent.h>
 
+typedef int(*IntersectionTest)(BaseColliderComponent*, OrientedBoxColliderComponent*);
+
 struct BVHNode
 {
 	class BaseColliderComponent*	object;
 	short							parentIndex;
+
+	BVHNode() : object(nullptr), parentIndex(0)
+	{
+		
+	}
+	
+	~BVHNode()
+	{
+		object = nullptr;
+	}
 };
 
 class BVHTree : public BaseSceneObject
@@ -25,6 +37,8 @@ public:
 
 	void BuildBoundingVolumeHierarchy();
 
-	void AddNodes(OrientedBoxCollider* boundingVolume, const int& layerIndex, const int& index, const int& parentIndex, const int& depth);
-	void AddNode(class BaseColliderComponent* pSceneObject, const int& index, const int& parentIndex, const int& depth);
+	void AddNode(BaseColliderComponent* pColliderComponent, const int& parentIndex, const int& depth);
+	void AddNodeRecursively(class BaseColliderComponent* pColliderComponent, const int& destLayerIndex, const int& layerIndex, const int& parentIndex, const int& depth, IntersectionTest intersectionTest);
+
+	void RenderDebug();
 };

@@ -315,7 +315,7 @@ namespace Rig3D
 	template<class Vector, int Dimension>
 	int IntersectSphereOBB(const Sphere<Vector>& sphere, const OBB<Vector, Dimension>& obb, Vector& cp)
 	{
-		// Get closest point on AABB to sphere center
+		// Get closest point on OBB to sphere center
 		ClosestOBBPointToPoint(obb, sphere.origin, cp);
 
 		Vector d = cp - sphere.origin;

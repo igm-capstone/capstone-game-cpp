@@ -41,6 +41,7 @@ namespace cliqCity
 			Quaternion(const float& w, const float& x, const float& y, const float& z) : x(x), y(y), z(z), w(w) {};
 			Quaternion(const float& w, const Vector3& v) : Quaternion(w, v.x, v.y, v.z) {};
 			Quaternion(const Quaternion& quaternion) : Quaternion(quaternion.w, quaternion.v) {};
+			Quaternion(const float& v) : Quaternion(0.0f, 0.0f, 0.0f, 0.0f) {};
 			Quaternion() : Quaternion(1.0f, 0.0f, 0.0f, 0.0f) {};
 
 			Quaternion conjugate() const;

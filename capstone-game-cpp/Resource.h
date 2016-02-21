@@ -16,6 +16,7 @@ class Resource
 		vec3f center, extents;
 		float floorWidth, floorHeight;
 		short staticMeshCount;
+		short staticColliderCount;
 		short floorCount;
 		short lampCount;
 	};
