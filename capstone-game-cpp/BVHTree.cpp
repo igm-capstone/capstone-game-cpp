@@ -38,6 +38,13 @@ struct BVHNodeLayerFilter
 	}
 };
 
+struct BVHNodeIntesection
+{
+	CLayer	layer;
+	int		parentIndex;
+	
+};
+
 static vec3f kDefaultOrientation[3] =
 {
 	{ 1.0f, 0.0f, 0.0f },
@@ -84,15 +91,15 @@ void BVHTree::Update()
 {
 	RenderDebug();
 
-	std::remove_if(mNodes.begin(), mNodes.end(), BVHNodeLayerFilter(COLLISION_LAYER_EXPLORER));
-	std::remove_if(mNodes.begin(), mNodes.end(), BVHNodeLayerFilter(COLLISION_LAYER_MINION));
+	mNodes.erase(std::remove_if(mNodes.begin(), mNodes.end(), [](const BVHNode& other)
+	{
+		return other.object->mLayer == COLLISION_LAYER_EXPLORER || other.object->mLayer == COLLISION_LAYER_MINION;
+	}), mNodes.end());
 
-	//TRACE("ADDING EXPLORERS" << Trace::endl);
-	//for (Explorer& explorer : Factory<Explorer>())
-	//{
-	//	TRACE("POS: " << explorer.mTransform->GetPosition() << Trace::endl);
-	//	AddNodeRecursively(explorer.mCollider, 1, 1, 0, 0, SphereComponentTest);
-	//}
+	for (Explorer& explorer : Factory<Explorer>())
+	{
+		AddNodeRecursively(explorer.mCollider, 1, 1, 0, 0, SphereComponentTest);
+	}
 }
 
 void BVHTree::BuildBoundingVolumeHierarchy()
@@ -177,6 +184,25 @@ void BVHTree::AddNodeRecursively(BaseColliderComponent* pColliderComponent, cons
 			}
 		}
 	}
+}
+
+void BVHTree::GetNodeIndices(std::vector<uint32_t>& indices, std::function<bool(const BVHNode& other)> predicate)
+{
+	BVHNode* pNodes		= &mNodes[0];
+	uint32_t nodeCount	= mNodes.size();
+
+	for (uint32_t i = 0; i < nodeCount; i++)
+	{
+		if (predicate(pNodes[i]))
+		{
+			indices.push_back(i);
+		}
+	}
+}
+
+BVHNode* BVHTree::GetNode(const uint32_t& index)
+{
+	return &mNodes[index];
 }
 
 void BVHTree::RenderDebug()

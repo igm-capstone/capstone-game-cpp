@@ -40,5 +40,7 @@ public:
 	void AddNode(BaseColliderComponent* pColliderComponent, const int& parentIndex, const int& depth);
 	void AddNodeRecursively(class BaseColliderComponent* pColliderComponent, const int& destLayerIndex, const int& layerIndex, const int& parentIndex, const int& depth, IntersectionTest intersectionTest);
 
+	void GetNodeIndices(std::vector<uint32_t>& indices, std::function<bool(const BVHNode& other)> predicate);
+	BVHNode* GetNode(const uint32_t& index);
 	void RenderDebug();
 };
