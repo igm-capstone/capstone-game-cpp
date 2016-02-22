@@ -25,9 +25,6 @@ Pixel main(Vertex vertex)
 {
 	matrix clip = mul(mul(vertex.world, view), projection);
 
-	vertex.position.x *= -1;
-	vertex.normal.x *= -1;
-
 	float4 vertexPos = float4(vertex.position, 1.0f);
 
 	Pixel pixel;
