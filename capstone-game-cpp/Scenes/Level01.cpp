@@ -216,12 +216,6 @@ void Level01::InitializeShaderResources()
 		const char* filenames[] = { "Assets/tileable5d.png", "Assets/wood floor 2.png" };
 		mRenderer->VAddShaderTextures2D(mStaticMeshShaderResource, filenames, 2);
 		mRenderer->VAddShaderLinearSamplerState(mStaticMeshShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
-
-		D3D11_RASTERIZER_DESC rastDesc;
-		ZeroMemory(&rastDesc, sizeof(D3D11_RASTERIZER_DESC));
-		rastDesc.FillMode = D3D11_FILL_SOLID;
-		rastDesc.CullMode = D3D11_CULL_FRONT;
-		mRenderer->GetDevice()->CreateRasterizerState(&rastDesc, &mCWRasterState);
 	}
 
 	// Explorers
@@ -492,7 +486,6 @@ void Level01::RenderShadowMaps()
 
 void Level01::RenderStaticMeshes()
 {
-	mRenderer->GetDeviceContext()->RSSetState(mCWRasterState);
 	mRenderer->SetViewport();
 	mRenderer->VSetRenderContextTargetsWithDepth(mGBufferContext, 0);
 
@@ -525,8 +518,6 @@ void Level01::RenderStaticMeshes()
 
 		for (auto i = 0; i < numElements; i++) ++it;
 	}
-		
-	mRenderer->GetDeviceContext()->RSSetState(nullptr);
 }
 
 void Level01::RenderExplorers()

@@ -226,7 +226,7 @@ public:
 
 				for (int polygonVertexIndex = 0; polygonVertexIndex < pSize; polygonVertexIndex++)
 				{
-					controlPointIndex = pMesh->GetPolygonVertex(pIndex, polygonVertexIndex);
+					controlPointIndex = pMesh->GetPolygonVertex(pIndex, ccw[polygonVertexIndex]);
 
 					// Position
 					fbxPosition = pMesh->GetControlPointAt(controlPointIndex);

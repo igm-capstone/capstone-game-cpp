@@ -28,8 +28,6 @@ class Level01 : public BaseScene
 	// RenderContext
 	IRenderContext*		mGBufferContext;
 	IRenderContext*		mShadowContext;
-
-	ID3D11RasterizerState* mCWRasterState; //For LHS handling.
 	
 	// ShaderResource
 	IShaderResource*	mStaticMeshShaderResource;
