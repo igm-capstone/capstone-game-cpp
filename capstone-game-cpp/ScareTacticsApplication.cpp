@@ -7,8 +7,8 @@
 #include "Shaders/obj/BillboardPixelShader.h"
 #include "Shaders/obj/BillboardVertexShader.h"
 #include "Shaders/obj/CircleVertexShader.h"
-#include "Shaders/obj/QuadPixelShader.h"
-#include "Shaders/obj/QuadVertexShader.h"
+#include "Shaders/obj/StaticMeshPixelShader.h"
+#include "Shaders/obj/StaticMeshVertexShader.h"
 #include "Shaders/obj/ExplorerVertexShader.h"
 #include "Shaders/obj/ExplorerPixelShader.h"
 #include "Shaders/obj/SpotLightVolumeVertexShader.h"
@@ -29,8 +29,8 @@
 using namespace Rig3D;
 
 ScareTacticsApplication::ScareTacticsApplication() :
-	mQuadVertexShader(nullptr),
-	mQuadPixelShader(nullptr),
+	mStaticMeshVertexShader(nullptr),
+	mStaticMeshPixelShader(nullptr),
 	mExplorerVertexShader(nullptr),
 	mExplorerPixelShader(nullptr),
 	mPLVolumeVertexShader(nullptr),
@@ -92,9 +92,9 @@ void ScareTacticsApplication::InitializeShaders()
 	auto engine = &Singleton<Engine>::SharedInstance();
 	auto renderer = engine->GetRenderer();
 
-	// Wall shaders
+	// Static Mesh shaders
 
-	InputElement wallInputElements[] =
+	InputElement staticMeshInputElements[] =
 	{
 		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX   },
 		{ "NORMAL",		0, 0, 12,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
@@ -105,11 +105,11 @@ void ScareTacticsApplication::InitializeShaders()
 		{ "WORLD",		3, 1, 48, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE }
 	};
 
-	renderer->VCreateShader(&mQuadVertexShader, &mGameAllocator);
-	renderer->VCreateShader(&mQuadPixelShader, &mGameAllocator);
+	renderer->VCreateShader(&mStaticMeshVertexShader, &mGameAllocator);
+	renderer->VCreateShader(&mStaticMeshPixelShader, &mGameAllocator);
 
-	renderer->VLoadVertexShader(mQuadVertexShader, gQuadVertexShader, sizeof(gQuadVertexShader), wallInputElements, 7);
-	renderer->VLoadPixelShader(mQuadPixelShader, gQuadPixelShader, sizeof(gQuadPixelShader));
+	renderer->VLoadVertexShader(mStaticMeshVertexShader, gStaticMeshVertexShader, sizeof(gStaticMeshVertexShader), staticMeshInputElements, 7);
+	renderer->VLoadPixelShader(mStaticMeshPixelShader, gStaticMeshPixelShader, sizeof(gStaticMeshPixelShader));
 
 	// Explorer Shaders
 
@@ -285,8 +285,8 @@ void ScareTacticsApplication::VShutdown()
 		mSceneToLoad->~BaseScene();
 	}
 
-	mQuadVertexShader->~IShader();
-	mQuadPixelShader->~IShader();
+	mStaticMeshVertexShader->~IShader();
+	mStaticMeshPixelShader->~IShader();
 	mExplorerVertexShader->~IShader();
 	mExplorerPixelShader->~IShader();
 	mPLVolumeVertexShader->~IShader();

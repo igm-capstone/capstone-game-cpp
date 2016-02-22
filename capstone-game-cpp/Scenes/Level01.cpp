@@ -127,7 +127,7 @@ void Level01::InitializeAssets()
 	mModelManager->LoadModel<GPU::Vertex3>("Wall_W_SingleWindwo");
 	mModelManager->LoadModel<GPU::Vertex3>("CurvedWall");
 	mModelManager->LoadModel<GPU::Vertex3>("Floor");
-	//mModelManager->LoadModel<GPU::SkinnedVertex>("Minion_Test");
+	mModelManager->LoadModel<GPU::SkinnedVertex>("Minion_Test");
 
 	mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 
@@ -188,23 +188,23 @@ void Level01::InitializeShaderResources()
 	// Shadow Maps for each light
 	mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mLevel.lampCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 
-	// Walls
+	// Static Meshes
 	{
-		// Allocate wall shader resource
+		// Allocate shader resource
 		mRenderer->VCreateShaderResource(&mStaticMeshShaderResource, &mAllocator);
 
 		// Instance buffer data
-		void*	ibWallData[] = { mLevel.staticMeshWorldMatrices, mLevel.floorWorldMatrices };
-		size_t	ibWallSizes[] = { sizeof(mat4f) * mLevel.staticMeshCount, sizeof(mat4f) * mLevel.floorCount };
-		size_t	ibWallStrides[] = { sizeof(mat4f), sizeof(mat4f) };
-		size_t	ibWallOffsets[] = { 0, 0 };
+		void*	ibStaticMeshData[] = { mLevel.staticMeshWorldMatrices, mLevel.floorWorldMatrices };
+		size_t	ibStaticMeshSizes[] = { sizeof(mat4f) * mLevel.staticMeshCount, sizeof(mat4f) * mLevel.floorCount };
+		size_t	ibStaticMeshStrides[] = { sizeof(mat4f), sizeof(mat4f) };
+		size_t	ibStaticMeshOffsets[] = { 0, 0 };
 
 		// Create the instance buffer
-		mRenderer->VCreateDynamicShaderInstanceBuffers(mStaticMeshShaderResource, ibWallData, ibWallSizes, ibWallStrides, ibWallOffsets, 2);
+		mRenderer->VCreateDynamicShaderInstanceBuffers(mStaticMeshShaderResource, ibStaticMeshData, ibStaticMeshSizes, ibStaticMeshStrides, ibStaticMeshOffsets, 2);
 
 		// Set data for instance buffer once
-		mRenderer->VUpdateShaderInstanceBuffer(mStaticMeshShaderResource, mLevel.staticMeshWorldMatrices, ibWallSizes[0], 0);
-		mRenderer->VUpdateShaderInstanceBuffer(mStaticMeshShaderResource, mLevel.floorWorldMatrices, ibWallSizes[1], 1);
+		mRenderer->VUpdateShaderInstanceBuffer(mStaticMeshShaderResource, mLevel.staticMeshWorldMatrices, ibStaticMeshSizes[0], 0);
+		mRenderer->VUpdateShaderInstanceBuffer(mStaticMeshShaderResource, mLevel.floorWorldMatrices, ibStaticMeshSizes[1], 1);
 
 		// Constant buffer data
 		void*	cStaticMeshData[] = { mCameraManager->GetCBufferPersp() };
@@ -216,6 +216,12 @@ void Level01::InitializeShaderResources()
 		const char* filenames[] = { "Assets/tileable5d.png", "Assets/wood floor 2.png" };
 		mRenderer->VAddShaderTextures2D(mStaticMeshShaderResource, filenames, 2);
 		mRenderer->VAddShaderLinearSamplerState(mStaticMeshShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
+
+		D3D11_RASTERIZER_DESC rastDesc;
+		ZeroMemory(&rastDesc, sizeof(D3D11_RASTERIZER_DESC));
+		rastDesc.FillMode = D3D11_FILL_SOLID;
+		rastDesc.CullMode = D3D11_CULL_FRONT;
+		mRenderer->GetDevice()->CreateRasterizerState(&rastDesc, &mCWRasterState);
 	}
 
 	// Explorers
@@ -486,6 +492,7 @@ void Level01::RenderShadowMaps()
 
 void Level01::RenderStaticMeshes()
 {
+	mRenderer->GetDeviceContext()->RSSetState(mCWRasterState);
 	mRenderer->SetViewport();
 	mRenderer->VSetRenderContextTargetsWithDepth(mGBufferContext, 0);
 
@@ -494,9 +501,9 @@ void Level01::RenderStaticMeshes()
 	mRenderer->VClearContextTarget(mGBufferContext, 2, Colors::magenta.pCols);	// Color
 	mRenderer->VClearDepthStencil(mGBufferContext, 0, 1.0f, 0);					// Depth
 
-	mRenderer->VSetInputLayout(mApplication->mQuadVertexShader);
-	mRenderer->VSetVertexShader(mApplication->mQuadVertexShader);
-	mRenderer->VSetPixelShader(mApplication->mQuadPixelShader);
+	mRenderer->VSetInputLayout(mApplication->mStaticMeshVertexShader);
+	mRenderer->VSetVertexShader(mApplication->mStaticMeshVertexShader);
+	mRenderer->VSetPixelShader(mApplication->mStaticMeshPixelShader);
 
 	mRenderer->VUpdateShaderConstantBuffer(mStaticMeshShaderResource, mCameraManager->GetCBufferPersp(), 0);
 
@@ -519,11 +526,7 @@ void Level01::RenderStaticMeshes()
 		for (auto i = 0; i < numElements; i++) ++it;
 	}
 		
-	/*mRenderer->VBindMesh(mPlaneMesh);
-	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 1, 1);
-	mRenderer->VSetPixelShaderResourceView(mStaticMeshShaderResource, 1, 0);
-
-	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mPlaneMesh->GetIndexCount(), mLevel.floorCount, 0, 0, 0);*/
+	mRenderer->GetDeviceContext()->RSSetState(nullptr);
 }
 
 void Level01::RenderExplorers()
