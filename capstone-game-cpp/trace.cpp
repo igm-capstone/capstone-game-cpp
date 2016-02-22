@@ -28,11 +28,11 @@
 #include "Shaders/obj/LineTraceVertexShader.h"
 
 char Trace::gTraceMemory[Trace::gTraceMemorySize] = { 0 };
-char Trace::gStaticMeshMemory[Trace::gMeshMemorySize] = { 0 };
+char Trace::gMeshMemory[Trace::gMeshMemorySize] = { 0 };
 
 Trace::Trace() :
 	mTraceAllocator(static_cast<void*>(gTraceMemory), static_cast<void*>(gTraceMemory + gTraceMemorySize)), 
-	mStaticMeshAllocator(static_cast<void*>(gStaticMeshMemory), static_cast<void*>(gStaticMeshMemory + gMeshMemorySize))
+	mStaticMeshAllocator(static_cast<void*>(gMeshMemory), static_cast<void*>(gMeshMemory + gMeshMemorySize))
 {
 	mStaticMeshLibrary.SetAllocator(&mStaticMeshAllocator);
 
@@ -59,7 +59,7 @@ void Trace::InitializeLineTraceMesh()
 
 	mLineTraceVertices = reinterpret_cast<LineTraceVertex*>(mTraceAllocator.Allocate(sizeof(LineTraceVertex) * gLineTraceVertexCount, alignof(LineTraceVertex), 0));
 
-	uint16_t lineTraceIndices[gLineTraceVertexCount];
+	uint32_t lineTraceIndices[gLineTraceVertexCount];
 	for (auto i = 0; i < gLineTraceVertexCount; i++)
 	{
 		lineTraceIndices[i] = i;
@@ -156,7 +156,7 @@ void Trace::Render() {
 	mDeviceContext->UpdateSubresource(mLineTraceShaderBuffer, 0, nullptr, Singleton<CameraManager>::SharedInstance().GetCBufferPersp(), 0, 0);
 	mDeviceContext->VSSetConstantBuffers(0, 1, &mLineTraceShaderBuffer);
 
-	mRenderer->VBindMesh(mLineTraceMesh);
+	mRenderer->VBindMesh32(mLineTraceMesh);
 	mRenderer->VDrawIndexed(0, mLineTraceDrawCount);
 
 	// reset line trace count

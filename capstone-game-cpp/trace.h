@@ -29,14 +29,14 @@ typedef cliqCity::memory::LinearAllocator LinearAllocator;
 class Trace
 {
 private:
-	static const int gLineTraceMaxCount = 20000;
+	static const int gLineTraceMaxCount = 50000;
 	static const int gLineTraceVertexCount = 2 * gLineTraceMaxCount;
 
-	static const int gTraceMemorySize = 10024 + (gLineTraceVertexCount * 8 * 4);
+	static const int gTraceMemorySize = 1024 + (gLineTraceVertexCount * sizeof(float) * 8);
 	static char gTraceMemory[gTraceMemorySize];
 
-	static const int gMeshMemorySize = 1024;
-	static char gStaticMeshMemory[gMeshMemorySize];
+	static const int gMeshMemorySize = 32; // Just an IMesh* really
+	static char gMeshMemory[gMeshMemorySize];
 
 	LinearAllocator					mTraceAllocator;
 	LinearAllocator					mStaticMeshAllocator;

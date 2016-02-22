@@ -69,9 +69,12 @@ namespace Rig3D
 		void	VCreateDynamicVertexBuffer(void* buffer, void* vertices, const size_t& size);
 
 		void	VCreateIndexBuffer(void* buffer, uint16_t* indices, const uint32_t& count);
+		void	VCreateIndexBuffer(void* buffer, uint32_t* indices, const uint32_t& count);
 		void	VCreateStaticIndexBuffer(void* buffer, uint16_t* indices, const uint32_t& count);
+		void	VCreateStaticIndexBuffer(void* buffer, uint32_t* indices, const uint32_t& count);
 		void	VCreateDynamicIndexBuffer(void* buffer, uint16_t* indices, const uint32_t& count);
-
+		void	VCreateDynamicIndexBuffer(void* buffer, uint32_t* indices, const uint32_t& count);
+		
 		void	VCreateInstanceBuffer(void* buffer, void* data, const size_t& size);
 		void	VCreateStaticInstanceBuffer(void* buffer, void* data, const size_t& size);
 		void	VCreateDynamicInstanceBuffer(void* buffer, void* data, const size_t& size);
@@ -127,13 +130,17 @@ namespace Rig3D
 		void	VSetDynamicMeshVertexBuffer(IMesh* mesh, void* vertices, const size_t& size, const size_t& stride);
 
 		void	VSetMeshIndexBuffer(IMesh* mesh, uint16_t* indices, const uint32_t& count);
+		void	VSetMeshIndexBuffer(IMesh* mesh, uint32_t* indices, const uint32_t& count);
 		void	VSetStaticMeshIndexBuffer(IMesh* mesh, uint16_t* indices, const uint32_t& count);
+		void	VSetStaticMeshIndexBuffer(IMesh* mesh, uint32_t* indices, const uint32_t& count);
 		void	VSetDynamicMeshIndexBuffer(IMesh* mesh, uint16_t* indices, const uint32_t& count);
-
+		void	VSetDynamicMeshIndexBuffer(IMesh* mesh, uint32_t* indices, const uint32_t& count);
+		
 		void	VUpdateMeshVertexBuffer(IMesh* mesh, void* data, const size_t& size);
 		void	VUpdateMeshIndexBuffer(IMesh* mesh, void* data, const uint32_t& count);
 
 		void    VBindMesh(IMesh* mesh);
+		void	VBindMesh32(IMesh* mesh);
 
 #pragma endregion 
 
