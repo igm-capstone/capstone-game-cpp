@@ -20,6 +20,46 @@ namespace
 	FbxManager* gFbxMgr = nullptr;
 }
 
+inline void ConvertVector(FbxVector4& srcVector, vec3f& destVector)
+{
+	destVector = { GET_FLOAT(srcVector.mData[0]), GET_FLOAT(srcVector.mData[1]), GET_FLOAT(srcVector.mData[2]) };
+}
+
+// Converts a vector from LHS to RHS by flipping the x axis
+inline void TransformVector(FbxVector4& srcVector, FbxVector4& destVector)
+{
+	memcpy(destVector, srcVector, sizeof(FbxVector4));
+	destVector.mData[0] = -srcVector[0];
+}
+
+inline void ConvertMatrix(FbxAMatrix& srcMatrix, mat4f& destMatrix)
+{
+	destMatrix.u = { GET_FLOAT(srcMatrix.GetRow(0).mData[0]), GET_FLOAT(srcMatrix.GetRow(0).mData[1]), GET_FLOAT(srcMatrix.GetRow(0).mData[2]), GET_FLOAT(srcMatrix.GetRow(0).mData[3]) };
+	destMatrix.v = { GET_FLOAT(srcMatrix.GetRow(1).mData[0]), GET_FLOAT(srcMatrix.GetRow(1).mData[1]), GET_FLOAT(srcMatrix.GetRow(1).mData[2]), GET_FLOAT(srcMatrix.GetRow(1).mData[3]) };
+	destMatrix.w = { GET_FLOAT(srcMatrix.GetRow(2).mData[0]), GET_FLOAT(srcMatrix.GetRow(2).mData[1]), GET_FLOAT(srcMatrix.GetRow(2).mData[2]), GET_FLOAT(srcMatrix.GetRow(2).mData[3]) };
+	destMatrix.t = { GET_FLOAT(srcMatrix.GetRow(3).mData[0]), GET_FLOAT(srcMatrix.GetRow(3).mData[1]), GET_FLOAT(srcMatrix.GetRow(3).mData[2]), GET_FLOAT(srcMatrix.GetRow(3).mData[3]) };
+}
+
+// Converts an affine matrix from RHS to LHS by negating the first row and column
+// http://answers.unity3d.com/storage/temp/12048-lefthandedtorighthanded.pdf
+inline void TransformAffineMatrix(FbxAMatrix& srcMatrix, FbxAMatrix& destMatrix)
+{
+	memcpy(destMatrix, srcMatrix, sizeof(FbxAMatrix));
+
+	double* s44 = static_cast<double*>(srcMatrix);
+	double* d44 = static_cast<double*>(destMatrix);
+
+	 //Row 1
+	d44[4]	= -s44[4];
+	d44[8]	= -s44[8];
+	d44[12] = -s44[12];
+	
+	// Column 1
+	d44[1]	= -s44[1];
+	d44[2]	= -s44[2];
+	d44[3]	= -s44[3];
+}
+
 template <class Vertex>
 class FBXMeshResource
 {
@@ -112,7 +152,7 @@ public:
 		FbxAxisSystem dxAxisSystem(FbxAxisSystem::eDirectX);
 		if (axisSystem != dxAxisSystem)
 		{
-			//dxAxisSystem.ConvertScene(pScene);
+			dxAxisSystem.ConvertScene(pScene);
 		}
 
 		FbxNode* pRootNode = pScene->GetRootNode();
@@ -177,29 +217,37 @@ public:
 				// We only draw triangles, feel me?
 				assert(pSize == 3);
 
-				FbxVector4 position, normal;
+				FbxVector4 fbxPosition, fbxNormal;
 				FbxVector2 uv;
 				int controlPointIndex;
 				bool unmapped;
 
-				int ccw[] = { 0, 1, 2 };
+				int ccw[] = { 0, 2, 1 };
 
 				for (int polygonVertexIndex = 0; polygonVertexIndex < pSize; polygonVertexIndex++)
 				{
-					controlPointIndex = pMesh->GetPolygonVertex(pIndex, ccw[polygonVertexIndex]);
+					controlPointIndex = pMesh->GetPolygonVertex(pIndex, polygonVertexIndex);
 
 					// Position
-					position = pMesh->GetControlPointAt(controlPointIndex);
+					fbxPosition = pMesh->GetControlPointAt(controlPointIndex);
 
 					// Normal
-					pMesh->GetPolygonVertexNormal(pIndex, polygonVertexIndex, normal);
+					pMesh->GetPolygonVertexNormal(pIndex, polygonVertexIndex, fbxNormal);
 
 					// UV
 					pMesh->GetPolygonVertexUV(pIndex, polygonVertexIndex, uvSetNameList.GetStringAt(0), uv, unmapped);
 
+					FbxVector4 xformPosition, xformNormal;
+					TransformVector(fbxPosition, xformPosition);
+					TransformVector(fbxNormal, xformNormal);
+
+					vec3f position, normal;
+					ConvertVector(xformPosition, position);
+					ConvertVector(xformNormal, normal);
+
 					Vertex vertex;
-					vertex.SetPosition(vec3f(GET_FLOAT(position.mData[0]), GET_FLOAT(position.mData[1]), GET_FLOAT(position.mData[2])));
-					vertex.SetNormal(vec3f(GET_FLOAT(normal.mData[0]), GET_FLOAT(normal.mData[1]), GET_FLOAT(normal.mData[2])));
+					vertex.SetPosition(position);
+					vertex.SetNormal(normal);
 
 					if (!unmapped)
 					{
@@ -358,17 +406,16 @@ public:
 						pCluster->GetTransformMatrix(transformMatrix);				// Model Space Transform (Mesh Transform) This is the cluster transform w/r/t the Model. I believe we need this if we convert the scene coordinate system.
 						pCluster->GetTransformLinkMatrix(transformLinkMatrix);		// Global Space Transform. This is the cluster transform w/r/t the Scene. This traverses each parent.
 
-																					// Transposing for graphics math
-						FbxAMatrix inverseBindPoseMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryMatrix; // Joint Space 
+						FbxAMatrix clusterInverseBindPoseMatrix = transformLinkMatrix.Inverse() * transformMatrix * geometryMatrix; // Joint Space 
+
+						FbxAMatrix inverseBindPoseMatrix;
+						TransformAffineMatrix(clusterInverseBindPoseMatrix, inverseBindPoseMatrix);
 
 						int jointIndex = mSkeletalHierarchy.GetJointIndexByName(pCluster->GetLink()->GetName());
 						assert(jointIndex > -1);
 
 						Joint* pJoint = &mSkeletalHierarchy.mJoints[jointIndex];
-						pJoint->inverseBindPoseMatrix.u = { GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(0).mData[3]) };
-						pJoint->inverseBindPoseMatrix.v = { GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(1).mData[3]) };
-						pJoint->inverseBindPoseMatrix.w = { GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(2).mData[3]) };
-						pJoint->inverseBindPoseMatrix.t = { GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[0]), GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[1]), GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[2]), GET_FLOAT(inverseBindPoseMatrix.GetRow(3).mData[3]) };
+						ConvertMatrix(inverseBindPoseMatrix, pJoint->inverseBindPoseMatrix);
 
 						// Get control points influenced by this joint
 						int controlPointIndexCount = pCluster->GetControlPointIndicesCount();
@@ -394,7 +441,11 @@ public:
 							currentTime.SetFrame(frameIndex, FBX_FPS);
 
 							FbxAMatrix animModelMatrix = pNode->EvaluateGlobalTransform(currentTime) * geometryMatrix;							// Model space pose matrix. This incorporates the transform of coordinate system if we converted the scene earlier.
-							FbxAMatrix animLinkMatrix = animModelMatrix.Inverse() * pCluster->GetLink()->EvaluateGlobalTransform(currentTime);	// Global Animated Space. This is the animated joint position w/r/t the scene.
+							FbxAMatrix animGlobalLinkMatrix = animModelMatrix.Inverse() *  pCluster->GetLink()->EvaluateGlobalTransform(currentTime);	// Global Animated Space. This is the animated joint position w/r/t the scene.
+
+							// LHS > RHS conversion... 
+							FbxAMatrix animLinkMatrix;
+							TransformAffineMatrix(animGlobalLinkMatrix, animLinkMatrix);
 
 							FbxQuaternion clusterRotation = animLinkMatrix.GetQ();
 							FbxVector4 clusterScale = animLinkMatrix.GetS();
