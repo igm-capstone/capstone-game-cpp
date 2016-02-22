@@ -67,7 +67,7 @@ void Trace::InitializeLineTraceMesh()
 
 	mStaticMeshLibrary.NewMesh(&mLineTraceMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mLineTraceMesh, mLineTraceVertices, sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex));
-	mRenderer->VSetDynamicMeshIndexBuffer(mLineTraceMesh, lineTraceIndices, gLineTraceVertexCount);
+	mRenderer->VSetStaticMeshIndexBuffer(mLineTraceMesh, lineTraceIndices, gLineTraceVertexCount);
 }
 
 void Trace::InitializeLineTraceShaders() {

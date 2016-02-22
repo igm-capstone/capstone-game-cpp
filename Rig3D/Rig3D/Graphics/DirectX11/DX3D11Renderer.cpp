@@ -341,7 +341,7 @@ void DX3D11Renderer::VCreateIndexBuffer(void* buffer, uint32_t* indices, const u
 {
 	D3D11_BUFFER_DESC ibd;
 	ibd.Usage = D3D11_USAGE_DEFAULT;
-	ibd.ByteWidth = sizeof(uint16_t) * count;
+	ibd.ByteWidth = sizeof(uint32_t) * count;
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 	ibd.MiscFlags = 0;
@@ -383,7 +383,7 @@ void DX3D11Renderer::VCreateStaticIndexBuffer(void* buffer, uint32_t* indices, c
 {
 	D3D11_BUFFER_DESC ibd;
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(uint16_t) * count;
+	ibd.ByteWidth = sizeof(uint32_t) * count;
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 	ibd.MiscFlags = 0;

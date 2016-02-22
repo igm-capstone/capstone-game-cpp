@@ -35,7 +35,7 @@ private:
 	static const int gTraceMemorySize = 1024 + (gLineTraceVertexCount * sizeof(float) * 8);
 	static char gTraceMemory[gTraceMemorySize];
 
-	static const int gMeshMemorySize = 32; // Just an IMesh* really
+	static const int gMeshMemorySize = 32; // Just an IMesh really
 	static char gMeshMemory[gMeshMemorySize];
 
 	LinearAllocator					mTraceAllocator;
