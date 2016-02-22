@@ -264,11 +264,11 @@ void CollisionManager::DetectCollisions()
 
 		for (uint32_t nIdx : wallIndices)
 		{
-			OrientedBoxColliderComponent* pObbComponent = reinterpret_cast<OrientedBoxColliderComponent*>(mBVHTree.GetNode(nIdx)->object);
+			OrientedBoxColliderComponent* pWallObbComponent = reinterpret_cast<OrientedBoxColliderComponent*>(mBVHTree.GetNode(nIdx)->object);
 
 			vec3f cp;
 
-			if (IntersectSphereOBB(pSphereComponent->mCollider, pObbComponent->mCollider, cp))
+			if (IntersectSphereOBB(pSphereComponent->mCollider, pWallObbComponent->mCollider, cp))
 			{
 				vec3f d = cp - pSphereComponent->mCollider.origin;
 				vec3f r = normalize(d) * pSphereComponent->mCollider.radius;
@@ -277,10 +277,10 @@ void CollisionManager::DetectCollisions()
 
 				Collision* pCollision = &collisions.back();
 				pCollision->colliderA.SphereCollider = pSphereComponent;
-				pCollision->colliderB.OBBCollider = pObbComponent;
+				pCollision->colliderB.OBBCollider = pWallObbComponent;
 				pCollision->minimumOverlap = d - r;
 
-				pSphereComponent->OnCollisionEnter(pObbComponent->mSceneObject, d - r);
+				pSphereComponent->OnCollisionEnter(pWallObbComponent->mSceneObject, d - r);
 			}
 		}
 

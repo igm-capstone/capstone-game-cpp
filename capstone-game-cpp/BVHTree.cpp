@@ -6,10 +6,13 @@
 #include <Rig3D/Intersection.h>
 #include <trace.h>
 #include <Colors.h>
+#include "SceneObjects/Explorer.h"
 
 
 #define PARTITION_COUNT 4
-#include "SceneObjects/Explorer.h"
+
+#define WALL_PARENT_LAYER_INDEX		1
+#define EXPLORER_PARENT_LAYER_INDEX 1
 
 inline int OBBComponentTest(BaseColliderComponent* a, OrientedBoxColliderComponent* b)
 {
@@ -98,7 +101,7 @@ void BVHTree::Update()
 
 	for (Explorer& explorer : Factory<Explorer>())
 	{
-		AddNodeRecursively(explorer.mCollider, 2, 1, 0, 0, SphereComponentTest);
+		AddNodeRecursively(explorer.mCollider, EXPLORER_PARENT_LAYER_INDEX, 1, 0, 0, SphereComponentTest);
 	}
 }
 
@@ -106,7 +109,7 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 {
 	OrientedBoxColliderComponent* pOBB = Factory<OrientedBoxColliderComponent>::Create();
 	pOBB->mCollider.origin = mOrigin;
-	pOBB->mCollider.halfSize = mExtents;
+	pOBB->mCollider.halfSize = { mExtents.x, mExtents.y, 50.0f };
 	pOBB->mCollider.axis[0] = kDefaultOrientation[0];
 	pOBB->mCollider.axis[1] = kDefaultOrientation[1];
 	pOBB->mCollider.axis[2] = kDefaultOrientation[2];
@@ -142,19 +145,19 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 		AddNodeRecursively(pOBB, 0, 0, 0, 0, OBBComponentTest);
 	}
 
-	for (StaticCollider& collider : Factory<StaticCollider>())
-	{
-		if (collider.mBoxCollider->mLayer == COLLISION_LAYER_FLOOR)
-		{
-			AddNodeRecursively(collider.mBoxCollider, 1, 0, 0, 0, OBBComponentTest);
-		}
-	}
+	//for (StaticCollider& collider : Factory<StaticCollider>())
+	//{
+	//	if (collider.mBoxCollider->mLayer == COLLISION_LAYER_FLOOR)
+	//	{
+	//		AddNodeRecursively(collider.mBoxCollider, 1, 0, 0, 0, OBBComponentTest);
+	//	}
+	//}
 
 	for (StaticCollider& collider : Factory<StaticCollider>())
 	{
 		if (collider.mBoxCollider->mLayer == COLLISION_LAYER_WALL)
 		{
-			AddNodeRecursively(collider.mBoxCollider, 2, 0, 0, 0, OBBComponentTest);
+			AddNodeRecursively(collider.mBoxCollider, WALL_PARENT_LAYER_INDEX, 0, 0, 0, OBBComponentTest);
 		}
 	}
 }
@@ -191,7 +194,7 @@ void BVHTree::AddNodeRecursively(BaseColliderComponent* pColliderComponent, cons
 						TRACE(" ");
 					}
 
-					//TRACE("Adding node to " << pOBB->mLayer << " " << pOBB->mCollider.origin << Trace::endl);
+					TRACE("Adding node to " << pOBB->mLayer << " " << pOBB->mCollider.origin << Trace::endl);
 					AddNode(pColliderComponent, static_cast<int>(i), layerIndex);
 				}
 			}

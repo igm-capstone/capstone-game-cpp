@@ -130,13 +130,17 @@ void loadStaticMeshes(jarr_t objs, std::string model)
 }
 
 
-void loadStaticColliders(jarr_t objs, CLayer layer)
+void loadStaticColliders(jarr_t objs, CLayer layer, vec3f levelExtents)
 {
 	TRACE_LOG("Loading " << int(objs->size()) << " static colliders...");
 	for (auto obj : *objs)
 	{
 		auto collider = Factory<StaticCollider>::Create();
 		parseTransform(obj, collider->mTransform);
+
+		vec3f s = collider->mTransform->GetScale();
+		collider->mTransform->SetScale(s.x, 40.0f, s.z);
+
 		collider->mBoxCollider->mCollider.origin = collider->mTransform->GetPosition();
 		collider->mBoxCollider->mCollider.halfSize = collider->mTransform->GetScale() * 0.5f;
 
@@ -289,14 +293,14 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	if (regions != nullptr)
 	{
 		level.staticColliderCount += static_cast<short>(regions->size());
-		loadStaticColliders(regions, COLLISION_LAYER_FLOOR);
+		loadStaticColliders(regions, COLLISION_LAYER_FLOOR, level.extents);
 	}
 
 	auto colliders = obj["staticColliders"].get_ptr<jarr_t>();
 	if (colliders != nullptr)
 	{
 		level.staticColliderCount += static_cast<short>(colliders->size());
-		loadStaticColliders(colliders, COLLISION_LAYER_WALL);
+		loadStaticColliders(colliders, COLLISION_LAYER_WALL, level.extents);
 	}
 
 
