@@ -55,7 +55,6 @@ class Level01 : public BaseScene
 
 	// Manager alias
 	ModelManager*		mModelManager;
-	
 
 public:
 	Level01();

@@ -17,8 +17,8 @@ class ScareTacticsApplication : public IApplication
 public:
 	// Shaders
 
-	IShader* mQuadVertexShader;
-	IShader* mQuadPixelShader;
+	IShader* mStaticMeshVertexShader;
+	IShader* mStaticMeshPixelShader;
 	IShader* mExplorerVertexShader;
 	IShader* mExplorerPixelShader;
 	IShader* mPLVolumeVertexShader;

@@ -15,13 +15,13 @@
     <FxCompile Include="Shaders\ShadowCasterPixelShader.hlsl" />
     <FxCompile Include="Shaders\BillboardPixelShader.hlsl" />
     <FxCompile Include="Shaders\ShadowPixelShader.hlsl" />
-    <FxCompile Include="Shaders\QuadPixelShader.hlsl" />
-    <FxCompile Include="Shaders\QuadVertexShader.hlsl" />
     <FxCompile Include="Shaders\BillboardVertexShader.hlsl" />
     <FxCompile Include="Shaders\SpritePixelShader.hlsl" />
     <FxCompile Include="Shaders\SpriteVertexShader.hlsl" />
     <FxCompile Include="Shaders\GridPass1ComputeShader.hlsl" />
     <FxCompile Include="Shaders\GridPass2ComputeShader.hlsl" />
+    <FxCompile Include="Shaders\StaticMeshVertexShader.hlsl" />
+    <FxCompile Include="Shaders\StaticMeshPixelShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />

@@ -44,13 +44,16 @@ void parseTransform(json obj, Transform* transform)
 	auto rotation = obj["rotation"];
 	if (!rotation.empty())
 	{
+		// In Unity, static meshes have a child elemented with rotation (-90,0,0). This is not part of the JSON file.
 		transform->SetRotation(parseQuatf(rotation)*quatf::rollPitchYaw(0, -0.5*PI, 0));
 	}
 
 	auto scale = obj["scale"];
 	if (!scale.empty())
 	{
-		transform->SetScale(parseVec3f(scale));
+		// Again, because of the the child rotation, the z<->y scale is flipped;
+		auto json = parseVec3f(scale);
+		transform->SetScale(vec3f(json.x, json.z, json.y));
 	}
 }
 
