@@ -1,10 +1,7 @@
 #pragma once
 #include "Scenes/BaseScene.h"
-#include "capstone-game-cpp/CollisionManager.h"
 #include <Uniforms.h>
 #include <Vertex.h>
-#include <AIManager.h>
-#include <ModelManager.h>
 
 class Level01 : public BaseScene
 {
@@ -46,14 +43,6 @@ class Level01 : public BaseScene
 	ID3D11Buffer*				mOutputData;
 	ID3D11Buffer*				mOutputDataCPURead;
 	ID3D11UnorderedAccessView*	mOutputDataSRV;
-	int lastUpdate = 0;
-
-	// Managers
-	CollisionManager	mCollisionManager;
-	AIManager			mAIManager;
-
-	// Manager alias
-	ModelManager*		mModelManager;
 
 public:
 	Level01();
@@ -67,6 +56,7 @@ public:
 	void InitializeShaderResources();
 	
 	void VUpdate(double milliseconds) override;
+	void VFixedUpdate(double milliseconds) override;
 
 	void VRender() override;
 	void RenderShadowMaps();	// Not called per frame

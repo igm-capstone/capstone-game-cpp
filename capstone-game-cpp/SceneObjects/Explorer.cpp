@@ -88,6 +88,8 @@ void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 		e->mHealth->TakeDamage(1.0f);
 		if (e->mHealth->GetHealth() <= 0) e->mHealth->TakeDamage(-1000.0f);
 	}
+
+	Singleton<AIManager>::SharedInstance().SetGridDirty(true);
 }
 
 void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)

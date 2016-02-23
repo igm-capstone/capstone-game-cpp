@@ -3,15 +3,13 @@ struct Node
 	float weight;
 	int x;
 	int y;
-	float3 worldPos;
 	bool hasLight;
+	float3 worldPos;
 };
 
 struct SimpleNode
 {
 	float weight;
-	int x;
-	int y;
 	bool hasLight;
 };
 
@@ -33,8 +31,9 @@ StructuredBuffer<Node> BufferIn : register(t0);
 RWStructuredBuffer<SimpleNode> BufferOut : register(u0);
 
 Texture2D Shadows : register(t1);
+Texture2D Obstacles : register(t2);
 
-[numthreads(12, 12, 1)] 
+[numthreads(6, 6, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
 	int x = id.x;
@@ -43,8 +42,6 @@ void main(uint3 id : SV_DispatchThreadID)
 	
 	Node i = BufferIn[flatID];
 	SimpleNode o;
-	o.x = i.x;
-	o.y = i.y;
 	o.weight = i.weight;
 	o.hasLight = i.hasLight;
 
@@ -59,11 +56,12 @@ void main(uint3 id : SV_DispatchThreadID)
 		//Sample shadow map
 		float4 color = Shadows.Load(int3(screenPos.x, screenPos.y, 0));
 		bool isShadow = (color.r + color.g + color.b) == 0;
-		//bool isObstacle = Obstacles.Load(int3(screenPos.x, screenPos.y, 0)).x == 0;
+		float4 color2 = Obstacles.Load(int3(screenPos.x, screenPos.y, 0));
+		bool isObstacle = color2.a != 0;
 
 		//Update
-		o.hasLight = !isShadow;
-		o.weight = /* isObstacle ? -2 :*/ -1;
+		o.hasLight = false;
+		o.weight = isObstacle ? -2 : -1;
 	}
  
 	BufferOut[flatID] = o;

@@ -249,7 +249,7 @@ void ScareTacticsApplication::UpdateGroundMousePosition()
 
 void ScareTacticsApplication::VUpdate(float deltaTime)
 {
-	
+	mAcumTimer += deltaTime;
 
 	// Update audio
 	FMOD_CHECK(mStudio->update());
@@ -259,11 +259,19 @@ void ScareTacticsApplication::VUpdate(float deltaTime)
 		UpdateGroundMousePosition();
 
 		mCurrentScene->VUpdate(deltaTime);
+		if (mAcumTimer > 1000.0f / FIXED_UPDATE) {
+			mCurrentScene->VFixedUpdate(mAcumTimer);
+			mAcumTimer = 0;
+		}
 		mCurrentScene->VRender();
 	}
 	else
 	{
 		mLoadingScreen->VUpdate(deltaTime);
+		if (mAcumTimer > 1000.0f / FIXED_UPDATE) {
+			mLoadingScreen->VFixedUpdate(mAcumTimer);
+			mAcumTimer = 0;
+		}
 		mLoadingScreen->VRender();
 	}
 }

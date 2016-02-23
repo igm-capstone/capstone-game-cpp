@@ -7,11 +7,13 @@
 #include <SceneObjects/Minion.h>
 #include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
 #include <Console.h>
+#include <ScareTacticsApplication.h>
 
 BaseScene::BaseScene() : 
 	mStaticMemory(nullptr),
 	mStaticMemorySize(0),
-	mState(BASE_SCENE_STATE_CONSTRUCTED)
+	mState(BASE_SCENE_STATE_CONSTRUCTED),
+	mDebugGrid(false), mDebugColl(false)
 {
 	mEngine = &Singleton<Engine>::SharedInstance();
 
@@ -23,8 +25,10 @@ BaseScene::BaseScene() :
 	mInput = mEngine->GetInput();
 
 	mCameraManager = &Singleton<CameraManager>::SharedInstance();
-	
 	mNetworkManager = &Singleton<NetworkManager>::SharedInstance();
+	mCollisionManager = &Singleton<CollisionManager>::SharedInstance();
+	mAIManager = &Singleton<AIManager>::SharedInstance();
+	mModelManager = Application::SharedInstance().GetModelManager();
 }
 
 BaseScene::~BaseScene()

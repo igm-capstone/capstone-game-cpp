@@ -16,6 +16,7 @@ public:
 
 	void VInitialize() override;
 	void VUpdate(double milliseconds) override;
+	void VFixedUpdate(double milliseconds) override;
 	void VRender() override;
 	void VShutdown() override;
 	void VOnResize() override;

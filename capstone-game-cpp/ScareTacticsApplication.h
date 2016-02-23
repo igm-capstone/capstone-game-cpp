@@ -7,7 +7,7 @@
 #include "fmodwrap.h"
 #include "ModelManager.h"
 
-#define STATIC_SCENE_MEMORY		1000000
+#define STATIC_SCENE_MEMORY		2000000
 #define SCENE_ALIGNMENT_PADDING 6
 
 using namespace Rig3D;
@@ -85,6 +85,8 @@ private:
 	size_t			mStaticMemorySize;
 
 	ModelManager	mModelManager;
+
+	double mAcumTimer;
 };
 
 typedef Singleton<ScareTacticsApplication> Application;

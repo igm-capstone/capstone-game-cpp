@@ -16,6 +16,10 @@ void LoadingScreen::VUpdate(double milliseconds)
 {
 }
 
+void LoadingScreen::VFixedUpdate(double milliseconds)
+{
+}
+
 void LoadingScreen::VRender()
 {
 	float bg[4] = { 0.2f, 0.8f, 0.2f, 0.5f };

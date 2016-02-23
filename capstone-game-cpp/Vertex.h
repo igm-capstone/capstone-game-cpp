@@ -90,15 +90,13 @@ namespace GPU {
 		float weight;
 		int x;
 		int y;
-		vec3f worldPos;
 		bool hasLight;
+		vec3f worldPos;
 	};
 
 	struct SimpleNode
 	{
 		float weight;
-		int x;
-		int y;
 		bool hasLight;
 	};
 

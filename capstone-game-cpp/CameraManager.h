@@ -9,12 +9,17 @@ class CameraManager
 	Rig3D::Renderer* mRenderer;
 	Rig3D::Camera mCameraOrto;
 	Rig3D::Camera mCameraPersp;
+	Rig3D::Camera mCameraFullOrto;
 
 	CBuffer::Camera	mCBufferOrto;
 	CBuffer::Camera	mCBufferPersp;
+	CBuffer::Camera	mCBufferFullOrto;
 	vec3f mForward;
 	vec3f mOrigin;
 	vec3f mLookAt;
+
+	vec2f mLevelCenter;
+	vec2f mLevelExtends;
 
 	const float mFOV = 0.33f * PI;
 	const float mNearPlane = 0.1f;
@@ -33,6 +38,7 @@ public:
 	CBuffer::Camera* GetCBufferOrto() { return &mCBufferOrto; }
 
 
+	void SetLevelBounds(vec2f center, vec2f extends);
 	void ChangeLookAtTo(const vec3f& newLookAt);
 	void ChangeLookAtBy(const vec3f& offset);
 	void MoveCamera(const vec3f& lookAt, const vec3f& origin);

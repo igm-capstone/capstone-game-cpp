@@ -8,7 +8,7 @@
 #include "Scenes\MainMenuScene.h"
 #include "capstone-game-cpp.rc.h"
 
-#define STATIC_APP_MEMORY 4000000
+#define STATIC_APP_MEMORY 8000000
 
 static char gApplicationMemory[STATIC_APP_MEMORY];	// 4mb
 

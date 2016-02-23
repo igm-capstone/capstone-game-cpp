@@ -36,4 +36,6 @@
 
 #define MAX_SKELETON_JOINTS 64
 
-#define GRID_MULT_OF	12
+#define GRID_MULT_OF	6
+
+#define FIXED_UPDATE 60.0  // X fixed updates per sec

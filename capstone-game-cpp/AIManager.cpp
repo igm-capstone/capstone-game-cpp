@@ -49,11 +49,6 @@ Node* AIManager::GetNodeAt(vec3f pos)
 	return &(mGrid((int)round(i), (int)round(j)));
 }
 
-void AIManager::Update() {
-
-
-}
-
 SearchResult<Node> AIManager::GetPath(vec3f from, vec3f to) {
 
 	// we want the path backward because we want the
