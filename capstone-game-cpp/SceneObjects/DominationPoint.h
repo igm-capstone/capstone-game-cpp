@@ -41,17 +41,8 @@ private:
 
 	~DominationPoint() {}
 
-	// TODO: change this to collision stay as soon as it is implemented
 	static void OnTriggerEnter(BaseSceneObject* obj, BaseSceneObject* other)
 	{
-		TRACE_LOG("OnTriggerEnter");
-
-	}
-
-	static void OnTriggerStay(BaseSceneObject* obj, BaseSceneObject* other)
-	{
-		TRACE_LOG("OnTriggerStay");
-
 		auto dom = static_cast<DominationPoint*>(obj);
 		if (dom->mController->isDominated)
 		{
@@ -68,10 +59,27 @@ private:
 		dom->mController->AddExplorer(exp);
 	}
 
+	static void OnTriggerStay(BaseSceneObject* obj, BaseSceneObject* other)
+	{
+
+	}
+
 	static void OnTriggerExit(BaseSceneObject* obj, BaseSceneObject* other)
 	{
-		TRACE_LOG("OnTriggerExit");
+		auto dom = static_cast<DominationPoint*>(obj);
+		if (dom->mController->isDominated)
+		{
+			return;
+		}
 
+		// I cant know out of the box if a class is 
+		// subtype of other if we dont have polymorphic types.
+		// For this case, I'm assuming that we only have collisions
+		// between DominationPoints AND EXPLORER.
+		// This code needs to be revised otherwise.
+		auto exp = static_cast<Explorer*>(other);
+
+		dom->mController->RemoveExplorer(exp);
 	}
 
 	static bool IsExplorerInteracting(Explorer* exp)
