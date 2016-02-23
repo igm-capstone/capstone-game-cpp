@@ -5,9 +5,6 @@
 #include "SceneObjects/DominationPoint.h"
 #include <algorithm>
 
-
-
-
 // Functor used to find matching collisions
 namespace
 {
