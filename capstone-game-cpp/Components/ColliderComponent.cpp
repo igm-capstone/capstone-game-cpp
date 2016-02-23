@@ -60,3 +60,17 @@ SphereColliderComponent::~SphereColliderComponent()
 }
 
 #pragma endregion 
+
+#pragma region PlaneColliderComponent
+
+PlaneColliderComponent::PlaneColliderComponent()
+{
+	mCollider.normal = { 0.0f, 1.0f, 0.0 };
+	mCollider.distance = 0.0f;
+}
+PlaneColliderComponent::~PlaneColliderComponent()
+{
+	
+}
+
+#pragma endregion 

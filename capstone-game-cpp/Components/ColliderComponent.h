@@ -73,3 +73,13 @@ public:
 	SphereColliderComponent();
 	~SphereColliderComponent();
 };
+
+class PlaneColliderComponent :
+	public BaseColliderComponent
+{
+public:
+	PlaneCollider mCollider;
+
+	PlaneColliderComponent();
+	~PlaneColliderComponent();
+};

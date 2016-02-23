@@ -20,6 +20,7 @@
 #include <Components/GhostController.h>
 #include <SceneObjects/Ghost.h>
 #include <SceneObjects/StaticMesh.h>
+#include <DebugRender.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -40,6 +41,10 @@ Level01::Level01() :
 
 Level01::~Level01()
 {
+#ifdef _DEBUG
+	ReleaseGlobals();
+#endif
+
 	mPlaneMesh->~IMesh();
 	mNDSQuadMesh->~IMesh();
 
@@ -148,17 +153,13 @@ void Level01::InitializeGeometry()
 	std::vector<GPU::Vertex3> vertices;
 	std::vector<uint16_t> indices;
 
-	// Cube
-	Geometry::Cube(vertices, indices, 2);
+#ifdef _DEBUG
+	CreateWireFrameRasterizerState();
+	CreateColliderMesh(&mAllocator);
+#endif
 
-	meshLibrary.NewMesh(&mCubeMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mCubeMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
-	mRenderer->VSetMeshIndexBuffer(mCubeMesh, &indices[0], indices.size());
+	// Floor
 
-	vertices.clear();
-	indices.clear();
-
-	// Plane
 	Geometry::Plane(vertices, indices, mLevel.floorWidth, mLevel.floorHeight, 5, 5);
 
 	meshLibrary.NewMesh(&mPlaneMesh, mRenderer);
@@ -428,6 +429,11 @@ void Level01::VRender()
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, Colors::transparent.pCols, 0xffffffff);
 
 	RenderStaticMeshes();
+
+#ifdef _DEBUG
+	RenderWallColliders(mExplorerShaderResource, mCameraManager, &mModel);
+#endif
+
 	RenderExplorers();
 	RenderMinions();
 	RenderSpotLightVolumes();
@@ -438,7 +444,6 @@ void Level01::VRender()
 	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, mNullSRV);
 
 	RenderGrid();
-	RenderStaticColliders();
 	RENDER_TRACE();
 	mRenderer->VSwapBuffers();
 }
@@ -543,43 +548,6 @@ void Level01::RenderStaticMeshes()
 	}
 }
 
-void Level01::RenderStaticColliders()
-{
-	if (!mDebugColl) return;
-
-	D3D11_RASTERIZER_DESC rasterizerDesc;
-	ZeroMemory(&rasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
-	rasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
-	rasterizerDesc.CullMode = D3D11_CULL_NONE;
-	rasterizerDesc.DepthClipEnable = true;
-
-	ID3D11RasterizerState* rasterizerState;
-	mRenderer->GetDevice()->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
-
-	mRenderer->GetDeviceContext()->RSSetState(rasterizerState);
-
-	mRenderer->VSetInputLayout(mApplication->mExplorerVertexShader);
-	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
-	mRenderer->VSetPixelShader(mApplication->mExplorerPixelShader);
-
-	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
-	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
-
-	for (StaticCollider& e : Factory<StaticCollider>())
-	{
-		if (e.mBoxCollider->mLayer != COLLISION_LAYER_WALL) continue;
-		mModel.world = e.mTransform->GetWorldMatrix().transpose();
-		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
-
-		mRenderer->VBindMesh(mCubeMesh);
-		mRenderer->VDrawIndexed(0, mCubeMesh->GetIndexCount());
-	}
-
-	mRenderer->GetDeviceContext()->RSSetState(nullptr);
-
-	ReleaseMacro(rasterizerState);
-}
 void Level01::RenderExplorers()
 {
 	mRenderer->VSetInputLayout(mApplication->mSkinnedVertexShader);

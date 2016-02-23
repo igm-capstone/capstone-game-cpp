@@ -24,6 +24,7 @@ class BVHTree : public BaseSceneObject
 {
 public:
 	std::vector<BVHNode> mNodes;
+	std::unordered_map<CLayer, uint32_t> mLayerStartIndex;
 
 	vec3f mOrigin;
 	vec3f mExtents;
@@ -41,6 +42,7 @@ public:
 	void AddNode(BaseColliderComponent* pColliderComponent, const int& parentIndex, const int& depth);
 	void AddNodeRecursively(class BaseColliderComponent* pColliderComponent, const int& destLayerIndex, const int& layerIndex, const int& parentIndex, const int& depth, IntersectionTest intersectionTest);
 
+	void GetNodeIndices(std::vector<uint32_t>& indices, const CLayer& layer, std::function<bool(const BVHNode& other)> predicate);
 	void GetNodeIndices(std::vector<uint32_t>& indices, std::function<bool(const BVHNode& other)> predicate);
 	BVHNode* GetNode(const uint32_t& index);
 };

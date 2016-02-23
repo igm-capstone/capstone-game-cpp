@@ -208,6 +208,56 @@ namespace Rig3D
 		return 1;
 	}
 
+	template<class Vector, int Dimension>
+	int IntersectRayOBB(Ray<Vector>& ray, OBB<Vector, Dimension>& obb, Vector& poi, float& t)
+	{
+		float tMin = 0.0f;
+		float tMax = FLT_MAX;
+
+		Vector rayToObb = obb.origin - ray.origin;
+
+		for (int i = 0; i < Dimension; i++)
+		{
+			// Projected distance and ray direction onto obb axis
+			float e	= cliqCity::graphicsMath::dot(obb.axis[i], rayToObb);
+			float f	= cliqCity::graphicsMath::dot(obb.axis[i], ray.normal);
+
+			if (abs(f) > 0.001f)
+			{
+				float inv_f = 1.0f / f;
+				float t1 = (e + obb.halfSize.pCols[i]) * inv_f;
+				float t2 = (e - obb.halfSize.pCols[i]) * inv_f;
+
+				if (t1 > t2)
+				{
+					float temp = t1;
+					t1 = t2;
+					t2 = temp;
+				}
+
+				tMin = max(tMin, t1);
+				tMax = min(tMax, t2);
+
+				if (tMin > tMax || tMax < 0.0f)
+				{
+					return 0;
+				}
+			}
+			else
+			{
+				// Ray is almost parallel to the planes
+				if (-e - obb.halfSize.pCols[i] > 0.0f || -e + obb.halfSize.pCols[i] < 0.0f)
+				{
+					return 0;
+				}
+			}
+		}
+
+		t = (tMin > 0.0f) ? tMin : tMax;
+		poi = ray.origin + ray.normal * t;
+
+		return 1;
+	}
 #pragma endregion 
 
 #pragma region Sphere - Primitive Tests
