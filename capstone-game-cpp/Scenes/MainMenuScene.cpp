@@ -27,6 +27,10 @@ void MainMenuScene::VUpdate(double milliseconds)
 
 }
 
+void MainMenuScene::VFixedUpdate(double milliseconds)
+{
+}
+
 void MainMenuScene::VRender()
 {
 	float bg[4] = { .25f, .25f, .25f, 0.5f };

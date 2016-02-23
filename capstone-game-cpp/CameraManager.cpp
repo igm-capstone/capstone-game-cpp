@@ -28,6 +28,11 @@ void CameraManager::ChangeLookAtBy(const vec3f& offset)
 	MoveCamera(mLookAt + offset, mOrigin + offset);
 }
 
+void CameraManager::SetLevelBounds(vec2f center, vec2f extends)
+{
+	
+}
+
 void CameraManager::MoveCamera(const vec3f& lookAt, const vec3f& origin)
 {
 	mLookAt = lookAt;
@@ -38,6 +43,9 @@ void CameraManager::MoveCamera(const vec3f& lookAt, const vec3f& origin)
 	
 	mCameraOrto.SetViewMatrix(mCameraPersp.GetViewMatrix());
 	mCBufferOrto.view = mCBufferPersp.view;
+
+	mCameraFullOrto.SetViewMatrix(mCameraPersp.GetViewMatrix());
+	mCBufferFullOrto.view = mCBufferPersp.view;
 
 	OnResize();
 }
@@ -51,6 +59,9 @@ void CameraManager::OnResize()
 
 	mCameraOrto.SetProjectionMatrix(mat4f::normalizedOrthographicLH(0, float(mRenderer->GetWindowWidth()), float(mRenderer->GetWindowHeight()), 0, mNearPlane, mFarPlane));
 	mCBufferOrto.projection = mCameraOrto.GetProjectionMatrix().transpose();
+
+	mCameraFullOrto.SetProjectionMatrix(mat4f::normalizedOrthographicLH(0, float(mRenderer->GetWindowWidth()), float(mRenderer->GetWindowHeight()), 0, mNearPlane, mFarPlane));
+	mCBufferFullOrto.projection = mCameraFullOrto.GetProjectionMatrix().transpose();
 }
 
 vec3f CameraManager::GetForward()

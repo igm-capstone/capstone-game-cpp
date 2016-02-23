@@ -16,7 +16,7 @@ public:
 
 	void InitGrid(float left, float top, float width, float height);
 	void ResetGridData();
-	void Update();
+	void Update() {};
 
 	Node* GetNodeAt(vec3f pos);
 	SearchResult<Node> GetPath(vec3f from, vec3f to);
@@ -27,11 +27,15 @@ public:
 	~AIManager();
 	void SetAllocator(LinearAllocator* allocator);
 
+	void SetGridDirty(bool state) { mGridIsDirty = state; }
+	bool IsGridDirty() { return mGridIsDirty; }
+
 private:
 	float mTop;
 	float mLeft;
 	int mNumCols;
 	int mNumRows;
-	const float mNodeRadius = 1.0f;
+	const float mNodeRadius = 0.85f;
+	bool mGridIsDirty;
 };
 

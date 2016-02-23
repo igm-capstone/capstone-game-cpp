@@ -56,14 +56,16 @@ Trace::~Trace() {
 
 void Trace::InitializeLineTraceMesh()
 {
+	auto lineTraceIndices = reinterpret_cast<uint32_t*>(mTraceAllocator.Allocate(sizeof(uint32_t) * gLineTraceVertexCount, alignof(uint32_t), 0));
 
-	mLineTraceVertices = reinterpret_cast<LineTraceVertex*>(mTraceAllocator.Allocate(sizeof(LineTraceVertex) * gLineTraceVertexCount, alignof(LineTraceVertex), 0));
-
-	uint32_t lineTraceIndices[gLineTraceVertexCount];
 	for (auto i = 0; i < gLineTraceVertexCount; i++)
 	{
 		lineTraceIndices[i] = i;
 	}
+	
+	mTraceAllocator.Free();
+
+	mLineTraceVertices = reinterpret_cast<LineTraceVertex*>(mTraceAllocator.Allocate(sizeof(LineTraceVertex) * gLineTraceVertexCount, alignof(LineTraceVertex), 0));
 
 	mStaticMeshLibrary.NewMesh(&mLineTraceMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mLineTraceMesh, mLineTraceVertices, sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex));

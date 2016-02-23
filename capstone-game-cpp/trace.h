@@ -29,7 +29,7 @@ typedef cliqCity::memory::LinearAllocator LinearAllocator;
 class Trace
 {
 private:
-	static const int gLineTraceMaxCount = 50000;
+	static const int gLineTraceMaxCount = 200000;
 	static const int gLineTraceVertexCount = 2 * gLineTraceMaxCount;
 
 	static const int gTraceMemorySize = 1024 + (gLineTraceVertexCount * sizeof(float) * 8);

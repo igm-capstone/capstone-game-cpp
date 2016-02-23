@@ -1,8 +1,6 @@
 struct SimpleNode
 {
 	float weight;
-	int x;
-	int y;
 	bool hasLight;
 };
 
@@ -29,70 +27,73 @@ SimpleNode getNode(int x, int y) {
 	return BufferIn[flatID];
 }
 
-bool CreateConnectionIfValid(out Connection conn, SimpleNode nodeFrom, SimpleNode nodeTo)
+bool isValidNode (int x, int y) {
+	return (x >= 0 && x < gridNumRows &&
+			y >= 0 && y < gridNumCols);
+}
+
+bool CreateConnectionIfValid(out Connection conn, SimpleNode nodeFrom, float cost, int toX, int toY)
 {
 	conn.cost = 0;
 	conn.nodeTo = nodeFrom;
+
+	if (!isValidNode(toX, toY)) return false;
+
+	SimpleNode nodeTo = getNode(toX, toY);
+
 	if (nodeTo.weight >= 0)
 	{
 		// 1.4 for diagonals and 1 for horizontal or vertical connections
-		conn.cost = (nodeFrom.x == nodeTo.x || nodeFrom.y == nodeTo.y) ? 1 : 1.4f;
+		conn.cost = cost;
 		conn.nodeTo = nodeTo;
 		return true;
 	}
 	return false;
 }
 
-void GetConnections(SimpleNode node, out Connection conns[8], out int count)
+void GetConnections(SimpleNode node, int x, int y, out Connection conns[8], out int count)
 {
 	bool diagonal = true;
-	int x = node.x;
-	int y = node.y;
-
-	bool notLeftEdge = x > 0;
-	bool notRightEdge = x < gridNumRows - 1;
-	bool notBottomEdge = y > 0;
-	bool notTopEdge = y < gridNumCols - 1;
 
 	Connection c;
 	count = 0;
 
-	if (notTopEdge && CreateConnectionIfValid(c, node, getNode(x, y + 1))) {
+	if (CreateConnectionIfValid(c, node, 1.0f, x, y + 1)) {
 		conns[count] = c;
 		count++;
 	}
-	if (diagonal && notRightEdge && notTopEdge && CreateConnectionIfValid(c, node, getNode(x + 1, y + 1))) {
+	if (diagonal && CreateConnectionIfValid(c, node, 1.41f, x + 1, y + 1)) {
 		conns[count] = c;
 		count++;
 	}
-	if (notRightEdge && CreateConnectionIfValid(c, node, getNode(x + 1, y))) {
+	if (CreateConnectionIfValid(c, node, 1.0f, x + 1, y)) {
 		conns[count] = c;
 		count++;
 	}
-	if (diagonal && notRightEdge && notBottomEdge && CreateConnectionIfValid(c, node, getNode(x + 1, y - 1))) {
+	if (diagonal && CreateConnectionIfValid(c, node, 1.41f, x + 1, y - 1)) {
 		conns[count] = c;
 		count++;
 	}
-	if (notBottomEdge && CreateConnectionIfValid(c, node, getNode(x, y - 1))) {
+	if (CreateConnectionIfValid(c, node, 1.0f, x, y - 1)) {
 		conns[count] = c;
 		count++;
 	}
-	if (diagonal && notLeftEdge && notBottomEdge && CreateConnectionIfValid(c, node, getNode(x - 1, y - 1))) {
+	if (diagonal && CreateConnectionIfValid(c, node, 1.41f, x - 1, y - 1)) {
 		conns[count] = c;
 		count++;
 	}
-	if (notLeftEdge && CreateConnectionIfValid(c, node, getNode(x - 1, y))) {
+	if (CreateConnectionIfValid(c, node, 1.0f, x - 1, y)) {
 		conns[count] = c;
 		count++;
 	}
-	if (diagonal && notLeftEdge && notTopEdge && CreateConnectionIfValid(c, node, getNode(x - 1, y + 1))) {
+	if (diagonal && CreateConnectionIfValid(c, node, 1.41f, x - 1, y + 1)) {
 		conns[count] = c;
 		count++;
 	}
 }
 
 
-[numthreads(12, 12, 1)]
+[numthreads(6, 6, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
 	int x = id.x;
@@ -105,7 +106,7 @@ void main(uint3 id : SV_DispatchThreadID)
 	if (n.weight == -1) {
 		Connection conns[8];
 		int count;
-		GetConnections(n, conns, count);
+		GetConnections(n, x, y, conns, count);
 		if (count > 0) {
 			Connection c = conns[0];
 			for (int i = 1; i < count; i++) {
@@ -116,7 +117,6 @@ void main(uint3 id : SV_DispatchThreadID)
 			n.weight = c.nodeTo.weight + c.cost;
 		}
 	}
-
+	
 	BufferOut[flatID] = n;
-
 }

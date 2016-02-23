@@ -3,6 +3,8 @@
 
 #include "Network\NetworkManager.h"
 #include <CameraManager.h>
+#include <CollisionManager.h>
+#include <AIManager.h>
 #include <Resource.h>
 
 using namespace Rig3D;
@@ -27,8 +29,12 @@ protected:
 	ID3D11Device*				mDevice;
 	ID3D11DeviceContext*		mDeviceContext;
 
+	// Managers
 	CameraManager*				mCameraManager;
 	NetworkManager*				mNetworkManager;
+	CollisionManager*			mCollisionManager;
+	AIManager*					mAIManager;
+	ModelManager*				mModelManager;
 
 	uint8_t*					mStaticMemory;
 	size_t						mStaticMemorySize;
@@ -37,6 +43,8 @@ public:
 	BaseSceneState				mState;
 
 	// Miscelanious
+	bool						mDebugGrid;
+	bool						mDebugColl;
 	Resource::LevelInfo			mLevel;
 	BoxCollider2D				mFloorCollider;
 
@@ -44,6 +52,7 @@ public:
 	virtual ~BaseScene();
 
 	void SetStaticMemory(void* staticMemory, size_t size);
+	virtual void VFixedUpdate(double milliseconds) = 0;
 
 	// Common methods
 	void RenderFPSIndicator();
