@@ -230,9 +230,9 @@ void CollisionManager::DetectCollisions()
 		BVHNode* pNode = mBVHTree.GetNode(idx);
 		int parentIndex = pNode->parentIndex;
 
-		mBVHTree.GetNodeIndices(wallIndices, [parentIndex](const BVHNode& other)
+		mBVHTree.GetNodeIndices(wallIndices, COLLISION_LAYER_WALL, [parentIndex](const BVHNode& other)
 		{
-			return other.parentIndex == parentIndex && other.object->mLayer == COLLISION_LAYER_WALL;
+			return other.parentIndex == parentIndex;
 		});
 
 		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
