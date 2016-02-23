@@ -1,4 +1,5 @@
 #pragma once
+#include <Rig3d/Parametric.h>
 
 #define clamp(val, _min, _max) max(min((val), (_max)), (_min));
 #define clamp01(val) clamp((val), 0, 1)

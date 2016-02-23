@@ -101,6 +101,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BVHTree.cpp" />
+    <ClCompile Include="BehaviorTree\Action.cpp" />
+    <ClCompile Include="BehaviorTree\Behavior.cpp" />
+    <ClCompile Include="BehaviorTree\BehaviorTree.cpp" />
+    <ClCompile Include="BehaviorTree\Composite.cpp" />
+    <ClCompile Include="BehaviorTree\Condition.cpp" />
+    <ClCompile Include="BehaviorTree\Sequence.cpp" />
+    <ClCompile Include="BehaviorTree\TestSuite.cpp" />
     <ClCompile Include="Components\AnimationController.cpp" />
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="CollisionManager.cpp" />
@@ -147,6 +154,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BVHTree.h" />
+    <ClInclude Include="BehaviorTree\Action.h" />
+    <ClInclude Include="BehaviorTree\Behavior.h" />
+    <ClInclude Include="BehaviorTree\BehaviorTree.h" />
+    <ClInclude Include="BehaviorTree\Composite.h" />
+    <ClInclude Include="BehaviorTree\Condition.h" />
+    <ClInclude Include="BehaviorTree\Sequence.h" />
+    <ClInclude Include="BehaviorTree\TestSuite.h" />
     <ClInclude Include="Components\AnimationController.h" />
     <ClInclude Include="CameraManager.h" />
     <ClInclude Include="CollisionManager.h" />
