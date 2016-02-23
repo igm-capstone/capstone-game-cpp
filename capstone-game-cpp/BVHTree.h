@@ -27,6 +27,7 @@ public:
 
 	vec3f mOrigin;
 	vec3f mExtents;
+	vec3f mQuadrantExtents;
 
 	BVHTree();
 	~BVHTree();
@@ -42,5 +43,4 @@ public:
 
 	void GetNodeIndices(std::vector<uint32_t>& indices, std::function<bool(const BVHNode& other)> predicate);
 	BVHNode* GetNode(const uint32_t& index);
-	void RenderDebug();
 };

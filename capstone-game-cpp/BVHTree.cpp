@@ -4,15 +4,49 @@
 #include <SceneObjects/BaseSceneObject.h>
 #include <Components/ColliderComponent.h>
 #include <Rig3D/Intersection.h>
-#include <trace.h>
 #include <Colors.h>
 #include "SceneObjects/Explorer.h"
 
-
-#define PARTITION_COUNT 4
+#define PARTITION_X_COUNT 3
+#define PARTITION_Y_COUNT 2
 
 #define WALL_PARENT_LAYER_INDEX		1
 #define EXPLORER_PARENT_LAYER_INDEX 1
+
+#define DRAW_DEBUG 0
+
+#if (DRAW_DEBUG == 1)
+#include <trace.h>
+
+void RenderDebug(BVHTree& bvhTree)
+{
+	vec3f tl = { bvhTree.mOrigin.x - bvhTree.mExtents.x, bvhTree.mOrigin.y + bvhTree.mExtents.y, 0.0f };
+	vec3f tr = { bvhTree.mOrigin.x + bvhTree.mExtents.x, bvhTree.mOrigin.y + bvhTree.mExtents.y, 0.0f };
+	vec3f bl = { bvhTree.mOrigin.x - bvhTree.mExtents.x, bvhTree.mOrigin.y - bvhTree.mExtents.y, 0.0f };
+
+	TRACE_LINE(tl, tr, Colors::red);
+	TRACE_LINE(tl, bl, Colors::red);
+
+
+	vec2f traceStep = bvhTree.mQuadrantExtents * 2.0f;
+
+	for (int x = 0; x < PARTITION_X_COUNT; x++)
+	{
+		OrientedBoxColliderComponent* pObb = reinterpret_cast<OrientedBoxColliderComponent*>(bvhTree.GetNode(x + 1)->object);
+		vec3f qtr = { pObb->mCollider.origin.x + pObb->mCollider.halfSize.x, pObb->mCollider.origin.y + pObb->mCollider.halfSize.y,0.0f };
+		vec3f obr = { pObb->mCollider.origin.x + pObb->mCollider.halfSize.x, bl.y, 0.0f };
+		TRACE_LINE(qtr, obr, Colors::red);
+	}
+
+	for (int y = 0; y < PARTITION_Y_COUNT; y++)
+	{
+		OrientedBoxColliderComponent* pObb = reinterpret_cast<OrientedBoxColliderComponent*>(bvhTree.GetNode((y * PARTITION_X_COUNT) + 1)->object);
+		vec3f qbl = { pObb->mCollider.origin.x - pObb->mCollider.halfSize.x, pObb->mCollider.origin.y - pObb->mCollider.halfSize.y, 0.0f };
+		vec3f obr = { tr.x, pObb->mCollider.origin.y - pObb->mCollider.halfSize.y, 0.0f };
+		TRACE_LINE(qbl, obr, Colors::red);
+	}
+}
+#endif
 
 inline int OBBComponentTest(BaseColliderComponent* a, OrientedBoxColliderComponent* b)
 {
@@ -80,7 +114,7 @@ BVHTree::~BVHTree()
 
 void BVHTree::SetRootBoundingVolume(vec3f origin, vec3f extents, int nodeCount)
 {
-	mNodes.reserve(nodeCount + PARTITION_COUNT + 1 + MAX_EXPLORERS);
+	mNodes.reserve(MAX_STATIC_COLLIDERS);
 	mOrigin		= origin;
 	mExtents	= extents;
 }
@@ -92,7 +126,9 @@ void BVHTree::Initialize()
 
 void BVHTree::Update()
 {
-	RenderDebug();
+#if (DRAW_DEBUG == 1)
+	RenderDebug(*this);
+#endif
 
 	mNodes.erase(std::remove_if(mNodes.begin(), mNodes.end(), [](const BVHNode& other)
 	{
@@ -109,7 +145,7 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 {
 	OrientedBoxColliderComponent* pOBB = Factory<OrientedBoxColliderComponent>::Create();
 	pOBB->mCollider.origin = mOrigin;
-	pOBB->mCollider.halfSize = { mExtents.x, mExtents.y, 50.0f };
+	pOBB->mCollider.halfSize = { mExtents.x, mExtents.y, 25.0f };
 	pOBB->mCollider.axis[0] = kDefaultOrientation[0];
 	pOBB->mCollider.axis[1] = kDefaultOrientation[1];
 	pOBB->mCollider.axis[2] = kDefaultOrientation[2];
@@ -117,41 +153,27 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 
 	AddNode(pOBB, -1, 0);	
 
-	vec3f halfExtents = mExtents * 0.5f;
+	vec2f rootSize			= { mExtents.x * 2.0f, mExtents.y * 2.0f };
+	vec2f quadrantSize		= { rootSize.x / static_cast<float>(PARTITION_X_COUNT),  rootSize.y / static_cast<float>(PARTITION_Y_COUNT) };
+	vec2f quadrantOffset	= (rootSize - quadrantSize) * 0.5f;
+	mQuadrantExtents		= { quadrantSize.x * 0.5f, quadrantSize.y * 0.5f, 25.0f };
 
-
-
-	vec3f quadrants[PARTITION_COUNT];
-	quadrants[0] = { mOrigin.x - halfExtents.x, mOrigin.y + halfExtents.y, mOrigin.z };
-	quadrants[1] = { mOrigin.x + halfExtents.x, mOrigin.y + halfExtents.y, mOrigin.z };
-	quadrants[2] = { mOrigin.x - halfExtents.x, mOrigin.y - halfExtents.y, mOrigin.z };
-	quadrants[3] = { mOrigin.x + halfExtents.x, mOrigin.y - halfExtents.y, mOrigin.z };
-
-	TRACE("QUADRANTS" << Trace::endl);
-
-	for (int i = 1; i < PARTITION_COUNT + 1; i++)
+	for (int y = 0; y < PARTITION_Y_COUNT; y++)
 	{
-		TRACE(" " << i - 1 << Trace::endl);
+		for (int x = 0; x < PARTITION_X_COUNT; x++)
+		{
+			pOBB = Factory<OrientedBoxColliderComponent>::Create();
+			pOBB->mCollider.origin = { mOrigin.x + (x * quadrantSize.x - quadrantOffset.x), mOrigin.y + (quadrantOffset.y - quadrantSize.y * y) , 0.0f };
+			pOBB->mCollider.halfSize = mQuadrantExtents;
+			pOBB->mCollider.axis[0] = kDefaultOrientation[0];
+			pOBB->mCollider.axis[1] = kDefaultOrientation[1];
+			pOBB->mCollider.axis[2] = kDefaultOrientation[2];
+			pOBB->mLayer = COLLISION_LAYER_QUADRANT;
+			pOBB->mSceneObject = this;
 
-		pOBB = Factory<OrientedBoxColliderComponent>::Create();
-		pOBB->mCollider.origin = quadrants[i - 1];
-		pOBB->mCollider.halfSize = {halfExtents.x, halfExtents.y, 50.0f};
-		pOBB->mCollider.axis[0] = kDefaultOrientation[0];
-		pOBB->mCollider.axis[1] = kDefaultOrientation[1];
-		pOBB->mCollider.axis[2] = kDefaultOrientation[2];
-		pOBB->mLayer = COLLISION_LAYER_QUADRANT;
-		pOBB->mSceneObject = this;
-
-		AddNodeRecursively(pOBB, 0, 0, 0, 0, OBBComponentTest);
+			AddNodeRecursively(pOBB, 0, 0, 0, 0, OBBComponentTest);
+		}
 	}
-
-	//for (StaticCollider& collider : Factory<StaticCollider>())
-	//{
-	//	if (collider.mBoxCollider->mLayer == COLLISION_LAYER_FLOOR)
-	//	{
-	//		AddNodeRecursively(collider.mBoxCollider, 1, 0, 0, 0, OBBComponentTest);
-	//	}
-	//}
 
 	for (StaticCollider& collider : Factory<StaticCollider>())
 	{
@@ -189,12 +211,6 @@ void BVHTree::AddNodeRecursively(BaseColliderComponent* pColliderComponent, cons
 				}
 				else
 				{
-					for (int i = 0; i < depth; i++)
-					{
-						TRACE(" ");
-					}
-
-					TRACE("Adding node to " << pOBB->mLayer << " " << pOBB->mCollider.origin << Trace::endl);
 					AddNode(pColliderComponent, static_cast<int>(i), layerIndex);
 				}
 			}
@@ -221,34 +237,3 @@ BVHNode* BVHTree::GetNode(const uint32_t& index)
 	return &mNodes[index];
 }
 
-void BVHTree::RenderDebug()
-{
-	vec3f halfExtents = mExtents * 0.5f;
-
-	vec3f quadrants[PARTITION_COUNT];
-	quadrants[0] = { mOrigin.x - halfExtents.x, mOrigin.y + halfExtents.y, mOrigin.z };
-	quadrants[1] = { mOrigin.x + halfExtents.x, mOrigin.y + halfExtents.y, mOrigin.z };
-	quadrants[2] = { mOrigin.x - halfExtents.x, mOrigin.y - halfExtents.y, mOrigin.z };
-	quadrants[3] = { mOrigin.x + halfExtents.x, mOrigin.y - halfExtents.y, mOrigin.z };
-
-	vec3f corners[8];
-	corners[0] = { quadrants[0].x - halfExtents.x, quadrants[0].y + halfExtents.y, 0 };	// TL
-	corners[1] = { quadrants[0].x + halfExtents.x, quadrants[0].y + halfExtents.y, 0 };	// TM
-
-	corners[2] = { quadrants[1].x + halfExtents.x, quadrants[1].y + halfExtents.y, 0 }; // TR
-	corners[3] = { quadrants[1].x + halfExtents.x, quadrants[1].y - halfExtents.y, 0 }; // MR
-
-	corners[4] = { quadrants[3].x + halfExtents.x, quadrants[3].y - halfExtents.y, 0 }; // BR
-	corners[5] = { quadrants[3].x - halfExtents.x, quadrants[3].y - halfExtents.y, 0 }; // BM
-
-	corners[6] = { quadrants[2].x - halfExtents.x, quadrants[2].y - halfExtents.y, 0 }; // BL
-	corners[7] = { quadrants[2].x - halfExtents.x, quadrants[2].y + halfExtents.y, 0 }; // ML
-
-	TRACE_LINE(corners[0], corners[2], Colors::red);
-	TRACE_LINE(corners[2], corners[4], Colors::red);
-	TRACE_LINE(corners[4], corners[6], Colors::red);
-	TRACE_LINE(corners[6], corners[0], Colors::red);
-
-	TRACE_LINE(corners[1], corners[5], Colors::red);
-	TRACE_LINE(corners[7], corners[3], Colors::red);
-}
