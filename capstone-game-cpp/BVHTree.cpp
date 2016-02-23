@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "BVHTree.h"
 #include "SceneObjects/StaticCollider.h"
+#include "SceneObjects/Region.h"
 #include <SceneObjects/BaseSceneObject.h>
 #include <Components/ColliderComponent.h>
 #include <Rig3D/Intersection.h>
@@ -12,6 +13,7 @@
 
 #define WALL_PARENT_LAYER_INDEX		1
 #define EXPLORER_PARENT_LAYER_INDEX 1
+#define REGION_PARENT_LAYER_INDEX   1
 
 #define DRAW_DEBUG 1
 
@@ -177,12 +179,14 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 		}
 	}
 
+	for (Region& region : Factory<Region>())
+	{
+		AddNodeRecursively(region.mColliderComponent, REGION_PARENT_LAYER_INDEX, 0, 0, 0, OBBComponentTest);
+	}
+
 	for (StaticCollider& collider : Factory<StaticCollider>())
 	{
-		if (collider.mBoxCollider->mLayer == COLLISION_LAYER_WALL)
-		{
-			AddNodeRecursively(collider.mBoxCollider, WALL_PARENT_LAYER_INDEX, 0, 0, 0, OBBComponentTest);
-		}
+		AddNodeRecursively(collider.mBoxCollider, WALL_PARENT_LAYER_INDEX, 0, 0, 0, OBBComponentTest);
 	}
 }
 
@@ -237,7 +241,7 @@ void BVHTree::GetNodeIndices(std::vector<uint32_t>& indices, const CLayer& layer
 
 	for (uint32_t i = startIndex; i < nodeCount; i++)
 	{
-		if (predicate(pNodes[i]))
+		if (pNodes[i].object->mLayer == layer && predicate(pNodes[i]))
 		{
 			indices.push_back(i);
 		}
@@ -262,4 +266,3 @@ BVHNode* BVHTree::GetNode(const uint32_t& index)
 {
 	return &mNodes[index];
 }
-
