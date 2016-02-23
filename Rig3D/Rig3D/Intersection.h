@@ -421,7 +421,7 @@ namespace Rig3D
 		{
 			for (int j = 0; j < Dimension; j++)
 			{
-				AbsR[i].pCols[j] = abs(R[i].pCols[j]) + FLT_EPSILON;
+				AbsR[i].pCols[j] = abs(R[i].pCols[j]) + 0.001f;
 			}
 		}
 
