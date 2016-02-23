@@ -130,7 +130,7 @@ void loadStaticMeshes(jarr_t objs, std::string model)
 }
 
 
-void loadStaticColliders(jarr_t objs, CLayer layer, vec3f levelExtents)
+void loadStaticColliders(jarr_t objs, CLayer layer, vec3f levelOrigin, vec3f levelExtents)
 {
 	TRACE_LOG("Loading " << int(objs->size()) << " static colliders...");
 	for (auto obj : *objs)
@@ -138,8 +138,14 @@ void loadStaticColliders(jarr_t objs, CLayer layer, vec3f levelExtents)
 		auto collider = Factory<StaticCollider>::Create();
 		parseTransform(obj, collider->mTransform);
 
-		vec3f s = collider->mTransform->GetScale();
-		collider->mTransform->SetScale(s.x, 40.0f, s.z);
+		// Hard coding z scale and position for colliders based on z extents in Unity
+		// Min z = 0.09 Max z = 15.06
+		// Lucas please give me z extents in json when you have time :)
+		vec3f jsonPosition	= collider->mTransform->GetPosition();
+		collider->mTransform->SetPosition(jsonPosition.x, jsonPosition.y, 7.5f);
+
+		vec3f jsonScale = collider->mTransform->GetScale();
+		collider->mTransform->SetScale(jsonScale.x, 15.0f, jsonScale.z);
 
 		collider->mBoxCollider->mCollider.origin = collider->mTransform->GetPosition();
 		collider->mBoxCollider->mCollider.halfSize = collider->mTransform->GetScale() * 0.5f;
@@ -293,14 +299,14 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	if (regions != nullptr)
 	{
 		level.staticColliderCount += static_cast<short>(regions->size());
-		loadStaticColliders(regions, COLLISION_LAYER_FLOOR, level.extents);
+		loadStaticColliders(regions, COLLISION_LAYER_FLOOR, level.center, level.extents);
 	}
 
 	auto colliders = obj["staticColliders"].get_ptr<jarr_t>();
 	if (colliders != nullptr)
 	{
 		level.staticColliderCount += static_cast<short>(colliders->size());
-		loadStaticColliders(colliders, COLLISION_LAYER_WALL, level.extents);
+		loadStaticColliders(colliders, COLLISION_LAYER_WALL, level.center, level.extents);
 	}
 
 
