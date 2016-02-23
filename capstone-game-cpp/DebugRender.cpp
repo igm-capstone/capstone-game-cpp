@@ -7,6 +7,7 @@
 #include <Rig3D/Memory/Memory/Memory.h>
 #include "SceneObjects/StaticCollider.h"
 #include  <ScareTacticsApplication.h>
+#include "SceneObjects/Region.h"
 
 namespace
 {
@@ -65,9 +66,9 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, cameraManager->GetCBufferPersp(), 0);
 	gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 0, 0);
 
-	for (StaticCollider& e : Factory<StaticCollider>())
+	for (Region& e : Factory<Region>())
 	{
-		if (e.mBoxCollider->mLayer != COLLISION_LAYER_WALL) continue;
+	//	if (e.mBoxCollider->mLayer != COLLISION_LAYER_WALL) continue;
 		model->world = e.mTransform->GetWorldMatrix().transpose();
 		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
 		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
