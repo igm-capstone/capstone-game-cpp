@@ -3,7 +3,6 @@
 #include <Rig3D/Intersection.h>
 #include "SceneObjects/Explorer.h"
 #include "SceneObjects/DominationPoint.h"
-#include "SceneObjects/StaticCollider.h"
 #include <algorithm>
 
 
@@ -216,30 +215,6 @@ void CollisionManager::DetectCollisions()
 			}
 		}
 	}
-
-	//for (Explorer& e1 : Factory<Explorer>())
-	//{
-	//	for (Explorer& e2 : Factory<Explorer>())
-	//	{
-	//		if (&e1 == &e2) continue;
-
-	//		if (IntersectSphereSphere(e1.mCollider->mCollider, e2.mCollider->mCollider))
-	//		{
-	//			float overlap = (e1.mCollider->mCollider.radius + e2.mCollider->mCollider.radius)
-	//				- magnitude(e1.mCollider->mCollider.origin - e2.mCollider->mCollider.origin);
-	//			vec3f AtoB = (e2.mCollider->mCollider.origin - e1.mCollider->mCollider.origin);
-
-	//			collisions.push_back(Collision());
-
-	//			Collision* pCollision = &collisions.back();
-	//			pCollision->colliderA.SphereCollider = e1.mCollider;
-	//			pCollision->colliderB.SphereCollider = e2.mCollider;
-	//			pCollision->minimumOverlap = - AtoB * overlap;
-
-	//			e1.mCollider->OnCollisionEnter(&e2, overlap);
-	//		}
-	//	}
-	//}
 
 	// Minion / Minion Collisions
 

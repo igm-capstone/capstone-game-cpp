@@ -149,16 +149,6 @@ void Level01::InitializeGeometry()
 	std::vector<GPU::Vertex3> vertices;
 	std::vector<uint16_t> indices;
 
-	// Colliders
-	Geometry::Cube(vertices, indices, 2);
-
-	meshLibrary.NewMesh(&mColliderMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mColliderMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
-	mRenderer->VSetMeshIndexBuffer(mColliderMesh, &indices[0], indices.size());
-
-	vertices.clear();
-	indices.clear();
-
 	// Floor
 	Geometry::Plane(vertices, indices, mLevel.floorWidth, mLevel.floorHeight, 5, 5);
 
@@ -421,7 +411,6 @@ void Level01::VRender()
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, Colors::transparent.pCols, 0xffffffff);
 
 	RenderStaticMeshes();
-	RenderStaticColliders();
 	RenderExplorers();
 	RenderMinions();
 	RenderSpotLightVolumes();
@@ -534,42 +523,6 @@ void Level01::RenderStaticMeshes()
 
 		for (auto i = 0; i < numElements; i++) ++it;
 	}
-}
-
-void Level01::RenderStaticColliders()
-{
-	D3D11_RASTERIZER_DESC rasterizerDesc;
-	ZeroMemory(&rasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
-	rasterizerDesc.FillMode = D3D11_FILL_WIREFRAME;
-	rasterizerDesc.CullMode = D3D11_CULL_NONE;
-	rasterizerDesc.DepthClipEnable = true;
-
-	ID3D11RasterizerState* rasterizerState;
-	mRenderer->GetDevice()->CreateRasterizerState(&rasterizerDesc, &rasterizerState);
-
-	mRenderer->GetDeviceContext()->RSSetState(rasterizerState);
-
-	mRenderer->VSetInputLayout(mApplication->mExplorerVertexShader);
-	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
-	mRenderer->VSetPixelShader(mApplication->mExplorerPixelShader);
-
-	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
-	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
-
-	for (StaticCollider& e : Factory<StaticCollider>())
-	{
-		if (e.mBoxCollider->mLayer != COLLISION_LAYER_WALL) continue;
-		mModel.world = e.mTransform->GetWorldMatrix().transpose();
-		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
-
-		mRenderer->VBindMesh(mColliderMesh);
-		mRenderer->VDrawIndexed(0, mColliderMesh->GetIndexCount());
-	}
-
-	mRenderer->GetDeviceContext()->RSSetState(nullptr);
-
-//	ReleaseMacro(rasterizerState);
 }
 
 void Level01::RenderExplorers()

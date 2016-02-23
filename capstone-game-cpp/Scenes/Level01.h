@@ -22,7 +22,6 @@ class Level01 : public BaseScene
 	LinearAllocator		mAllocator;
 
 	// Mesh
-	IMesh*				mColliderMesh;
 	IMesh*				mPlaneMesh;
 	IMesh*				mNDSQuadMesh;
 
@@ -72,7 +71,6 @@ public:
 	void VRender() override;
 	void RenderShadowMaps();	// Not called per frame
 	void RenderStaticMeshes();
-	void RenderStaticColliders();
 	void RenderExplorers();
 	void RenderSpotLightVolumes();
 	void RenderFullScreenQuad();
