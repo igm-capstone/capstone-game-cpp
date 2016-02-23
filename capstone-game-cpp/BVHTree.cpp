@@ -13,7 +13,7 @@
 #define WALL_PARENT_LAYER_INDEX		1
 #define EXPLORER_PARENT_LAYER_INDEX 1
 
-#define DRAW_DEBUG 0
+#define DRAW_DEBUG 1
 
 #if (DRAW_DEBUG == 1)
 #include <trace.h>
@@ -129,6 +129,8 @@ void BVHTree::Update()
 #if (DRAW_DEBUG == 1)
 	RenderDebug(*this);
 #endif
+	mLayerStartIndex.erase(COLLISION_LAYER_EXPLORER);
+	mLayerStartIndex.erase(COLLISION_LAYER_MINION);
 
 	mNodes.erase(std::remove_if(mNodes.begin(), mNodes.end(), [](const BVHNode& other)
 	{
@@ -186,10 +188,14 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 
 void BVHTree::AddNode(BaseColliderComponent* pColliderComponent, const int& parentIndex, const int& depth)
 {
+	if (mLayerStartIndex.find(pColliderComponent->mLayer) == mLayerStartIndex.end())
+	{
+		mLayerStartIndex.insert({ pColliderComponent->mLayer , mNodes.size() });
+	}
+
 	mNodes.push_back(BVHNode());
 
 	BVHNode* pNode = &mNodes.back();
-
 	pNode->object		= pColliderComponent;
 	pNode->parentIndex	= parentIndex;
 }
@@ -214,6 +220,26 @@ void BVHTree::AddNodeRecursively(BaseColliderComponent* pColliderComponent, cons
 					AddNode(pColliderComponent, static_cast<int>(i), layerIndex);
 				}
 			}
+		}
+	}
+}
+
+void BVHTree::GetNodeIndices(std::vector<uint32_t>& indices, const CLayer& layer, std::function<bool(const BVHNode& other)> predicate)
+{
+	uint32_t startIndex = 0;
+	if (mLayerStartIndex.find(layer) != mLayerStartIndex.end())
+	{
+		startIndex = mLayerStartIndex[layer];
+	}
+
+	BVHNode* pNodes = &mNodes[0];
+	uint32_t nodeCount = mNodes.size();
+
+	for (uint32_t i = startIndex; i < nodeCount; i++)
+	{
+		if (predicate(pNodes[i]))
+		{
+			indices.push_back(i);
 		}
 	}
 }
