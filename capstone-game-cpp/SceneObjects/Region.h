@@ -9,8 +9,6 @@ class Region :
 
 public:
 	OrientedBoxColliderComponent*   mColliderComponent;
-	PlaneCollider					mPlaneCollider;
-	mat4f							mInvWorldMatrix;
 
 	Region();
 	~Region();

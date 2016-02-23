@@ -8,9 +8,6 @@ Region::Region() : mColliderComponent(Factory<OrientedBoxColliderComponent>::Cre
 	mColliderComponent->mIsDynamic = false;
 	mColliderComponent->mIsActive = true;
 	mColliderComponent->mSceneObject = this;
-
-	mPlaneCollider.normal = { 0.0f, 0.0f, -1.0f };
-	mPlaneCollider.distance = 0.0f;
 }
 
 Region::~Region()
