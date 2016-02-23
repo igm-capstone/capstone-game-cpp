@@ -54,11 +54,9 @@
     <ClCompile Include="TargetFollower.cpp" />
     <ClCompile Include="trace.cpp" />
     <ClCompile Include="BVHTree.cpp" />
+    <ClCompile Include="DebugRender.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SceneObjects\SpawnPoint.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Components\AnimationController.h" />
     <ClInclude Include="CameraManager.h" />
     <ClInclude Include="CollisionManager.h" />
@@ -91,12 +89,10 @@
     <ClInclude Include="SceneObjects\Explorer.h" />
     <ClInclude Include="SceneObjects\MoveableBlock.h" />
     <ClInclude Include="SceneObjects\Lamp.h" />
-    <ClInclude Include="SceneObjects\Wall.h" />
     <ClInclude Include="Scenes\BaseScene.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="AIManager.h" />
     <ClInclude Include="json.h" />
-    <ClInclude Include="LevelReader.h" />
     <ClInclude Include="Network\NetworkData.h" />
     <ClInclude Include="Network\NetworkClient.h" />
     <ClInclude Include="Network\NetworkManager.h" />
@@ -116,14 +112,10 @@
     <ClInclude Include="Uniforms.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="BVHTree.h" />
+    <ClInclude Include="SceneObjects\SpawnPoint.h" />
+    <ClInclude Include="DebugRender.h" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\QuadVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\QuadPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\BillboardPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
@@ -175,9 +167,6 @@
     <FxCompile Include="Shaders\SkinnedMeshVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\GridComputeShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
@@ -198,7 +187,6 @@
     <ClCompile Include="SceneObjects\Minion.cpp" />
     <ClCompile Include="Scenes\BaseScene.cpp" />
     <ClCompile Include="AIManager.cpp" />
-    <ClCompile Include="LevelReader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Network\NetworkClient.cpp" />
     <ClCompile Include="Network\NetworkManager.cpp" />

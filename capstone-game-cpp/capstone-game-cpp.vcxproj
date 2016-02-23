@@ -113,6 +113,7 @@
     <ClCompile Include="Components\MinionController.cpp" />
     <ClCompile Include="Components\Skill.cpp" />
     <ClCompile Include="Console.cpp" />
+    <ClCompile Include="DebugRender.cpp" />
     <ClCompile Include="Factory.cpp" />
     <ClCompile Include="ModelManager.cpp" />
     <ClCompile Include="Resource.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="Components\GhostController.h" />
     <ClInclude Include="Components\Health.h" />
     <ClInclude Include="Components\MinionController.h" />
+    <ClInclude Include="DebugRender.h" />
     <ClInclude Include="FBXResource.h" />
     <ClInclude Include="fmodwrap.h" />
     <ClInclude Include="Mathf.h" />

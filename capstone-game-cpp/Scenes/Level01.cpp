@@ -20,6 +20,7 @@
 #include <Components/GhostController.h>
 #include <SceneObjects/Ghost.h>
 #include <SceneObjects/StaticMesh.h>
+#include <DebugRender.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -41,6 +42,10 @@ Level01::Level01() :
 
 Level01::~Level01()
 {
+#ifdef _DEBUG
+	ReleaseGlobals();
+#endif
+
 	mPlaneMesh->~IMesh();
 	mNDSQuadMesh->~IMesh();
 
@@ -149,6 +154,10 @@ void Level01::InitializeGeometry()
 	std::vector<GPU::Vertex3> vertices;
 	std::vector<uint16_t> indices;
 
+#ifdef _DEBUG
+	CreateWireFrameRasterizerState();
+	CreateColliderMesh(&mAllocator);
+#endif
 	// Floor
 	Geometry::Plane(vertices, indices, mLevel.floorWidth, mLevel.floorHeight, 5, 5);
 
@@ -411,6 +420,11 @@ void Level01::VRender()
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, Colors::transparent.pCols, 0xffffffff);
 
 	RenderStaticMeshes();
+
+#ifdef _DEBUG
+	RenderWallColliders(mExplorerShaderResource, mCameraManager, &mModel);
+#endif
+
 	RenderExplorers();
 	RenderMinions();
 	RenderSpotLightVolumes();
