@@ -44,6 +44,29 @@ void parseTransform(json obj, Transform* transform)
 	auto rotation = obj["rotation"];
 	if (!rotation.empty())
 	{
+		transform->SetRotation(parseQuatf(rotation));
+	}
+
+	auto scale = obj["scale"];
+	if (!scale.empty())
+	{
+		transform->SetScale(parseVec3f(scale));
+	}
+}
+
+
+void parseStaticMeshTransform(json obj, Transform* transform)
+{
+
+	auto position = obj["position"];
+	if (!position.empty())
+	{
+		transform->SetPosition(parseVec3f(position));
+	}
+
+	auto rotation = obj["rotation"];
+	if (!rotation.empty())
+	{
 		// In Unity, static meshes have a child elemented with rotation (-90,0,0). This is not part of the JSON file.
 		transform->SetRotation(parseQuatf(rotation)*quatf::rollPitchYaw(0, -0.5*PI, 0));
 	}
@@ -56,7 +79,6 @@ void parseTransform(json obj, Transform* transform)
 		transform->SetScale(vec3f(json.x, json.z, json.y));
 	}
 }
-
 
 void loadLamps(jarr_t objs)
 {
@@ -124,7 +146,7 @@ void loadStaticMeshes(jarr_t objs, std::string model)
 	for (auto obj : *objs)
 	{
 		auto staticMesh = Factory<StaticMesh>::Create();
-		parseTransform(obj, staticMesh->mTransform);
+		parseStaticMeshTransform(obj, staticMesh->mTransform);
 		Resource::mModelManager->GetModel(model.c_str())->Link(staticMesh);
 	}
 }
