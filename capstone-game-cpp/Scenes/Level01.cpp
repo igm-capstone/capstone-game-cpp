@@ -131,10 +131,15 @@ void Level01::InitializeAssets()
 
 	mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 
-
 	mFloorCollider.halfSize = mLevel.extents;
 	mFloorCollider.origin = mLevel.center;
 
+	mFloorCollider.halfSize = mLevel.extents;
+	mFloorCollider.origin	= mLevel.center;
+
+	mCameraManager->MoveCamera(mLevel.center, mLevel.center - vec3f(0.0f, 0.0f, 100.0f));
+
+	mCollisionManager.mBVHTree.SetRootBoundingVolume(mLevel.center, mLevel.extents, mLevel.staticColliderCount);
 	mAIManager.InitGrid(mLevel.center.x - mLevel.extents.x, mLevel.center.y + mLevel.extents.y, 2 * mLevel.extents.x, 2 * mLevel.extents.y);
 }
 

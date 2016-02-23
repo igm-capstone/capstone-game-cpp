@@ -3,8 +3,10 @@
 #include <Rig3D/Intersection.h>
 #include "SceneObjects/Explorer.h"
 #include "SceneObjects/DominationPoint.h"
-#include "SceneObjects/StaticCollider.h"
 #include <algorithm>
+
+
+
 
 // Functor used to find matching collisions
 namespace
@@ -38,10 +40,14 @@ void CollisionManager::Initialize()
 {
 	mCollisions.reserve(MAX_COLLISIONS);
 	mTriggers.reserve(MAX_COLLISIONS);
+
+	mBVHTree.Initialize();
 }
 
 void CollisionManager::Update(double milliseconds)
 {
+	mBVHTree.Update();
+
 	std::vector<Collision> frameCollisions;
 
 	DetectTriggers(frameCollisions);
@@ -163,30 +169,49 @@ void CollisionManager::DispatchTriggerExit(Collision* collision)
 
 void CollisionManager::DetectCollisions()
 {
-	// Explorer / Explorer Collisions
-
 	std::vector<Collision>& collisions = mCollisions;
 
-	for (Explorer& e1 : Factory<Explorer>())
+	// Get node indices for explorers 
+	std::vector<uint32_t> indices;
+
+	indices.reserve(MAX_EXPLORERS);
+	
+	mBVHTree.GetNodeIndices(indices, [](const BVHNode& other)
 	{
-		for (Explorer& e2 : Factory<Explorer>())
+		return other.object->mLayer == COLLISION_LAYER_EXPLORER;
+	});
+
+	// Explorer / Explorer Collisions
+
+	for (uint32_t i : indices)
+	{
+		for (uint32_t j : indices)
 		{
-			if (&e1 == &e2) continue;
+			if (i == j) continue;
 
-			if (IntersectSphereSphere(e1.mCollider->mCollider, e2.mCollider->mCollider))
+			BVHNode* pNode_e1 = mBVHTree.GetNode(i);
+			BVHNode* pNode_e2 = mBVHTree.GetNode(j);
+
+			if (pNode_e1->parentIndex == pNode_e2->parentIndex)
 			{
-				float overlap = (e1.mCollider->mCollider.radius + e2.mCollider->mCollider.radius)
-					- magnitude(e1.mCollider->mCollider.origin - e2.mCollider->mCollider.origin);
-				vec3f AtoB = (e2.mCollider->mCollider.origin - e1.mCollider->mCollider.origin);
+				SphereColliderComponent* pSC_e1 = reinterpret_cast<SphereColliderComponent*>(pNode_e1->object);
+				SphereColliderComponent* pSC_e2 = reinterpret_cast<SphereColliderComponent*>(pNode_e2->object);
 
-				collisions.push_back(Collision());
+				if (IntersectSphereSphere(pSC_e1->mCollider, pSC_e2->mCollider))
+				{
+					float overlap = (pSC_e1->mCollider.radius + pSC_e2->mCollider.radius)
+						- magnitude(pSC_e1->mCollider.origin - pSC_e2->mCollider.origin);
+					vec3f AtoB = (pSC_e2->mCollider.origin - pSC_e1->mCollider.origin);
 
-				Collision* pCollision = &collisions.back();
-				pCollision->colliderA.SphereCollider = e1.mCollider;
-				pCollision->colliderB.SphereCollider = e2.mCollider;
-				pCollision->minimumOverlap = - AtoB * overlap;
+					collisions.push_back(Collision());
 
-				e1.mCollider->OnCollisionEnter(&e2, overlap);
+					Collision* pCollision = &collisions.back();
+					pCollision->colliderA.SphereCollider = pSC_e1;
+					pCollision->colliderB.SphereCollider = pSC_e2;
+					pCollision->minimumOverlap = -AtoB * overlap;
+
+					pSC_e1->OnCollisionEnter(pSC_e2->mSceneObject, overlap);
+				}
 			}
 		}
 	}
@@ -197,26 +222,44 @@ void CollisionManager::DetectCollisions()
 
 	// Explorer / Wall Collisions
 
-	for (Explorer& e : Factory<Explorer>())
+	std::vector<uint32_t> wallIndices;
+	wallIndices.reserve(50);
+
+	for (uint32_t idx : indices)
 	{
-		for (StaticCollider& w : Factory<StaticCollider>())
+		BVHNode* pNode = mBVHTree.GetNode(idx);
+		int parentIndex = pNode->parentIndex;
+
+		mBVHTree.GetNodeIndices(wallIndices, [parentIndex](const BVHNode& other)
 		{
+			return other.parentIndex == parentIndex && other.object->mLayer == COLLISION_LAYER_WALL;
+		});
+
+		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
+
+		for (uint32_t nIdx : wallIndices)
+		{
+			OrientedBoxColliderComponent* pWallObbComponent = reinterpret_cast<OrientedBoxColliderComponent*>(mBVHTree.GetNode(nIdx)->object);
+
 			vec3f cp;
-			
-			if (IntersectSphereOBB(e.mCollider->mCollider, w.mBoxCollider->mCollider, cp))
+
+			if (IntersectSphereOBB(pSphereComponent->mCollider, pWallObbComponent->mCollider, cp))
 			{
-				vec3f d = cp - e.mCollider->mCollider.origin;
-				vec3f r = normalize(d) * e.mCollider->mCollider.radius;
+				vec3f d = cp - pSphereComponent->mCollider.origin;
+				vec3f r = normalize(d) * pSphereComponent->mCollider.radius;
+
 				collisions.push_back(Collision());
 
 				Collision* pCollision = &collisions.back();
-				pCollision->colliderA.SphereCollider	= e.mCollider;
-				pCollision->colliderB.OBBCollider		= w.mBoxCollider;
-				pCollision->minimumOverlap				= d - r;
+				pCollision->colliderA.SphereCollider = pSphereComponent;
+				pCollision->colliderB.OBBCollider = pWallObbComponent;
+				pCollision->minimumOverlap = d - r;
 
-				e.mCollider->OnCollisionEnter(&w, d - r);
+				pSphereComponent->OnCollisionEnter(pWallObbComponent->mSceneObject, d - r);
 			}
 		}
+
+		wallIndices.clear();
 	}
 }
 

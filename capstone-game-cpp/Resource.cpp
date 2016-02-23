@@ -152,20 +152,32 @@ void loadStaticMeshes(jarr_t objs, std::string model)
 }
 
 
-void loadStaticColliders(jarr_t objs)
+void loadStaticColliders(jarr_t objs, CLayer layer, vec3f levelOrigin, vec3f levelExtents)
 {
 	TRACE_LOG("Loading " << int(objs->size()) << " static colliders...");
 	for (auto obj : *objs)
 	{
-		auto wall = Factory<StaticCollider>::Create();
-		parseTransform(obj, wall->mTransform);
-		wall->mBoxCollider->mCollider.origin = wall->mTransform->GetPosition();
-		wall->mBoxCollider->mCollider.halfSize = wall->mTransform->GetScale() * 0.5f;
+		auto collider = Factory<StaticCollider>::Create();
+		parseTransform(obj, collider->mTransform);
 
-		mat3f axis = wall->mTransform->GetRotationMatrix();
-		wall->mBoxCollider->mCollider.axis[0] = axis.pRows[0];
-		wall->mBoxCollider->mCollider.axis[1] = axis.pRows[1];
-		wall->mBoxCollider->mCollider.axis[2] = axis.pRows[2];
+		// Hard coding z scale and position for colliders based on z extents in Unity
+		// Min z = 0.09 Max z = 15.06
+		// Lucas please give me z extents in json when you have time :)
+		vec3f jsonPosition	= collider->mTransform->GetPosition();
+		collider->mTransform->SetPosition(jsonPosition.x, jsonPosition.y, 7.5f);
+
+		vec3f jsonScale = collider->mTransform->GetScale();
+		collider->mTransform->SetScale(jsonScale.x, 15.0f, jsonScale.z);
+
+		collider->mBoxCollider->mCollider.origin = collider->mTransform->GetPosition();
+		collider->mBoxCollider->mCollider.halfSize = collider->mTransform->GetScale() * 0.5f;
+
+		mat3f axis = collider->mTransform->GetRotationMatrix();
+		collider->mBoxCollider->mCollider.axis[0] = axis.pRows[0];
+		collider->mBoxCollider->mCollider.axis[1] = axis.pRows[1];
+		collider->mBoxCollider->mCollider.axis[2] = axis.pRows[2];
+
+		collider->mBoxCollider->mLayer = layer;
 	}
 }
 
@@ -228,7 +240,7 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	{
 		for (int x = 0; x < TILE_COUNT_X; x++)
 		{
-			level.floorWorldMatrices[y * TILE_COUNT_X + x] = (mat4f::rotateX(-PI * 0.5f) * mat4f::translate({ x * level.floorWidth - halfWidth, halfHeight - y * level.floorHeight, 0.5f })).transpose(); //FIXME: hardcoded z value
+			level.floorWorldMatrices[y * TILE_COUNT_X + x] = (mat4f::rotateX(-PI * 0.5f) * mat4f::translate({ level.center.x + (x * level.floorWidth - halfWidth) , level.center.y + (halfHeight - y * level.floorHeight), 0.5f })).transpose(); //FIXME: hardcoded z value
 		}
 	}
 
@@ -295,7 +307,7 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 				level.staticMeshCount += static_cast<short>(meshes->size());
 			}
 		}
-		
+
 		level.staticMeshWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.staticMeshCount, alignof(mat4f), 0));
 
 		int i = 0;
@@ -303,6 +315,23 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 			level.staticMeshWorldMatrices[i++] = w.mTransform->GetWorldMatrix().transpose();
 		}
 	}
+
+
+	auto regions = obj["regions"].get_ptr<jarr_t>();
+	if (regions != nullptr)
+	{
+		level.staticColliderCount += static_cast<short>(regions->size());
+		loadStaticColliders(regions, COLLISION_LAYER_FLOOR, level.center, level.extents);
+	}
+
+	auto colliders = obj["staticColliders"].get_ptr<jarr_t>();
+	if (colliders != nullptr)
+	{
+		level.staticColliderCount += static_cast<short>(colliders->size());
+		loadStaticColliders(colliders, COLLISION_LAYER_WALL, level.center, level.extents);
+	}
+
+
 
 	return level;
 }

@@ -53,6 +53,163 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TargetFollower.cpp" />
     <ClCompile Include="trace.cpp" />
+    <ClCompile Include="BVHTree.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SceneObjects\SpawnPoint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\AnimationController.h" />
+    <ClInclude Include="CameraManager.h" />
+    <ClInclude Include="CollisionManager.h" />
+    <ClInclude Include="Components\BaseComponent.h" />
+    <ClInclude Include="Components\ColliderComponent.h" />
+    <ClInclude Include="Components\DominationPointController.h" />
+    <ClInclude Include="Components\FmodEvent.h" />
+    <ClInclude Include="Components\FmodEventCollection.h" />
+    <ClInclude Include="Components\GhostController.h" />
+    <ClInclude Include="Components\Health.h" />
+    <ClInclude Include="Components\MinionController.h" />
+    <ClInclude Include="FBXResource.h" />
+    <ClInclude Include="fmodwrap.h" />
+    <ClInclude Include="Mathf.h" />
+    <ClInclude Include="SceneObjects\Ghost.h" />
+    <ClInclude Include="Components\Skill.h" />
+    <ClInclude Include="capstone-game-cpp.rc.h" />
+    <ClInclude Include="Console.h" />
+    <ClInclude Include="Culler.h" />
+    <ClInclude Include="SceneObjects\DominationPoint.h" />
+    <ClInclude Include="SceneObjects\Minion.h" />
+    <ClInclude Include="SceneObjects\Pickup.h" />
+    <ClInclude Include="Components\ExplorerController.h" />
+    <ClInclude Include="Factory.h" />
+    <ClInclude Include="Components\NetworkID.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="ScareTacticsApplication.h" />
+    <ClInclude Include="SceneObjects\SpawnPoint.h" />
+    <ClInclude Include="SceneObjects\LegacySceneObject.h" />
+    <ClInclude Include="SceneObjects\Explorer.h" />
+    <ClInclude Include="SceneObjects\MoveableBlock.h" />
+    <ClInclude Include="SceneObjects\Lamp.h" />
+    <ClInclude Include="SceneObjects\Wall.h" />
+    <ClInclude Include="Scenes\BaseScene.h" />
+    <ClInclude Include="Colors.h" />
+    <ClInclude Include="AIManager.h" />
+    <ClInclude Include="json.h" />
+    <ClInclude Include="LevelReader.h" />
+    <ClInclude Include="Network\NetworkData.h" />
+    <ClInclude Include="Network\NetworkClient.h" />
+    <ClInclude Include="Network\NetworkManager.h" />
+    <ClInclude Include="Network\NetworkServer.h" />
+    <ClInclude Include="Node.h" />
+    <ClInclude Include="PathFinder\Graph.h" />
+    <ClInclude Include="PathFinder\Fringe.h" />
+    <ClInclude Include="RayCast.h" />
+    <ClInclude Include="SceneObjects\BaseSceneObject.h" />
+    <ClInclude Include="Scenes\Level01.h" />
+    <ClInclude Include="Scenes\LoadingScreen.h" />
+    <ClInclude Include="Scenes\MainMenuScene.h" />
+    <ClInclude Include="SkeletalHierarchy.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TargetFollower.h" />
+    <ClInclude Include="trace.h" />
+    <ClInclude Include="Uniforms.h" />
+    <ClInclude Include="Vertex.h" />
+    <ClInclude Include="BVHTree.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\QuadVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\QuadPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BillboardPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BillboardVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CircleVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShadowCasterPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShadowPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\LineTraceVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\LineTracePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ExplorerPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ExplorerVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\DebugTexturePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SpotLightVolumeVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SpotLightVolumePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\NDSQuadVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\NDSQuadPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SpritePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SpriteVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SkinnedMeshVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\GridComputeShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Components\AnimationController.cpp" />
+    <ClCompile Include="CameraManager.cpp" />
+    <ClCompile Include="CollisionManager.cpp" />
+    <ClCompile Include="Components\ColliderComponent.cpp" />
+    <ClCompile Include="Components\DominationPointController.cpp" />
+    <ClCompile Include="Components\ExplorerController.cpp" />
+    <ClCompile Include="Components\FmodEvent.cpp" />
+    <ClCompile Include="Components\FmodEventCollection.cpp" />
+    <ClCompile Include="Components\GhostController.cpp" />
+    <ClCompile Include="Components\MinionController.cpp" />
+    <ClCompile Include="Components\Skill.cpp" />
+    <ClCompile Include="Console.cpp" />
+    <ClCompile Include="Factory.cpp" />
+    <ClCompile Include="Resource.cpp" />
+    <ClCompile Include="ScareTacticsApplication.cpp" />
+    <ClCompile Include="SceneObjects\Minion.cpp" />
+    <ClCompile Include="Scenes\BaseScene.cpp" />
+    <ClCompile Include="AIManager.cpp" />
+    <ClCompile Include="LevelReader.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Network\NetworkClient.cpp" />
+    <ClCompile Include="Network\NetworkManager.cpp" />
+    <ClCompile Include="Network\NetworkServer.cpp" />
+    <ClCompile Include="Scenes\Level01.cpp" />
+    <ClCompile Include="Scenes\LoadingScreen.cpp" />
+    <ClCompile Include="Scenes\MainMenuScene.cpp" />
+    <ClCompile Include="SkeletalHierarchy.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="TargetFollower.cpp" />
+    <ClCompile Include="trace.cpp" />
     <ClCompile Include="ModelManager.cpp" />
     <ClCompile Include="SceneObjects\BaseSceneObject.cpp" />
     <ClCompile Include="SceneObjects\Explorer.cpp" />
@@ -123,6 +280,7 @@
     <CustomBuild Include="External\libfbxsdk.ref" />
   </ItemGroup>
   <ItemGroup>
+    <ResourceCompile Include="capstone-game-cpp.rc" />
     <ResourceCompile Include="capstone-game-cpp.rc" />
   </ItemGroup>
   <ItemGroup>

@@ -1,0 +1,239 @@
+#include "stdafx.h"
+#include "BVHTree.h"
+#include "SceneObjects/StaticCollider.h"
+#include <SceneObjects/BaseSceneObject.h>
+#include <Components/ColliderComponent.h>
+#include <Rig3D/Intersection.h>
+#include <Colors.h>
+#include "SceneObjects/Explorer.h"
+
+#define PARTITION_X_COUNT 3
+#define PARTITION_Y_COUNT 2
+
+#define WALL_PARENT_LAYER_INDEX		1
+#define EXPLORER_PARENT_LAYER_INDEX 1
+
+#define DRAW_DEBUG 0
+
+#if (DRAW_DEBUG == 1)
+#include <trace.h>
+
+void RenderDebug(BVHTree& bvhTree)
+{
+	vec3f tl = { bvhTree.mOrigin.x - bvhTree.mExtents.x, bvhTree.mOrigin.y + bvhTree.mExtents.y, 0.0f };
+	vec3f tr = { bvhTree.mOrigin.x + bvhTree.mExtents.x, bvhTree.mOrigin.y + bvhTree.mExtents.y, 0.0f };
+	vec3f bl = { bvhTree.mOrigin.x - bvhTree.mExtents.x, bvhTree.mOrigin.y - bvhTree.mExtents.y, 0.0f };
+
+	TRACE_LINE(tl, tr, Colors::red);
+	TRACE_LINE(tl, bl, Colors::red);
+
+
+	vec2f traceStep = bvhTree.mQuadrantExtents * 2.0f;
+
+	for (int x = 0; x < PARTITION_X_COUNT; x++)
+	{
+		OrientedBoxColliderComponent* pObb = reinterpret_cast<OrientedBoxColliderComponent*>(bvhTree.GetNode(x + 1)->object);
+		vec3f qtr = { pObb->mCollider.origin.x + pObb->mCollider.halfSize.x, pObb->mCollider.origin.y + pObb->mCollider.halfSize.y,0.0f };
+		vec3f obr = { pObb->mCollider.origin.x + pObb->mCollider.halfSize.x, bl.y, 0.0f };
+		TRACE_LINE(qtr, obr, Colors::red);
+	}
+
+	for (int y = 0; y < PARTITION_Y_COUNT; y++)
+	{
+		OrientedBoxColliderComponent* pObb = reinterpret_cast<OrientedBoxColliderComponent*>(bvhTree.GetNode((y * PARTITION_X_COUNT) + 1)->object);
+		vec3f qbl = { pObb->mCollider.origin.x - pObb->mCollider.halfSize.x, pObb->mCollider.origin.y - pObb->mCollider.halfSize.y, 0.0f };
+		vec3f obr = { tr.x, pObb->mCollider.origin.y - pObb->mCollider.halfSize.y, 0.0f };
+		TRACE_LINE(qbl, obr, Colors::red);
+	}
+}
+#endif
+
+inline int OBBComponentTest(BaseColliderComponent* a, OrientedBoxColliderComponent* b)
+{
+	return IntersectOBBOBB(reinterpret_cast<OrientedBoxColliderComponent*>(a)->mCollider, b->mCollider);
+}
+
+inline int SphereComponentTest(BaseColliderComponent* a, OrientedBoxColliderComponent* b)
+{
+	vec3f cp;
+	return IntersectSphereOBB(reinterpret_cast<SphereColliderComponent*>(a)->mCollider, b->mCollider, cp);
+}
+
+struct BVHNodeLayerFilter
+{
+	CLayer					layer;
+
+	BVHNodeLayerFilter(CLayer layer) : layer(layer)
+	{
+		
+	}
+
+	bool operator()(const BVHNode& other) const
+	{
+
+		return layer == other.object->mLayer;
+	}
+};
+
+struct BVHNodeIntesection
+{
+	CLayer	layer;
+	int		parentIndex;
+	
+};
+
+static vec3f kDefaultOrientation[3] =
+{
+	{ 1.0f, 0.0f, 0.0f },
+	{ 0.0f, 1.0f, 0.0f },
+	{ 0.0f, 0.0f, 1.0f }
+};
+
+namespace
+{
+	static const CLayer gAllLayers[] =
+	{
+		COLLISION_LAYER_ROOT,
+		COLLISION_LAYER_QUADRANT,
+		COLLISION_LAYER_FLOOR,
+		COLLISION_LAYER_WALL,
+		COLLISION_LAYER_EXPLORER,
+		COLLISION_LAYER_MINION,
+		COLLISION_LAYER_SKILL,
+		COLLISION_LAYER_LAMP
+	};
+}
+
+BVHTree::BVHTree()
+{
+}
+
+BVHTree::~BVHTree()
+{
+}
+
+void BVHTree::SetRootBoundingVolume(vec3f origin, vec3f extents, int nodeCount)
+{
+	mNodes.reserve(MAX_STATIC_COLLIDERS);
+	mOrigin		= origin;
+	mExtents	= extents;
+}
+
+void BVHTree::Initialize()
+{
+	BuildBoundingVolumeHierarchy();
+}
+
+void BVHTree::Update()
+{
+#if (DRAW_DEBUG == 1)
+	RenderDebug(*this);
+#endif
+
+	mNodes.erase(std::remove_if(mNodes.begin(), mNodes.end(), [](const BVHNode& other)
+	{
+		return other.object->mLayer == COLLISION_LAYER_EXPLORER || other.object->mLayer == COLLISION_LAYER_MINION;
+	}), mNodes.end());
+
+	for (Explorer& explorer : Factory<Explorer>())
+	{
+		AddNodeRecursively(explorer.mCollider, EXPLORER_PARENT_LAYER_INDEX, 1, 0, 0, SphereComponentTest);
+	}
+}
+
+void BVHTree::BuildBoundingVolumeHierarchy()
+{
+	OrientedBoxColliderComponent* pOBB = Factory<OrientedBoxColliderComponent>::Create();
+	pOBB->mCollider.origin = mOrigin;
+	pOBB->mCollider.halfSize = { mExtents.x, mExtents.y, 25.0f };
+	pOBB->mCollider.axis[0] = kDefaultOrientation[0];
+	pOBB->mCollider.axis[1] = kDefaultOrientation[1];
+	pOBB->mCollider.axis[2] = kDefaultOrientation[2];
+	pOBB->mSceneObject = this;
+
+	AddNode(pOBB, -1, 0);	
+
+	vec2f rootSize			= { mExtents.x * 2.0f, mExtents.y * 2.0f };
+	vec2f quadrantSize		= { rootSize.x / static_cast<float>(PARTITION_X_COUNT),  rootSize.y / static_cast<float>(PARTITION_Y_COUNT) };
+	vec2f quadrantOffset	= (rootSize - quadrantSize) * 0.5f;
+	mQuadrantExtents		= { quadrantSize.x * 0.5f, quadrantSize.y * 0.5f, 25.0f };
+
+	for (int y = 0; y < PARTITION_Y_COUNT; y++)
+	{
+		for (int x = 0; x < PARTITION_X_COUNT; x++)
+		{
+			pOBB = Factory<OrientedBoxColliderComponent>::Create();
+			pOBB->mCollider.origin = { mOrigin.x + (x * quadrantSize.x - quadrantOffset.x), mOrigin.y + (quadrantOffset.y - quadrantSize.y * y) , 0.0f };
+			pOBB->mCollider.halfSize = mQuadrantExtents;
+			pOBB->mCollider.axis[0] = kDefaultOrientation[0];
+			pOBB->mCollider.axis[1] = kDefaultOrientation[1];
+			pOBB->mCollider.axis[2] = kDefaultOrientation[2];
+			pOBB->mLayer = COLLISION_LAYER_QUADRANT;
+			pOBB->mSceneObject = this;
+
+			AddNodeRecursively(pOBB, 0, 0, 0, 0, OBBComponentTest);
+		}
+	}
+
+	for (StaticCollider& collider : Factory<StaticCollider>())
+	{
+		if (collider.mBoxCollider->mLayer == COLLISION_LAYER_WALL)
+		{
+			AddNodeRecursively(collider.mBoxCollider, WALL_PARENT_LAYER_INDEX, 0, 0, 0, OBBComponentTest);
+		}
+	}
+}
+
+void BVHTree::AddNode(BaseColliderComponent* pColliderComponent, const int& parentIndex, const int& depth)
+{
+	mNodes.push_back(BVHNode());
+
+	BVHNode* pNode = &mNodes.back();
+
+	pNode->object		= pColliderComponent;
+	pNode->parentIndex	= parentIndex;
+}
+
+void BVHTree::AddNodeRecursively(BaseColliderComponent* pColliderComponent, const int& parentLayerIndex, const int& layerIndex, const int& parentIndex, const int& depth, IntersectionTest intersectionTest)
+{
+	for (uint32_t i = parentIndex; i < mNodes.size(); i++)
+	{
+		if (mNodes[i].object->mLayer == gAllLayers[layerIndex])
+		{
+			OrientedBoxColliderComponent* pOBB = reinterpret_cast<OrientedBoxColliderComponent*>(mNodes[i].object);
+
+			vec3f cp;
+			if (intersectionTest(pColliderComponent, pOBB))
+			{
+				if (mNodes[i].object->mLayer != gAllLayers[parentLayerIndex])
+				{
+					AddNodeRecursively(pColliderComponent, parentLayerIndex, layerIndex + 1, static_cast<int>(i), depth + 1, intersectionTest);
+				}
+				else
+				{
+					AddNode(pColliderComponent, static_cast<int>(i), layerIndex);
+				}
+			}
+		}
+	}
+}
+
+void BVHTree::GetNodeIndices(std::vector<uint32_t>& indices, std::function<bool(const BVHNode& other)> predicate)
+{
+	BVHNode* pNodes		= &mNodes[0];
+	uint32_t nodeCount	= mNodes.size();
+
+	for (uint32_t i = 0; i < nodeCount; i++)
+	{
+		if (predicate(pNodes[i]))
+		{
+			indices.push_back(i);
+		}
+	}
+}
+
+BVHNode* BVHTree::GetNode(const uint32_t& index)
+{
+	return &mNodes[index];
+}
+

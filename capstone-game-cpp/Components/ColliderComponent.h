@@ -2,14 +2,25 @@
 #include "Rig3D/Parametric.h"
 #include "BaseComponent.h"
 
-struct Collision;
+enum CLayer : short
+{
+	COLLISION_LAYER_ROOT = -2,
+	COLLISION_LAYER_QUADRANT,
+	COLLISION_LAYER_FLOOR,
+	COLLISION_LAYER_WALL,
+	COLLISION_LAYER_EXPLORER,
+	COLLISION_LAYER_MINION,
+	COLLISION_LAYER_SKILL,
+	COLLISION_LAYER_LAMP
+};
 
 class BaseColliderComponent :
 	public BaseComponent
 {
 public:
-	bool mIsDynamic;
-	bool mIsTrigger;
+	CLayer	mLayer;
+	bool	mIsDynamic;
+	bool	mIsTrigger;
 
 	EXPOSE_CALLBACK_2(CollisionEnter, BaseSceneObject*, vec3f)
 	EXPOSE_CALLBACK_1(CollisionExit, BaseSceneObject*)
@@ -19,7 +30,7 @@ public:
 	EXPOSE_CALLBACK_1(TriggerExit, BaseSceneObject*)
 
 protected:
-	BaseColliderComponent() : mIsDynamic(true), mIsTrigger(false) {};
+	BaseColliderComponent() : mLayer(COLLISION_LAYER_ROOT), mIsDynamic(true), mIsTrigger(false) {};
 	~BaseColliderComponent() {};
 };
 

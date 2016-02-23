@@ -9,7 +9,7 @@ http://www.gamedev.net/page/resources/_/technical/graphics-programming-and-theor
 #pragma once
 #include <fbxsdk.h>
 #include <SkeletalHierarchy.h>
-#include "trace.h"
+#include <trace.h>
 
 #define GET_FLOAT(f) static_cast<float>(f)
 
@@ -156,9 +156,6 @@ public:
 		}
 
 		FbxNode* pRootNode = pScene->GetRootNode();
-
-		PrintNodesRecursively(pRootNode, 0);
-
 
 		if (pRootNode)
 		{

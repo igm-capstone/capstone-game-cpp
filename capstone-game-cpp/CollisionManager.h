@@ -1,5 +1,6 @@
 #pragma once
 #include <Components/ColliderComponent.h>
+#include "BVHTree.h"
 
 struct Collision
 {
@@ -25,6 +26,8 @@ struct Collision
 class CollisionManager
 {
 public:
+	BVHTree	mBVHTree;
+
 	CollisionManager();
 	~CollisionManager();
 

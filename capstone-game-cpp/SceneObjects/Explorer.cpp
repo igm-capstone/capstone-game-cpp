@@ -4,6 +4,7 @@
 #include <Components/ExplorerController.h>
 #include <Components/AnimationController.h>
 #include <Components/ColliderComponent.h>
+#include <ModelManager.h>
 #include <Components/Health.h>
 #include <Components/Skill.h>
 #include <Vertex.h>
@@ -19,7 +20,7 @@ Explorer::Explorer()
 	mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
 	mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
 	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
-	
+
 	mController = Factory<ExplorerController>::Create();
 	mController->mSceneObject = this;
 	mController->mIsActive = false;
@@ -27,9 +28,9 @@ Explorer::Explorer()
 	mController->RegisterMoveCallback(&OnMove);
 	mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
 
-	Application::SharedInstance().GetModelManager()->LoadModel<GPU::SkinnedVertex>("AnimTest");
-	Application::SharedInstance().GetModelManager()->GetModel("AnimTest")->Link(this);
-		
+	Application::SharedInstance().GetModelManager()->LoadModel<GPU::SkinnedVertex>("Minion_Test");
+	Application::SharedInstance().GetModelManager()->GetModel("Minion_Test")->Link(this);
+
 	mAnimationController = Factory<AnimationController>::Create();
 	mAnimationController->mSceneObject = this;
 	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
@@ -39,6 +40,7 @@ Explorer::Explorer()
 	mCollider->mIsDynamic = true;
 	mCollider->mSceneObject = this;
 	mCollider->mIsActive = false;
+	mCollider->mLayer = COLLISION_LAYER_EXPLORER;
 	mCollider->RegisterCollisionExitCallback(&OnCollisionExit);
 
 	mHealth = Factory<Health>::Create();
@@ -65,7 +67,7 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
 
-	mAnimationController->PlayLoopingAnimation("Take 001");
+	mAnimationController->PlayLoopingAnimation("Minion_01_Animation_Pass_1_1_1.0007");
 }
 
 void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
