@@ -225,8 +225,8 @@ namespace Rig3D
 			if (abs(f) > 0.001f)
 			{
 				float inv_f = 1.0f / f;
-				float t1 = e + obb.halfSize.pCols[i] * inv_f;
-				float t2 = e - obb.halfSize.pCols[i] * inv_f;
+				float t1 = (e + obb.halfSize.pCols[i]) * inv_f;
+				float t2 = (e - obb.halfSize.pCols[i]) * inv_f;
 
 				if (t1 > t2)
 				{
@@ -235,15 +235,8 @@ namespace Rig3D
 					t2 = temp;
 				}
 
-				if (t1 > tMin)
-				{
-					tMin = t1;
-				}
-
-				if (t2 < tMax)
-				{
-					tMax = t2;
-				}
+				tMin = max(tMin, t1);
+				tMax = min(tMax, t2);
 
 				if (tMin > tMax || tMax < 0.0f)
 				{
