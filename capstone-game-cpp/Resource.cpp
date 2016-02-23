@@ -10,6 +10,7 @@
 #include <GraphicsMath/cgm.h>
 #include "SceneObjects/StaticMesh.h"
 #include "SceneObjects/StaticCollider.h"
+#include "SceneObjects/Region.h"
 
 using namespace std;
 using namespace Rig3D;
@@ -151,6 +152,32 @@ void loadStaticMeshes(jarr_t objs, std::string model)
 	}
 }
 
+void loadRegions(jarr_t objs, CLayer layer, vec3f levelOrigin, vec3f levelExtents)
+{
+	TRACE_LOG("Loading " << int(objs->size()) << " static regions...");
+	for (auto obj : *objs)
+	{
+		auto region = Factory<Region>::Create();
+		parseTransform(obj, region->mTransform);
+		
+		vec3f adjustedScale = region->mTransform->GetScale();
+		adjustedScale.z = 1.0f;
+		region->mTransform->SetScale(adjustedScale);
+
+		//vec3f adjustedPos = region->mTransform->GetPosition();
+		//adjustedPos.z += 10.0f;
+		//region->mTransform->SetPosition(adjustedPos);
+
+		// Bounding volume construction for BVH Tree
+		region->mColliderComponent->mCollider.origin = region->mTransform->GetPosition();
+		region->mColliderComponent->mCollider.halfSize = region->mTransform->GetScale() * 0.5f;
+
+		mat3f axis = region->mTransform->GetRotationMatrix();
+		region->mColliderComponent->mCollider.axis[0] = axis.pRows[0];
+		region->mColliderComponent->mCollider.axis[1] = axis.pRows[1];
+		region->mColliderComponent->mCollider.axis[2] = axis.pRows[2];
+	}
+}
 
 void loadStaticColliders(jarr_t objs, CLayer layer, vec3f levelOrigin, vec3f levelExtents)
 {
@@ -167,7 +194,7 @@ void loadStaticColliders(jarr_t objs, CLayer layer, vec3f levelOrigin, vec3f lev
 		collider->mTransform->SetPosition(jsonPosition.x, jsonPosition.y, 7.5f);
 
 		vec3f jsonScale = collider->mTransform->GetScale();
-		collider->mTransform->SetScale(jsonScale.x, 15.0f, jsonScale.z);
+		collider->mTransform->SetScale(jsonScale.x, jsonScale.y, 15.0f);
 
 		collider->mBoxCollider->mCollider.origin = collider->mTransform->GetPosition();
 		collider->mBoxCollider->mCollider.halfSize = collider->mTransform->GetScale() * 0.5f;
@@ -320,14 +347,21 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	auto regions = obj["regions"].get_ptr<jarr_t>();
 	if (regions != nullptr)
 	{
-		level.staticColliderCount += static_cast<short>(regions->size());
-		loadStaticColliders(regions, COLLISION_LAYER_FLOOR, level.center, level.extents);
+		level.regionCount += static_cast<short>(regions->size());
+		loadRegions(regions, COLLISION_LAYER_FLOOR, level.center, level.extents);
+	}
+
+	auto ramps = obj["ramps"].get_ptr<jarr_t>();
+	if (regions != nullptr)
+	{
+		level.regionCount += static_cast<short>(ramps->size());
+		loadRegions(ramps, COLLISION_LAYER_FLOOR, level.center, level.extents);
 	}
 
 	auto colliders = obj["staticColliders"].get_ptr<jarr_t>();
 	if (colliders != nullptr)
 	{
-		level.staticColliderCount += static_cast<short>(colliders->size());
+		level.staticColliderCount = static_cast<short>(colliders->size());
 		loadStaticColliders(colliders, COLLISION_LAYER_WALL, level.center, level.extents);
 	}
 

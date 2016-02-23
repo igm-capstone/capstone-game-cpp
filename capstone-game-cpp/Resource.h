@@ -19,6 +19,7 @@ public:
 		float floorWidth, floorHeight;
 
 		short staticColliderCount	= 0;
+		short regionCount			= 0;
 		short staticMeshCount		= 0;
 		short floorCount			= 0;
 		short lampCount				= 0;
