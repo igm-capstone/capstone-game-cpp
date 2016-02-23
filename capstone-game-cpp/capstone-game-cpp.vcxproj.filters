@@ -55,6 +55,7 @@
     <ClCompile Include="trace.cpp" />
     <ClCompile Include="BVHTree.cpp" />
     <ClCompile Include="DebugRender.cpp" />
+    <ClCompile Include="SceneObjects\Region.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -114,6 +115,7 @@
     <ClInclude Include="BVHTree.h" />
     <ClInclude Include="SceneObjects\SpawnPoint.h" />
     <ClInclude Include="DebugRender.h" />
+    <ClInclude Include="SceneObjects\Region.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BillboardPixelShader.hlsl">

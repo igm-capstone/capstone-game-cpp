@@ -10,6 +10,7 @@
 #include "SceneObjects\DominationPoint.h"
 #include "SceneObjects\Lamp.h"
 #include "SceneObjects\Ghost.h"
+#include "SceneObjects\Region.h"
 
 #include "Components\NetworkID.h"
 #include "Components\ColliderComponent.h"
@@ -45,6 +46,8 @@ REGISTER_FACTORY ( SpawnPoint,		5	)
 REGISTER_FACTORY ( Pickup,			7	)
 REGISTER_FACTORY ( DominationPoint,	6	)
 REGISTER_FACTORY ( Lamp,			17	)
+REGISTER_FACTORY ( Region,			100)
+
 
 // register transform factory
 REGISTER_FACTORY ( Transform,	100 + MAX_STATIC_MESHES + MAX_EXPLORERS + MAX_MINIONS)
@@ -63,3 +66,4 @@ REGISTER_FACTORY ( Health,							MAX_EXPLORERS + MAX_MINIONS)
 REGISTER_FACTORY ( FmodEvent,						100	)
 REGISTER_FACTORY ( FmodEventCollection,				10	)
 REGISTER_FACTORY ( AnimationController,				MAX_EXPLORERS + MAX_MINIONS)
+REGISTER_FACTORY ( PlaneColliderComponent, 100)
