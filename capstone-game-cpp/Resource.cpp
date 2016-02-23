@@ -167,7 +167,7 @@ void loadStaticColliders(jarr_t objs, CLayer layer, vec3f levelOrigin, vec3f lev
 		collider->mTransform->SetPosition(jsonPosition.x, jsonPosition.y, 7.5f);
 
 		vec3f jsonScale = collider->mTransform->GetScale();
-		collider->mTransform->SetScale(jsonScale.x, 15.0f, jsonScale.z);
+		collider->mTransform->SetScale(jsonScale.x, jsonScale.y , 15.0f);
 
 		collider->mBoxCollider->mCollider.origin = collider->mTransform->GetPosition();
 		collider->mBoxCollider->mCollider.halfSize = collider->mTransform->GetScale() * 0.5f;
