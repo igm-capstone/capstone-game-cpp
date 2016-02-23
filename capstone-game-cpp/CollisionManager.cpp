@@ -4,6 +4,7 @@
 #include "SceneObjects/Explorer.h"
 #include "SceneObjects/DominationPoint.h"
 #include <algorithm>
+#include "SceneObjects/Region.h"
 
 // Functor used to find matching collisions
 namespace
@@ -219,22 +220,22 @@ void CollisionManager::DetectCollisions()
 
 	// Explorer / Wall Collisions
 
-	std::vector<uint32_t> wallIndices;
-	wallIndices.reserve(50);
+	std::vector<uint32_t> colliderIndices;
+	colliderIndices.reserve(50);
 
 	for (uint32_t idx : indices)
 	{
 		BVHNode* pNode = mBVHTree.GetNode(idx);
 		int parentIndex = pNode->parentIndex;
 
-		mBVHTree.GetNodeIndices(wallIndices, COLLISION_LAYER_WALL, [parentIndex](const BVHNode& other)
+		mBVHTree.GetNodeIndices(colliderIndices, COLLISION_LAYER_WALL, [parentIndex](const BVHNode& other)
 		{
 			return other.parentIndex == parentIndex;
 		});
 
 		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
 
-		for (uint32_t nIdx : wallIndices)
+		for (uint32_t nIdx : colliderIndices)
 		{
 			OrientedBoxColliderComponent* pWallObbComponent = reinterpret_cast<OrientedBoxColliderComponent*>(mBVHTree.GetNode(nIdx)->object);
 
@@ -256,8 +257,46 @@ void CollisionManager::DetectCollisions()
 			}
 		}
 
-		wallIndices.clear();
+		colliderIndices.clear();
 	}
+
+	// Floor Overlaps
+	for (uint32_t idx : indices)
+	{
+		BVHNode* pNode = mBVHTree.GetNode(idx);
+		int parentIndex = pNode->parentIndex;
+		mBVHTree.GetNodeIndices(colliderIndices, COLLISION_LAYER_FLOOR, [parentIndex](const BVHNode& other)
+		{
+			return other.parentIndex == parentIndex;
+		});
+	
+		vec3f position = pNode->object->mSceneObject->mTransform->GetPosition();
+		
+		Ray<vec3f> ray;
+		ray.origin = position;
+		ray.normal = { 0.0f, 0.0f, 1.0f };
+
+		for (uint32_t nIdx : colliderIndices)
+		{
+			Region* pRegion = reinterpret_cast<Region*>(mBVHTree.GetNode(nIdx)->object->mSceneObject);
+
+			vec3f poi;
+			float t;
+
+			if (IntersectRayOBB(ray, pRegion->mColliderComponent->mCollider, poi, t))
+			{
+				SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
+				
+				position.z = poi.z - pSphereComponent->mCollider.radius;
+				pSphereComponent->mSceneObject->mTransform->SetPosition(position);
+				pSphereComponent->mCollider.origin = position;
+				pNode->object->OnCollisionExit(pRegion);
+			}
+		}
+
+		colliderIndices.clear();
+	}
+
 }
 
 void CollisionManager::ResolveCollisions()
