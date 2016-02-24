@@ -28,6 +28,8 @@ public:
 	IShader* mSpriteVertexShader;
 	IShader* mSpritePixelShader;
 	IShader* mSkinnedVertexShader;
+	IShader* mGridVertexShader;
+	IShader* mGridPixelShader;
 	IShader* mGridPass1ComputeShader;
 	IShader* mGridPass2ComputeShader;
 

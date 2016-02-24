@@ -25,6 +25,7 @@ class Level01 : public BaseScene
 	// RenderContext
 	IRenderContext*		mGBufferContext;
 	IRenderContext*		mShadowContext;
+	IRenderContext*		mGridContext;
 	
 	// ShaderResource
 	IShaderResource*	mStaticMeshShaderResource;

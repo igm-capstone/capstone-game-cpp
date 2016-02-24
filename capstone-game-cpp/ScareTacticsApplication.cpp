@@ -19,6 +19,8 @@
 #include "Shaders/obj/SpriteVertexShader.h"
 #include "Shaders/obj/SpritePixelShader.h"
 #include "Shaders/obj/ShadowCasterPixelShader.h"
+#include "Shaders/obj/GridVertexShader.h"
+#include "Shaders/obj/GridPixelShader.h"
 #include "Shaders/obj/GridPass1ComputeShader.h"
 #include "Shaders/obj/GridPass2ComputeShader.h"
 #include "Shaders/obj/ShadowPixelShader.h"
@@ -189,7 +191,24 @@ void ScareTacticsApplication::InitializeShaders()
 
 	renderer->VLoadVertexShader(mSkinnedVertexShader, gSkinnedMeshVertexShader, sizeof(gSkinnedMeshVertexShader), skinnedInputElements, 5);
 
-	// Grid Compute Shader
+	// Grid Shaders
+
+	InputElement gridInputElements[] =
+	{
+		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "NORMAL",		0, 0, 12,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "TEXCOORD",	0, 0, 24,  0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "WORLD",		0, 1, 0,  1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
+		{ "WORLD",		1, 1, 16, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
+		{ "WORLD",		2, 1, 32, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
+		{ "WORLD",		3, 1, 48, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE }
+	};
+
+	renderer->VCreateShader(&mGridVertexShader, &mGameAllocator);
+	renderer->VCreateShader(&mGridPixelShader, &mGameAllocator);
+
+	renderer->VLoadVertexShader(mGridVertexShader, gGridVertexShader, sizeof(gGridVertexShader), gridInputElements, 7);
+	renderer->VLoadPixelShader(mGridPixelShader, gGridPixelShader, sizeof(gGridPixelShader));
 
 	renderer->VCreateShader(&mGridPass1ComputeShader, &mGameAllocator);
 	renderer->VLoadComputeShader(mGridPass1ComputeShader, gGridPass1ComputeShader, sizeof(gGridPass1ComputeShader));
@@ -305,6 +324,8 @@ void ScareTacticsApplication::VShutdown()
 	mSpritePixelShader->~IShader();
 	mDBGPixelShader->~IShader();
 	mSkinnedVertexShader->~IShader();
+	mGridVertexShader->~IShader();
+	mGridPixelShader->~IShader();
 	mGridPass1ComputeShader->~IShader();
 	mGridPass2ComputeShader->~IShader();
 

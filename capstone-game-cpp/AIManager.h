@@ -35,7 +35,7 @@ private:
 	float mLeft;
 	int mNumCols;
 	int mNumRows;
-	const float mNodeRadius = 0.85f;
+	const float mNodeRadius = 0.75f;
 	bool mGridIsDirty;
 };
 

@@ -12,5 +12,6 @@ namespace Colors
 	static const cliqCity::graphicsMath::Vector4 cyan			= { 0.0f, 1.0f, 1.0f, 1.0f };
 	static const cliqCity::graphicsMath::Vector4 yellow			= { 1.0f, 1.0f, 0.0f, 1.0f };
 	static const cliqCity::graphicsMath::Vector4 magenta		= { 1.0f, 0.0f, 1.0f, 1.0f };
-	static const cliqCity::graphicsMath::Vector4 transparent	= { 1.0f, 1.0f, 1.0f, 0.0f };
+	static const cliqCity::graphicsMath::Vector4 magentaAlpha	= { 1.0f, 0.0f, 1.0f, 0.0f };
+	static const cliqCity::graphicsMath::Vector4 whiteAlpha		= { 1.0f, 1.0f, 1.0f, 0.0f };
 }
