@@ -18,7 +18,7 @@
 //Config
 
 #define MAX_EXPLORERS 4
-#define MAX_EXPLORER_SKILLS  5
+#define MAX_EXPLORER_SKILLS  2
 
 #define MAX_GHOST_SKILLS 4
 
