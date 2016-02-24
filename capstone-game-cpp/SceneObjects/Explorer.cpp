@@ -8,6 +8,7 @@
 #include <Components/Health.h>
 #include <Components/Skill.h>
 #include <Vertex.h>
+#include <Components/AnimationUtility.h>
 
 Explorer::Explorer()
 {
@@ -52,9 +53,15 @@ Explorer::Explorer()
 
 	auto sprint = Factory<Skill>::Create();
 	sprint->mSceneObject = this;
-	sprint->SetBinding(SkillBinding().Set(KEYCODE_A).Set(MOUSEBUTTON_LEFT));
+	sprint->SetBinding(SkillBinding().Set(KEYCODE_A));
 	sprint->Setup(2, 1, DoSprint);
 	mSkills[0] = sprint;
+
+	auto melee = Factory<Skill>::Create();
+	melee->mSceneObject = this;
+	melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
+	melee->Setup(2, 1, DoMelee);
+	mSkills[1] = melee;
 }
 
 void Explorer::Spawn(vec3f pos, int UUID)
@@ -67,7 +74,7 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
 
-	mAnimationController->PlayLoopingAnimation("Minion_01_Animation_Pass_1_1_1.0007");
+	PlayAnimation(mAnimationController, &gMinionWalk, true);
 }
 
 void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
@@ -138,4 +145,16 @@ void Explorer::DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* t
 
 	auto e = reinterpret_cast<Explorer*>(obj);
 	e->mController->Sprint(duration);
+}
+
+void Explorer::DoMelee(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+{
+	KeyframeOption option { gMinionMelee.startFrameIndex, OnKeyframe };
+
+	PlayAnimation(reinterpret_cast<Explorer*>(obj)->mAnimationController, &gMinionMelee, &option, 1);
+}
+
+void Explorer::OnKeyframe(void* obj)
+{
+	TRACE_LOG("HI");
 }

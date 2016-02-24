@@ -114,6 +114,11 @@ void ExplorerController::Sprint(float duration)
 	mSprintDuration = duration;
 }
 
+void ExplorerController::Melee()
+{
+	
+}
+
 void ExplorerController::SetBaseRotation(const float& x, const float& y, const float& z)
 {
 	mModelRotation = quatf::rollPitchYaw(z, x, y);

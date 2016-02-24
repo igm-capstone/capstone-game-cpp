@@ -6,7 +6,7 @@
 #include <Components/AnimationController.h>
 #include <ScareTacticsApplication.h>
 #include <Vertex.h>
-
+#include <Components/AnimationUtility.h>
 
 Minion::Minion()
 {
@@ -47,7 +47,7 @@ void Minion::Spawn(vec3f pos, int UUID)
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
 
-	mAnimationController->PlayLoopingAnimation("Minion_01_Animation_Pass_1_1_1.0007");
+	PlayAnimation(mAnimationController, &gMinionWalk, true);
 }
 
 void Minion::OnMove(BaseSceneObject* obj, vec3f newPos)

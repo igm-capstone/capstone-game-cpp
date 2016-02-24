@@ -32,6 +32,7 @@ public:
 
 	bool Update(double milliseconds);
 	void Sprint(float duration);
+	void Melee();
 	void SetBaseRotation(const float& x, const float& y, const float& z);
 
 	EXPOSE_CALLBACK_2(Move, vec3f, quatf)
