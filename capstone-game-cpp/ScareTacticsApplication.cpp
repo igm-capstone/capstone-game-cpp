@@ -2,6 +2,7 @@
 #include "Rig3D/Engine.h"
 #include "capstone-game-cpp/ScareTacticsApplication.h"
 #include "Rig3D/Graphics/DirectX11/DX11Shader.h"
+#include "SceneObjects/Explorer.h"
 
 //Shaders - Headers are output from compiler
 #include "Shaders/obj/BillboardPixelShader.h"
@@ -212,6 +213,7 @@ void ScareTacticsApplication::InitializeFMOD()
 
 void ScareTacticsApplication::VInitialize()
 {
+	InitializeExplorerInventory(); // Not sure the best place to put this feel free to move if necessary
 	InitializeShaders();
 	InitializeFMOD();
 

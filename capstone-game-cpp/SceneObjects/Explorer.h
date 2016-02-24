@@ -1,6 +1,8 @@
 #pragma once
 #include "SceneObjects\BaseSceneObject.h"
 
+void InitializeExplorerInventory();
+
 class Explorer : public BaseSceneObject
 {
 	friend class Factory<Explorer>;
@@ -9,7 +11,8 @@ public:
 	class ExplorerController*			mController;
 	class AnimationController*			mAnimationController;
 	class SphereColliderComponent*		mCollider;
-	class Skill*						mSkills[MAX_EXPLORER_SKILLS];
+	class BaseColliderComponent*		mMeleeCollider;	// Not sure where this will be
+	class Skill**						mSkills;
 	class Health*						mHealth;
 
 private:

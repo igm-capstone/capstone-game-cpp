@@ -10,6 +10,42 @@
 #include <Vertex.h>
 #include <Components/AnimationUtility.h>
 
+struct ExplorerInventory
+{
+	BaseColliderComponent* meleeCollider;
+	Skill* skills[MAX_EXPLORER_SKILLS];
+
+} gExplorerInventory[MAX_EXPLORERS];
+
+void InitializeExplorerInventory()
+{
+	gExplorerInventory[0].meleeCollider = Factory<OrientedBoxColliderComponent>::Create();
+	gExplorerInventory[1].meleeCollider = Factory<SphereColliderComponent>::Create();
+	gExplorerInventory[2].meleeCollider = Factory<SphereColliderComponent>::Create();
+	gExplorerInventory[3].meleeCollider = Factory<SphereColliderComponent>::Create();
+
+	for (int i = 0; i < MAX_EXPLORERS; i++)
+	{
+		gExplorerInventory[i].meleeCollider->mIsActive	= false;
+		gExplorerInventory[i].meleeCollider->mIsTrigger = true;
+		gExplorerInventory[i].meleeCollider->mIsDynamic = false;
+		gExplorerInventory[i].meleeCollider->mLayer		= COLLISION_LAYER_SKILL;
+
+		auto sprint = Factory<Skill>::Create();
+		sprint->SetBinding(SkillBinding().Set(KEYCODE_A));
+		sprint->Setup(2, 1, Explorer::DoSprint);
+		sprint->mIsActive = false;
+		gExplorerInventory[i].skills[0] = sprint;
+
+		auto melee = Factory<Skill>::Create();
+		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
+		melee->Setup(2, 1, Explorer::DoMelee);
+		melee->mIsActive = false;
+		gExplorerInventory[i].skills[1] = melee;
+	}
+}
+
+
 Explorer::Explorer()
 {
 	mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
@@ -48,20 +84,6 @@ Explorer::Explorer()
 	mHealth->mSceneObject = this;
 	mHealth->SetMaxHealth(1000.0f);
 	mHealth->RegisterHealthChangeCallback(OnHealthChange);
-
-	memset(mSkills, 0, sizeof(mSkills));
-
-	auto sprint = Factory<Skill>::Create();
-	sprint->mSceneObject = this;
-	sprint->SetBinding(SkillBinding().Set(KEYCODE_A));
-	sprint->Setup(2, 1, DoSprint);
-	mSkills[0] = sprint;
-
-	auto melee = Factory<Skill>::Create();
-	melee->mSceneObject = this;
-	melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
-	melee->Setup(2, 1, DoMelee);
-	mSkills[1] = melee;
 }
 
 void Explorer::Spawn(vec3f pos, int UUID)
@@ -75,6 +97,16 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	mNetworkID->mUUID = UUID;
 
 	PlayAnimation(mAnimationController, &gMinionWalk, true);
+	mMeleeCollider	= gExplorerInventory[UUID].meleeCollider;
+	mMeleeCollider->mSceneObject = this;
+
+	mSkills			= &gExplorerInventory[UUID].skills[0];
+	for (int i = 0; i < MAX_EXPLORER_SKILLS; i++)
+	{
+		mSkills[i]->mSceneObject = this;
+		mSkills[i]->mIsActive = true;
+	}
+
 }
 
 void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
