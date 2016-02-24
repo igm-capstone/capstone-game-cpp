@@ -36,4 +36,17 @@ namespace CBuffer {
 		float sliceHeight;
 		float padding[2];
 	};
+
+	struct GridData
+	{
+		int gridNumCols;
+		int gridNumRows;
+		int mapTexWidth;
+		int maxTexHeight;
+	};
+
+	struct ObjectType
+	{
+		vec4f color;
+	};
 }

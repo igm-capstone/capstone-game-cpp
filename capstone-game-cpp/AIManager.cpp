@@ -5,7 +5,7 @@
 #include "SceneObjects/Explorer.h"
 
 AIManager::AIManager()
-	: mPathFinder(mGrid)
+	: mPathFinder(mGrid), mGridIsDirty(true)
 {
 	Update();
 }

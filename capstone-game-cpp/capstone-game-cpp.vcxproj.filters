@@ -20,8 +20,10 @@
     <FxCompile Include="Shaders\SpriteVertexShader.hlsl" />
     <FxCompile Include="Shaders\GridPass1ComputeShader.hlsl" />
     <FxCompile Include="Shaders\GridPass2ComputeShader.hlsl" />
-    <FxCompile Include="Shaders\StaticMeshVertexShader.hlsl" />
     <FxCompile Include="Shaders\StaticMeshPixelShader.hlsl" />
+    <FxCompile Include="Shaders\StaticMeshVertexShader.hlsl" />
+    <FxCompile Include="Shaders\GridVertexShader.hlsl" />
+    <FxCompile Include="Shaders\GridPixelShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />

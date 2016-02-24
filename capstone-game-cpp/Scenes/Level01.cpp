@@ -30,6 +30,7 @@ Level01::Level01() :
 	mNDSQuadMesh(nullptr),
 	mGBufferContext(nullptr),
 	mShadowContext(nullptr),
+	mGridContext(nullptr),
 	mStaticMeshShaderResource(nullptr),
 	mExplorerShaderResource(nullptr),
 	mPLVShaderResource(nullptr), 
@@ -71,6 +72,7 @@ Level01::~Level01()
 	
 	mGBufferContext->~IRenderContext();
 	mShadowContext->~IRenderContext();
+	mGridContext->~IRenderContext();
 
 	ReleaseMacro(mFullSrcData);
 	ReleaseMacro(mFullSrcDataSRV);
@@ -145,6 +147,7 @@ void Level01::InitializeAssets()
 
 	mCollisionManager->mBVHTree.SetRootBoundingVolume(mLevel.center, mLevel.extents, mLevel.staticColliderCount);
 	mAIManager->InitGrid(mLevel.center.x - mLevel.extents.x, mLevel.center.y + mLevel.extents.y, 2 * mLevel.extents.x, 2 * mLevel.extents.y);
+	mCameraManager->SetLevelBounds(mLevel.center, mLevel.extents);
 }
 
 void Level01::InitializeGeometry()
@@ -199,6 +202,7 @@ void Level01::InitializeShaderResources()
 	// Allocate render context
 	mRenderer->VCreateRenderContext(&mGBufferContext, &mAllocator);
 	mRenderer->VCreateRenderContext(&mShadowContext, &mAllocator);
+	mRenderer->VCreateRenderContext(&mGridContext, &mAllocator);
 
 	// Shadow Maps for each light
 	mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mLevel.lampCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
@@ -251,7 +255,7 @@ void Level01::InitializeShaderResources()
 		size_t cbPVLSizes[] = { sizeof(CBuffer::Light), sizeof(vec4f) };
 
 		mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 2);
-		mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_BORDER, const_cast<float*>(Colors::transparent.pCols));
+		mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_BORDER, const_cast<float*>(Colors::whiteAlpha.pCols));
 		mRenderer->AddAdditiveBlendState(mPLVShaderResource);
 	}
 
@@ -286,11 +290,20 @@ void Level01::InitializeShaderResources()
 	{
 		mRenderer->VCreateShaderResource(&mGridShaderResource, &mAllocator);
 
-		int	gridData[4] = { mAIManager->mGrid.mNumCols , mAIManager->mGrid.mNumRows, mRenderer->GetWindowWidth(), mRenderer->GetWindowHeight() };
-		void*  cbGridData[] = { mCameraManager->GetCBufferPersp(), gridData };
-		size_t cbGridSizes[] = { sizeof(CBuffer::Camera), sizeof(int) * 4 };
+		CBuffer::GridData		mGridData;
+		mGridData.gridNumCols = mAIManager->mGrid.mNumCols;
+		mGridData.gridNumRows = mAIManager->mGrid.mNumRows;
+		mGridData.mapTexWidth = int(mLevel.extents.x*GRID_MAP_SCALE);
+		mGridData.maxTexHeight = int(mLevel.extents.y*GRID_MAP_SCALE);
 
-		mRenderer->VCreateShaderConstantBuffers(mGridShaderResource, cbGridData, cbGridSizes, 2);
+		// Grid
+		mRenderer->VCreateContextResourceTargets(mGridContext, 1, mGridData.mapTexWidth, mGridData.maxTexHeight);
+		mRenderer->VCreateContextDepthStencilResourceTargets(mGridContext, 1, mGridData.mapTexWidth, mGridData.maxTexHeight);
+
+		void*  cbGridData[] = { mCameraManager->GetCBufferPersp(), &mGridData, nullptr };
+		size_t cbGridSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::GridData), sizeof(CBuffer::ObjectType) }; // 3 is for VS, not CS
+
+		mRenderer->VCreateShaderConstantBuffers(mGridShaderResource, cbGridData, cbGridSizes, 3);
 
 		{ //Full Grid
 			D3D11_BUFFER_DESC descGPUBuffer;
@@ -403,9 +416,15 @@ void Level01::VUpdate(double milliseconds)
 	if (mInput->GetKeyDown(KEYCODE_F4))
 	{
 		mDebugColl = !mDebugColl;
-	}	
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F5))
+	{
+		mCameraManager->mIsOrto = !mCameraManager->mIsOrto;
+	}
 
 	mCollisionManager->Update(milliseconds);
+	//ComputeGrid();
 }
 
 void Level01::VFixedUpdate(double milliseconds)
@@ -426,7 +445,7 @@ void Level01::VRender()
 	mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_TRIANGLE);
 	mRenderer->SetViewport();
 
-	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, Colors::transparent.pCols, 0xffffffff);
+	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, Colors::whiteAlpha.pCols, 0xffffffff);
 
 	RenderStaticMeshes();
 
@@ -517,9 +536,9 @@ void Level01::RenderStaticMeshes()
 	mRenderer->SetViewport();
 	mRenderer->VSetRenderContextTargetsWithDepth(mGBufferContext, 0);
 
-	mRenderer->VClearContextTarget(mGBufferContext, 0, Colors::transparent.pCols);	// Position
-	mRenderer->VClearContextTarget(mGBufferContext, 1, Colors::transparent.pCols);	// Normal
-	mRenderer->VClearContextTarget(mGBufferContext, 2, Colors::transparent.pCols);	// Color
+	mRenderer->VClearContextTarget(mGBufferContext, 0, Colors::magentaAlpha.pCols);	// Position
+	mRenderer->VClearContextTarget(mGBufferContext, 1, Colors::magentaAlpha.pCols);	// Normal
+	mRenderer->VClearContextTarget(mGBufferContext, 2, Colors::magentaAlpha.pCols);	// Color
 	mRenderer->VClearDepthStencil(mGBufferContext, 0, 1.0f, 0);					// Depth
 
 	mRenderer->VSetInputLayout(mApplication->mStaticMeshVertexShader);
@@ -672,7 +691,7 @@ void Level01::RenderSprites()
 	mRenderer->VSetVertexShader(mApplication->mSpriteVertexShader);
 	mRenderer->VSetPixelShader(mApplication->mSpritePixelShader);
 
-	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferOrto(), 0);
+	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferScreenOrto(), 0);
 	mRenderer->VSetVertexShaderConstantBuffers(mSpritesShaderResource);
 
 	UINT sCount = 0;
@@ -711,6 +730,8 @@ void Level01::RenderGrid()
 		{
 			auto n = mAIManager->mGrid(i, j);
 			vec4f c;
+			if (n.weight == -1 && !n.hasLight) continue;
+			
 			switch ((int)n.weight) {
 			case -10:
 				c = Colors::magenta;
@@ -728,6 +749,7 @@ void Level01::RenderGrid()
 				c = vec4f(0, 0, n.weight*0.1f, 1);
 				break;
 			}
+
 			TRACE_SMALL_BOX(n.worldPos, c * vec4f(1, 1, 1, 0.4f));
 			if (n.hasLight) { TRACE_SMALL_CROSS(n.worldPos, Colors::yellow * vec4f(1, 1, 1, 0.4f)); }
 		}
@@ -740,6 +762,50 @@ void Level01::ComputeGrid()
 {
 	if (mNetworkManager->mMode != NetworkManager::SERVER) return;
 
+	// Prepare visual data (aka draw a bunch of stuff again
+	mRenderer->VSetRenderContextTargetsWithDepth(mGridContext, 0);
+	
+	mRenderer->VClearContextTarget(mGridContext, 0, Colors::magentaAlpha.pCols);
+	mRenderer->VClearDepthStencil(mGridContext, 0, 1.0f, 0);
+	
+	// Reset state
+	mRenderer->GetDeviceContext()->RSSetState(nullptr);
+	mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_TRIANGLE);
+	mRenderer->SetViewport(0.0f, 0.0f, static_cast<float>(mLevel.extents.x*GRID_MAP_SCALE), static_cast<float>(mLevel.extents.y*GRID_MAP_SCALE), 0.0f, 1.0f);
+	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, Colors::whiteAlpha.pCols, 0xffffffff);
+	
+	mRenderer->VSetInputLayout(mApplication->mGridVertexShader);
+	mRenderer->VSetVertexShader(mApplication->mGridVertexShader);
+	mRenderer->VSetPixelShader(mApplication->mGridPixelShader);
+
+	CBuffer::ObjectType obj;
+	obj.color = vec4f(1, 1, 1, 1);
+
+	mRenderer->VUpdateShaderConstantBuffer(mGridShaderResource, mCameraManager->GetCBufferFullLevelOrto(), 0);
+	mRenderer->VUpdateShaderConstantBuffer(mGridShaderResource, &obj, 2);
+
+	mRenderer->VSetVertexShaderConstantBuffer(mGridShaderResource, 0, 0);
+	mRenderer->VSetVertexShaderConstantBuffer(mGridShaderResource, 2, 1);
+
+	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 0, 1);
+	
+	int instanceCount = 0;
+	for (Factory<StaticMesh>::iterator it = Factory<StaticMesh>().begin(); it != Factory<StaticMesh>().end();)
+	{
+		auto& staticMesh = *it;
+		auto modelCluster = staticMesh.mModel;
+		auto numElements = modelCluster->ShareCount();
+
+		mRenderer->VBindMesh(modelCluster->mMesh);
+		mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
+		instanceCount += numElements;
+
+		for (auto i = 0; i < numElements; i++) ++it;
+	}
+
+	mRenderer->VSetContextTarget();
+
+	// Reset current grid to -10 / 0 on player
 	mAIManager->ResetGridData();
 
 	//Copy previous results to a CPU friendly buffer
@@ -748,13 +814,13 @@ void Level01::ComputeGrid()
 	//Pass 1
 	mRenderer->VSetComputeShader(mApplication->mGridPass1ComputeShader);
 
-	mRenderer->VUpdateShaderConstantBuffer(mGridShaderResource, mCameraManager->GetCBufferPersp(), 0);
+	mRenderer->VUpdateShaderConstantBuffer(mGridShaderResource, mCameraManager->GetCBufferFullLevelOrto(), 0);
 	mRenderer->VSetComputeShaderConstantBuffers(mGridShaderResource);
 
 	mDeviceContext->UpdateSubresource(mFullSrcData, 0, NULL, mAIManager->mGrid.pList, 0, 0);
 	mDeviceContext->CSSetShaderResources(0, 1, &mFullSrcDataSRV);			//Full grid data
 	mRenderer->VSetComputeShaderResourceView(mGBufferContext, 3, 1);		//Shadow Map
-	mRenderer->VSetComputeShaderResourceView(mGBufferContext, 0, 2);		//Obstacles Map
+	mRenderer->VSetComputeShaderResourceView(mGridContext, 0, 2);		//Obstacles Map
 	mDeviceContext->CSSetUnorderedAccessViews(0, 1, &mOutputDataSRV, NULL);	//Output
 
 	mRenderer->GetDeviceContext()->Dispatch(mAIManager->mGrid.mNumRows / GRID_MULT_OF, mAIManager->mGrid.mNumCols / GRID_MULT_OF, 1);

@@ -7,19 +7,20 @@
 class CameraManager
 {
 	Rig3D::Renderer* mRenderer;
-	Rig3D::Camera mCameraOrto;
 	Rig3D::Camera mCameraPersp;
-	Rig3D::Camera mCameraFullOrto;
+	Rig3D::Camera mCameraQuadOrto;
+	Rig3D::Camera mCameraScreenOrto;
 
-	CBuffer::Camera	mCBufferOrto;
 	CBuffer::Camera	mCBufferPersp;
-	CBuffer::Camera	mCBufferFullOrto;
+	CBuffer::Camera	mCBufferScreenOrto;
+	CBuffer::Camera	mCBufferFullLevelOrto;
 	vec3f mForward;
 	vec3f mOrigin;
 	vec3f mLookAt;
 
 	vec2f mLevelCenter;
 	vec2f mLevelExtends;
+
 
 	const float mFOV = 0.33f * PI;
 	const float mNearPlane = 0.1f;
@@ -34,16 +35,17 @@ public:
 	vec3f GetOrigin() { return mOrigin; };
 	vec3f GetLookAt() { return mLookAt; };
 
-	CBuffer::Camera* GetCBufferPersp() { return &mCBufferPersp; }
-	CBuffer::Camera* GetCBufferOrto() { return &mCBufferOrto; }
+	CBuffer::Camera* GetCBufferPersp() { return mIsOrto ? &mCBufferFullLevelOrto : &mCBufferPersp; }
+	CBuffer::Camera* GetCBufferScreenOrto() { return mIsOrto ? &mCBufferFullLevelOrto : &mCBufferScreenOrto; }
+	CBuffer::Camera* GetCBufferFullLevelOrto() { return &mCBufferFullLevelOrto; }
 
+	bool mIsOrto;
 
 	void SetLevelBounds(vec2f center, vec2f extends);
 	void ChangeLookAtTo(const vec3f& newLookAt);
 	void ChangeLookAtBy(const vec3f& offset);
 	void MoveCamera(const vec3f& lookAt, const vec3f& origin);
 	void OnResize();
-	vec3f GetForward();
 	
 	// to screen
 	vec2f World2Screen(const vec3f& world);
