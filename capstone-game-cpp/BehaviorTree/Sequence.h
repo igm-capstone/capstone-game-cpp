@@ -8,12 +8,9 @@ public:
 
 protected:
 	class BehaviorTree* mBehaviorTree;
-
-	void OnInitialize() override;
-	void OnChildComplete(BehaviorStatus status);
-
-	BehaviorStatus Update() override;
-
 	std::vector<class Behavior*>::iterator mCurrent;
 
+	static void OnChildComplete(void* data, BehaviorStatus status);
+	static void OnInitialize(Behavior& self, void* data);
+	static BehaviorStatus OnUpdate(Behavior& self, void* data);
 };

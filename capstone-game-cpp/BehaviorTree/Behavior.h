@@ -30,31 +30,67 @@ namespace std
 	}
 }
 
+class Behavior;
 
 typedef std::function<void(BehaviorStatus)> BehaviorObserver;
+typedef void(*ObserverCallback)(void*, BehaviorStatus);
+typedef BehaviorStatus(*UpdateCallback)(Behavior&, void*);
+typedef void(*InitializeCallback)(Behavior&, void*);
+typedef void(*TerminateCallback)(Behavior&, void*, BehaviorStatus);
 
 class Behavior
 {
+	friend class BehaviorTree;
+
 public:
-	typedef BehaviorStatus(*UpdateCallback)();
-	typedef void(*InitializeCallback)();
-	typedef void(*TerminateCallback)(BehaviorStatus status);
 
 	Behavior();
-	virtual ~Behavior();
+	~Behavior();
 
-	BehaviorStatus Tick();
-	virtual BehaviorStatus Update() = 0;
-	virtual void OnInitialize() {}
-	virtual void OnTerminate(BehaviorStatus) {}
+	void SetInitializeCallback(InitializeCallback callback)
+	{
+		mOnInitialize = callback;
+	}
 
+	void SetUpdateCallback(UpdateCallback callback)
+	{
+		mOnUpdate = callback;
+	}
+
+	void SetTerminateCallback(TerminateCallback callback)
+	{
+		mOnTerminate = callback;
+	}
+
+	BehaviorStatus GetStatus() const
+	{
+		return mStatus;
+	}
+
+	void SetObserver(ObserverCallback callback, void* data)
+	{
+		mOnObserver = callback;
+		mObserverData = data;
+	}
+
+	void NotifyObserver(BehaviorStatus status) const
+	{
+		if (mOnObserver)
+		{
+			mOnObserver(mObserverData, status);
+		}
+	}
+
+	BehaviorStatus Tick(void* userData);
 
 protected:
 	BehaviorStatus     mStatus;
-	BehaviorObserver   mObserver;
-	UpdateCallback     mUpdateCallback;
-	InitializeCallback mInitializeCallback;
-	TerminateCallback  mTerminateCallback;
+	ObserverCallback   mOnObserver;
+	void*              mObserverData;
+
+	UpdateCallback     mOnUpdate;
+	InitializeCallback mOnInitialize;
+	TerminateCallback  mOnTerminate;
 };
 
 
@@ -73,26 +109,35 @@ struct MockBehavior : public Behavior
 		, mReturnStatus(BehaviorStatus::Running)
 		, mTerminateStatus(BehaviorStatus::Invalid)
 	{
+		SetInitializeCallback(&OnInitialize);
+		SetUpdateCallback(&OnUpdate);
+		SetTerminateCallback(&OnTerminate);
 	}
 
-	virtual ~MockBehavior()
+	~MockBehavior()
 	{
 	}
 
-	virtual void OnInitialize() override
+	static void OnInitialize(Behavior& bh, void* data)
 	{
-		++mInitializeCalled;
+		auto& self = static_cast<MockBehavior&>(bh);
+
+		++self.mInitializeCalled;
 	}
 
-	virtual void OnTerminate(BehaviorStatus s) override
+	static void OnTerminate(Behavior& bh, void* data, BehaviorStatus status)
 	{
-		++mTerminateCalled;
-		mTerminateStatus = s;
+		auto& self = static_cast<MockBehavior&>(bh);
+
+		++self.mTerminateCalled;
+		self.mTerminateStatus = status;
 	}
 
-	virtual BehaviorStatus Update() override
+	static BehaviorStatus OnUpdate(Behavior& bh, void* data)
 	{
-		++mUpdateCalled;
-		return mReturnStatus;
+		auto& self = static_cast<MockBehavior&>(bh);
+
+		++self.mUpdateCalled;
+		return self.mReturnStatus;
 	}
 };

@@ -12,11 +12,11 @@ MinionController::MinionController()
 	auto sequence = new Sequence(*mBehaviorTree);
 
 	auto findTarget = new Action();
-	findTarget->mUpdate = std::bind(&MinionController::FindTarget, this);
+	findTarget->SetUpdateCallback(&FindTarget);
 	sequence->mChildren.push_back(findTarget);
 
 	auto follow = new Action();
-	follow->mUpdate = std::bind(&MinionController::MoveTowardsTarget, this);
+	follow->SetUpdateCallback(&MoveTowardsTarget);
 	sequence->mChildren.push_back(follow);
 
 	mBehaviorTree->Start(*sequence);
@@ -33,21 +33,25 @@ bool MinionController::Update(double milliseconds)
 {
 	if (!mIsActive) return false;
 
-	mBehaviorTree->Tick();
+	mBehaviorTree->Tick(this);
 	
 	return true;
 }
 
-BehaviorStatus MinionController::FindTarget()
+BehaviorStatus MinionController::FindTarget(Behavior& bh, void* data)
 {
-	mTarget = vec3f(rand() % 25, rand() % 25, 0);
+	auto& self = *static_cast<MinionController*>(data);
+
+	self.mTarget = vec3f(rand() % 25, rand() % 25, 0);
 	return BehaviorStatus::Success;
 }
 
-BehaviorStatus MinionController::MoveTowardsTarget()
+BehaviorStatus MinionController::MoveTowardsTarget(Behavior& bh, void* data)
 {
-	vec3f myPos = mSceneObject->mTransform->GetPosition();
-	vec3f direction = mTarget - myPos;
+	auto& self = *static_cast<MinionController*>(data);
+
+	vec3f myPos = self.mSceneObject->mTransform->GetPosition();
+	vec3f direction = self.mTarget - myPos;
 	float distanceSquared = magnitudeSquared(direction);
 
 	if (distanceSquared < .25)
@@ -63,7 +67,7 @@ BehaviorStatus MinionController::MoveTowardsTarget()
 	// delta space for the current frame
 	vec3f ds = targetVelocity;
 
-	OnMove(myPos + ds);
+	self.OnMove(myPos + ds);
 
 	return BehaviorStatus::Running;
 }

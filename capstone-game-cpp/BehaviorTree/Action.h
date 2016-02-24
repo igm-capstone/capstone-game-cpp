@@ -5,7 +5,7 @@
 class Action : public Behavior
 {
 public:
-	std::function<BehaviorStatus(void)> mUpdate;
-	
-	BehaviorStatus Update() override;
+	//std::function<BehaviorStatus(void)> mUpdate;
+	//
+	//BehaviorStatus Update() override;
 };

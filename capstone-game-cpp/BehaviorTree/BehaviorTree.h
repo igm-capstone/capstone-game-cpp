@@ -5,11 +5,11 @@
 class BehaviorTree
 {
 public:
-	void Start(Behavior& bh, BehaviorObserver* observer = nullptr);
+	void Start(Behavior& bh);
+	void Start(Behavior& bh, ObserverCallback observer, void* observerData = nullptr);
 	void Stop(Behavior& bh, BehaviorStatus result);
-	void Tick();
-	bool Step();
-
+	void Tick(void* userData = nullptr);
+	bool Step(void* userData);
 
 protected:
 	std::deque<Behavior*> mBehaviors;

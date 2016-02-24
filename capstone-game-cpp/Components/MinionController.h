@@ -17,8 +17,8 @@ public:
 
 	// behavior tree code
 	vec3f mTarget;
-	BehaviorStatus FindTarget();
-	BehaviorStatus MoveTowardsTarget();
+	static BehaviorStatus FindTarget(Behavior& bh, void* data);
+	static BehaviorStatus MoveTowardsTarget(Behavior& bh, void* data);
 
 	EXPOSE_CALLBACK_1(Move, vec3f)
 };

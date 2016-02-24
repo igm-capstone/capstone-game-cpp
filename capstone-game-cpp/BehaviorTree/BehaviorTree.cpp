@@ -1,52 +1,50 @@
 ﻿#include "stdafx.h"
 #include "BehaviorTree.h"
 
-void BehaviorTree::Start(Behavior& bh, BehaviorObserver* observer)
+void BehaviorTree::Start(Behavior& bh, ObserverCallback observer, void* data)
 {
-	if (observer != nullptr)
-	{
-		bh.mObserver = *observer;
-	}
+	bh.SetObserver(observer, data);
+	Start(bh);
+}
 
+void BehaviorTree::Start(Behavior& bh)
+{
 	mBehaviors.push_front(&bh);
 }
 
 void BehaviorTree::Stop(Behavior& bh, BehaviorStatus result)
 {
 	ASSERT(result != BehaviorStatus::Running);
-	bh.mStatus = result;
 
-	if (bh.mObserver)
-	{
-		bh.mObserver(result);
-	}
+	bh.mStatus = result;
+	bh.NotifyObserver(result);
 }
 
-void BehaviorTree::Tick()
+void BehaviorTree::Tick(void* userData)
 {
 	mBehaviors.push_back(nullptr);
 
-	while(Step())
+	while (Step(userData))
 	{
 		continue;
 	}
 }
 
-bool BehaviorTree::Step()
+bool BehaviorTree::Step(void* userData)
 {
 	Behavior* current = mBehaviors.front();
 	mBehaviors.pop_front();
 
-	if (current == nullptr)
+	if (!current)
 	{
 		return false;
 	}
 
-	current->Tick();
+	current->Tick(userData);
 
-	if (current->mStatus != BehaviorStatus::Running && current->mObserver)
+	if (current->mStatus != BehaviorStatus::Running)
 	{
-		current->mObserver(current->mStatus);
+		current->NotifyObserver(current->mStatus);
 	}
 	else
 	{

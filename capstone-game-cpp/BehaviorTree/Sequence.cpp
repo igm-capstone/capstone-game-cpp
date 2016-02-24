@@ -4,40 +4,46 @@
 
 Sequence::Sequence(BehaviorTree& bt) : mBehaviorTree(&bt)
 {
+	SetInitializeCallback(&OnInitialize);
+	SetUpdateCallback(&OnUpdate);
 }
 
-void Sequence::OnInitialize()
+void Sequence::OnInitialize(Behavior& bh, void* data)
 {
-	mCurrent = mChildren.begin();
-	BehaviorObserver observer = std::bind(&Sequence::OnChildComplete, this, std::placeholders::_1);
-	mBehaviorTree->Start(**mCurrent, &observer);
+	auto& self = static_cast<Sequence&>(bh);
+
+	self.mCurrent = self.mChildren.begin();
+	self.mBehaviorTree->Start(**self.mCurrent, &OnChildComplete, &self);
 }
 
-void Sequence::OnChildComplete(BehaviorStatus status)
+void Sequence::OnChildComplete(void* observerData, BehaviorStatus status)
 {
-	Behavior& child = **mCurrent;
+	auto& self = *static_cast<Sequence*>(observerData);
 
-	if (child.mStatus == BehaviorStatus::Failure)
+	const Behavior& child = **self.mCurrent;
+
+	if (child.GetStatus() == BehaviorStatus::Failure)
 	{
-		mBehaviorTree->Stop(*this, BehaviorStatus::Failure);
+		self.mBehaviorTree->Stop(self, BehaviorStatus::Failure);
 		return;
 	}
 
-	ASSERT(child.mStatus == BehaviorStatus::Success);
-	if(++mCurrent == mChildren.end())
+	ASSERT(child.GetStatus() == BehaviorStatus::Success);
+	if(++self.mCurrent == self.mChildren.end())
 	{
-		mBehaviorTree->Stop(*this, BehaviorStatus::Success);
-		mStatus = BehaviorStatus::Invalid;
+		self.mBehaviorTree->Stop(self, BehaviorStatus::Success);
+		//self.mStatus = BehaviorStatus::Invalid;
 	}
 	else
 	{
-		BehaviorObserver observer = std::bind(&Sequence::OnChildComplete, this, std::placeholders::_1);
-		mBehaviorTree->Start(**mCurrent, &observer);
+		//BehaviorObserver observer = std::bind(&Sequence::OnChildComplete, this, std::placeholders::_1);
+		//mBehaviorTree->Start(**mCurrent, &observer);
+		self.mBehaviorTree->Start(**self.mCurrent, &OnChildComplete, &self);
 	}
 
 }
 
-BehaviorStatus Sequence::Update()
+BehaviorStatus Sequence::OnUpdate(Behavior& self, void* data)
 {
 	return BehaviorStatus::Running;
 }
@@ -55,12 +61,12 @@ TEST(BehaviorTrees, SequenceOnePassThrough)
 
 		bt.Start(seq);
 		bt.Tick();
-		CHECK_EQUAL(seq.mStatus, BehaviorStatus::Running);
+		CHECK_EQUAL(seq.GetStatus(), BehaviorStatus::Running);
 		CHECK_EQUAL(0, seq[0].mTerminateCalled);
 
 		seq[0].mReturnStatus = status[i];
 		bt.Tick();
-		CHECK_EQUAL(seq.mStatus, status[i]);
+		CHECK_EQUAL(seq.GetStatus(), status[i]);
 		CHECK_EQUAL(1, seq[0].mTerminateCalled);
 	}
 }
@@ -72,12 +78,12 @@ TEST(BehaviorTrees, SequenceTwoFails)
 
 	bt.Start(seq);
 	bt.Tick();
-	CHECK_EQUAL(seq.mStatus, BehaviorStatus::Running);
+	CHECK_EQUAL(seq.GetStatus(), BehaviorStatus::Running);
 	CHECK_EQUAL(0, seq[0].mTerminateCalled);
 
 	seq[0].mReturnStatus = BehaviorStatus::Failure;
 	bt.Tick();
-	CHECK_EQUAL(seq.mStatus, BehaviorStatus::Failure);
+	CHECK_EQUAL(seq.GetStatus(), BehaviorStatus::Failure);
 	CHECK_EQUAL(1, seq[0].mTerminateCalled);
 }
 
@@ -88,12 +94,12 @@ TEST(BehaviorTrees, SequenceTwoContinues)
 
 	bt.Start(seq);
 	bt.Tick();
-	CHECK_EQUAL(seq.mStatus, BehaviorStatus::Running);
+	CHECK_EQUAL(seq.GetStatus(), BehaviorStatus::Running);
 	CHECK_EQUAL(0, seq[0].mTerminateCalled);
 
 	seq[0].mReturnStatus = BehaviorStatus::Success;
 	bt.Tick();
-	CHECK_EQUAL(seq.mStatus, BehaviorStatus::Running);
+	CHECK_EQUAL(seq.GetStatus(), BehaviorStatus::Running);
 	CHECK_EQUAL(1, seq[0].mTerminateCalled);
 }
 

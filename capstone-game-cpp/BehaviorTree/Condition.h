@@ -5,6 +5,18 @@
 class Condition : public Behavior
 {
 public:
-	BehaviorStatus Update() override;
-	std::function<bool()> mCanRun;
+	typedef bool(*ConditionCallback)(Behavior& self, void* data);
+
+	void SetConditionCallback(ConditionCallback callback)
+	{
+		mOnCondition = callback;
+	}
+	
+	Condition();
+
+
+	static BehaviorStatus Update(Behavior& self, void* data);
+	
+protected:
+	ConditionCallback mOnCondition;
 };

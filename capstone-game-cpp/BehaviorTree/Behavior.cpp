@@ -2,27 +2,35 @@
 #include "Behavior.h"
 #include "BehaviorTree.h"
 
-Behavior::Behavior(): mStatus(BehaviorStatus::Invalid)
+Behavior::Behavior(): 
+	mStatus(BehaviorStatus::Invalid), 
+	mOnObserver(nullptr),
+	mObserverData(nullptr),
+	mOnUpdate(nullptr), 
+	mOnInitialize(nullptr), 
+	mOnTerminate(nullptr)
 {
 }
-
 
 Behavior::~Behavior()
 {
 }
 
-BehaviorStatus Behavior::Tick()
+BehaviorStatus Behavior::Tick(void* userData)
 {
-	if (mStatus == BehaviorStatus::Invalid)
+	if (mOnInitialize && mStatus == BehaviorStatus::Invalid)
 	{
-		OnInitialize();
+		mOnInitialize(*this, userData);
 	}
 
-	mStatus = Update();
-
-	if (mStatus != BehaviorStatus::Running)
+	if (mOnUpdate)
 	{
-		OnTerminate(mStatus);
+		mStatus = mOnUpdate(*this, userData);
+	}
+
+	if (mOnTerminate && mStatus != BehaviorStatus::Running)
+	{
+		mOnTerminate(*this, userData, mStatus);
 	}
 
 	return mStatus;
