@@ -12,25 +12,74 @@ AnimationController::~AnimationController()
 {
 }
 
-void AnimationController::PlayAnimation(const char* name)
+int AnimationController::FindAnimationIndex(const char* name)
 {
-	int index = -1;
 	for (uint32_t i = 0; i < (*mSkeletalAnimations).size(); i++)
 	{
 		if (strcmp(name, (*mSkeletalAnimations)[i].name.c_str()) == 0)
 		{
-			index = static_cast<int>(i);
+			return static_cast<int>(i);
 		}
 	}
 
-	mCurrentAnimationIndex = index;
+	return -1;
 }
 
-void AnimationController::PlayLoopingAnimation(const char* name)
+void AnimationController::SetKeyframeOptions(KeyframeOption* options, uint32_t count)
 {
-	mIsLooping = true;
-	PlayAnimation(name);
+	mKeyframeCallbackMap.clear();
+
+	for (uint32_t i = 0; i < count; i++)
+	{
+		mKeyframeCallbackMap[options[i].index] = options[i].onKeyframe;
+	}
 }
+
+void AnimationController::PlayAnimation(const char* name, bool shoudLoop)
+{
+	SetKeyframeOptions(nullptr, 0);
+
+	int index = FindAnimationIndex(name);
+
+	SkeletalAnimation* pSkeletalAnimation = &(*mSkeletalAnimations)[index];
+
+	mCurrentAnimationIndex = index;
+	mCurrentAnimationStartIndex = 0;
+	mCurrentAnimationEndIndex = pSkeletalAnimation->frameCount - 1;
+	mIsLooping = shoudLoop;
+}
+
+void AnimationController::PlayAnimation(const char* name, KeyframeOption* options, uint32_t count, bool shoudLoop)
+{
+	SetKeyframeOptions(options, count);
+
+	int index = FindAnimationIndex(name);
+
+	SkeletalAnimation* pSkeletalAnimation = &(*mSkeletalAnimations)[index];
+
+	mCurrentAnimationIndex = index;
+	mCurrentAnimationStartIndex = 0;
+	mCurrentAnimationEndIndex = pSkeletalAnimation->frameCount - 1;
+	mIsLooping = shoudLoop;
+}
+
+void AnimationController::PlayAnimationRange(const char* name, uint32_t startIndex, uint32_t endIndex, bool shoudLoop)
+{
+	SetKeyframeOptions(nullptr, 0);
+
+	assert(startIndex < endIndex);
+
+	int index = FindAnimationIndex(name);
+
+	SkeletalAnimation* pSkeletalAnimation = &(*mSkeletalAnimations)[index];
+	assert(startIndex < pSkeletalAnimation->frameCount && endIndex < pSkeletalAnimation->frameCount);
+	
+	mCurrentAnimationIndex		= index;
+	mCurrentAnimationStartIndex = startIndex;
+	mCurrentAnimationEndIndex	= endIndex;
+	mIsLooping = shoudLoop;
+}
+
 
 void AnimationController::Update(double milliseconds)
 {
@@ -38,39 +87,25 @@ void AnimationController::Update(double milliseconds)
 	{
 		return;
 	}
-	static int f = 0;
-
-	
 
 	SkeletalAnimation* currentAnimation = &(*mSkeletalAnimations)[mCurrentAnimationIndex];
 
-	//Input* input = Singleton<Engine>::SharedInstance().GetInput();
-	//if (input->GetKeyDown(KEYCODE_RIGHT))
-	//{
-	//	f += 10;
-	//	if (f > currentAnimation->frameCount)
-	//	{
-	//		f = 0;
-	//	}
-	//}
-
-	float duration = currentAnimation->duration;
+	float framesPerMS	= static_cast<float>(currentAnimation->frameCount) / currentAnimation->duration;
+	float duration		= (mCurrentAnimationEndIndex - mCurrentAnimationStartIndex + 1) / framesPerMS;
 
 	if (mCurrentAnimationPlayTime <= duration)
 	{
 		SkeletalHierarchy& skeletalHierarchy = mSkeletalHierarchy;
 		
-		float framesPerMS = static_cast<float>(currentAnimation->frameCount) / duration;
+		float t = mCurrentAnimationStartIndex + mCurrentAnimationPlayTime * framesPerMS;
+		uint32_t keyframeIndex =static_cast<int>(floorf(t));
+		TRACE_LOG(keyframeIndex);
 
-	//	uint32_t keyframeIndex = f;
-		uint32_t keyframeIndex = static_cast<int>(floorf(mCurrentAnimationPlayTime * framesPerMS));
-
-		float u = 0;// (mCurrentAnimationPlayTime - keyframeIndex);
-
+		float u = t - keyframeIndex;
 		for (JointAnimation jointAnimation : currentAnimation->jointAnimations)
 		{
 			Keyframe& current	= jointAnimation.keyframes[keyframeIndex];
-			Keyframe& next		= jointAnimation.keyframes[min(keyframeIndex + 1, currentAnimation->jointAnimations.size() - 1)];
+			Keyframe& next		= jointAnimation.keyframes[min(keyframeIndex + 1, mCurrentAnimationEndIndex)];
 
 			quatf rotation		= cliqCity::graphicsMath::normalize(cliqCity::graphicsMath::slerp(current.rotation, next.rotation, u));
 			vec3f scale			= cliqCity::graphicsMath::lerp(current.scale, next.scale, u);
@@ -80,6 +115,11 @@ void AnimationController::Update(double milliseconds)
 		}
 
 		mCurrentAnimationPlayTime += static_cast<float>(milliseconds);
+
+		if (mKeyframeCallbackMap[keyframeIndex])
+		{
+			mKeyframeCallbackMap[keyframeIndex](mSceneObject);
+		}
 	}
 	else
 	{
