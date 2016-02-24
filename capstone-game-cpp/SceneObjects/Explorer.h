@@ -35,5 +35,7 @@ public:
 
 	static void DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
 	static void DoMelee(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
-	static void OnKeyframe(void* obj);
+	static void OnMeleeStart(void* obj);
+	static void OnMeleeStop(void* obj);
+
 };

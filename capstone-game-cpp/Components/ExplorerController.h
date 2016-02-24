@@ -25,8 +25,12 @@ class ExplorerController : public BaseComponent
 	// delta time in seconds
 	bool Move(float dt, vec3f& pos);
 	bool Rotate(float dt, vec3f& pos, quatf& rot);
-
+	
+	bool CanMove();
+	void PlayWalkAnimation();
+	void PauseWalkAnimation();
 public:
+	class AnimationController* mAnimationController;
 	float mSpeed;
 	bool  mIsInteracting;
 

@@ -58,13 +58,6 @@ Explorer::Explorer()
 	mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
 	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
 
-	mController = Factory<ExplorerController>::Create();
-	mController->mSceneObject = this;
-	mController->mIsActive = false;
-	mController->mSpeed = 0.05f;
-	mController->RegisterMoveCallback(&OnMove);
-	mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
-
 	Application::SharedInstance().GetModelManager()->LoadModel<GPU::SkinnedVertex>("Minion_Test");
 	Application::SharedInstance().GetModelManager()->GetModel("Minion_Test")->Link(this);
 
@@ -72,6 +65,20 @@ Explorer::Explorer()
 	mAnimationController->mSceneObject = this;
 	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
 	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
+
+	KeyframeOption meleeOptions[] = { { gMinionMelee.startFrameIndex, OnMeleeStart }, { gMinionMelee.endFrameIndex, OnMeleeStop } };
+	SetStateAnimation(mAnimationController, ANIM_STATE_WALK, &gMinionWalk, nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_RUN, &gMinionRun, nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionMelee, meleeOptions, 2, false);
+	SetRestFrameIndex(mAnimationController, gMinionRestFrameIndex);
+
+	mController = Factory<ExplorerController>::Create();
+	mController->mSceneObject = this;
+	mController->mIsActive = false;
+	mController->mSpeed = 0.05f;
+	mController->RegisterMoveCallback(&OnMove);
+	mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
+	mController->mAnimationController = mAnimationController;	// Be careful if you move this code. AnimationController should exist before here.
 
 	mCollider = Factory<SphereColliderComponent>::Create();
 	mCollider->mIsDynamic = true;
@@ -96,7 +103,6 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
 
-	PlayAnimation(mAnimationController, &gMinionWalk, true);
 	mMeleeCollider	= gExplorerInventory[UUID].meleeCollider;
 	mMeleeCollider->mSceneObject = this;
 
@@ -107,6 +113,7 @@ void Explorer::Spawn(vec3f pos, int UUID)
 		mSkills[i]->mIsActive = true;
 	}
 
+	mAnimationController->SetState(ANIM_STATE_IDLE);
 }
 
 void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
@@ -181,12 +188,22 @@ void Explorer::DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* t
 
 void Explorer::DoMelee(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
 {
-	KeyframeOption option { gMinionMelee.startFrameIndex, OnKeyframe };
-
-	PlayAnimation(reinterpret_cast<Explorer*>(obj)->mAnimationController, &gMinionMelee, &option, 1);
+	TRACE_LOG("DoMelee " << obj);
+	AnimationController* pAnimationController = reinterpret_cast<Explorer*>(obj)->mAnimationController;
+	pAnimationController->SetState(ANIM_STATE_MELEE);
+	pAnimationController->Resume();
 }
 
-void Explorer::OnKeyframe(void* obj)
+void Explorer::OnMeleeStart(void* obj)
 {
-	TRACE_LOG("HI");
+	TRACE_LOG("ANIM START");
+}
+
+void Explorer::OnMeleeStop(void* obj)
+{
+	TRACE_LOG("ANIM STOP");
+
+	AnimationController* pAnimationController = reinterpret_cast<Explorer*>(obj)->mAnimationController;
+	pAnimationController->SetState(ANIM_STATE_WALK);
+	pAnimationController->Resume();
 }

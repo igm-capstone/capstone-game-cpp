@@ -31,6 +31,7 @@ Minion::Minion()
 	mAnimationController->mSceneObject = this;
 	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
 	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
+	SetRestFrameIndex(mAnimationController, gMinionRestFrameIndex);
 }
 
 Minion::~Minion()
@@ -46,8 +47,6 @@ void Minion::Spawn(vec3f pos, int UUID)
 
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
-
-	PlayAnimation(mAnimationController, &gMinionWalk, true);
 }
 
 void Minion::OnMove(BaseSceneObject* obj, vec3f newPos)
