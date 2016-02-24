@@ -2,11 +2,18 @@
 #include "AnimationController.h"
 #include "trace.h"
 #include "Rig3D\Common\Input.h"
+#include "limits.h"
 
-AnimationController::AnimationController() : mCurrentAnimationIndex(-1), mCurrentAnimationPlayTime(0.0f), mIsAnimating(false), mIsLooping(false)
+AnimationController::AnimationController() : 
+	mCurrentAnimationIndex(-1), 
+	mCurrentAnimationStartIndex(0), 
+	mCurrentAnimationEndIndex(0), 
+	mCurrentAnimationPlayTime(0.0f), 
+	mSkeletalAnimations(nullptr), 
+	mIsAnimating(false), 
+	mIsLooping(false)
 {
 }
-
 
 AnimationController::~AnimationController()
 {
@@ -88,6 +95,9 @@ void AnimationController::Update(double milliseconds)
 		return;
 	}
 
+	// So we can trigger frames at 0
+	static uint32_t prevKeyframeIndex = UINT32_MAX;	
+
 	SkeletalAnimation* currentAnimation = &(*mSkeletalAnimations)[mCurrentAnimationIndex];
 
 	float framesPerMS	= static_cast<float>(currentAnimation->frameCount) / currentAnimation->duration;
@@ -99,7 +109,7 @@ void AnimationController::Update(double milliseconds)
 		
 		float t = mCurrentAnimationStartIndex + mCurrentAnimationPlayTime * framesPerMS;
 		uint32_t keyframeIndex =static_cast<int>(floorf(t));
-		TRACE_LOG(keyframeIndex);
+		//TRACE_LOG(prevKeyframeIndex << "\t" << keyframeIndex);
 
 		float u = t - keyframeIndex;
 		for (JointAnimation jointAnimation : currentAnimation->jointAnimations)
@@ -116,10 +126,12 @@ void AnimationController::Update(double milliseconds)
 
 		mCurrentAnimationPlayTime += static_cast<float>(milliseconds);
 
-		if (mKeyframeCallbackMap[keyframeIndex])
-		{
+		if (mKeyframeCallbackMap[keyframeIndex] != nullptr && prevKeyframeIndex != keyframeIndex)
+		{ 
 			mKeyframeCallbackMap[keyframeIndex](mSceneObject);
 		}
+
+		prevKeyframeIndex = keyframeIndex;
 	}
 	else
 	{
