@@ -8,6 +8,7 @@ IterableComposite::IterableComposite(BehaviorTree& bt, BehaviorStatus breakStatu
 {
 	SetInitializeCallback(&OnInitialize);
 	SetUpdateCallback(&OnUpdate);
+	SetFlushCallback(&OnFlush);
 }
 
 void IterableComposite::OnInitialize(Behavior& bh, void* data)
@@ -15,12 +16,22 @@ void IterableComposite::OnInitialize(Behavior& bh, void* data)
 	auto& self = static_cast<IterableComposite&>(bh);
 
 	self.mCurrent = self.mChildren.begin();
-	self.mBehaviorTree->Start(**self.mCurrent, &OnChildComplete, &self);
+	self.mBehaviorTree->Start(**self.mCurrent, { &OnChildComplete, &self, data });
 }
 
-void IterableComposite::OnChildComplete(void* observerData, BehaviorStatus status)
+void IterableComposite::OnFlush(Behavior& bh, void* data)
 {
-	auto& self = *static_cast<IterableComposite*>(observerData);
+	auto& self = static_cast<IterableComposite&>(bh);
+
+	if (self.mCurrent == self.mChildren.end())
+	{
+		self.mStatus = BehaviorStatus::Invalid;
+	}
+}
+
+void IterableComposite::OnChildComplete(Behavior& bh, void* data, BehaviorStatus status)
+{
+	auto& self = static_cast<IterableComposite&>(bh);
 
 	const Behavior& child = **self.mCurrent;
 
@@ -51,7 +62,7 @@ void IterableComposite::OnChildComplete(void* observerData, BehaviorStatus statu
 
 	// start the execution of the next child 
 	// and get notified on it's completion
-	self.mBehaviorTree->Start(**self.mCurrent, &OnChildComplete, &self);
+	self.mBehaviorTree->Start(**self.mCurrent, { &OnChildComplete, &self, data });
 }
 
 BehaviorStatus IterableComposite::OnUpdate(Behavior& self, void* data)

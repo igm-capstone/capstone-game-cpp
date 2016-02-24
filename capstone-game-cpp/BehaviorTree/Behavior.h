@@ -31,12 +31,20 @@ namespace std
 }
 
 class Behavior;
-
-typedef std::function<void(BehaviorStatus)> BehaviorObserver;
-typedef void(*ObserverCallback)(void*, BehaviorStatus);
+typedef void(*ObserverCallback)(Behavior&, void*, BehaviorStatus);
 typedef BehaviorStatus(*UpdateCallback)(Behavior&, void*);
+typedef void(*FlushCallback)(Behavior&, void*);
 typedef void(*InitializeCallback)(Behavior&, void*);
 typedef void(*TerminateCallback)(Behavior&, void*, BehaviorStatus);
+
+struct BehaviorObserver
+{
+	ObserverCallback callback;
+	Behavior*        behavior;
+	void*            data;
+
+	static BehaviorObserver Default() { return{ nullptr, nullptr, nullptr }; }
+};
 
 class Behavior
 {
@@ -50,6 +58,11 @@ public:
 	void SetInitializeCallback(InitializeCallback callback)
 	{
 		mOnInitialize = callback;
+	}
+
+	void SetFlushCallback(FlushCallback callback)
+	{
+		mOnFlush = callback;
 	}
 
 	void SetUpdateCallback(UpdateCallback callback)
@@ -67,17 +80,16 @@ public:
 		return mStatus;
 	}
 
-	void SetObserver(ObserverCallback callback, void* data)
+	void SetObserver(BehaviorObserver observer)
 	{
-		mOnObserver = callback;
-		mObserverData = data;
+		mObserver = observer;
 	}
 
 	void NotifyObserver(BehaviorStatus status) const
 	{
-		if (mOnObserver)
+		if (mObserver.callback)
 		{
-			mOnObserver(mObserverData, status);
+			mObserver.callback(*mObserver.behavior, mObserver.data, status);
 		}
 	}
 
@@ -85,10 +97,10 @@ public:
 
 protected:
 	BehaviorStatus     mStatus;
-	ObserverCallback   mOnObserver;
-	void*              mObserverData;
+	BehaviorObserver   mObserver;
 
 	UpdateCallback     mOnUpdate;
+	FlushCallback      mOnFlush;
 	InitializeCallback mOnInitialize;
 	TerminateCallback  mOnTerminate;
 };

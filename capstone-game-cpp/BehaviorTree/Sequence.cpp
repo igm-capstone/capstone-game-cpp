@@ -73,6 +73,33 @@ TEST(BehaviorTrees, Tick_TwoChildrenSucceed_ReturnSuccess)
 	CHECK_EQUAL(1, seq[1].mTerminateCalled);
 }
 
+
+TEST(BehaviorTrees, Tick_ResetSequenceAfterSuccess_ReturnSuccess)
+{
+	BehaviorTree bt;
+	MockSequence seq(bt, 2);
+
+	bt.Start(seq);
+
+	for (size_t i = 0; i < 2; i++)
+	{
+		seq[0].mReturnStatus = BehaviorStatus::Success;
+		seq[1].mReturnStatus = BehaviorStatus::Running;
+		bt.Tick();
+
+		CHECK_EQUAL(seq.GetStatus(), BehaviorStatus::Running);
+		CHECK_EQUAL(i + 1, seq[0].mTerminateCalled);
+		CHECK_EQUAL(1, seq[1].mInitializeCalled);
+
+		seq[1].mReturnStatus = BehaviorStatus::Success;
+		bt.Tick();
+
+		CHECK_EQUAL(seq.GetStatus(), BehaviorStatus::Success);
+		CHECK_EQUAL(i + 1, seq[0].mTerminateCalled);
+		CHECK_EQUAL(i + 1, seq[1].mTerminateCalled);
+	}
+}
+
 TEST(BehaviorTrees, Tick_SelectorParentSequenceChildren_SelectorSucceeds)
 {
 	BehaviorTree bt;

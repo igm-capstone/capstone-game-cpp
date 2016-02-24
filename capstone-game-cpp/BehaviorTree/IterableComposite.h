@@ -11,7 +11,8 @@ protected:
 	std::vector<class Behavior*>::iterator mCurrent;
 	BehaviorStatus mBreakStatus;
 
-	static void OnChildComplete(void* data, BehaviorStatus status);
+	static void OnChildComplete(Behavior& self, void* data, BehaviorStatus status);
 	static void OnInitialize(Behavior& self, void* data);
+	static void OnFlush(Behavior& bh, void* data);
 	static BehaviorStatus OnUpdate(Behavior& self, void* data);
 };

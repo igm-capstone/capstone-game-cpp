@@ -4,9 +4,9 @@
 
 Behavior::Behavior(): 
 	mStatus(BehaviorStatus::Invalid), 
-	mOnObserver(nullptr),
-	mObserverData(nullptr),
+	mObserver(BehaviorObserver::Default()),
 	mOnUpdate(nullptr), 
+	mOnFlush(nullptr), 
 	mOnInitialize(nullptr), 
 	mOnTerminate(nullptr)
 {
@@ -18,6 +18,11 @@ Behavior::~Behavior()
 
 BehaviorStatus Behavior::Tick(void* userData)
 {
+	if (mOnFlush && mStatus != BehaviorStatus::Invalid)
+	{
+		mOnFlush(*this, userData);
+	}
+
 	if (mOnInitialize && mStatus == BehaviorStatus::Invalid)
 	{
 		mOnInitialize(*this, userData);
