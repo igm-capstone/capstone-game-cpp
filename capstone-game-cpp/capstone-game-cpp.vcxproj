@@ -100,9 +100,9 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BehaviorTree\IterableComposite.cpp" />
     <ClCompile Include="BehaviorTree\Selector.cpp" />
     <ClCompile Include="BVHTree.cpp" />
-    <ClCompile Include="BehaviorTree\Action.cpp" />
     <ClCompile Include="BehaviorTree\Behavior.cpp" />
     <ClCompile Include="BehaviorTree\BehaviorTree.cpp" />
     <ClCompile Include="BehaviorTree\Composite.cpp" />
@@ -154,9 +154,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BehaviorTree\IterableComposite.h" />
     <ClInclude Include="BehaviorTree\Selector.h" />
     <ClInclude Include="BVHTree.h" />
-    <ClInclude Include="BehaviorTree\Action.h" />
     <ClInclude Include="BehaviorTree\Behavior.h" />
     <ClInclude Include="BehaviorTree\BehaviorTree.h" />
     <ClInclude Include="BehaviorTree\Composite.h" />

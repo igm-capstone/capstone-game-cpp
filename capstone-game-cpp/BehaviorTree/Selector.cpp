@@ -4,59 +4,10 @@
 #include "Sequence.h"
 
 
-Selector::Selector(BehaviorTree& bt) : mBehaviorTree(&bt)
+Selector::Selector(BehaviorTree& bt) : IterableComposite(bt, BehaviorStatus::Success)
 {
-	SetInitializeCallback(&OnInitialize);
-	SetUpdateCallback(&OnUpdate);
+
 }
-
-void Selector::OnInitialize(Behavior& bh, void* data)
-{
-	auto& self = static_cast<Selector&>(bh);
-
-	self.mCurrent = self.mChildren.begin();
-	self.mBehaviorTree->Start(**self.mCurrent, &OnChildComplete, &self);
-}
-
-void Selector::OnChildComplete(void* observerData, BehaviorStatus status)
-{
-	auto& self = *static_cast<Selector*>(observerData);
-
-	const Behavior& child = **self.mCurrent;
-
-	// stop as soon as the current child has succeeded
-	if (child.GetStatus() == BehaviorStatus::Success)
-	{
-		self.mBehaviorTree->Stop(self, BehaviorStatus::Success);
-		return;
-	}
-
-	// childrens can either complete with success or failure
-	ASSERT(child.GetStatus() == BehaviorStatus::Failure);
-
-	// otherwise, move on to the next child
-	++self.mCurrent;
-
-	// return failure if no children left
-	if (self.mCurrent == self.mChildren.end())
-	{
-		self.mBehaviorTree->Stop(self, BehaviorStatus::Failure);
-		return;
-	}
-	
-	// start the execution of the next child 
-	// and get notified on it's completion
-	self.mBehaviorTree->Start(**self.mCurrent, &OnChildComplete, &self);
-}
-
-BehaviorStatus Selector::OnUpdate(Behavior& bh, void* data)
-{
-	// always return running,
-	// mStatus will be set to SUCCESS or FAILURE when a children is completed
-	// using BehaviorTree::Stop(this, status);
-	return BehaviorStatus::Running;
-}
-
 
 typedef MockComposite<Selector> MockSelector;
 
@@ -127,4 +78,57 @@ TEST(BehaviorTrees, Tick_SelectorSecondNotInitialized_ReturnSuccess)
 	CHECK_EQUAL(selector.GetStatus(), BehaviorStatus::Success);
 	CHECK_EQUAL(1, selector[0].mTerminateCalled);
 	CHECK_EQUAL(0, selector[1].mInitializeCalled);
+}
+
+
+TEST(BehaviorTrees, Tick_SequenceParentSelectorChildren_AllSucceeds)
+{
+	BehaviorTree bt;
+	Sequence sequence(bt);
+	MockSelector selector1(bt, 2);
+	MockSelector selector2(bt, 2);
+
+	sequence.Add(selector1);
+	sequence.Add(selector2);
+
+	bt.Start(sequence);
+	selector1[0].mReturnStatus = BehaviorStatus::Success;
+	selector2[0].mReturnStatus = BehaviorStatus::Success;
+	bt.Tick();
+
+	CHECK_EQUAL(BehaviorStatus::Success, sequence.GetStatus());
+	CHECK_EQUAL(1, selector1[0].mTerminateCalled);
+	CHECK_EQUAL(0, selector1[1].mInitializeCalled);
+	CHECK_EQUAL(1, selector2[0].mTerminateCalled);
+	CHECK_EQUAL(0, selector2[1].mInitializeCalled);
+}
+
+
+TEST(BehaviorTrees, Tick_SequenceParentSelectorChildren_SecondFailsSequenceFails)
+{
+	BehaviorTree bt;
+	Sequence sequence(bt);
+	MockSelector selector1(bt, 2);
+	MockSelector selector2(bt, 2);
+
+	sequence.Add(selector1);
+	sequence.Add(selector2);
+
+	bt.Start(sequence);
+	selector1[0].mReturnStatus = BehaviorStatus::Success;
+	bt.Tick();
+
+	CHECK_EQUAL(BehaviorStatus::Running, sequence.GetStatus());
+	CHECK_EQUAL(1, selector1[0].mTerminateCalled);
+	CHECK_EQUAL(0, selector1[1].mInitializeCalled);
+	CHECK_EQUAL(1, selector2[0].mInitializeCalled);
+
+	selector2[0].mReturnStatus = BehaviorStatus::Failure;
+	selector2[1].mReturnStatus = BehaviorStatus::Failure;
+	bt.Tick();
+
+	CHECK_EQUAL(BehaviorStatus::Failure, sequence.GetStatus());
+	CHECK_EQUAL(1, selector1[0].mTerminateCalled);
+	CHECK_EQUAL(1, selector2[0].mTerminateCalled);
+	CHECK_EQUAL(1, selector2[1].mTerminateCalled);
 }

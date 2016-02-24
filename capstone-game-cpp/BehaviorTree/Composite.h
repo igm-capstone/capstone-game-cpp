@@ -5,6 +5,8 @@ class Composite : public Behavior
 {
 public:
 	std::vector<Behavior*> mChildren;
+
+	void Add(Behavior& behavior);
 };
 
 template <class COMPOSITE>

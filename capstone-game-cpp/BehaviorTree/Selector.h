@@ -1,18 +1,9 @@
 ﻿#pragma once
-#include "Behavior.h"
-#include "Composite.h"
+#include "IterableComposite.h"
 
-class Selector : public Composite
+class Selector : public IterableComposite
 {
 
 public:
 	Selector(BehaviorTree& bt);
-	
-protected:
-	class BehaviorTree* mBehaviorTree;
-	std::vector<class Behavior*>::iterator mCurrent;
-
-	static void OnInitialize(Behavior& bh, void* data);
-	static void OnChildComplete(void* observerData, BehaviorStatus status);
-	static BehaviorStatus OnUpdate(Behavior& bh, void* data);
 };

@@ -57,6 +57,7 @@
     <ClCompile Include="DebugRender.cpp" />
     <ClCompile Include="SceneObjects\Region.cpp" />
     <ClCompile Include="BehaviorTree\Selector.cpp" />
+    <ClCompile Include="BehaviorTree\IterableComposite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -118,6 +119,7 @@
     <ClInclude Include="DebugRender.h" />
     <ClInclude Include="SceneObjects\Region.h" />
     <ClInclude Include="BehaviorTree\Selector.h" />
+    <ClInclude Include="BehaviorTree\IterableComposite.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BillboardPixelShader.hlsl">
@@ -212,7 +214,6 @@
     <ClCompile Include="BehaviorTree\Condition.cpp" />
     <ClCompile Include="BehaviorTree\Sequence.cpp" />
     <ClCompile Include="BehaviorTree\TestSuite.cpp" />
-    <ClCompile Include="BehaviorTree\Action.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -278,7 +279,6 @@
     <ClInclude Include="BehaviorTree\Condition.h" />
     <ClInclude Include="BehaviorTree\Sequence.h" />
     <ClInclude Include="BehaviorTree\TestSuite.h" />
-    <ClInclude Include="BehaviorTree\Action.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="External\fmodstudioL.ref" />

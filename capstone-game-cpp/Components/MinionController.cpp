@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "MinionController.h"
 #include <BehaviorTree/BehaviorTree.h>
-#include <BehaviorTree/Action.h>
 #include <BehaviorTree/Sequence.h>
 #include <Mathf.h>
 
@@ -11,11 +10,11 @@ MinionController::MinionController()
 	mBehaviorTree = new BehaviorTree();
 	auto sequence = new Sequence(*mBehaviorTree);
 
-	auto findTarget = new Action();
+	auto findTarget = new Behavior();
 	findTarget->SetUpdateCallback(&FindTarget);
 	sequence->mChildren.push_back(findTarget);
 
-	auto follow = new Action();
+	auto follow = new Behavior();
 	follow->SetUpdateCallback(&MoveTowardsTarget);
 	sequence->mChildren.push_back(follow);
 
