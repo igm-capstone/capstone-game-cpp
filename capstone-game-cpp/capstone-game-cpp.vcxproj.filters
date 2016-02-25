@@ -1,29 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <FxCompile Include="Shaders\DebugTexturePixelShader.hlsl" />
-    <FxCompile Include="Shaders\ExplorerPixelShader.hlsl" />
-    <FxCompile Include="Shaders\ExplorerVertexShader.hlsl" />
-    <FxCompile Include="Shaders\NDSQuadPixelShader.hlsl" />
-    <FxCompile Include="Shaders\NDSQuadVertexShader.hlsl" />
-    <FxCompile Include="Shaders\SkinnedMeshVertexShader.hlsl" />
-    <FxCompile Include="Shaders\SpotLightVolumePixelShader.hlsl" />
-    <FxCompile Include="Shaders\SpotLightVolumeVertexShader.hlsl" />
-    <FxCompile Include="Shaders\CircleVertexShader.hlsl" />
-    <FxCompile Include="Shaders\LineTracePixelShader.hlsl" />
-    <FxCompile Include="Shaders\LineTraceVertexShader.hlsl" />
-    <FxCompile Include="Shaders\ShadowCasterPixelShader.hlsl" />
-    <FxCompile Include="Shaders\BillboardPixelShader.hlsl" />
-    <FxCompile Include="Shaders\ShadowPixelShader.hlsl" />
-    <FxCompile Include="Shaders\BillboardVertexShader.hlsl" />
-    <FxCompile Include="Shaders\SpritePixelShader.hlsl" />
-    <FxCompile Include="Shaders\SpriteVertexShader.hlsl" />
-    <FxCompile Include="Shaders\GridPass1ComputeShader.hlsl" />
-    <FxCompile Include="Shaders\GridPass2ComputeShader.hlsl" />
-    <FxCompile Include="Shaders\StaticMeshPixelShader.hlsl" />
-    <FxCompile Include="Shaders\StaticMeshVertexShader.hlsl" />
-    <FxCompile Include="Shaders\GridVertexShader.hlsl" />
-    <FxCompile Include="Shaders\GridPixelShader.hlsl" />
+    <FxCompile Include="Shaders\CSGridPass1.hlsl" />
+    <FxCompile Include="Shaders\CSGridPass2.hlsl" />
+    <FxCompile Include="Shaders\PSDefColor.hlsl" />
+    <FxCompile Include="Shaders\PSDefMaterial.hlsl" />
+    <FxCompile Include="Shaders\PSFwdColor.hlsl" />
+    <FxCompile Include="Shaders\PSFwd2DTexture.hlsl" />
+    <FxCompile Include="Shaders\PSFwdSpotLightVolume.hlsl" />
+    <FxCompile Include="Shaders\PSFwdDeferredOutput.hlsl" />
+    <FxCompile Include="Shaders\VSDefInstancedMaterial.hlsl" />
+    <FxCompile Include="Shaders\VSFwdSprites.hlsl" />
+    <FxCompile Include="Shaders\VSFwdSpotLightVolume.hlsl" />
+    <FxCompile Include="Shaders\VSFwdLineTrace.hlsl" />
+    <FxCompile Include="Shaders\VSFwdFullScreenQuad.hlsl" />
+    <FxCompile Include="Shaders\VSDefSkinnedMaterial.hlsl" />
+    <FxCompile Include="Shaders\VSDefSingleMaterial.hlsl" />
+    <FxCompile Include="Shaders\VSDefSingleColor.hlsl" />
+    <FxCompile Include="Shaders\VSFwdInstancedColor.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
@@ -118,59 +112,7 @@
     <ClInclude Include="SceneObjects\SpawnPoint.h" />
     <ClInclude Include="DebugRender.h" />
     <ClInclude Include="SceneObjects\Region.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Shaders\BillboardPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\BillboardVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\CircleVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ShadowCasterPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ShadowPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\LineTraceVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\LineTracePixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ExplorerPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ExplorerVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\DebugTexturePixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\SpotLightVolumeVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\SpotLightVolumePixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\NDSQuadVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\NDSQuadPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\SpritePixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\SpriteVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\SkinnedMeshVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
+    <ClInclude Include="SceneObjects\Door.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />

@@ -1,50 +1,43 @@
 #include "stdafx.h"
 #include "Rig3D/Engine.h"
 #include "capstone-game-cpp/ScareTacticsApplication.h"
-#include "Rig3D/Graphics/DirectX11/DX11Shader.h"
 
 //Shaders - Headers are output from compiler
-#include "Shaders/obj/BillboardPixelShader.h"
-#include "Shaders/obj/BillboardVertexShader.h"
-#include "Shaders/obj/CircleVertexShader.h"
-#include "Shaders/obj/StaticMeshPixelShader.h"
-#include "Shaders/obj/StaticMeshVertexShader.h"
-#include "Shaders/obj/ExplorerVertexShader.h"
-#include "Shaders/obj/ExplorerPixelShader.h"
-#include "Shaders/obj/SpotLightVolumeVertexShader.h"
-#include "Shaders/obj/SpotLightVolumePixelShader.h"
-#include "Shaders/obj/NDSQuadVertexShader.h"
-#include "Shaders/obj/NDSQuadPixelShader.h"
-#include "Shaders/obj/DebugTexturePixelShader.h"
-#include "Shaders/obj/SpriteVertexShader.h"
-#include "Shaders/obj/SpritePixelShader.h"
-#include "Shaders/obj/ShadowCasterPixelShader.h"
-#include "Shaders/obj/GridVertexShader.h"
-#include "Shaders/obj/GridPixelShader.h"
-#include "Shaders/obj/GridPass1ComputeShader.h"
-#include "Shaders/obj/GridPass2ComputeShader.h"
-#include "Shaders/obj/ShadowPixelShader.h"
-#include "Shaders/obj/SkinnedMeshVertexShader.h"
+#include "Shaders/obj/CSGridPass1.h"
+#include "Shaders/obj/CSGridPass2.h"
+#include "Shaders/obj/PSDefColor.h"
+#include "Shaders/obj/PSDefMaterial.h"
+#include "Shaders/obj/PSFwd2DTexture.h"
+#include "Shaders/obj/PSFwdColor.h"
+#include "Shaders/obj/PSFwdDeferredOutput.h"
+#include "Shaders/obj/PSFwdSpotLightVolume.h"
+#include "Shaders/obj/VSDefInstancedMaterial.h"
+#include "Shaders/obj/VSDefSingleColor.h"
+#include "Shaders/obj/VSDefSingleMaterial.h"
+#include "Shaders/obj/VSDefSkinnedMaterial.h"
+#include "Shaders/obj/VSFwdFullScreenQuad.h"
+#include "Shaders/obj/VSFwdInstancedColor.h"
+#include "Shaders/obj/VSFwdLineTrace.h"
+#include "Shaders/obj/VSFwdSpotLightVolume.h"
+#include "Shaders/obj/VSFwdSprites.h"
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
-#include <Rig3D/Intersection.h>
 
 using namespace Rig3D;
 
 ScareTacticsApplication::ScareTacticsApplication() :
-	mStaticMeshVertexShader(nullptr),
-	mStaticMeshPixelShader(nullptr),
-	mExplorerVertexShader(nullptr),
-	mExplorerPixelShader(nullptr),
-	mPLVolumeVertexShader(nullptr),
-	mPLVolumePixelShader(nullptr),
-	mNDSQuadVertexShader(nullptr),
-	mNDSQuadPixelShader(nullptr),
-	mSpriteVertexShader(nullptr),
-	mSpritePixelShader(nullptr),
-	mSkinnedVertexShader(nullptr),
-	mGridPass1ComputeShader(nullptr),
-	mGridPass2ComputeShader(nullptr),
-	mDBGPixelShader(nullptr),
+	mVSDefInstancedMaterial(nullptr),
+	mPSDefMaterial(nullptr),
+	mVSDefSingleMaterial(nullptr),
+	mPSFwdDeferredOutput(nullptr),
+	mVSFwdSpotLightVolume(nullptr),
+	mPSFwdSpotLightVolume(nullptr),
+	mVSFwdFullScreenQuad(nullptr),
+	mPSFwd2DTexture(nullptr),
+	mVSFwdSprites(nullptr),
+	mVSDefSkinnedMaterial(nullptr),
+	mCSGridPass1(nullptr),
+	mCSGridPass2(nullptr),
+	mPSFwdColor(nullptr),
 	mStudio(nullptr),
 	mLoadingScreen(nullptr),
 	mCurrentScene(nullptr),
@@ -94,9 +87,10 @@ void ScareTacticsApplication::InitializeShaders()
 	auto engine = &Singleton<Engine>::SharedInstance();
 	auto renderer = engine->GetRenderer();
 
-	// Static Mesh shaders
+#pragma region Vertex Shaders
 
-	InputElement staticMeshInputElements[] =
+	// Instancing
+	InputElement instancingInput[] =
 	{
 		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX   },
 		{ "NORMAL",		0, 0, 12,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
@@ -106,60 +100,37 @@ void ScareTacticsApplication::InitializeShaders()
 		{ "WORLD",		2, 1, 32, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
 		{ "WORLD",		3, 1, 48, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE }
 	};
+	renderer->VCreateShader(&mVSDefInstancedMaterial, &mGameAllocator);
+	renderer->VLoadVertexShader(mVSDefInstancedMaterial, gVSDefInstancedMaterial, sizeof(gVSDefInstancedMaterial), instancingInput, 7);
+	renderer->VCreateShader(&mVSFwdInstancedColor, &mGameAllocator);
+	renderer->VLoadVertexShader(mVSFwdInstancedColor, gVSFwdInstancedColor, sizeof(gVSFwdInstancedColor), instancingInput, 7);
 
-	renderer->VCreateShader(&mStaticMeshVertexShader, &mGameAllocator);
-	renderer->VCreateShader(&mStaticMeshPixelShader, &mGameAllocator);
-
-	renderer->VLoadVertexShader(mStaticMeshVertexShader, gStaticMeshVertexShader, sizeof(gStaticMeshVertexShader), staticMeshInputElements, 7);
-	renderer->VLoadPixelShader(mStaticMeshPixelShader, gStaticMeshPixelShader, sizeof(gStaticMeshPixelShader));
-
-	// Explorer Shaders
-
-	InputElement explorerInputElements[] =
+	// Single Mesh
+	InputElement vertex3Input[] =
 	{
 		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
 		{ "NORMAL",		0, 0, 12,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
 		{ "TEXCOORD",	0, 0, 24,  0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX }
 	};
+	renderer->VCreateShader(&mVSDefSingleMaterial, &mGameAllocator);
+	renderer->VLoadVertexShader(mVSDefSingleMaterial, gVSDefSingleMaterial, sizeof(gVSDefSingleMaterial), vertex3Input, 3);
+	renderer->VCreateShader(&mVSDefSingleColor, &mGameAllocator);
+	renderer->VLoadVertexShader(mVSDefSingleColor, gVSDefSingleColor, sizeof(gVSDefSingleColor), vertex3Input, 3);
 
-	renderer->VCreateShader(&mExplorerVertexShader, &mGameAllocator);
-	renderer->VCreateShader(&mExplorerPixelShader, &mGameAllocator);
-
-	renderer->VLoadVertexShader(mExplorerVertexShader, gExplorerVertexShader, sizeof(gExplorerVertexShader), explorerInputElements, 3);
-	renderer->VLoadPixelShader(mExplorerPixelShader, gExplorerPixelShader, sizeof(gExplorerPixelShader));
-
-	// Point Light Shaders
-
-	InputElement plvInputElements[] = 
+	// Point Light
+	InputElement plvInputElements[] =
 	{
 		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX }
 	};
+	renderer->VCreateShader(&mVSFwdSpotLightVolume, &mGameAllocator);
+	renderer->VLoadVertexShader(mVSFwdSpotLightVolume, gVSFwdSpotLightVolume, sizeof(gVSFwdSpotLightVolume), plvInputElements, 1);
 
-	renderer->VCreateShader(&mPLVolumeVertexShader, &mGameAllocator);
-	renderer->VCreateShader(&mPLVolumePixelShader, &mGameAllocator);
-
-	renderer->VLoadVertexShader(mPLVolumeVertexShader, gSpotLightVolumeVertexShader, sizeof(gSpotLightVolumeVertexShader), plvInputElements, 1);
-	renderer->VLoadPixelShader(mPLVolumePixelShader, gSpotLightVolumePixelShader, sizeof(gSpotLightVolumePixelShader));
-
-	// Normalized Device Quad Shaders
-
-	InputElement ndsqInputElements[] =
-	{
-		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
-		{ "TEXCOORD",	0, 0, 12,  0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX }
-	};
-
-	renderer->VCreateShader(&mNDSQuadVertexShader, &mGameAllocator);
-	renderer->VCreateShader(&mNDSQuadPixelShader, &mGameAllocator);
-
-	renderer->VLoadVertexShader(mNDSQuadVertexShader, gNDSQuadVertexShader, sizeof(gNDSQuadVertexShader), ndsqInputElements, 2);
-	renderer->VLoadPixelShader(mNDSQuadPixelShader, gNDSQuadPixelShader, sizeof(gNDSQuadPixelShader));
-
-	renderer->VCreateShader(&mDBGPixelShader, &mGameAllocator);
-	renderer->VLoadPixelShader(mDBGPixelShader, gDebugTexturePixelShader, sizeof(gDebugTexturePixelShader));
-
-	// Sprite Shaders
-
+	// Full screen quad
+	// No input :D Use Draw(3, 0) with no mesh bound.
+	renderer->VCreateShader(&mVSFwdFullScreenQuad, &mGameAllocator);
+	renderer->VLoadVertexShader(mVSFwdFullScreenQuad, gVSFwdFullScreenQuad, sizeof(gVSFwdFullScreenQuad), nullptr, 0);
+	
+	// Sprite
 	InputElement spriteInputElements[] =
 	{
 		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
@@ -169,15 +140,10 @@ void ScareTacticsApplication::InitializeShaders()
 		{ "SCALE",		0, 1, 20, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
 		{ "TEXID",		0, 1, 28, 1, R_FLOAT32,  INPUT_CLASS_PER_INSTANCE }
 	};
+	renderer->VCreateShader(&mVSFwdSprites, &mGameAllocator);
+	renderer->VLoadVertexShader(mVSFwdSprites, gVSFwdSprites, sizeof(gVSFwdSprites), spriteInputElements, 6);
 
-	renderer->VCreateShader(&mSpriteVertexShader, &mGameAllocator);
-	renderer->VCreateShader(&mSpritePixelShader, &mGameAllocator);
-
-	renderer->VLoadVertexShader(mSpriteVertexShader, gSpriteVertexShader, sizeof(gSpriteVertexShader), spriteInputElements, 6);
-	renderer->VLoadPixelShader(mSpritePixelShader, gSpritePixelShader, sizeof(gSpritePixelShader));	
-	
-	// Skinned Vertex Shader
-
+	// Skinned Vertex
 	InputElement skinnedInputElements[] =
 	{
 		{ "BLENDINDICES",	0, 0, 0,	0,	RGBA_UINT32,	INPUT_CLASS_PER_VERTEX },
@@ -186,34 +152,41 @@ void ScareTacticsApplication::InitializeShaders()
 		{ "NORMAL",			0, 0, 44,	0,	RGB_FLOAT32,	INPUT_CLASS_PER_VERTEX },
 		{ "TEXCOORD",		0, 0, 56,	0,	RG_FLOAT32,		INPUT_CLASS_PER_VERTEX }
 	};
+	renderer->VCreateShader(&mVSDefSkinnedMaterial, &mGameAllocator);
+	renderer->VLoadVertexShader(mVSDefSkinnedMaterial, gVSDefSkinnedMaterial, sizeof(gVSDefSkinnedMaterial), skinnedInputElements, 5);
 
-	renderer->VCreateShader(&mSkinnedVertexShader, &mGameAllocator);
+#pragma endregion
 
-	renderer->VLoadVertexShader(mSkinnedVertexShader, gSkinnedMeshVertexShader, sizeof(gSkinnedMeshVertexShader), skinnedInputElements, 5);
+#pragma region Pixel Shaders
 
-	// Grid Shaders
+	renderer->VCreateShader(&mPSFwdDeferredOutput, &mGameAllocator);
+	renderer->VLoadPixelShader(mPSFwdDeferredOutput, gPSFwdDeferredOutput, sizeof(gPSFwdDeferredOutput));
 
-	InputElement gridInputElements[] =
-	{
-		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
-		{ "NORMAL",		0, 0, 12,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
-		{ "TEXCOORD",	0, 0, 24,  0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX },
-		{ "WORLD",		0, 1, 0,  1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
-		{ "WORLD",		1, 1, 16, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
-		{ "WORLD",		2, 1, 32, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE },
-		{ "WORLD",		3, 1, 48, 1, RGBA_FLOAT32, INPUT_CLASS_PER_INSTANCE }
-	};
+	renderer->VCreateShader(&mPSFwd2DTexture, &mGameAllocator);
+	renderer->VLoadPixelShader(mPSFwd2DTexture, gPSFwd2DTexture, sizeof(gPSFwd2DTexture));
 
-	renderer->VCreateShader(&mGridVertexShader, &mGameAllocator);
-	renderer->VCreateShader(&mGridPixelShader, &mGameAllocator);
+	renderer->VCreateShader(&mPSFwdSpotLightVolume, &mGameAllocator);
+	renderer->VLoadPixelShader(mPSFwdSpotLightVolume, gPSFwdSpotLightVolume, sizeof(gPSFwdSpotLightVolume));
 
-	renderer->VLoadVertexShader(mGridVertexShader, gGridVertexShader, sizeof(gGridVertexShader), gridInputElements, 7);
-	renderer->VLoadPixelShader(mGridPixelShader, gGridPixelShader, sizeof(gGridPixelShader));
+	renderer->VCreateShader(&mPSDefMaterial, &mGameAllocator);
+	renderer->VLoadPixelShader(mPSDefMaterial, gPSDefMaterial, sizeof(gPSDefMaterial));
 
-	renderer->VCreateShader(&mGridPass1ComputeShader, &mGameAllocator);
-	renderer->VLoadComputeShader(mGridPass1ComputeShader, gGridPass1ComputeShader, sizeof(gGridPass1ComputeShader));
-	renderer->VCreateShader(&mGridPass2ComputeShader, &mGameAllocator);
-	renderer->VLoadComputeShader(mGridPass2ComputeShader, gGridPass2ComputeShader, sizeof(gGridPass2ComputeShader));
+	renderer->VCreateShader(&mPSDefColor, &mGameAllocator);
+	renderer->VLoadPixelShader(mPSDefColor, gPSDefColor, sizeof(gPSDefColor));
+
+	renderer->VCreateShader(&mPSFwdColor, &mGameAllocator);
+	renderer->VLoadPixelShader(mPSFwdColor, gPSFwdColor, sizeof(gPSFwdColor));
+
+#pragma endregion
+
+#pragma region Compute Shaders
+
+	renderer->VCreateShader(&mCSGridPass1, &mGameAllocator);
+	renderer->VLoadComputeShader(mCSGridPass1, gCSGridPass1, sizeof(gCSGridPass1));
+	renderer->VCreateShader(&mCSGridPass2, &mGameAllocator);
+	renderer->VLoadComputeShader(mCSGridPass2, gCSGridPass2, sizeof(gCSGridPass2));
+
+#pragma endregion
 }
 
 void ScareTacticsApplication::InitializeFMOD()
@@ -312,22 +285,22 @@ void ScareTacticsApplication::VShutdown()
 		mSceneToLoad->~BaseScene();
 	}
 
-	mStaticMeshVertexShader->~IShader();
-	mStaticMeshPixelShader->~IShader();
-	mExplorerVertexShader->~IShader();
-	mExplorerPixelShader->~IShader();
-	mPLVolumeVertexShader->~IShader();
-	mPLVolumePixelShader->~IShader();
-	mNDSQuadVertexShader->~IShader();
-	mNDSQuadPixelShader->~IShader();
-	mSpriteVertexShader->~IShader();
-	mSpritePixelShader->~IShader();
-	mDBGPixelShader->~IShader();
-	mSkinnedVertexShader->~IShader();
-	mGridVertexShader->~IShader();
-	mGridPixelShader->~IShader();
-	mGridPass1ComputeShader->~IShader();
-	mGridPass2ComputeShader->~IShader();
+	mCSGridPass1->~IShader();
+	mCSGridPass2->~IShader();
+	mPSDefColor->~IShader();
+	mPSDefMaterial->~IShader();
+	mPSFwd2DTexture->~IShader();
+	mPSFwdColor->~IShader();
+	mPSFwdDeferredOutput->~IShader();
+	mPSFwdSpotLightVolume->~IShader();
+	mVSDefInstancedMaterial->~IShader();
+	mVSDefSingleColor->~IShader();
+	mVSDefSingleMaterial->~IShader();
+	mVSDefSkinnedMaterial->~IShader();
+	mVSFwdFullScreenQuad->~IShader();
+	mVSFwdInstancedColor->~IShader();
+	mVSFwdSpotLightVolume->~IShader();
+	mVSFwdSprites->~IShader();
 
 	mSceneAllocator.Free();
 	mGameAllocator.Free();

@@ -1,7 +1,7 @@
 struct Vertex
 {
-	float4		mColor		: COLOR;
-	float3		mPosition	: POSITION;
+	float3		position	: POSITION;
+	float4		color		: COLOR;
 };
 
 struct Pixel
@@ -21,8 +21,8 @@ Pixel main(Vertex vertex)
 	matrix clip = mul(view, projection);
 
 	Pixel pixel;
-	pixel.mPositionH = mul(float4(vertex.mPosition, 1.0f), clip);
-	pixel.mColor = vertex.mColor;
+	pixel.mPositionH = mul(float4(vertex.position, 1.0f), clip);
+	pixel.mColor = vertex.color;
 
 	return pixel;
 }

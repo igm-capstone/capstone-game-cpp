@@ -55,15 +55,18 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 
 	gRenderer->GetDeviceContext()->RSSetState(gWireframeRS);
 
-	gRenderer->VSetInputLayout(gApplication->mExplorerVertexShader);
-	gRenderer->VSetVertexShader(gApplication->mExplorerVertexShader);
-	gRenderer->VSetPixelShader(gApplication->mExplorerPixelShader);
+	gRenderer->VSetInputLayout(gApplication->mVSDefSingleColor);
+	gRenderer->VSetVertexShader(gApplication->mVSDefSingleColor);
+	gRenderer->VSetPixelShader(gApplication->mPSDefColor);
 
 	IShaderResource* iShaderResource = reinterpret_cast<IShaderResource*>(pShaderResource);
 	CameraManager* cameraManager = reinterpret_cast<CameraManager*>(pCameraManager);
 	CBuffer::Model* model = reinterpret_cast<CBuffer::Model*>(pModel);
 
+	vec4f color[1] = { vec4f(0,1,0,1) };
+
 	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, cameraManager->GetCBufferPersp(), 0);
+	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, &color, 3);
 	gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 0, 0);
 
 	for (Region& e : Factory<Region>())
@@ -72,6 +75,7 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 		model->world = e.mTransform->GetWorldMatrix().transpose();
 		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
 		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
+		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 3, 2);
 
 		gRenderer->VBindMesh(gColliderMesh);
 		gRenderer->VDrawIndexed(0, gColliderMesh->GetIndexCount());

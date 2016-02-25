@@ -21,6 +21,7 @@
 #include <SceneObjects/Ghost.h>
 #include <SceneObjects/StaticMesh.h>
 #include <DebugRender.h>
+#include <SceneObjects/Door.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -128,11 +129,13 @@ void Level01::VInitialize()
 void Level01::InitializeAssets()
 {
 	mModelManager->LoadModel<GPU::Vertex3>("Wall");
+	mModelManager->LoadModel<GPU::Vertex3>("TriangleWall");
 	mModelManager->LoadModel<GPU::Vertex3>("Wall_DoubleDoor");
 	mModelManager->LoadModel<GPU::Vertex3>("Wall_SingleDoor");
 	mModelManager->LoadModel<GPU::Vertex3>("Wall_W_SingleWindwo");
 	mModelManager->LoadModel<GPU::Vertex3>("CurvedWall");
 	mModelManager->LoadModel<GPU::Vertex3>("Floor");
+	mModelManager->LoadModel<GPU::Vertex3>("Door");
 	//mModelManager->LoadModel<GPU::SkinnedVertex>("Minion_Test");
 
 	mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
@@ -187,13 +190,13 @@ void Level01::InitializeGeometry()
 		indices.clear();
 	}
 
-	// Billboard Quad
-	std::vector<GPU::NDSVertex> ndsVertices;
+	// Billboard Quad (Sprites)
+	std::vector<GPU::VertexUV> ndsVertices;
 
 	Geometry::NDSQuad(ndsVertices, indices);
 
 	meshLibrary.NewMesh(&mNDSQuadMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mNDSQuadMesh, &ndsVertices[0], sizeof(GPU::NDSVertex) * ndsVertices.size(), sizeof(GPU::NDSVertex));
+	mRenderer->VSetMeshVertexBuffer(mNDSQuadMesh, &ndsVertices[0], sizeof(GPU::VertexUV) * ndsVertices.size(), sizeof(GPU::VertexUV));
 	mRenderer->VSetMeshIndexBuffer(mNDSQuadMesh, &indices[0], indices.size());
 }
 
@@ -241,10 +244,10 @@ void Level01::InitializeShaderResources()
 	{
 		mRenderer->VCreateShaderResource(&mExplorerShaderResource, &mAllocator);
 
-		void* cbExplorerData[] = { mCameraManager->GetCBufferPersp(), &mModel, mSkinnedMeshMatices };
-		size_t cbExplorerSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::Model), sizeof(mat4f) *  MAX_SKELETON_JOINTS};
+		void* cbExplorerData[] = { mCameraManager->GetCBufferPersp(), &mModel, mSkinnedMeshMatrices, nullptr };
+		size_t cbExplorerSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::Model), sizeof(mat4f) *  MAX_SKELETON_JOINTS, sizeof(vec4f)};
 
-		mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 3);
+		mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 4);
 	}
 
 	// PVL
@@ -424,7 +427,6 @@ void Level01::VUpdate(double milliseconds)
 	}
 
 	mCollisionManager->Update(milliseconds);
-	//ComputeGrid();
 }
 
 void Level01::VFixedUpdate(double milliseconds)
@@ -450,9 +452,11 @@ void Level01::VRender()
 	RenderStaticMeshes();
 
 #ifdef _DEBUG
+	if (mDebugColl)
 	RenderWallColliders(mExplorerShaderResource, mCameraManager, &mModel);
 #endif
-
+	
+	RenderDoors();
 	RenderExplorers();
 	RenderMinions();
 	RenderSpotLightVolumes();
@@ -470,8 +474,8 @@ void Level01::VRender()
 void Level01::RenderShadowMaps()
 {
 	mRenderer->SetViewport(0.0f, 0.0f, static_cast<float>(SHADOW_MAP_SIZE), static_cast<float>(SHADOW_MAP_SIZE), 0.0f, 1.0f);
-	mRenderer->VSetInputLayout(mApplication->mExplorerVertexShader);
-	mRenderer->VSetVertexShader(mApplication->mExplorerVertexShader);
+	mRenderer->VSetInputLayout(mApplication->mVSDefSingleMaterial);
+	mRenderer->VSetVertexShader(mApplication->mVSDefSingleMaterial);
 	mRenderer->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
 
 	// Identity here just to be compatible with shader.
@@ -541,9 +545,9 @@ void Level01::RenderStaticMeshes()
 	mRenderer->VClearContextTarget(mGBufferContext, 2, Colors::magentaAlpha.pCols);	// Color
 	mRenderer->VClearDepthStencil(mGBufferContext, 0, 1.0f, 0);					// Depth
 
-	mRenderer->VSetInputLayout(mApplication->mStaticMeshVertexShader);
-	mRenderer->VSetVertexShader(mApplication->mStaticMeshVertexShader);
-	mRenderer->VSetPixelShader(mApplication->mStaticMeshPixelShader);
+	mRenderer->VSetInputLayout(mApplication->mVSDefInstancedMaterial);
+	mRenderer->VSetVertexShader(mApplication->mVSDefInstancedMaterial);
+	mRenderer->VSetPixelShader(mApplication->mPSDefMaterial);
 
 	mRenderer->VUpdateShaderConstantBuffer(mStaticMeshShaderResource, mCameraManager->GetCBufferPersp(), 0);
 
@@ -567,11 +571,42 @@ void Level01::RenderStaticMeshes()
 	}
 }
 
+void Level01::RenderDoors()
+{
+	mRenderer->VSetInputLayout(mApplication->mVSDefSingleColor);
+	mRenderer->VSetVertexShader(mApplication->mVSDefSingleColor);
+	mRenderer->VSetPixelShader(mApplication->mPSDefColor);
+
+	vec4f color[1] = { Colors::yellow };
+
+	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
+	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, color, 3);
+	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 3, 2);
+
+	ModelCluster* model = nullptr;
+
+	for (Door& d : Factory<Door>())
+	{
+		if(!model)
+		{
+			model = d.mModel;
+			mRenderer->VBindMesh(model->mMesh);
+		}
+
+		mModel.world = d.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+		
+		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
+	}
+}
+
 void Level01::RenderExplorers()
 {
-	mRenderer->VSetInputLayout(mApplication->mSkinnedVertexShader);
-	mRenderer->VSetVertexShader(mApplication->mSkinnedVertexShader);
-	mRenderer->VSetPixelShader(mApplication->mExplorerPixelShader);
+	mRenderer->VSetInputLayout(mApplication->mVSDefSkinnedMaterial);
+	mRenderer->VSetVertexShader(mApplication->mVSDefSkinnedMaterial);
+	mRenderer->VSetPixelShader(mApplication->mPSDefMaterial);
 
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
@@ -582,8 +617,8 @@ void Level01::RenderExplorers()
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 
-		e.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatices);
-		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatices, 2);
+		e.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatrices);
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
 		
 		mRenderer->VBindMesh(e.mModel->mMesh);
@@ -600,9 +635,9 @@ void Level01::RenderSpotLightVolumes()
 
 	mRenderer->SetBlendState(mPLVShaderResource, 0, color, 0xffffffff);
 
-	mRenderer->VSetInputLayout(mApplication->mPLVolumeVertexShader);
-	mRenderer->VSetVertexShader(mApplication->mPLVolumeVertexShader);
-	mRenderer->VSetPixelShader(mApplication->mPLVolumePixelShader);
+	mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
+	mRenderer->VSetVertexShader(mApplication->mVSFwdSpotLightVolume);
+	mRenderer->VSetPixelShader(mApplication->mPSFwdSpotLightVolume);
 
 	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
@@ -646,23 +681,22 @@ void Level01::RenderFullScreenQuad()
 	mRenderer->VSetContextTarget();
 	mRenderer->VClearContextTarget(Colors::magenta.pCols);
 
-	mRenderer->VSetInputLayout(mApplication->mNDSQuadVertexShader);
-	mRenderer->VSetVertexShader(mApplication->mNDSQuadVertexShader);
-	mRenderer->VSetPixelShader(mApplication->mNDSQuadPixelShader);
+	mRenderer->VSetInputLayout(mApplication->mVSFwdFullScreenQuad);
+	mRenderer->VSetVertexShader(mApplication->mVSFwdFullScreenQuad);
+	mRenderer->VSetPixelShader(mApplication->mPSFwdDeferredOutput);
 
 	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 2, 0);		// Color
 	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 3, 1);		// Albedo
 	mRenderer->VSetPixelShaderDepthResourceView(mGBufferContext, 0, 2);	// Depth
 
-	mRenderer->VBindMesh(mNDSQuadMesh);
-	mRenderer->VDrawIndexed(0, mNDSQuadMesh->GetIndexCount());
+	mRenderer->GetDeviceContext()->Draw(3, 0);
 }
 
 void Level01::RenderMinions()
 {
-	mRenderer->VSetInputLayout (mApplication->mSkinnedVertexShader);
-	mRenderer->VSetVertexShader(mApplication->mSkinnedVertexShader);
-	mRenderer->VSetPixelShader (mApplication->mExplorerPixelShader);
+	mRenderer->VSetInputLayout (mApplication->mVSDefSkinnedMaterial);
+	mRenderer->VSetVertexShader(mApplication->mVSDefSkinnedMaterial);
+	mRenderer->VSetPixelShader (mApplication->mPSDefMaterial);
 
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
@@ -673,8 +707,8 @@ void Level01::RenderMinions()
 
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 
-		m.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatices);
-		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatices, 2);
+		m.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatrices);
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
 
 		mRenderer->VBindMesh(m.mModel->mMesh);
@@ -687,9 +721,9 @@ void Level01::RenderSprites()
 	mRenderer->VSetContextTarget();
 	auto currentTexture = -1;
 
-	mRenderer->VSetInputLayout(mApplication->mSpriteVertexShader);
-	mRenderer->VSetVertexShader(mApplication->mSpriteVertexShader);
-	mRenderer->VSetPixelShader(mApplication->mSpritePixelShader);
+	mRenderer->VSetInputLayout(mApplication->mVSFwdSprites);
+	mRenderer->VSetVertexShader(mApplication->mVSFwdSprites);
+	mRenderer->VSetPixelShader(mApplication->mPSFwd2DTexture);
 
 	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferScreenOrto(), 0);
 	mRenderer->VSetVertexShaderConstantBuffers(mSpritesShaderResource);
@@ -723,8 +757,8 @@ void Level01::RenderSprites()
 
 void Level01::RenderGrid()
 {
-	if (!mDebugGrid) return;
 #ifdef _DEBUG
+	if (!mDebugGrid) return;
 	for (auto i = 0; i < mAIManager->mGrid.mNumRows; i++)
 		for (auto j = 0; j < mAIManager->mGrid.mNumCols; j++)
 		{
@@ -774,9 +808,9 @@ void Level01::ComputeGrid()
 	mRenderer->SetViewport(0.0f, 0.0f, static_cast<float>(mLevel.extents.x*GRID_MAP_SCALE), static_cast<float>(mLevel.extents.y*GRID_MAP_SCALE), 0.0f, 1.0f);
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, Colors::whiteAlpha.pCols, 0xffffffff);
 	
-	mRenderer->VSetInputLayout(mApplication->mGridVertexShader);
-	mRenderer->VSetVertexShader(mApplication->mGridVertexShader);
-	mRenderer->VSetPixelShader(mApplication->mGridPixelShader);
+	mRenderer->VSetInputLayout(mApplication->mVSFwdInstancedColor);
+	mRenderer->VSetVertexShader(mApplication->mVSFwdInstancedColor);
+	mRenderer->VSetPixelShader(mApplication->mPSFwdColor);
 
 	CBuffer::ObjectType obj;
 	obj.color = vec4f(1, 1, 1, 1);
@@ -812,7 +846,7 @@ void Level01::ComputeGrid()
 	mDeviceContext->CopyResource(mOutputDataCPURead, mOutputData);
 
 	//Pass 1
-	mRenderer->VSetComputeShader(mApplication->mGridPass1ComputeShader);
+	mRenderer->VSetComputeShader(mApplication->mCSGridPass1);
 
 	mRenderer->VUpdateShaderConstantBuffer(mGridShaderResource, mCameraManager->GetCBufferFullLevelOrto(), 0);
 	mRenderer->VSetComputeShaderConstantBuffers(mGridShaderResource);
@@ -828,7 +862,7 @@ void Level01::ComputeGrid()
 	mDeviceContext->CSSetShaderResources(0, 3, mNullSRV);
 
 	//Pass 2
-	mRenderer->VSetComputeShader(mApplication->mGridPass2ComputeShader);
+	mRenderer->VSetComputeShader(mApplication->mCSGridPass2);
 
 	mDeviceContext->CopyResource(mSimpleSrcData, mOutputData);
 	mDeviceContext->CSSetShaderResources(0, 1, &mSimpleSrcDataSRV);			//Simple grid data

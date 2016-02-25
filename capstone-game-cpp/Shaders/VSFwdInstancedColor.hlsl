@@ -12,7 +12,7 @@ struct Pixel
 	float4 color		: COLOR;
 };
 
-cbuffer transform : register(b0)
+cbuffer camera : register(b0)
 {
 	matrix projection;
 	matrix view;
