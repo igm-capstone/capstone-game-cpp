@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "Behavior.h"
-#include <functional>
 
 class Condition : public Behavior
 {
@@ -12,7 +11,7 @@ public:
 		mOnCondition = callback;
 	}
 	
-	Condition();
+	Condition(std::string name = "Condition");
 
 
 	static BehaviorStatus Update(Behavior& self, void* data);

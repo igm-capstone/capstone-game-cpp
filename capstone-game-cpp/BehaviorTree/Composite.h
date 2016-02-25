@@ -4,6 +4,8 @@
 class Composite : public Behavior
 {
 public:
+	Composite(std::string name);
+
 	std::vector<Behavior*> mChildren;
 
 	void Add(Behavior& behavior);
@@ -13,8 +15,8 @@ template <class COMPOSITE>
 class MockComposite : public COMPOSITE
 {
 public:
-	MockComposite(class BehaviorTree& bt, size_t size)
-		: COMPOSITE(bt)
+	MockComposite(class BehaviorTree& bt, size_t size, std::string name = "Mock Composite")
+		: COMPOSITE(bt, name)
 	{
 		for (size_t i = 0; i<size; ++i)
 		{

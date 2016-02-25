@@ -52,7 +52,7 @@ class Behavior
 
 public:
 
-	Behavior();
+	Behavior(std::string name = "Behavior");
 	~Behavior();
 
 	void SetInitializeCallback(InitializeCallback callback)
@@ -96,6 +96,7 @@ public:
 	BehaviorStatus Tick(void* userData);
 
 protected:
+	std::string        mName;
 	BehaviorStatus     mStatus;
 	BehaviorObserver   mObserver;
 
@@ -115,7 +116,8 @@ struct MockBehavior : public Behavior
 	BehaviorStatus mTerminateStatus;
 
 	MockBehavior()
-		: mInitializeCalled(0)
+		: Behavior("Mock Behavior")
+		, mInitializeCalled(0)
 		, mTerminateCalled(0)
 		, mUpdateCalled(0)
 		, mReturnStatus(BehaviorStatus::Running)

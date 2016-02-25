@@ -4,7 +4,7 @@
 #include "Sequence.h"
 
 
-Selector::Selector(BehaviorTree& bt) : IterableComposite(bt, BehaviorStatus::Success)
+Selector::Selector(BehaviorTree& bt, std::string name) : IterableComposite(bt, BehaviorStatus::Success, name)
 {
 
 }
@@ -22,13 +22,13 @@ TEST(BehaviorTrees, Tick_PassThroughToSibling_ReturnTerminated)
 		bt.Start(selector);
 		bt.Tick();
 
-		CHECK_EQUAL(selector.GetStatus(), BehaviorStatus::Running);
+		CHECK_EQUAL(BehaviorStatus::Running, selector.GetStatus());
 		CHECK_EQUAL(0, selector[0].mTerminateCalled);
 
 		selector[0].mReturnStatus = status[i];
 		bt.Tick();
 
-		CHECK_EQUAL(selector.GetStatus(), status[i]);
+		CHECK_EQUAL(status[i], selector.GetStatus());
 		CHECK_EQUAL(1, selector[0].mTerminateCalled);
 	}
 }
@@ -119,6 +119,8 @@ TEST(BehaviorTrees, Tick_SequenceParentSelectorChildren_SecondFailsSequenceFails
 	bt.Tick();
 
 	CHECK_EQUAL(BehaviorStatus::Running, sequence.GetStatus());
+	CHECK_EQUAL(BehaviorStatus::Success, selector1.GetStatus());
+	CHECK_EQUAL(BehaviorStatus::Running, selector2.GetStatus());
 	CHECK_EQUAL(1, selector1[0].mTerminateCalled);
 	CHECK_EQUAL(0, selector1[1].mInitializeCalled);
 	CHECK_EQUAL(1, selector2[0].mInitializeCalled);
@@ -128,6 +130,8 @@ TEST(BehaviorTrees, Tick_SequenceParentSelectorChildren_SecondFailsSequenceFails
 	bt.Tick();
 
 	CHECK_EQUAL(BehaviorStatus::Failure, sequence.GetStatus());
+	CHECK_EQUAL(BehaviorStatus::Success, selector1.GetStatus());
+	CHECK_EQUAL(BehaviorStatus::Failure, selector2.GetStatus());
 	CHECK_EQUAL(1, selector1[0].mTerminateCalled);
 	CHECK_EQUAL(1, selector2[0].mTerminateCalled);
 	CHECK_EQUAL(1, selector2[1].mTerminateCalled);

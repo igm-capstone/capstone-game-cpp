@@ -4,7 +4,7 @@
 class IterableComposite : public Composite
 {
 public:
-	IterableComposite(BehaviorTree& bt, BehaviorStatus breakStatus);
+	IterableComposite(BehaviorTree& bt, BehaviorStatus breakStatus, std::string name = "Iterable Composite");
 
 protected:
 	class BehaviorTree* mBehaviorTree;

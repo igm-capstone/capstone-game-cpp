@@ -2,7 +2,8 @@
 #include "Behavior.h"
 #include "BehaviorTree.h"
 
-Behavior::Behavior(): 
+Behavior::Behavior(std::string name):
+	mName(name),
 	mStatus(BehaviorStatus::Invalid), 
 	mObserver(BehaviorObserver::Default()),
 	mOnUpdate(nullptr), 
@@ -18,10 +19,10 @@ Behavior::~Behavior()
 
 BehaviorStatus Behavior::Tick(void* userData)
 {
-	if (mOnFlush && mStatus != BehaviorStatus::Invalid)
-	{
-		mOnFlush(*this, userData);
-	}
+	//if (mOnFlush && mStatus != BehaviorStatus::Invalid)
+	//{
+	//	mOnFlush(*this, userData);
+	//}
 
 	if (mOnInitialize && mStatus == BehaviorStatus::Invalid)
 	{
