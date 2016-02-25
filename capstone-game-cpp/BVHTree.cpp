@@ -3,6 +3,7 @@
 #include "SceneObjects/StaticCollider.h"
 #include "SceneObjects/Region.h"
 #include <SceneObjects/BaseSceneObject.h>
+#include <Components/Skill.h>
 #include <Components/ColliderComponent.h>
 #include <Rig3D/Intersection.h>
 #include <Colors.h>
@@ -14,7 +15,7 @@
 #define WALL_PARENT_LAYER_INDEX		1
 #define EXPLORER_PARENT_LAYER_INDEX 1
 #define REGION_PARENT_LAYER_INDEX   1
-
+#define SKILL_PARENT_LAYER_INDEX	1
 #define DRAW_DEBUG 1
 
 #if (DRAW_DEBUG == 1)
@@ -133,15 +134,32 @@ void BVHTree::Update()
 #endif
 	mLayerStartIndex.erase(COLLISION_LAYER_EXPLORER);
 	mLayerStartIndex.erase(COLLISION_LAYER_MINION);
+	mLayerStartIndex.erase(COLLISION_LAYER_SKILL);
 
 	mNodes.erase(std::remove_if(mNodes.begin(), mNodes.end(), [](const BVHNode& other)
 	{
-		return other.object->mLayer == COLLISION_LAYER_EXPLORER || other.object->mLayer == COLLISION_LAYER_MINION;
+		if (other.object->mLayer == COLLISION_LAYER_SKILL)
+		{
+			TRACE_LOG("REMOVING SKILL " << other.object);
+		}
+
+		return 
+			other.object->mLayer == COLLISION_LAYER_EXPLORER || 
+			other.object->mLayer == COLLISION_LAYER_MINION ||
+			other.object->mLayer == COLLISION_LAYER_SKILL;
 	}), mNodes.end());
 
 	for (Explorer& explorer : Factory<Explorer>())
 	{
 		AddNodeRecursively(explorer.mCollider, EXPLORER_PARENT_LAYER_INDEX, 1, 0, 0, SphereComponentTest);
+	}
+
+	for (Skill& skill : Factory<Skill>())
+	{
+		if (skill.mColliderComponent && skill.mColliderComponent->mIsActive)
+		{
+			AddNodeRecursively(skill.mColliderComponent, SKILL_PARENT_LAYER_INDEX, 1, 0, 0, SphereComponentTest);
+		}
 	}
 }
 
@@ -195,6 +213,11 @@ void BVHTree::AddNode(BaseColliderComponent* pColliderComponent, const int& pare
 	if (mLayerStartIndex.find(pColliderComponent->mLayer) == mLayerStartIndex.end())
 	{
 		mLayerStartIndex.insert({ pColliderComponent->mLayer , mNodes.size() });
+	}
+
+	if (pColliderComponent->mLayer == COLLISION_LAYER_SKILL)
+	{
+		TRACE_LOG("ADDING SKILL TO " << parentIndex);
 	}
 
 	mNodes.push_back(BVHNode());

@@ -11,7 +11,6 @@ public:
 	class ExplorerController*			mController;
 	class AnimationController*			mAnimationController;
 	class SphereColliderComponent*		mCollider;
-	class BaseColliderComponent*		mMeleeCollider;	// Not sure where this will be
 	class Skill**						mSkills;
 	class Health*						mHealth;
 

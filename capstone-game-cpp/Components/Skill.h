@@ -26,6 +26,8 @@ class Skill : public BaseComponent
 	EXPOSE_CALLBACK_3(Use, float, BaseSceneObject*, vec3f)
 
 public:
+	class BaseColliderComponent* mColliderComponent;	// Not all skills will use this, but enough will to give this class a pointer.
+	vec3f mColliderOffset;
 	float mCoolDown;
 	float mDuration;
 	float mLastUsed;

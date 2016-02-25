@@ -12,35 +12,35 @@
 
 struct ExplorerInventory
 {
-	BaseColliderComponent* meleeCollider;
 	Skill* skills[MAX_EXPLORER_SKILLS];
 
 } gExplorerInventory[MAX_EXPLORERS];
 
 void InitializeExplorerInventory()
 {
-	gExplorerInventory[0].meleeCollider = Factory<OrientedBoxColliderComponent>::Create();
-	gExplorerInventory[1].meleeCollider = Factory<SphereColliderComponent>::Create();
-	gExplorerInventory[2].meleeCollider = Factory<SphereColliderComponent>::Create();
-	gExplorerInventory[3].meleeCollider = Factory<SphereColliderComponent>::Create();
-
+	// Everyone gets the same thing for now, until all skills are in. 
+	// Open to ideas on how to init this better. This method will get long :(
 	for (int i = 0; i < MAX_EXPLORERS; i++)
 	{
-		gExplorerInventory[i].meleeCollider->mIsActive	= false;
-		gExplorerInventory[i].meleeCollider->mIsTrigger = true;
-		gExplorerInventory[i].meleeCollider->mIsDynamic = false;
-		gExplorerInventory[i].meleeCollider->mLayer		= COLLISION_LAYER_SKILL;
-
 		auto sprint = Factory<Skill>::Create();
 		sprint->SetBinding(SkillBinding().Set(KEYCODE_A));
 		sprint->Setup(2, 1, Explorer::DoSprint);
 		sprint->mIsActive = false;
 		gExplorerInventory[i].skills[0] = sprint;
 
+		SphereColliderComponent* pSphereComponent = Factory<SphereColliderComponent>::Create();
+		pSphereComponent->mCollider.radius = 2.5f;
+		pSphereComponent->mIsActive = false;
+		pSphereComponent->mIsTrigger = true;
+		pSphereComponent->mIsDynamic = false;
+		pSphereComponent->mLayer = COLLISION_LAYER_SKILL;
+
 		auto melee = Factory<Skill>::Create();
 		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
 		melee->Setup(2, 1, Explorer::DoMelee);
 		melee->mIsActive = false;
+		melee->mColliderOffset = { 0.0f, 0.0f, 2.75f };
+		melee->mColliderComponent = pSphereComponent;
 		gExplorerInventory[i].skills[1] = melee;
 	}
 }
@@ -95,6 +95,8 @@ Explorer::Explorer()
 
 void Explorer::Spawn(vec3f pos, int UUID)
 {
+	static int explorerCount = 0;
+
 	mTransform->SetPosition(pos);		
 
 	mCollider->mIsActive = true;
@@ -103,14 +105,15 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
 
-	mMeleeCollider	= gExplorerInventory[UUID].meleeCollider;
-	mMeleeCollider->mSceneObject = this;
-
-	mSkills			= &gExplorerInventory[UUID].skills[0];
+	mSkills	= &gExplorerInventory[explorerCount++].skills[0];
 	for (int i = 0; i < MAX_EXPLORER_SKILLS; i++)
 	{
 		mSkills[i]->mSceneObject = this;
 		mSkills[i]->mIsActive = true;
+		if (mSkills[i]->mColliderComponent)
+		{
+			mSkills[i]->mColliderComponent->mSceneObject = this;
+		}
 	}
 
 	mAnimationController->SetState(ANIM_STATE_IDLE);
@@ -122,6 +125,9 @@ void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 	e->mTransform->SetPosition(newPos);
 	e->mTransform->SetRotation(newRot);
 	e->mCollider->mCollider.origin = newPos;
+
+	SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(e->mSkills[1]->mColliderComponent);
+	pSphereComponent->mCollider.origin = e->mTransform->GetForward() + e->mSkills[1]->mColliderOffset;
 		
 	if (e->mNetworkID->mHasAuthority) {
 		e->mCameraManager->ChangeLookAtTo(newPos);
@@ -188,22 +194,19 @@ void Explorer::DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* t
 
 void Explorer::DoMelee(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
 {
-	TRACE_LOG("DoMelee " << obj);
-	AnimationController* pAnimationController = reinterpret_cast<Explorer*>(obj)->mAnimationController;
-	pAnimationController->SetState(ANIM_STATE_MELEE);
-	pAnimationController->Resume();
+	auto e = reinterpret_cast<Explorer*>(obj);
+	e->mController->Melee();
 }
 
 void Explorer::OnMeleeStart(void* obj)
 {
-	TRACE_LOG("ANIM START");
+	reinterpret_cast<Explorer*>(obj)->mSkills[1]->mColliderComponent->mIsActive = true;
 }
 
 void Explorer::OnMeleeStop(void* obj)
 {
-	TRACE_LOG("ANIM STOP");
+	reinterpret_cast<Explorer*>(obj)->mSkills[1]->mColliderComponent->mIsActive = false;
 
-	AnimationController* pAnimationController = reinterpret_cast<Explorer*>(obj)->mAnimationController;
-	pAnimationController->SetState(ANIM_STATE_WALK);
-	pAnimationController->Resume();
+	auto e = reinterpret_cast<Explorer*>(obj);
+	e->mController->PlayStateAnimation(ANIM_STATE_IDLE);
 }

@@ -3,7 +3,6 @@
 #include <Mathf.h>
 #include <Colors.h>
 #include <SceneObjects/Explorer.h>
-#include <Components/AnimationController.h>
 #include <Components/AnimationUtility.h>
 
 using namespace cliqCity::graphicsMath;
@@ -108,12 +107,12 @@ bool ExplorerController::Update(double milliseconds)
 
 	if (hasMoved /*|| hasRotated*/)
 	{
-		PlayWalkAnimation();
+		PlayStateAnimation(ANIM_STATE_WALK);
 		OnMove(pos, rot);
 	}
 	else
 	{
-		PauseWalkAnimation();
+		PauseStateAnimation(ANIM_STATE_WALK);
 	}
 
 	UpdateInteractWill();
@@ -130,7 +129,7 @@ void ExplorerController::Sprint(float duration)
 
 void ExplorerController::Melee()
 {
-	
+	PlayStateAnimation(ANIM_STATE_MELEE);
 }
 
 void ExplorerController::SetBaseRotation(const float& x, const float& y, const float& z)
@@ -143,24 +142,16 @@ bool ExplorerController::CanMove()
 	return mAnimationController->GetState() != ANIM_STATE_MELEE;
 }
 
-void ExplorerController::PlayWalkAnimation()
+void ExplorerController::PlayStateAnimation(AnimationControllerState state)
 {
 	AnimationController* pAnimationController = reinterpret_cast<Explorer*>(mSceneObject)->mAnimationController;
-	if (pAnimationController->GetState() != ANIM_STATE_WALK)
-	{
-		bool c = CanMove();
-		TRACE_LOG("PlayWalkAnimation " << this);
-	}
-	pAnimationController->SetState(ANIM_STATE_WALK);
-
+	pAnimationController->SetState(state);
 	pAnimationController->Resume();
 }
-
-void ExplorerController::PauseWalkAnimation()
+void ExplorerController::PauseStateAnimation(AnimationControllerState state)
 {
 	AnimationController* pAnimationController = reinterpret_cast<Explorer*>(mSceneObject)->mAnimationController;
-
-	if (pAnimationController->GetState() == ANIM_STATE_WALK)
+	if (pAnimationController->GetState() == state)
 	{
 		pAnimationController->Pause();
 	}

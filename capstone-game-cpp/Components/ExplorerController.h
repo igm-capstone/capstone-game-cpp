@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "BaseComponent.h"
 #include <ScareTacticsApplication.h>
+#include <Components/AnimationController.h>
 
 class ExplorerController : public BaseComponent
 {
@@ -21,14 +22,12 @@ class ExplorerController : public BaseComponent
 	vec3f mCurrentSpeed;
 
 	void UpdateInteractWill();
-
+	
 	// delta time in seconds
 	bool Move(float dt, vec3f& pos);
 	bool Rotate(float dt, vec3f& pos, quatf& rot);
-	
 	bool CanMove();
-	void PlayWalkAnimation();
-	void PauseWalkAnimation();
+
 public:
 	class AnimationController* mAnimationController;
 	float mSpeed;
@@ -38,6 +37,9 @@ public:
 	void Sprint(float duration);
 	void Melee();
 	void SetBaseRotation(const float& x, const float& y, const float& z);
+
+	void PlayStateAnimation(AnimationControllerState state);
+	void PauseStateAnimation(AnimationControllerState state);
 
 	EXPOSE_CALLBACK_2(Move, vec3f, quatf)
 	EXPOSE_CALLBACK_0(BeginInteract)

@@ -62,7 +62,7 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 	// Explorer / Domination Point
 	
 	// The most domination point triggers we can have is 4. An explorer can only be overlapping one domination point at a time.
-	frameCollisions.reserve(MAX_EXPLORERS);
+	frameCollisions.reserve(MAX_EXPLORERS + MAX_EXPLORER_SKILLS);
 
 	for (Explorer& e : Factory<Explorer>())
 	{
@@ -78,6 +78,12 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 			}
 		}
 	}
+
+	// Explorer / Skill
+
+
+
+	// Minion / Skill
 }
 
 void CollisionManager::DispatchTriggers(std::vector<Collision>& frameCollisions)
