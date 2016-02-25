@@ -9,7 +9,7 @@ IterableComposite::IterableComposite(BehaviorTree& bt, BehaviorStatus breakStatu
 {
 	SetInitializeCallback(&OnInitialize);
 	SetUpdateCallback(&OnUpdate);
-	SetFlushCallback(&OnFlush);
+	SetResetCallback(&OnReset);
 }
 
 void IterableComposite::OnInitialize(Behavior& bh, void* data)
@@ -20,15 +20,18 @@ void IterableComposite::OnInitialize(Behavior& bh, void* data)
 	self.mBehaviorTree->Start(**self.mCurrent, { &OnChildComplete, &self, data });
 }
 
-void IterableComposite::OnFlush(Behavior& bh, void* data)
+void IterableComposite::OnReset(Behavior& bh, void* data)
 {
 	auto& self = static_cast<IterableComposite&>(bh);
 
-	if (self.mStatus != BehaviorStatus::Running)
-	{
-		self.mCurrent = self.mChildren.begin();
-		self.mBehaviorTree->Start(**self.mCurrent, { &OnChildComplete, &self, data });
-	}
+	self.mStatus = BehaviorStatus::Invalid;
+	//self.mCurrent = self.mChildren.begin();
+	//
+	//if (self.mStatus != BehaviorStatus::Running)
+	//{
+	//	self.mBehaviorTree->Start(**self.mCurrent, { &OnChildComplete, &self, data });
+	//}
+
 }
 
 void IterableComposite::OnChildComplete(Behavior& bh, void* data, BehaviorStatus status)

@@ -14,9 +14,10 @@ public:
 	class BehaviorTree* mBehaviorTree;
 
 	bool Update(double milliseconds);
-
 	// behavior tree code
 	vec3f mTarget;
+	static bool IsExplorerInRange(class Behavior& bh, void* data);
+	static enum class BehaviorStatus MoveTowardsExplorer(class Behavior& bh, void* data);
 	static enum class BehaviorStatus FindTarget(class Behavior& bh, void* data);
 	static enum class BehaviorStatus MoveTowardsTarget(class Behavior& bh, void* data);
 

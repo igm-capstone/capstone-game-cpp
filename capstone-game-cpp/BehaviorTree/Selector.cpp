@@ -6,7 +6,14 @@
 
 Selector::Selector(BehaviorTree& bt, std::string name) : IterableComposite(bt, BehaviorStatus::Success, name)
 {
-	// set state to invalid????
+	//SetResetCallback(&OnReset);
+}
+
+void Selector::OnReset(Behavior& bh, void* data)
+{
+	auto& self = static_cast<Selector&>(bh);
+
+	self.mStatus = BehaviorStatus::Invalid;
 }
 
 typedef MockComposite<Selector> MockSelector;

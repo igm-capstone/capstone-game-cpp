@@ -5,28 +5,37 @@
 #include <AIManager.h>
 #include <Mathf.h>
 #include <PrioritySelector.h>
-
-//Sequence* s;
+#include <BehaviorTree/Condition.h>
 
 MinionController::MinionController():
 	mAI(Singleton<AIManager>::SharedInstance())
 {
 	mBehaviorTree = new BehaviorTree();
-	auto baseSelector = new PrioritySelector(*mBehaviorTree);
 
-	auto sequence = new Sequence(*mBehaviorTree);
-	//s = sequence;
+	auto baseSelector = new PrioritySelector(*mBehaviorTree, "(???) Priority Selector");
+	auto followExplorerSequence = new Sequence(*mBehaviorTree, "(-->) Follow Explorer");
+	auto isExplorerInRange = new Condition("(?) Is Explorer in Range");
+	auto moveTowardsExplorer = new Behavior("(!) Move Towards Explorer");
+	auto patrolSequence = new Sequence(*mBehaviorTree, "(-->) Patrol");
+	auto findTarget = new Behavior("(!) Find Patrol Target");
+	auto moveTowardsTarget = new Behavior("(!) Move Towards Target");
 
 
-	auto findTarget = new Behavior();
+	isExplorerInRange->SetConditionCallback(&IsExplorerInRange);
+	moveTowardsExplorer->SetUpdateCallback(&MoveTowardsExplorer);
 	findTarget->SetUpdateCallback(&FindTarget);
-	sequence->Add(*findTarget);
+	moveTowardsTarget->SetUpdateCallback(&MoveTowardsTarget);
 
-	auto follow = new Behavior();
-	follow->SetUpdateCallback(&MoveTowardsTarget);
-	sequence->Add(*follow);
 
-	baseSelector->Add(*sequence);
+	baseSelector->Add(*followExplorerSequence);
+	baseSelector->Add(*patrolSequence);
+
+	followExplorerSequence->Add(*isExplorerInRange);
+	followExplorerSequence->Add(*moveTowardsExplorer);
+
+	patrolSequence->Add(*findTarget);
+	patrolSequence->Add(*moveTowardsTarget);
+
 
 	mBehaviorTree->Start(*baseSelector);
 }
@@ -41,11 +50,51 @@ MinionController::~MinionController()
 bool MinionController::Update(double milliseconds)
 {
 	if (!mIsActive) return false;
-	//if (mBehaviorTree->mBehaviors.empty())
-	//mBehaviorTree->Start(*s);
+	
 	mBehaviorTree->Tick(this);
 	
 	return true;
+}
+
+
+bool MinionController::IsExplorerInRange(Behavior& bh, void* data)
+{
+	auto& self = *static_cast<MinionController*>(data);
+	
+	auto node = self.mAI.GetNodeAt(self.mSceneObject->mTransform->GetPosition());
+	auto nodeState = node->GetState();
+
+	return nodeState == Node::PATH;
+}
+
+BehaviorStatus MinionController::MoveTowardsExplorer(Behavior& bh, void* data)
+{
+	auto& self = *static_cast<MinionController*>(data);
+
+	vec3f myPos = self.mSceneObject->mTransform->GetPosition();
+	auto myNode = self.mAI.GetNodeAt(myPos);
+
+	auto targetConn = self.mAI.mGrid.GetBestFitConnection(myNode);
+	vec3f direction = targetConn.to->worldPos - myPos;
+	
+	float distanceSquared = magnitudeSquared(direction);
+
+	if (distanceSquared < .25)
+	{
+		return BehaviorStatus::Success;
+	}
+
+	auto timer = Singleton<Engine>::SharedInstance().GetTimer();
+
+	// speed per second
+	vec3f targetVelocity = normalize(direction) * 0.01f * timer->GetDeltaTime();
+
+	// delta space for the current frame
+	vec3f ds = targetVelocity;
+
+	self.OnMove(myPos + ds);
+
+	return BehaviorStatus::Success;
 }
 
 BehaviorStatus MinionController::FindTarget(Behavior& bh, void* data)

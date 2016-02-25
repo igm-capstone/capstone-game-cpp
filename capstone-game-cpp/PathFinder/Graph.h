@@ -90,6 +90,25 @@ namespace PathFinder
 			return connections;
 		}
 
+		Connection<T> GetBestFitConnection(T* node)
+		{
+			Connection<T> result;
+			result.cost = FLT_MAX;
+
+			auto connections = GetNodeConnections(node);
+			for (auto& connection : *connections)
+			{
+				if (connection.cost < result.cost)
+				{
+					result = connection;
+				}
+			}
+
+			delete connections;
+
+			return result;
+		}
+
 		void CreateConnectionIfValid(vector<Connection<T>>* list, T* nodeFrom, T* nodeTo)
 		{
 			if (nodeTo->weight < FLT_MAX)

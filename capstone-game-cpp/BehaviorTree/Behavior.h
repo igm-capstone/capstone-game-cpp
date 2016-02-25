@@ -60,7 +60,7 @@ public:
 		mOnInitialize = callback;
 	}
 
-	void SetFlushCallback(ResetCallback callback)
+	void SetResetCallback(ResetCallback callback)
 	{
 		mOnReset = callback;
 	}
