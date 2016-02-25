@@ -6,7 +6,7 @@
 
 Selector::Selector(BehaviorTree& bt) : IterableComposite(bt, BehaviorStatus::Success)
 {
-
+	// set state to invalid????
 }
 
 typedef MockComposite<Selector> MockSelector;

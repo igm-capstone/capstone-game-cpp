@@ -60,6 +60,7 @@
     <ClCompile Include="SceneObjects\Region.cpp" />
     <ClCompile Include="BehaviorTree\Selector.cpp" />
     <ClCompile Include="BehaviorTree\IterableComposite.cpp" />
+    <ClCompile Include="PrioritySelector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -122,6 +123,7 @@
     <ClInclude Include="SceneObjects\Region.h" />
     <ClInclude Include="BehaviorTree\Selector.h" />
     <ClInclude Include="BehaviorTree\IterableComposite.h" />
+    <ClInclude Include="PrioritySelector.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\BillboardPixelShader.hlsl">

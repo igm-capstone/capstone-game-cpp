@@ -124,6 +124,7 @@
     <ClCompile Include="DebugRender.cpp" />
     <ClCompile Include="Factory.cpp" />
     <ClCompile Include="ModelManager.cpp" />
+    <ClCompile Include="PrioritySelector.cpp" />
     <ClCompile Include="SceneObjects\Region.cpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="ScareTacticsApplication.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="fmodwrap.h" />
     <ClInclude Include="Mathf.h" />
     <ClInclude Include="ModelManager.h" />
+    <ClInclude Include="PrioritySelector.h" />
     <ClInclude Include="SceneObjects\Region.h" />
     <ClInclude Include="SceneObjects\Ghost.h" />
     <ClInclude Include="Components\Skill.h" />

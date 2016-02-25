@@ -33,7 +33,7 @@ namespace std
 class Behavior;
 typedef void(*ObserverCallback)(Behavior&, void*, BehaviorStatus);
 typedef BehaviorStatus(*UpdateCallback)(Behavior&, void*);
-typedef void(*FlushCallback)(Behavior&, void*);
+typedef void(*ResetCallback)(Behavior&, void*);
 typedef void(*InitializeCallback)(Behavior&, void*);
 typedef void(*TerminateCallback)(Behavior&, void*, BehaviorStatus);
 
@@ -60,9 +60,9 @@ public:
 		mOnInitialize = callback;
 	}
 
-	void SetFlushCallback(FlushCallback callback)
+	void SetFlushCallback(ResetCallback callback)
 	{
-		mOnFlush = callback;
+		mOnReset = callback;
 	}
 
 	void SetUpdateCallback(UpdateCallback callback)
@@ -94,13 +94,14 @@ public:
 	}
 
 	BehaviorStatus Tick(void* userData);
+	void Reset(void* userData);
 
 protected:
 	BehaviorStatus     mStatus;
 	BehaviorObserver   mObserver;
 
 	UpdateCallback     mOnUpdate;
-	FlushCallback      mOnFlush;
+	ResetCallback      mOnReset;
 	InitializeCallback mOnInitialize;
 	TerminateCallback  mOnTerminate;
 };

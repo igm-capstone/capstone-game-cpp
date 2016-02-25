@@ -6,7 +6,7 @@ Behavior::Behavior():
 	mStatus(BehaviorStatus::Invalid), 
 	mObserver(BehaviorObserver::Default()),
 	mOnUpdate(nullptr), 
-	mOnFlush(nullptr), 
+	mOnReset(nullptr), 
 	mOnInitialize(nullptr), 
 	mOnTerminate(nullptr)
 {
@@ -18,10 +18,7 @@ Behavior::~Behavior()
 
 BehaviorStatus Behavior::Tick(void* userData)
 {
-	if (mOnFlush && mStatus != BehaviorStatus::Invalid)
-	{
-		mOnFlush(*this, userData);
-	}
+
 
 	if (mOnInitialize && mStatus == BehaviorStatus::Invalid)
 	{
@@ -39,6 +36,14 @@ BehaviorStatus Behavior::Tick(void* userData)
 	}
 
 	return mStatus;
+}
+
+void Behavior::Reset(void* data)
+{
+	if (mOnReset && mStatus != BehaviorStatus::Invalid)
+	{
+		mOnReset(*this, data);
+	}
 }
 
 TEST(BehaviorTrees, TaskInitialize)

@@ -3,11 +3,16 @@
 #include <BehaviorTree/BehaviorTree.h>
 #include <BehaviorTree/Sequence.h>
 #include <Mathf.h>
+#include <PrioritySelector.h>
 
 MinionController::MinionController()
 {
 	mBehaviorTree = new BehaviorTree();
+	auto baseSelector = new PrioritySelector(*mBehaviorTree);
+
 	auto sequence = new Sequence(*mBehaviorTree);
+
+
 
 	auto findTarget = new Behavior();
 	findTarget->SetUpdateCallback(&FindTarget);
@@ -17,7 +22,9 @@ MinionController::MinionController()
 	follow->SetUpdateCallback(&MoveTowardsTarget);
 	sequence->Add(*follow);
 
-	mBehaviorTree->Start(*sequence);
+	baseSelector->Add(*sequence);
+
+	mBehaviorTree->Start(*baseSelector);
 }
 
 
