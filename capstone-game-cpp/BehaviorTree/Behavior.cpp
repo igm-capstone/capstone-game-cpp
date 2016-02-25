@@ -2,7 +2,8 @@
 #include "Behavior.h"
 #include "BehaviorTree.h"
 
-Behavior::Behavior(): 
+Behavior::Behavior(std::string name):
+	mName(name),
 	mStatus(BehaviorStatus::Invalid), 
 	mObserver(BehaviorObserver::Default()),
 	mOnUpdate(nullptr), 

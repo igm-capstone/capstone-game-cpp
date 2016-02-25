@@ -3,7 +3,7 @@
 #include "BehaviorTree.h"
 #include "Selector.h"
 
-Sequence::Sequence(BehaviorTree& bt) : IterableComposite(bt, BehaviorStatus::Failure)
+Sequence::Sequence(BehaviorTree& bt, std::string name) : IterableComposite(bt, BehaviorStatus::Failure, name)
 {
 }
 
@@ -87,14 +87,14 @@ TEST(BehaviorTrees, Tick_ResetSequenceAfterSuccess_ReturnSuccess)
 		seq[1].mReturnStatus = BehaviorStatus::Running;
 		bt.Tick();
 
-		CHECK_EQUAL(seq.GetStatus(), BehaviorStatus::Running);
+		CHECK_EQUAL(BehaviorStatus::Running, seq.GetStatus());
 		CHECK_EQUAL(i + 1, seq[0].mTerminateCalled);
 		CHECK_EQUAL(1, seq[1].mInitializeCalled);
 
 		seq[1].mReturnStatus = BehaviorStatus::Success;
 		bt.Tick();
 
-		CHECK_EQUAL(seq.GetStatus(), BehaviorStatus::Success);
+		CHECK_EQUAL(BehaviorStatus::Success, seq.GetStatus());
 		CHECK_EQUAL(i + 1, seq[0].mTerminateCalled);
 		CHECK_EQUAL(i + 1, seq[1].mTerminateCalled);
 	}

@@ -4,5 +4,5 @@
 class Sequence : public IterableComposite
 {
 public:
-	Sequence(BehaviorTree& bt);
+	Sequence(BehaviorTree& bt, std::string name = "Sequence");
 };

@@ -1,6 +1,5 @@
 #pragma once
 #include "BaseComponent.h"
-#include <BehaviorTree/BehaviorTree.h>
 
 class MinionController : public BaseComponent
 {
@@ -11,14 +10,15 @@ class MinionController : public BaseComponent
 
 public:
 	float mSpeed;
-	BehaviorTree* mBehaviorTree;
+	class AIManager& mAI;
+	class BehaviorTree* mBehaviorTree;
 
 	bool Update(double milliseconds);
 
 	// behavior tree code
 	vec3f mTarget;
-	static BehaviorStatus FindTarget(Behavior& bh, void* data);
-	static BehaviorStatus MoveTowardsTarget(Behavior& bh, void* data);
+	static enum class BehaviorStatus FindTarget(class Behavior& bh, void* data);
+	static enum class BehaviorStatus MoveTowardsTarget(class Behavior& bh, void* data);
 
 	EXPOSE_CALLBACK_1(Move, vec3f)
 };

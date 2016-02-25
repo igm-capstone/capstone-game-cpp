@@ -4,7 +4,7 @@
 #include "BehaviorTree.h"
 
 
-Condition::Condition()
+Condition::Condition(std::string name): Behavior(name)
 {
 	SetUpdateCallback(&Update);
 }
