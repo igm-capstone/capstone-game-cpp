@@ -52,6 +52,8 @@
     <ClCompile Include="BVHTree.cpp" />
     <ClCompile Include="DebugRender.cpp" />
     <ClCompile Include="SceneObjects\Region.cpp" />
+    <ClCompile Include="BehaviorTree\Selector.cpp" />
+    <ClCompile Include="BehaviorTree\IterableComposite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -113,6 +115,8 @@
     <ClInclude Include="DebugRender.h" />
     <ClInclude Include="SceneObjects\Region.h" />
     <ClInclude Include="SceneObjects\Door.h" />
+    <ClInclude Include="BehaviorTree\Selector.h" />
+    <ClInclude Include="BehaviorTree\IterableComposite.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
@@ -148,6 +152,12 @@
     <ClCompile Include="SceneObjects\BaseSceneObject.cpp" />
     <ClCompile Include="SceneObjects\Explorer.cpp" />
     <ClCompile Include="SceneObjects\Ghost.cpp" />
+    <ClCompile Include="BehaviorTree\Behavior.cpp" />
+    <ClCompile Include="BehaviorTree\BehaviorTree.cpp" />
+    <ClCompile Include="BehaviorTree\Composite.cpp" />
+    <ClCompile Include="BehaviorTree\Condition.cpp" />
+    <ClCompile Include="BehaviorTree\Sequence.cpp" />
+    <ClCompile Include="BehaviorTree\TestSuite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -207,6 +217,12 @@
     <ClInclude Include="SceneObjects\StaticCollider.h" />
     <ClInclude Include="SceneObjects\StaticMesh.h" />
     <ClInclude Include="ModelManager.h" />
+    <ClInclude Include="BehaviorTree\Behavior.h" />
+    <ClInclude Include="BehaviorTree\BehaviorTree.h" />
+    <ClInclude Include="BehaviorTree\Composite.h" />
+    <ClInclude Include="BehaviorTree\Condition.h" />
+    <ClInclude Include="BehaviorTree\Sequence.h" />
+    <ClInclude Include="BehaviorTree\TestSuite.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="External\fmodstudioL.ref" />

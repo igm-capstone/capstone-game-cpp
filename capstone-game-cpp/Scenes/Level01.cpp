@@ -20,6 +20,7 @@
 #include <Components/GhostController.h>
 #include <SceneObjects/Ghost.h>
 #include <SceneObjects/StaticMesh.h>
+#include <Components/MinionController.h>
 #include <DebugRender.h>
 #include <SceneObjects/Door.h>
 
@@ -389,6 +390,11 @@ void Level01::VUpdate(double milliseconds)
 	for (ExplorerController& ec : Factory<ExplorerController>())
 	{
 		ec.Update(milliseconds);
+	}
+
+	for (auto& mc : Factory<MinionController>())
+	{
+		mc.Update(milliseconds);
 	}
 
 	for (auto& gc : Factory<GhostController>())
