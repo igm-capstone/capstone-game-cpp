@@ -113,7 +113,11 @@ void BVHTree::Update()
 	for (Explorer& explorer : Factory<Explorer>())
 	{
 		AddNodeRecursively(explorer.mCollider, EXPLORER_PARENT_LAYER_INDEX, 1, 0, 0);
-		AddNodeRecursively(explorer.mMeleeColliderComponent.asBaseColliderComponent, SKILL_PARENT_LAYER_INDEX, 1, 0, 0);
+
+		if (explorer.mMeleeColliderComponent.asBaseColliderComponent->mIsActive)
+		{
+			AddNodeRecursively(explorer.mMeleeColliderComponent.asBaseColliderComponent, SKILL_PARENT_LAYER_INDEX, 1, 0, 0);
+		}
 	}
 }
 
