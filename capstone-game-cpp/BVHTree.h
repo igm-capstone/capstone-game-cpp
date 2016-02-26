@@ -2,8 +2,6 @@
 #include <SceneObjects/BaseSceneObject.h>
 #include <Components/ColliderComponent.h>
 
-typedef int(*IntersectionTest)(BaseColliderComponent*, OrientedBoxColliderComponent*);
-
 struct BVHNode
 {
 	class BaseColliderComponent*	object;
@@ -40,7 +38,7 @@ public:
 	void BuildBoundingVolumeHierarchy();
 
 	void AddNode(BaseColliderComponent* pColliderComponent, const int& parentIndex, const int& depth);
-	void AddNodeRecursively(class BaseColliderComponent* pColliderComponent, const int& destLayerIndex, const int& layerIndex, const int& parentIndex, const int& depth, IntersectionTest intersectionTest);
+	void AddNodeRecursively(class BaseColliderComponent* pColliderComponent, const int& destLayerIndex, const int& layerIndex, const int& parentIndex, const int& depth);
 
 	void GetNodeIndices(std::vector<uint32_t>& indices, const CLayer& layer, std::function<bool(const BVHNode& other)> predicate);
 	void GetNodeIndices(std::vector<uint32_t>& indices, std::function<bool(const BVHNode& other)> predicate);

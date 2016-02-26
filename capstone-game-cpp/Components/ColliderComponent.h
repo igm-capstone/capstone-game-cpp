@@ -2,6 +2,8 @@
 #include "Rig3D/Parametric.h"
 #include "BaseComponent.h"
 
+typedef int(*InteresectOBB)(class BaseColliderComponent*, class OrientedBoxColliderComponent*);
+
 enum CLayer : short
 {
 	COLLISION_LAYER_ROOT = -2,
@@ -18,6 +20,8 @@ class BaseColliderComponent :
 	public BaseComponent
 {
 public:
+	InteresectOBB mOnObbTest;
+	vec3f	mOffset;
 	CLayer	mLayer;
 	bool	mIsDynamic;
 	bool	mIsTrigger;
@@ -30,7 +34,7 @@ public:
 	EXPOSE_CALLBACK_1(TriggerExit, BaseSceneObject*)
 
 protected:
-	BaseColliderComponent() : mLayer(COLLISION_LAYER_ROOT), mIsDynamic(true), mIsTrigger(false) {};
+	BaseColliderComponent() : mOnObbTest(nullptr), mOffset(0.0f), mLayer(COLLISION_LAYER_ROOT), mIsDynamic(true), mIsTrigger(false) {};
 	~BaseColliderComponent() {};
 };
 
@@ -42,6 +46,8 @@ public:
 
 	BoxColliderComponent();
 	~BoxColliderComponent();
+
+	static int IntersectAABBOBB(class BaseColliderComponent*, class OrientedBoxColliderComponent*);
 };
 
 class OrientedBoxColliderComponent : 
@@ -52,6 +58,8 @@ public:
 
 	OrientedBoxColliderComponent();
 	~OrientedBoxColliderComponent();
+
+	static int IntersectOBBOBB(class BaseColliderComponent*, class OrientedBoxColliderComponent*);
 };
 
 class QuadColliderComponent :
@@ -72,6 +80,8 @@ public:
 
 	SphereColliderComponent();
 	~SphereColliderComponent();
+
+	static int IntersectSphereOBB(class BaseColliderComponent*, class OrientedBoxColliderComponent*);
 };
 
 class PlaneColliderComponent :

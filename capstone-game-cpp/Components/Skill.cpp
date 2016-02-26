@@ -28,7 +28,6 @@ SkillBinding& SkillBinding::Set(KeyCode value)
 }
 
 Skill::Skill() :
-	mColliderComponent(nullptr),
 	mCoolDown(0),
 	mDuration(0),
 	mLastUsed(0),
