@@ -30,8 +30,8 @@ Explorer::Explorer()
 	mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
 	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
 
-	Application::SharedInstance().GetModelManager()->LoadModel<GPU::SkinnedVertex>("Minion_Test");
-	Application::SharedInstance().GetModelManager()->GetModel("Minion_Test")->Link(this);
+	Application::SharedInstance().GetModelManager()->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
+	Application::SharedInstance().GetModelManager()->GetModel(kMinionAnimModelName)->Link(this);
 
 	mAnimationController = Factory<AnimationController>::Create();
 	mAnimationController->mSceneObject = this;
@@ -163,6 +163,7 @@ void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal)
 
 void Explorer::OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other)
 {
+	other->Is<Explorer>();
 	auto e = static_cast<Explorer*>(obj);
 	if (e->mNetworkID->mHasAuthority) {
 		e->mCameraManager->ChangeLookAtTo(e->mTransform->GetPosition());

@@ -327,12 +327,12 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	auto staticMeshes = obj["staticMeshes"];
 	if (staticMeshes != nullptr)
 	{
+
 		for (json::iterator it = staticMeshes.begin(); it != staticMeshes.end(); ++it) {
 			std::cout << it.key() << " : " << it.value() << "\n";
 
 			auto model = it.key();
 			auto meshes = obj["staticMeshes"][it.key()].get_ptr<jarr_t>();
-			if (model == "Floor") continue;
 			if (meshes) {
 				loadStaticMeshes(meshes, model);
 				level.staticMeshCount += static_cast<short>(meshes->size());

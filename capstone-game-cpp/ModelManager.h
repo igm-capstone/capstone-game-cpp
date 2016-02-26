@@ -4,11 +4,22 @@
 #include "SceneObjects/BaseSceneObject.h"
 #include "FBXResource.h"
 
+extern const char* kWallModelName;
+extern const char* kTriangleWallModelName;
+extern const char* kWallDoubleDoorModelName;
+extern const char* kWallSingleDoorModelName;
+extern const char* kWallSingleWindowModelName;
+extern const char* kCurvedWallModelName;
+extern const char* kFloorModelName;
+extern const char* kDoorModelName;
+extern const char* kMinionAnimModelName;
+
 class ModelCluster
 {
 	friend class ModelManager;
 public:
 	class Rig3D::IMesh* mMesh;
+	uint32_t			mMaterialIndex;
 	std::vector<SkeletalAnimation> mSkeletalAnimations;
 	SkeletalHierarchy mSkeletalHierarchy;
 

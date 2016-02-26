@@ -23,6 +23,7 @@
 #include <Components/MinionController.h>
 #include <DebugRender.h>
 #include <SceneObjects/Door.h>
+#include <Rig3D/Graphics/DirectX11/DX11ShaderResource.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -129,15 +130,14 @@ void Level01::VInitialize()
 
 void Level01::InitializeAssets()
 {
-	mModelManager->LoadModel<GPU::Vertex3>("Wall");
-	mModelManager->LoadModel<GPU::Vertex3>("TriangleWall");
-	mModelManager->LoadModel<GPU::Vertex3>("Wall_DoubleDoor");
-	mModelManager->LoadModel<GPU::Vertex3>("Wall_SingleDoor");
-	mModelManager->LoadModel<GPU::Vertex3>("Wall_W_SingleWindwo");
-	mModelManager->LoadModel<GPU::Vertex3>("CurvedWall");
-	mModelManager->LoadModel<GPU::Vertex3>("Floor");
-	mModelManager->LoadModel<GPU::Vertex3>("Door");
-	//mModelManager->LoadModel<GPU::SkinnedVertex>("Minion_Test");
+	mModelManager->LoadModel<GPU::Vertex3>(kWallModelName);
+	mModelManager->LoadModel<GPU::Vertex3>(kTriangleWallModelName);
+	mModelManager->LoadModel<GPU::Vertex3>(kWallDoubleDoorModelName);
+	mModelManager->LoadModel<GPU::Vertex3>(kWallSingleDoorModelName);
+	mModelManager->LoadModel<GPU::Vertex3>(kWallSingleWindowModelName);
+	mModelManager->LoadModel<GPU::Vertex3>(kCurvedWallModelName);
+	mModelManager->LoadModel<GPU::Vertex3>(kFloorModelName);
+	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
 
 	mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 
@@ -239,6 +239,15 @@ void Level01::InitializeShaderResources()
 		const char* filenames[] = { "Assets/tileable5d.png", "Assets/wood floor 2.png" };
 		mRenderer->VAddShaderTextures2D(mStaticMeshShaderResource, filenames, 2);
 		mRenderer->VAddShaderLinearSamplerState(mStaticMeshShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
+
+		mModelManager->GetModel(kWallModelName)->mMaterialIndex				= 0;
+		mModelManager->GetModel(kTriangleWallModelName)->mMaterialIndex		= 0;
+		mModelManager->GetModel(kWallDoubleDoorModelName)->mMaterialIndex	= 0;
+		mModelManager->GetModel(kWallSingleDoorModelName)->mMaterialIndex	= 0;
+		mModelManager->GetModel(kWallSingleWindowModelName)->mMaterialIndex = 0;
+		mModelManager->GetModel(kCurvedWallModelName)->mMaterialIndex		= 0;
+		mModelManager->GetModel(kWallModelName)->mMaterialIndex				= 0;
+		mModelManager->GetModel(kFloorModelName)->mMaterialIndex			= 1;
 	}
 
 	// Explorers
@@ -563,7 +572,6 @@ void Level01::RenderStaticMeshes()
 
 	mRenderer->VSetVertexShaderConstantBuffer(mStaticMeshShaderResource, 0, 0);
 	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 0, 1);
-	mRenderer->VSetPixelShaderResourceView(mStaticMeshShaderResource, 0, 0);
 	mRenderer->VSetPixelShaderSamplerStates(mStaticMeshShaderResource);
 
 	int instanceCount = 0;
@@ -572,7 +580,9 @@ void Level01::RenderStaticMeshes()
 		auto& staticMesh = *it;
 		auto modelCluster = staticMesh.mModel;
 		auto numElements = modelCluster->ShareCount();
-		
+	
+		mRenderer->VSetPixelShaderResourceView(mStaticMeshShaderResource, modelCluster->mMaterialIndex, 0);
+
 		mRenderer->VBindMesh(modelCluster->mMesh);
 		mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
 		instanceCount += numElements;
