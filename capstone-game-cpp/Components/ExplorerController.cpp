@@ -2,18 +2,21 @@
 #include "ExplorerController.h"
 #include <Mathf.h>
 #include <Colors.h>
+#include <SceneObjects/Explorer.h>
+#include <Components/AnimationUtility.h>
 
 using namespace cliqCity::graphicsMath;
 
 ExplorerController::ExplorerController() :
-	mInput((&Singleton<Engine>::SharedInstance())->GetInput()), 
+	mInput((&Singleton<Engine>::SharedInstance())->GetInput()),
 	mApplication(&Application::SharedInstance()),
 	mCameraManager(&Singleton<CameraManager>::SharedInstance()),
 	mSprintDuration(0),
-	mAcceleration(10.0f), 
-	mBaseMoveSpeed(20.0f), 
-	mSpeedMultiplier(1), 
-	mCurrentSpeed(0), 
+	mAcceleration(10.0f),
+	mBaseMoveSpeed(20.0f),
+	mSpeedMultiplier(1),
+	mCurrentSpeed(0),
+	mAnimationController(nullptr),
 	mSpeed(0.01f),
 	mIsInteracting(false)
 {
@@ -48,7 +51,7 @@ bool ExplorerController::Move(float dt, vec3f& pos)
 	mCurrentSpeed = Mathf::Lerp(mCurrentSpeed, targetSpeed, mAcceleration * dt);
 
 	// delta space for the current frame
-	vec3f ds = mCurrentSpeed * dt;
+	vec3f ds = mCurrentSpeed * dt * CanMove();
 
 	if (magnitude(ds) > 0.001f) {
 		pos += ds;
@@ -68,8 +71,11 @@ bool ExplorerController::Rotate(float dt, vec3f& pos, quatf& rot)
 	auto dir = mousePosition - pos;
 	quatf newRot = normalize(quatf::angleAxis(atan2(dir.y, dir.x), vec3f(0, 0, 1)) * quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0));
 
-	auto hasRotated = rot == newRot;
-	rot = newRot;
+	auto hasRotated = (rot == newRot);
+	if (hasRotated && CanMove())
+	{
+		rot = newRot;
+	}
 
 	return hasRotated;
 }
@@ -102,7 +108,12 @@ bool ExplorerController::Update(double milliseconds)
 
 	if (hasMoved /*|| hasRotated*/)
 	{
+		PlayStateAnimation(ANIM_STATE_WALK);
 		OnMove(pos, rot);
+	}
+	else
+	{
+		PauseStateAnimation(ANIM_STATE_WALK);
 	}
 
 	UpdateInteractWill();
@@ -110,12 +121,39 @@ bool ExplorerController::Update(double milliseconds)
 	return hasMoved || hasRotated;
 }
 
+
+
 void ExplorerController::Sprint(float duration)
 {
 	mSprintDuration = duration;
 }
 
+void ExplorerController::Melee()
+{
+	PlayStateAnimation(ANIM_STATE_MELEE);
+}
+
 void ExplorerController::SetBaseRotation(const float& x, const float& y, const float& z)
 {
 	mModelRotation = quatf::rollPitchYaw(z, x, y);
+}
+
+bool ExplorerController::CanMove()
+{
+	return mAnimationController->GetState() != ANIM_STATE_MELEE;
+}
+
+void ExplorerController::PlayStateAnimation(AnimationControllerState state)
+{
+	AnimationController* pAnimationController = reinterpret_cast<Explorer*>(mSceneObject)->mAnimationController;
+	pAnimationController->SetState(state);
+	pAnimationController->Resume();
+}
+void ExplorerController::PauseStateAnimation(AnimationControllerState state)
+{
+	AnimationController* pAnimationController = reinterpret_cast<Explorer*>(mSceneObject)->mAnimationController;
+	if (pAnimationController->GetState() == state)
+	{
+		pAnimationController->Pause();
+	}
 }

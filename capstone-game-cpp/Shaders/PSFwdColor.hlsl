@@ -1,6 +1,6 @@
 struct Pixel
 {
-	float4 positionH	: SV_POSITION;
+	float4 position		: SV_POSITION;
 	float4 color		: COLOR;
 
 };

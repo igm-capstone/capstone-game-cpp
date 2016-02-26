@@ -1020,7 +1020,10 @@ void DX3D11Renderer::VLoadVertexShader(IShader* vertexShader, const void* byteCo
 
 	mDevice->CreateVertexShader(byteCode, byteSize, nullptr, &dxShader->mVertexShader);
 
-	VLoadInputLayout(dxShader, byteCode, byteSize, inputElements, count);
+	if (count)
+	{
+		VLoadInputLayout(dxShader, byteCode, byteSize, inputElements, count);
+	}
 }
 
 void DX3D11Renderer::VLoadInputLayout(IShader* vertexShader, const void* byteCode, size_t byteSize, InputElement* inputElements, const uint32_t& count)

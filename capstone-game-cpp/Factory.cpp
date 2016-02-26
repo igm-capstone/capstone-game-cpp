@@ -11,6 +11,7 @@
 #include "SceneObjects\Lamp.h"
 #include "SceneObjects\Ghost.h"
 #include "SceneObjects\Region.h"
+#include "SceneObjects\Door.h"
 
 #include "Components\NetworkID.h"
 #include "Components\ColliderComponent.h"
@@ -54,7 +55,7 @@ REGISTER_FACTORY ( Transform,	100 + MAX_STATIC_MESHES + MAX_EXPLORERS + MAX_MINI
 
 // register component factories
 REGISTER_FACTORY ( NetworkID,						1 + MAX_EXPLORERS + MAX_MINIONS)
-REGISTER_FACTORY ( BoxColliderComponent,			100 + MAX_STATIC_MESHES)
+REGISTER_FACTORY ( BoxColliderComponent,			100 + MAX_STATIC_MESHES + MAX_DOORS)
 REGISTER_FACTORY ( OrientedBoxColliderComponent,	MAX_STATIC_COLLIDERS)
 REGISTER_FACTORY ( SphereColliderComponent,			MAX_EXPLORERS + MAX_MINIONS)
 REGISTER_FACTORY ( ExplorerController,				MAX_EXPLORERS)
@@ -66,4 +67,5 @@ REGISTER_FACTORY ( Health,							MAX_EXPLORERS + MAX_MINIONS)
 REGISTER_FACTORY ( FmodEvent,						100	)
 REGISTER_FACTORY ( FmodEventCollection,				10	)
 REGISTER_FACTORY ( AnimationController,				MAX_EXPLORERS + MAX_MINIONS)
-REGISTER_FACTORY ( PlaneColliderComponent, 100)
+REGISTER_FACTORY ( PlaneColliderComponent,			100)
+REGISTER_FACTORY ( Door,							MAX_DOORS)

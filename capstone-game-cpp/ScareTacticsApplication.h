@@ -17,27 +17,25 @@ class ScareTacticsApplication : public IApplication
 public:
 	// Shaders
 
-	IShader* mStaticMeshVertexShader;
-	IShader* mStaticMeshPixelShader;
-	IShader* mExplorerVertexShader;
-	IShader* mExplorerPixelShader;
-	IShader* mPLVolumeVertexShader;
-	IShader* mPLVolumePixelShader;
-	IShader* mNDSQuadVertexShader;
-	IShader* mNDSQuadPixelShader;
-	IShader* mSpriteVertexShader;
-	IShader* mSpritePixelShader;
-	IShader* mSkinnedVertexShader;
-	IShader* mGridVertexShader;
-	IShader* mGridPixelShader;
-	IShader* mGridPass1ComputeShader;
-	IShader* mGridPass2ComputeShader;
-
-	IShader* mDBGPixelShader;
+	IShader* mCSGridPass1;
+	IShader* mCSGridPass2;
+	IShader* mPSDefColor;
+	IShader* mPSDefMaterial;
+	IShader* mPSFwd2DTexture;
+	IShader* mPSFwdColor;
+	IShader* mPSFwdDeferredOutput;
+	IShader* mPSFwdSpotLightVolume;
+	IShader* mVSDefInstancedMaterial;
+	IShader* mVSDefSingleColor;
+	IShader* mVSDefSingleMaterial;
+	IShader* mVSDefSkinnedMaterial;
+	IShader* mVSFwdFullScreenQuad;
+	IShader* mVSFwdInstancedColor;
+	IShader* mVSFwdSpotLightVolume;
+	IShader* mVSFwdSprites;
 
 	FMOD::Studio::System* mStudio;
 	vec3f mGroundMousePosition;
-
 	ScareTacticsApplication();
 	~ScareTacticsApplication();
 
