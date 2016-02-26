@@ -192,7 +192,7 @@ void loadStaticColliders(jarr_t objs, CLayer layer, vec3f levelOrigin, vec3f lev
 		// Min z = 0.09 Max z = 15.06
 		// Lucas please give me z extents in json when you have time :)
 		vec3f jsonPosition	= collider->mTransform->GetPosition();
-		collider->mTransform->SetPosition(jsonPosition.x, jsonPosition.y, 7.5f);
+		collider->mTransform->SetPosition(jsonPosition.x, jsonPosition.y,-7.5f);
 
 		vec3f jsonScale = collider->mTransform->GetScale();
 		collider->mTransform->SetScale(jsonScale.x, jsonScale.y, 15.0f);
@@ -327,12 +327,12 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	auto staticMeshes = obj["staticMeshes"];
 	if (staticMeshes != nullptr)
 	{
+
 		for (json::iterator it = staticMeshes.begin(); it != staticMeshes.end(); ++it) {
 			std::cout << it.key() << " : " << it.value() << "\n";
 
 			auto model = it.key();
 			auto meshes = obj["staticMeshes"][it.key()].get_ptr<jarr_t>();
-			if (model == "Floor") continue;
 			if (meshes) {
 				loadStaticMeshes(meshes, model);
 				level.staticMeshCount += static_cast<short>(meshes->size());

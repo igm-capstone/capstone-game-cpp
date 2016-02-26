@@ -74,7 +74,7 @@ namespace GPU {
 
 		void SetColor(vec4f&) { return; }
 		void SetScale(vec3f&) { return; }
-		void SetUV(vec2f&) { return; }
+		void SetUV(vec2f& val) { this->UV = val; }
 	};
 
 	struct Sprite

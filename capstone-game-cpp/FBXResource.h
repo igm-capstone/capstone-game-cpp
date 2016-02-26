@@ -223,16 +223,18 @@ public:
 
 				for (int polygonVertexIndex = 0; polygonVertexIndex < pSize; polygonVertexIndex++)
 				{
-					controlPointIndex = pMesh->GetPolygonVertex(pIndex, ccw[polygonVertexIndex]);
+					int remappedPolygonVertexIndex = ccw[polygonVertexIndex];
+
+					controlPointIndex = pMesh->GetPolygonVertex(pIndex, remappedPolygonVertexIndex);
 
 					// Position
 					fbxPosition = pMesh->GetControlPointAt(controlPointIndex);
 
 					// Normal
-					pMesh->GetPolygonVertexNormal(pIndex, polygonVertexIndex, fbxNormal);
+					pMesh->GetPolygonVertexNormal(pIndex, remappedPolygonVertexIndex, fbxNormal);
 
 					// UV
-					pMesh->GetPolygonVertexUV(pIndex, polygonVertexIndex, uvSetNameList.GetStringAt(0), uv, unmapped);
+					pMesh->GetPolygonVertexUV(pIndex, remappedPolygonVertexIndex, uvSetNameList.GetStringAt(0), uv, unmapped);
 
 					FbxVector4 xformPosition, xformNormal;
 					TransformVector(fbxPosition, xformPosition);
@@ -248,7 +250,7 @@ public:
 
 					if (!unmapped)
 					{
-						vertex.SetUV(vec2f(GET_FLOAT(uv.mData[0]), GET_FLOAT(uv.mData[1])));
+						vertex.SetUV(vec2f(GET_FLOAT(uv.mData[0]), 1.0f - GET_FLOAT(uv.mData[1])));
 					}
 
 					// Blend info
