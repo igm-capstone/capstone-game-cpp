@@ -16,9 +16,9 @@ void GhostController::Update(double milliseconds)
 	{
 		// calculate ds (delta space) for the mouse
 		vec2f lastScreenPos = mInput->prevMousePosition;
-		vec2f currScreenPos = mInput->mousePosition;
+		//vec2f currScreenPos = mInput->mousePosition;
 		vec3f lastWorldPos  = camManager->Screen2WorldAtZ0(lastScreenPos);
-		vec3f currWorldPos  = camManager->Screen2WorldAtZ0(currScreenPos);
+		vec3f currWorldPos  = Application::SharedInstance().mGroundMousePosition; //camManager->Screen2WorldAtZ0(currScreenPos);
 		vec3f ds = lastWorldPos - currWorldPos;
 
 		// get camera projected bounds (only valid for orthogonal camera)

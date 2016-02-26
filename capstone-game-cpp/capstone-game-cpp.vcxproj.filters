@@ -1,27 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <FxCompile Include="Shaders\DebugTexturePixelShader.hlsl" />
-    <FxCompile Include="Shaders\ExplorerPixelShader.hlsl" />
-    <FxCompile Include="Shaders\ExplorerVertexShader.hlsl" />
-    <FxCompile Include="Shaders\NDSQuadPixelShader.hlsl" />
-    <FxCompile Include="Shaders\NDSQuadVertexShader.hlsl" />
-    <FxCompile Include="Shaders\SkinnedMeshVertexShader.hlsl" />
-    <FxCompile Include="Shaders\SpotLightVolumePixelShader.hlsl" />
-    <FxCompile Include="Shaders\SpotLightVolumeVertexShader.hlsl" />
-    <FxCompile Include="Shaders\CircleVertexShader.hlsl" />
-    <FxCompile Include="Shaders\LineTracePixelShader.hlsl" />
-    <FxCompile Include="Shaders\LineTraceVertexShader.hlsl" />
-    <FxCompile Include="Shaders\ShadowCasterPixelShader.hlsl" />
-    <FxCompile Include="Shaders\BillboardPixelShader.hlsl" />
-    <FxCompile Include="Shaders\ShadowPixelShader.hlsl" />
-    <FxCompile Include="Shaders\BillboardVertexShader.hlsl" />
-    <FxCompile Include="Shaders\SpritePixelShader.hlsl" />
-    <FxCompile Include="Shaders\SpriteVertexShader.hlsl" />
-    <FxCompile Include="Shaders\GridPass1ComputeShader.hlsl" />
-    <FxCompile Include="Shaders\GridPass2ComputeShader.hlsl" />
-    <FxCompile Include="Shaders\StaticMeshVertexShader.hlsl" />
-    <FxCompile Include="Shaders\StaticMeshPixelShader.hlsl" />
+    <FxCompile Include="Shaders\CSGridPass1.hlsl" />
+    <FxCompile Include="Shaders\CSGridPass2.hlsl" />
+    <FxCompile Include="Shaders\PSDefColor.hlsl" />
+    <FxCompile Include="Shaders\PSDefMaterial.hlsl" />
+    <FxCompile Include="Shaders\PSFwdColor.hlsl" />
+    <FxCompile Include="Shaders\PSFwd2DTexture.hlsl" />
+    <FxCompile Include="Shaders\PSFwdSpotLightVolume.hlsl" />
+    <FxCompile Include="Shaders\PSFwdDeferredOutput.hlsl" />
+    <FxCompile Include="Shaders\VSDefInstancedMaterial.hlsl" />
+    <FxCompile Include="Shaders\VSFwdSprites.hlsl" />
+    <FxCompile Include="Shaders\VSFwdSpotLightVolume.hlsl" />
+    <FxCompile Include="Shaders\VSFwdLineTrace.hlsl" />
+    <FxCompile Include="Shaders\VSFwdFullScreenQuad.hlsl" />
+    <FxCompile Include="Shaders\VSDefSkinnedMaterial.hlsl" />
+    <FxCompile Include="Shaders\VSDefSingleMaterial.hlsl" />
+    <FxCompile Include="Shaders\VSDefSingleColor.hlsl" />
+    <FxCompile Include="Shaders\VSFwdInstancedColor.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
@@ -56,7 +52,8 @@
     <ClCompile Include="BVHTree.cpp" />
     <ClCompile Include="DebugRender.cpp" />
     <ClCompile Include="SceneObjects\Region.cpp" />
-    <ClCompile Include="Components\AnimationUtility.cpp" />
+    <ClCompile Include="BehaviorTree\Selector.cpp" />
+    <ClCompile Include="BehaviorTree\IterableComposite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -117,60 +114,9 @@
     <ClInclude Include="SceneObjects\SpawnPoint.h" />
     <ClInclude Include="DebugRender.h" />
     <ClInclude Include="SceneObjects\Region.h" />
-    <ClInclude Include="Components\AnimationUtility.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Shaders\BillboardPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\BillboardVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\CircleVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ShadowCasterPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ShadowPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\LineTraceVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\LineTracePixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ExplorerPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\ExplorerVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\DebugTexturePixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\SpotLightVolumeVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\SpotLightVolumePixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\NDSQuadVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\NDSQuadPixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\SpritePixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\SpriteVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\SkinnedMeshVertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
+    <ClInclude Include="SceneObjects\Door.h" />
+    <ClInclude Include="BehaviorTree\Selector.h" />
+    <ClInclude Include="BehaviorTree\IterableComposite.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
@@ -206,6 +152,12 @@
     <ClCompile Include="SceneObjects\BaseSceneObject.cpp" />
     <ClCompile Include="SceneObjects\Explorer.cpp" />
     <ClCompile Include="SceneObjects\Ghost.cpp" />
+    <ClCompile Include="BehaviorTree\Behavior.cpp" />
+    <ClCompile Include="BehaviorTree\BehaviorTree.cpp" />
+    <ClCompile Include="BehaviorTree\Composite.cpp" />
+    <ClCompile Include="BehaviorTree\Condition.cpp" />
+    <ClCompile Include="BehaviorTree\Sequence.cpp" />
+    <ClCompile Include="BehaviorTree\TestSuite.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -265,6 +217,12 @@
     <ClInclude Include="SceneObjects\StaticCollider.h" />
     <ClInclude Include="SceneObjects\StaticMesh.h" />
     <ClInclude Include="ModelManager.h" />
+    <ClInclude Include="BehaviorTree\Behavior.h" />
+    <ClInclude Include="BehaviorTree\BehaviorTree.h" />
+    <ClInclude Include="BehaviorTree\Composite.h" />
+    <ClInclude Include="BehaviorTree\Condition.h" />
+    <ClInclude Include="BehaviorTree\Sequence.h" />
+    <ClInclude Include="BehaviorTree\TestSuite.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="External\fmodstudioL.ref" />

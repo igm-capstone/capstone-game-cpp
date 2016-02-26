@@ -24,8 +24,8 @@
 
 #include "Rig3D\Common\Transform.h"
 
-#include "Shaders/obj/LineTracePixelShader.h"
-#include "Shaders/obj/LineTraceVertexShader.h"
+#include "Shaders/obj/VSFwdLineTrace.h"
+#include "Shaders/obj/PSFwdColor.h"
 
 char Trace::gTraceMemory[Trace::gTraceMemorySize] = { 0 };
 char Trace::gMeshMemory[Trace::gMeshMemorySize] = { 0 };
@@ -49,8 +49,8 @@ Trace::~Trace() {
 	mLineTraceMesh->~IMesh();
 
 	ReleaseMacro(mLineTraceInputLayout);
-	ReleaseMacro(mLineTraceVertexShader);
-	ReleaseMacro(mLineTracePixelShader);
+	ReleaseMacro(mVSLineTrace);
+	ReleaseMacro(mPSSimpleColor);
 	ReleaseMacro(mLineTraceShaderBuffer);
 }
 
@@ -65,44 +65,44 @@ void Trace::InitializeLineTraceMesh()
 	
 	mTraceAllocator.Free();
 
-	mLineTraceVertices = reinterpret_cast<LineTraceVertex*>(mTraceAllocator.Allocate(sizeof(LineTraceVertex) * gLineTraceVertexCount, alignof(LineTraceVertex), 0));
+	mLineTraceVertices = reinterpret_cast<GPU::Vertex2*>(mTraceAllocator.Allocate(sizeof(GPU::Vertex2) * gLineTraceVertexCount, alignof(GPU::Vertex2), 0));
 
 	mStaticMeshLibrary.NewMesh(&mLineTraceMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mLineTraceMesh, mLineTraceVertices, sizeof(LineTraceVertex) * gLineTraceVertexCount, sizeof(LineTraceVertex));
+	mRenderer->VSetMeshVertexBuffer(mLineTraceMesh, mLineTraceVertices, sizeof(GPU::Vertex2) * gLineTraceVertexCount, sizeof(GPU::Vertex2));
 	mRenderer->VSetStaticMeshIndexBuffer(mLineTraceMesh, lineTraceIndices, gLineTraceVertexCount);
 }
 
 void Trace::InitializeLineTraceShaders() {
 	D3D11_INPUT_ELEMENT_DESC inputDescription[] =
 	{
-		{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
 	// Create the shader on the device
 	mDevice->CreateVertexShader(
-		gLineTraceVertexShader,
-		sizeof(gLineTraceVertexShader),
+		gVSFwdLineTrace,
+		sizeof(gVSFwdLineTrace),
 		nullptr,
-		&mLineTraceVertexShader);
+		&mVSLineTrace);
 
 	// Before cleaning up the data, create the input layout
 	if (inputDescription) {
 		mDevice->CreateInputLayout(
 			inputDescription,					// Reference to Description
 			2,									// Number of elments inside of Description
-			gLineTraceVertexShader,
-			sizeof(gLineTraceVertexShader),
+			gVSFwdLineTrace,
+			sizeof(gVSFwdLineTrace),
 			&mLineTraceInputLayout);
 	}
 
 
 	// Create the shader on the device
 	mDevice->CreatePixelShader(
-		gLineTracePixelShader,
-		sizeof(gLineTracePixelShader),
+		gPSFwdColor,
+		sizeof(gPSFwdColor),
 		nullptr,
-		&mLineTracePixelShader);
+		&mPSSimpleColor);
 
 
 	// Constant buffers ----------------------------------------
@@ -149,8 +149,8 @@ void Trace::Render() {
 	mDeviceContext->OMSetRenderTargets(1, mRenderer->GetRenderTargetView(), nullptr);
 
 	mDeviceContext->IASetInputLayout(mLineTraceInputLayout);
-	mDeviceContext->VSSetShader(mLineTraceVertexShader, nullptr, 0);
-	mDeviceContext->PSSetShader(mLineTracePixelShader, nullptr, 0);
+	mDeviceContext->VSSetShader(mVSLineTrace, nullptr, 0);
+	mDeviceContext->PSSetShader(mPSSimpleColor, nullptr, 0);
 
 	
 
@@ -211,7 +211,7 @@ void Trace::TraceBox(const vec3f& pos, const vec4f& color)
 
 void Trace::TraceSmallBox(const vec3f& pos, const vec4f& color)
 {
-	const auto halfSize = 0.5f;
+	const auto halfSize = 0.75f;
 
 	auto xmin = pos.x - halfSize;
 	auto xmax = pos.x + halfSize;

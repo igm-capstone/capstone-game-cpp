@@ -11,6 +11,7 @@
 #include "SceneObjects/StaticMesh.h"
 #include "SceneObjects/StaticCollider.h"
 #include "SceneObjects/Region.h"
+#include "SceneObjects/Door.h"
 
 using namespace std;
 using namespace Rig3D;
@@ -208,21 +209,24 @@ void loadStaticColliders(jarr_t objs, CLayer layer, vec3f levelOrigin, vec3f lev
 	}
 }
 
-void loadBlocks(jarr_t objs)
+void loadDoors(jarr_t objs)
 {
-	TRACE_LOG("Loading " << int(objs->size()) << " moveable blocks...");
+	TRACE_LOG("Loading " << int(objs->size()) << " doors...");
 	for (auto obj : *objs)
 	{
 		auto position = parseVec3f(obj["position"]);
 		auto rotation = parseQuatf(obj["rotation"]);
 		auto scale = parseVec3f(obj["scale"]);
+		auto canOpen = obj["canOpen"].get<bool>();
 
-		auto block = Factory<MoveableBlock>::Create();
-		parseTransform(obj, block->mTransform);
+		auto door = Factory<Door>::Create();
+		parseTransform(obj, door->mTransform);
+		Resource::mModelManager->GetModel("Door")->Link(door);
 
-		block->mTransform->SetPosition(position);
-		block->mTransform->SetRotation(rotation);
-		block->mTransform->SetScale(scale);
+		door->mTransform->SetPosition(position);
+		door->mTransform->SetRotation(rotation);
+		door->mTransform->SetScale(scale);
+		door->mCanOpen = canOpen;
 	}
 }
 
@@ -314,10 +318,10 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		loadSpawnPoints(spawnPoints);
 	}
 
-	auto moveableBlocks = obj["moveableBlocks"].get_ptr<jarr_t>();
-	if (moveableBlocks != nullptr)
+	auto doors = obj["doors"].get_ptr<jarr_t>();
+	if (doors != nullptr)
 	{
-		loadBlocks(moveableBlocks);
+		loadDoors(doors);
 	}
 
 	auto staticMeshes = obj["staticMeshes"];
@@ -352,7 +356,7 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	}
 
 	auto ramps = obj["ramps"].get_ptr<jarr_t>();
-	if (regions != nullptr)
+	if (ramps != nullptr)
 	{
 		level.regionCount += static_cast<short>(ramps->size());
 		loadRegions(ramps, COLLISION_LAYER_FLOOR, level.center, level.extents);
@@ -364,8 +368,6 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		level.staticColliderCount = static_cast<short>(colliders->size());
 		loadStaticColliders(colliders, COLLISION_LAYER_WALL, level.center, level.extents);
 	}
-
-
 
 	return level;
 }

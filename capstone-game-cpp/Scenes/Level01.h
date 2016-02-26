@@ -13,7 +13,7 @@ class Level01 : public BaseScene
 
 	// GPU Data
 	GPU::Sprite			mSpriteInstanceData[MAX_SPRITES];
-	mat4f				mSkinnedMeshMatices[MAX_SKELETON_JOINTS];
+	mat4f				mSkinnedMeshMatrices[MAX_SKELETON_JOINTS];
 
 	// Allocators
 	LinearAllocator		mAllocator;
@@ -25,6 +25,7 @@ class Level01 : public BaseScene
 	// RenderContext
 	IRenderContext*		mGBufferContext;
 	IRenderContext*		mShadowContext;
+	IRenderContext*		mGridContext;
 	
 	// ShaderResource
 	IShaderResource*	mStaticMeshShaderResource;
@@ -61,6 +62,7 @@ public:
 	void VRender() override;
 	void RenderShadowMaps();	// Not called per frame
 	void RenderStaticMeshes();
+	void RenderDoors();
 	void RenderExplorers();
 	void RenderSpotLightVolumes();
 	void RenderFullScreenQuad();

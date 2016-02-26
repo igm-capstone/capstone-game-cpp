@@ -12,6 +12,8 @@ CameraManager::CameraManager()
 
 	pPlane.normal = vec3f(0, 0, -1);
 	pPlane.distance = 0;
+
+	mIsOrto = false;
 }
 
 CameraManager::~CameraManager()
@@ -30,7 +32,14 @@ void CameraManager::ChangeLookAtBy(const vec3f& offset)
 
 void CameraManager::SetLevelBounds(vec2f center, vec2f extends)
 {
-	
+	mLevelCenter = center;
+	mLevelExtends = extends;
+
+	mCameraPersp.SetViewMatrix(mat4f::lookAtLH(center, center, vec3f(0, 1, 0)));
+	mCBufferFullLevelOrto.view = mCBufferPersp.view;
+
+	mCameraQuadOrto.SetProjectionMatrix(mat4f::normalizedOrthographicLH(mLevelCenter.x - mLevelExtends.x, mLevelCenter.x + mLevelExtends.x, mLevelCenter.y - mLevelExtends.y, mLevelCenter.y + mLevelExtends.y, mNearPlane, mFarPlane));
+	mCBufferFullLevelOrto.projection = mCameraQuadOrto.GetProjectionMatrix().transpose();
 }
 
 void CameraManager::MoveCamera(const vec3f& lookAt, const vec3f& origin)
@@ -41,11 +50,8 @@ void CameraManager::MoveCamera(const vec3f& lookAt, const vec3f& origin)
 	mCameraPersp.SetViewMatrix(mat4f::lookAtLH(lookAt, origin, vec3f(0, 1, 0)));
 	mCBufferPersp.view = mCameraPersp.GetViewMatrix().transpose();
 	
-	mCameraOrto.SetViewMatrix(mCameraPersp.GetViewMatrix());
-	mCBufferOrto.view = mCBufferPersp.view;
-
-	mCameraFullOrto.SetViewMatrix(mCameraPersp.GetViewMatrix());
-	mCBufferFullOrto.view = mCBufferPersp.view;
+	mCameraScreenOrto.SetViewMatrix(mCameraPersp.GetViewMatrix());
+	mCBufferScreenOrto.view = mCBufferPersp.view;
 
 	OnResize();
 }
@@ -57,21 +63,8 @@ void CameraManager::OnResize()
 	mCameraPersp.SetProjectionMatrix(mat4f::normalizedPerspectiveLH(mFOV, aspectRatio, mNearPlane, mFarPlane));
 	mCBufferPersp.projection = mCameraPersp.GetProjectionMatrix().transpose();
 
-	mCameraOrto.SetProjectionMatrix(mat4f::normalizedOrthographicLH(0, float(mRenderer->GetWindowWidth()), float(mRenderer->GetWindowHeight()), 0, mNearPlane, mFarPlane));
-	mCBufferOrto.projection = mCameraOrto.GetProjectionMatrix().transpose();
-
-	mCameraFullOrto.SetProjectionMatrix(mat4f::normalizedOrthographicLH(0, float(mRenderer->GetWindowWidth()), float(mRenderer->GetWindowHeight()), 0, mNearPlane, mFarPlane));
-	mCBufferFullOrto.projection = mCameraFullOrto.GetProjectionMatrix().transpose();
-}
-
-vec3f CameraManager::GetForward()
-{
-	if (true)
-	{
-		mForward = vec3f(0, 0, 1) * mat3f(mCameraPersp.GetViewMatrix());
-	}
-
-	return mForward;
+	mCameraScreenOrto.SetProjectionMatrix(mat4f::normalizedOrthographicLH(0, float(mRenderer->GetWindowWidth()), float(mRenderer->GetWindowHeight()), 0, mNearPlane, mFarPlane));
+	mCBufferScreenOrto.projection = mCameraScreenOrto.GetProjectionMatrix().transpose();
 }
 
 vec2f CameraManager::World2Screen(const vec3f& world)

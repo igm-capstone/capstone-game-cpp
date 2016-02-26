@@ -7,6 +7,7 @@
 #include "Scenes\LoadingScreen.h"
 #include "Scenes\MainMenuScene.h"
 #include "capstone-game-cpp.rc.h"
+#include "BehaviorTree/TestSuite.h"
 
 #define STATIC_APP_MEMORY 8000000
 
@@ -20,7 +21,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 	int showCmd)
 {
 	using namespace Rig3D;
-	
+
 	if (strcmp(cmdLine, "--local-client") == 0)
 	{
 		MainMenuScene::gLocalClient = true;
@@ -78,6 +79,9 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 	
 	app->SetStaticMemory(gApplicationMemory, STATIC_APP_MEMORY);
 	app->LoadScene<MainMenuScene>();
+
+	auto& testSuite = test::TestSuite::SharedInstance();
+	bool allPassed = testSuite.RunAllTests();
 
 	engine.RunApplication(app);
 

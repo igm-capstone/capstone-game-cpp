@@ -4,21 +4,23 @@ struct Vertex
 	float3		normal		: NORMAL;
 	float2		uv			: TEXCOORD;
 	float4x4	world		: WORLD;
-//	uint		mInstanceID	: SV_InstanceID;
 };
 
 struct Pixel
 {
 	float4 positionH	: SV_POSITION;
-	float3 positionT	: POSITIONT;
-	float3 normal		: NORMAL;
-	float2 uv			: TEXCOORD;
+	float4 color		: COLOR;
 };
 
-cbuffer transform : register(b0)
+cbuffer camera : register(b0)
 {
 	matrix projection;
 	matrix view;
+}
+
+cbuffer objectType : register(b1)
+{
+	float4 color;
 }
 
 Pixel main(Vertex vertex)
@@ -29,9 +31,7 @@ Pixel main(Vertex vertex)
 
 	Pixel pixel;
 	pixel.positionH = mul(vertexPos, clip);
-	pixel.positionT = mul(vertexPos, vertex.world).xyz;
-	pixel.normal = mul(vertex.normal, (float3x3)vertex.world).xyz;
-	pixel.uv = vertex.uv;
+	pixel.color = color;
 
 	return pixel;
 }

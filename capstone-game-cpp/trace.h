@@ -1,5 +1,6 @@
 #pragma once
 #include <iomanip>
+#include "Vertex.h"
 #if defined _DEBUG
 
 #include <sstream>
@@ -42,23 +43,17 @@ private:
 	LinearAllocator					mStaticMeshAllocator;
 	MeshLibrary<LinearAllocator>	mStaticMeshLibrary;
 
-	struct LineTraceVertex
-	{
-		vec4f Color;
-		vec3f Position;
-	};
-
 	std::stringstream ss;
 	char buff[128];
 
 	Renderer*						mRenderer;
 	ID3D11Device*					mDevice;
 	ID3D11DeviceContext*			mDeviceContext;
-	LineTraceVertex*				mLineTraceVertices;
+	GPU::Vertex2*					mLineTraceVertices;
 	IMesh*							mLineTraceMesh;
 	ID3D11InputLayout*				mLineTraceInputLayout;
-	ID3D11VertexShader*				mLineTraceVertexShader;
-	ID3D11PixelShader*				mLineTracePixelShader;
+	ID3D11VertexShader*				mVSLineTrace;
+	ID3D11PixelShader*				mPSSimpleColor;
 	ID3D11Buffer*					mLineTraceShaderBuffer;
 
 	int								mLineTraceDrawCount;

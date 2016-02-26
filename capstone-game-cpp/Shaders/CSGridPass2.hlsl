@@ -14,8 +14,8 @@ cbuffer gridData : register(b1)
 {
 	int gridNumCols;
 	int gridNumRows;
-	int screenWidth;
-	int screenHeight;
+	int mapTexWidth;
+	int mapTexHeight;
 }
 
 StructuredBuffer<SimpleNode> BufferIn : register(t0);

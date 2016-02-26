@@ -179,7 +179,10 @@ void Explorer::UpdateComponents(quatf rotation, vec3f position)
 	{
 	default:
 	{
-		mMeleeColliderComponent.asSphereColliderComponent->mCollider.origin = position + (rotation * mMeleeColliderComponent.asSphereColliderComponent->mOffset);
+		if (mMeleeColliderComponent.asBaseColliderComponent)
+		{
+			mMeleeColliderComponent.asSphereColliderComponent->mCollider.origin = position + (rotation * mMeleeColliderComponent.asSphereColliderComponent->mOffset);
+		}
 		break;
 	}
 	}
