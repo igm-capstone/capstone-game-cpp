@@ -192,7 +192,7 @@ void loadStaticColliders(jarr_t objs, CLayer layer, vec3f levelOrigin, vec3f lev
 		// Min z = 0.09 Max z = 15.06
 		// Lucas please give me z extents in json when you have time :)
 		vec3f jsonPosition	= collider->mTransform->GetPosition();
-		collider->mTransform->SetPosition(jsonPosition.x, jsonPosition.y, 7.5f);
+		collider->mTransform->SetPosition(jsonPosition.x, jsonPosition.y,-7.5f);
 
 		vec3f jsonScale = collider->mTransform->GetScale();
 		collider->mTransform->SetScale(jsonScale.x, jsonScale.y, 15.0f);
