@@ -1,19 +1,27 @@
 #pragma once
 #include "SceneObjects\BaseSceneObject.h"
 
-void InitializeExplorerInventory();
+int GetExplorerID(class Explorer* explorer);
 
 class Explorer : public BaseSceneObject
 {
 	friend class Factory<Explorer>;
 public:
+	union MeleeColliderComponent
+	{
+		class BaseColliderComponent*		asBaseColliderComponent;
+		class SphereColliderComponent*		asSphereColliderComponent;
+		class OrientedBoxColliderComponent* asBoxColliderComponent;
+	};
+
 	class NetworkID*					mNetworkID;
 	class ExplorerController*			mController;
 	class AnimationController*			mAnimationController;
 	class SphereColliderComponent*		mCollider;
-	class Skill**						mSkills;
+	class Skill*						mSkills[MAX_EXPLORER_SKILLS];
 	class Health*						mHealth;
 
+	MeleeColliderComponent				mMeleeColliderComponent;
 private:
 	class NetworkClient*				mNetworkClient;
 	class CameraManager*				mCameraManager;
@@ -24,6 +32,7 @@ private:
 
 public:
 	void Spawn(vec3f pos, int UUID);
+	void UpdateComponents(quatf rotation, vec3f position);
 
 	static void OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot);
 	static void OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth);
@@ -34,7 +43,9 @@ public:
 
 	static void DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
 	static void DoMelee(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
+
 	static void OnMeleeStart(void* obj);
 	static void OnMeleeStop(void* obj);
 
+	static void OnMeleeHit(BaseSceneObject* self, BaseSceneObject* other);
 };

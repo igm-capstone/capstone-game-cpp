@@ -213,7 +213,6 @@ void ScareTacticsApplication::InitializeFMOD()
 
 void ScareTacticsApplication::VInitialize()
 {
-	InitializeExplorerInventory(); // Not sure the best place to put this feel free to move if necessary
 	InitializeShaders();
 	InitializeFMOD();
 

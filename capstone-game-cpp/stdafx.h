@@ -18,7 +18,7 @@
 //Config
 
 #define MAX_EXPLORERS 4
-#define MAX_EXPLORER_SKILLS  2
+#define MAX_EXPLORER_SKILLS  5
 
 #define MAX_GHOST_SKILLS 4
 
@@ -29,6 +29,7 @@
 #define MAX_STATIC_COLLIDERS 300
 
 #define SHADOW_MAP_SIZE 1024
+#define GRID_MAP_SCALE	10
 
 #define MAX_COLLISIONS 128
 
