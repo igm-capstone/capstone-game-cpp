@@ -3,10 +3,57 @@
 
 #define clamp(val, _min, _max) max(min((val), (_max)), (_min));
 #define clamp01(val) clamp((val), 0, 1)
+#define PI_TWO PI * 2
 
 class Mathf
 {
 public:
+
+	inline static float Repeat(float t, float length)
+	{
+		return t - floor(t / length) * length;
+	}
+
+	inline static float LerpAngle(float a, float b, float t)
+	{
+		float num = Repeat(b - a, PI_TWO);
+		if (num > PI)
+		{
+			num -= PI_TWO;
+		}
+		return a + num * clamp01(t);
+	}
+
+	inline static float MoveTowards(float current, float target, float maxDelta)
+	{
+		if (abs(target - current) <= maxDelta)
+		{
+			return target;
+		}
+		return current + Sign(target - current) * maxDelta;
+	}
+
+	inline static float Sign(float f)
+	{
+		return (f < 0.0f) ? -1.0f : 1.0f;
+	}
+
+	inline static float MoveTowardsAngle(float current, float target, float maxDelta)
+	{
+		target = current + DeltaAngle(current, target);
+		return MoveTowards(current, target, maxDelta);
+	}
+
+	inline  static float DeltaAngle(float current, float target)
+	{
+		float num = Repeat(target - current, PI_TWO);
+		if (num > PI)
+		{
+			num -= PI_TWO;
+		}
+		return num;
+	}
+
 
 	template<class VectorType>
 	inline static VectorType Lerp(const VectorType& from, const VectorType& to, float t)
@@ -48,6 +95,8 @@ public:
 
 		return v;
 	}
+
+
 
 	template<class VectorType>
 	inline static AABB<VectorType> Fit(AABB<VectorType> inner, AABB<VectorType> outer)

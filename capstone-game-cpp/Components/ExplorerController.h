@@ -14,7 +14,10 @@ class ExplorerController : public BaseComponent
 	Application* mApplication;
 	CameraManager* mCameraManager;
 	
-	double mSprintDuration;
+	float mAngle;
+	float mMouseLock;
+
+	float mSprintDuration;
 	quatf mModelRotation;
 
 	float mAcceleration;
@@ -25,7 +28,9 @@ class ExplorerController : public BaseComponent
 	
 	// delta time in seconds
 	bool Move(float dt, vec3f& pos);
-	bool Rotate(float dt, vec3f& pos, quatf& rot);
+	bool RotateTowardsMoveDirection(float dt, vec3f& pos, quatf& rot);
+	bool RotateTowardsMousePosition(float dt, vec3f& pos, quatf& rot);
+	bool UpdateRotation(float angle, quatf & rot);
 	bool CanMove();
 
 public:

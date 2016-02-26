@@ -11,6 +11,8 @@ ExplorerController::ExplorerController() :
 	mInput((&Singleton<Engine>::SharedInstance())->GetInput()),
 	mApplication(&Application::SharedInstance()),
 	mCameraManager(&Singleton<CameraManager>::SharedInstance()),
+	mAngle(0),
+	mMouseLock(0),
 	mSprintDuration(0),
 	mAcceleration(10.0f),
 	mBaseMoveSpeed(20.0f),
@@ -60,18 +62,48 @@ bool ExplorerController::Move(float dt, vec3f& pos)
 	return false;
 }
 
-bool ExplorerController::Rotate(float dt, vec3f& pos, quatf& rot)
+bool ExplorerController::RotateTowardsMoveDirection(float dt, vec3f& pos, quatf& rot)
+{
+
+	auto lastPos = mSceneObject->mTransform->GetPosition();
+	auto dir = normalize(pos - lastPos);
+
+	if (magnitude(dir) == 0) {
+		return false;
+	}
+
+	//TRACE_LINE(lastPos, lastPos + dir * 5, Colors::red);
+
+	float targetAngle = atan2(dir.y, dir.x);
+	mAngle = Mathf::LerpAngle(mAngle, targetAngle, 8 * dt);
+
+	return UpdateRotation(mAngle, rot);
+}
+
+bool ExplorerController::RotateTowardsMousePosition(float dt, vec3f& pos, quatf& rot)
 {
 	// rotate towards mouse
-	
+
 	auto mousePosition = mCameraManager->Screen2WorldAt(mInput->mousePosition, pos.z);
+	auto lastPos = mSceneObject->mTransform->GetPosition();
+	auto dir = normalize(mousePosition - lastPos);
 
-	TRACE_LINE(pos, mousePosition, Colors::red);
+	if (magnitude(dir) == 0) {
+		return false;
+	}
 
-	auto dir = mousePosition - pos;
-	quatf newRot = normalize(quatf::angleAxis(atan2(dir.y, dir.x), vec3f(0, 0, 1)) * quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0));
+	//TRACE_LINE(lastPos, lastPos + dir * 5, Colors::green);
 
-	auto hasRotated = (rot == newRot);
+	float targetAngle = atan2(dir.y, dir.x);
+	mAngle = Mathf::LerpAngle(mAngle, targetAngle, 15 * dt);
+
+	return UpdateRotation(mAngle, rot);
+}
+
+bool ExplorerController::UpdateRotation(float angle, quatf& rot) {
+	quatf newRot = normalize(quatf::angleAxis(angle, vec3f(0, 0, 1)) * quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0));
+
+	auto hasRotated = rot != newRot;
 	if (hasRotated && CanMove())
 	{
 		rot = newRot;
@@ -100,11 +132,21 @@ bool ExplorerController::Update(double milliseconds)
 	// delta time in seconds
 	float dt = float(milliseconds) * 0.001f;
 
+	// this line is to prevent huge dts during debug time
+	dt = min(dt, 0.05);
+
 	auto pos = mSceneObject->mTransform->GetPosition();
 	auto rot = mSceneObject->mTransform->GetRotation();
 
 	bool hasMoved   = Move(dt, pos);
-	bool hasRotated = Rotate(dt, pos, rot);
+	bool hasRotated = false;
+	if (mMouseLock) {
+		mMouseLock = max(mMouseLock - dt, 0);
+		hasRotated = RotateTowardsMousePosition(dt, pos, rot);
+	}
+	else {
+		hasRotated = RotateTowardsMoveDirection(dt, pos, rot);
+	}
 
 	if (hasMoved /*|| hasRotated*/)
 	{
@@ -114,6 +156,10 @@ bool ExplorerController::Update(double milliseconds)
 	else
 	{
 		PauseStateAnimation(ANIM_STATE_WALK);
+	}
+
+	if (mInput->GetMouseButtonDown(MOUSEBUTTON_RIGHT)) {
+		mMouseLock = .2f;
 	}
 
 	UpdateInteractWill();
