@@ -130,6 +130,7 @@ void Level01::VInitialize()
 
 void Level01::InitializeAssets()
 {
+	// Pre-load models
 	mModelManager->LoadModel<GPU::Vertex3>(kWallModelName);
 	mModelManager->LoadModel<GPU::Vertex3>(kTriangleWallModelName);
 	mModelManager->LoadModel<GPU::Vertex3>(kWallDoubleDoorModelName);
@@ -138,6 +139,7 @@ void Level01::InitializeAssets()
 	mModelManager->LoadModel<GPU::Vertex3>(kCurvedWallModelName);
 	mModelManager->LoadModel<GPU::Vertex3>(kFloorModelName);
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
+	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 
 	mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 
