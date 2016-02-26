@@ -2,10 +2,10 @@
 #include "MinionController.h"
 #include <BehaviorTree/BehaviorTree.h>
 #include <BehaviorTree/Sequence.h>
+#include <BehaviorTree/Condition.h>
+#include <BehaviorTree/PrioritySelector.h>
 #include <AIManager.h>
 #include <Mathf.h>
-#include <PrioritySelector.h>
-#include <BehaviorTree/Condition.h>
 
 MinionController::MinionController():
 	mAI(Singleton<AIManager>::SharedInstance())

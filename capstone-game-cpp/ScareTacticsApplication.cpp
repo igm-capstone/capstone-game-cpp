@@ -276,7 +276,6 @@ void ScareTacticsApplication::VUpdate(float deltaTime)
 	if (mCurrentScene)
 	{
 		UpdateGroundMousePosition();
-
 		mCurrentScene->VUpdate(deltaTime);
 		if (mAcumTimer > 1000.0f / FIXED_UPDATE) {
 			mCurrentScene->VFixedUpdate(mAcumTimer);

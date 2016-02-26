@@ -17,7 +17,7 @@ void IterableComposite::OnInitialize(Behavior& bh, void* data)
 	auto& self = static_cast<IterableComposite&>(bh);
 
 	self.mCurrent = self.mChildren.begin();
-	self.mBehaviorTree->Start(**self.mCurrent, { &OnChildComplete, &self, data });
+	//self.mBehaviorTree->Start(**self.mCurrent, { &OnChildComplete, &self, data });
 }
 
 void IterableComposite::OnReset(Behavior& bh, void* data)
@@ -75,7 +75,7 @@ BehaviorStatus IterableComposite::OnUpdate(Behavior& bh, void* data)
 	// always return running,
 	// mStatus will be set to SUCCESS or FAILURE when a children is completed
 	// using BehaviorTree::Stop(this, status);
-	return BehaviorStatus::Running;
+	//return BehaviorStatus::Running;
 
 	for (;;)
 	{
@@ -102,7 +102,7 @@ BehaviorStatus IterableComposite::OnUpdate(Behavior& bh, void* data)
 		//ASSERT(child.GetStatus() == fallthrough);
 		if (child.GetStatus() == BehaviorStatus::Running)
 		{
-			return  BehaviorStatus::Running;
+			return BehaviorStatus::Running;
 		}
 
 		// otherwise, move on to the next child
@@ -115,9 +115,5 @@ BehaviorStatus IterableComposite::OnUpdate(Behavior& bh, void* data)
 			self.mCurrent = self.mChildren.begin();
 			return fallthrough;
 		}
-
-		// start the execution of the next child 
-		// and get notified on it's completion
-		//self.mBehaviorTree->Start(**self.mCurrent, { &OnChildComplete, &self, data });
 	}
 }

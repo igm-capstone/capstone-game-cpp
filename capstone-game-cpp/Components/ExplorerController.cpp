@@ -8,6 +8,7 @@ using namespace cliqCity::graphicsMath;
 ExplorerController::ExplorerController() :
 	mInput((&Singleton<Engine>::SharedInstance())->GetInput()), 
 	mApplication(&Application::SharedInstance()),
+	mCameraManager(&Singleton<CameraManager>::SharedInstance()),
 	mSprintDuration(0),
 	mAcceleration(10.0f), 
 	mBaseMoveSpeed(20.0f), 
@@ -59,13 +60,13 @@ bool ExplorerController::Move(float dt, vec3f& pos)
 bool ExplorerController::Rotate(float dt, vec3f& pos, quatf& rot)
 {
 	// rotate towards mouse
-	auto mousePosition = mApplication->mGroundMousePosition;
-	mousePosition.z = 0;
+	
+	auto mousePosition = mCameraManager->Screen2WorldAt(mInput->mousePosition, pos.z);
 
 	TRACE_LINE(pos, mousePosition, Colors::red);
 
 	auto dir = mousePosition - pos;
-	quatf newRot = normalize(quatf::angleAxis(atan2(dir.y, dir.x), vec3f(0, 0, 1)) * mModelRotation);
+	quatf newRot = normalize(quatf::angleAxis(atan2(dir.y, dir.x), vec3f(0, 0, 1)) * quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0));
 
 	auto hasRotated = rot == newRot;
 	rot = newRot;

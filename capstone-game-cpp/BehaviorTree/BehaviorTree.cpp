@@ -10,6 +10,7 @@ void BehaviorTree::Start(Behavior& bh, BehaviorObserver observer)
 void BehaviorTree::Start(Behavior& bh)
 {
 	mBehaviors.push_front(&bh);
+	mBehavior = &bh;
 }
 
 void BehaviorTree::Stop(Behavior& bh, BehaviorStatus result)
@@ -22,6 +23,10 @@ void BehaviorTree::Stop(Behavior& bh, BehaviorStatus result)
 
 void BehaviorTree::Tick(void* userData)
 {
+	mBehavior->Tick(userData);
+
+	return;
+
 	// placeholder for end of frame
 	mBehaviors.push_back(nullptr);
 

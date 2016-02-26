@@ -840,7 +840,7 @@ void Level01::ComputeGrid()
 	mDeviceContext->CSSetShaderResources(0, 1, &mSimpleSrcDataSRV);			//Simple grid data
 	mDeviceContext->CSSetUnorderedAccessViews(0, 1, &mOutputDataSRV, NULL);	//Output
 
-	for (int i = 0; i < 50; i++) {
+	for (int i = 0; i < 30; i++) {
 		mRenderer->GetDeviceContext()->Dispatch(mAIManager->mGrid.mNumRows / GRID_MULT_OF, mAIManager->mGrid.mNumCols / GRID_MULT_OF, 1);
 		//mDeviceContext->CSSetShaderResources(0, 1, mNullSRV);
 		mDeviceContext->CopyResource(mSimpleSrcData, mOutputData);

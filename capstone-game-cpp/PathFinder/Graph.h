@@ -93,12 +93,12 @@ namespace PathFinder
 		Connection<T> GetBestFitConnection(T* node)
 		{
 			Connection<T> result;
-			result.cost = FLT_MAX;
+			result.to = nullptr;
 
 			auto connections = GetNodeConnections(node);
 			for (auto& connection : *connections)
 			{
-				if (connection.cost < result.cost)
+				if (result.to == nullptr || connection.to->weight < result.to->weight)
 				{
 					result = connection;
 				}

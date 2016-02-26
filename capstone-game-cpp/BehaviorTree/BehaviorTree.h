@@ -13,4 +13,5 @@ public:
 
 protected:
 	std::deque<Behavior*> mBehaviors;
+	Behavior* mBehavior;
 };

@@ -26,7 +26,7 @@ Explorer::Explorer()
 	mController->mIsActive = false;
 	mController->mSpeed = 0.05f;
 	mController->RegisterMoveCallback(&OnMove);
-	mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
+	mController->SetBaseRotation(-0.5f * PI, 0.0f, 0.0f);
 
 	Application::SharedInstance().GetModelManager()->LoadModel<GPU::SkinnedVertex>("Minion_Test");
 	Application::SharedInstance().GetModelManager()->GetModel("Minion_Test")->Link(this);

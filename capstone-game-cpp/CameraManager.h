@@ -56,12 +56,15 @@ public:
 	// to world at z0
 	vec3f Viewport2WorldAtZ0(const vec2f& viewport);
 	vec3f Screen2WorldAtZ0(const vec2f& screen);
+	vec3f Viewport2WorldAt(const vec2f& viewport, float z);
+	vec3f Screen2WorldAt(const vec2f& screen, float z);
 
 	// to ray
 	Rig3D::Ray<vec3f> Viewport2Ray(const vec2f& viewport);
 	Rig3D::Ray<vec3f> Screen2Ray(const vec2f& screen);
 
 private:
+	vec3f Viewport2WorldAt_Unclamped(const vec2f& viewport, float z);
 	//For Screen2World/Pixel2Unit calculation
 	Rig3D::Ray<vec3f> pRay;
 	Rig3D::Plane<vec3f> pPlane;

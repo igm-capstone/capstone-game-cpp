@@ -10,7 +10,7 @@ CameraManager::CameraManager()
 	mRenderer = Rig3D::Singleton<Rig3D::Engine>::SharedInstance().GetRenderer();
 	MoveCamera(vec3f(0,0,0), vec3f(0,0,-100)); //default camera
 
-	pPlane.normal = vec3f(0, 0, -1);
+	pPlane.normal = vec3f(0, 0, 1);
 	pPlane.distance = 0;
 
 	mIsOrto = false;
@@ -91,24 +91,35 @@ vec2f CameraManager::Screen2Viewport(const vec2f& screen)
 vec3f CameraManager::Screen2WorldAtZ0(const vec2f& screen)
 {
 	vec2f viewport = Screen2Viewport(screen);
-	
-	Viewport2Ray(viewport);
-
-	vec3f world;
-	IntersectRayPlane(pRay, pPlane, world, pDist);
-	return world;
+	return Viewport2WorldAt_Unclamped(viewport, 0);
 }
 
 vec3f CameraManager::Viewport2WorldAtZ0(const vec2f& viewport)
 {
-	vec2f clamped = Mathf::Clamp01(viewport);
-	Viewport2Ray(clamped);
+	return Viewport2WorldAt(viewport, 0);
+}
+
+vec3f CameraManager::Screen2WorldAt(const vec2f& screen, float z)
+{
+	vec2f viewport = Screen2Viewport(screen);
+	return Viewport2WorldAt_Unclamped(viewport, z);
+}
+
+vec3f CameraManager::Viewport2WorldAt(const vec2f& viewport, float z)
+{
+	vec2f clamped = Mathf::Clamp(viewport, vec2f(-1, -1), vec2f(1, 1));
+	return Viewport2WorldAt_Unclamped(clamped, z);
+}
+
+vec3f CameraManager::Viewport2WorldAt_Unclamped(const vec2f& viewport, float z)
+{
+	Viewport2Ray(viewport);
 
 	vec3f world;
+	pPlane.distance = z;
 	IntersectRayPlane(pRay, pPlane, world, pDist);
 	return world;
 }
-
 
 Ray<vec3f> CameraManager::Screen2Ray(const vec2f& screen)
 {

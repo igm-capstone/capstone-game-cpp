@@ -11,6 +11,7 @@ class ExplorerController : public BaseComponent
 
 	class Input* mInput;
 	Application* mApplication;
+	CameraManager* mCameraManager;
 	
 	double mSprintDuration;
 	quatf mModelRotation;
@@ -19,7 +20,6 @@ class ExplorerController : public BaseComponent
 	float mBaseMoveSpeed;
 	float mSpeedMultiplier;
 	vec3f mCurrentSpeed;
-
 	void UpdateInteractWill();
 
 	// delta time in seconds
