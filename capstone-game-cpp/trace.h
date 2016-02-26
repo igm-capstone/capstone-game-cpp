@@ -79,6 +79,7 @@ public:
 	Trace &operator << (long value) { ss << value; return *this; }
 	Trace &operator << (bool value) { ss << value; return *this; }
 	Trace &operator << (char* value) { ss << value; return *this; }
+	Trace &operator << (void* value) { ss << value; return *this; }
 	Trace &operator << (const char* value) { ss << value; return *this; }
 	Trace &operator << (std::string value) { ss << value; return *this; }
 	Trace &operator << (Trace &(*function)(Trace &trace)) { return function(*this); }

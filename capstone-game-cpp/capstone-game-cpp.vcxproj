@@ -112,6 +112,7 @@
     <ClCompile Include="Components\AnimationController.cpp" />
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="CollisionManager.cpp" />
+    <ClCompile Include="Components\AnimationUtility.cpp" />
     <ClCompile Include="Components\ColliderComponent.cpp" />
     <ClCompile Include="Components\DominationPointController.cpp" />
     <ClCompile Include="Components\ExplorerController.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="Components\AnimationController.h" />
     <ClInclude Include="CameraManager.h" />
     <ClInclude Include="CollisionManager.h" />
+    <ClInclude Include="Components\AnimationUtility.h" />
     <ClInclude Include="Components\BaseComponent.h" />
     <ClInclude Include="Components\ColliderComponent.h" />
     <ClInclude Include="Components\DominationPointController.h" />

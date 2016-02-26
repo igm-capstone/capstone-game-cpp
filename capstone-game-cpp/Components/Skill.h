@@ -26,6 +26,7 @@ class Skill : public BaseComponent
 	EXPOSE_CALLBACK_3(Use, float, BaseSceneObject*, vec3f)
 
 public:
+	vec3f mColliderOffset;
 	float mCoolDown;
 	float mDuration;
 	float mLastUsed;

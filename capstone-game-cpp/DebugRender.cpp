@@ -8,10 +8,13 @@
 #include "SceneObjects/StaticCollider.h"
 #include  <ScareTacticsApplication.h>
 #include "SceneObjects/Region.h"
+#include "Components/Skill.h"
+#include "SceneObjects/Explorer.h"
 
 namespace
 {
 	Rig3D::IMesh* gColliderMesh = nullptr;
+	Rig3D::IMesh* gSphereMesh = nullptr;
 	ID3D11RasterizerState* gWireframeRS = nullptr;
 	Rig3D::Renderer* gRenderer = nullptr;
 	Application* gApplication = nullptr;
@@ -44,6 +47,12 @@ void CreateColliderMesh(void* allocator)
 
 	vertices.clear();
 	indices.clear();
+
+	Rig3D::Geometry::Sphere(vertices, indices, 6, 6, 0.5f);
+
+	meshLibrary.NewMesh(&gSphereMesh, gRenderer);
+	gRenderer->VSetMeshVertexBuffer(gSphereMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
+	gRenderer->VSetMeshIndexBuffer(gSphereMesh, &indices[0], indices.size());
 }
 
 void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pModel)
@@ -69,6 +78,8 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, &color, 3);
 	gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 0, 0);
 
+	gRenderer->VBindMesh(gColliderMesh);
+
 	for (Region& e : Factory<Region>())
 	{
 	//	if (e.mBoxCollider->mLayer != COLLISION_LAYER_WALL) continue;
@@ -77,8 +88,33 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
 		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 3, 2);
 
-		gRenderer->VBindMesh(gColliderMesh);
 		gRenderer->VDrawIndexed(0, gColliderMesh->GetIndexCount());
+	}
+
+	for (StaticCollider& e : Factory<StaticCollider>())
+	{
+		//	if (e.mBoxCollider->mLayer != COLLISION_LAYER_WALL) continue;
+		model->world = e.mTransform->GetWorldMatrix().transpose();
+		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
+		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
+		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 3, 2);
+
+		gRenderer->VDrawIndexed(0, gColliderMesh->GetIndexCount());
+	}
+
+	gRenderer->VBindMesh(gSphereMesh);
+
+	for (Explorer& s : Factory<Explorer>())
+	{
+		if (s.mMeleeColliderComponent.asSphereColliderComponent)
+		{
+			SphereColliderComponent* c = s.mMeleeColliderComponent.asSphereColliderComponent;
+			model->world = (mat4f::scale(c->mCollider.radius) * mat4f::translate(c->mCollider.origin)).transpose();
+			gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
+			gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
+
+			gRenderer->VDrawIndexed(0, gSphereMesh->GetIndexCount());
+		}
 	}
 
 	gRenderer->GetDeviceContext()->RSSetState(nullptr);
@@ -87,5 +123,6 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 void ReleaseGlobals()
 {
 	gColliderMesh->~IMesh();
+	gSphereMesh->~IMesh();
 	ReleaseMacro(gWireframeRS);
 }

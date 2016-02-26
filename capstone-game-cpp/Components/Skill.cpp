@@ -64,6 +64,10 @@ public:
 
 void Skill::Update()
 {
+	if (!mIsActive)
+	{
+		return;
+	}
 
 	//--- check if a binding was activated
 

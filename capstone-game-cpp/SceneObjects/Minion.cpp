@@ -6,7 +6,7 @@
 #include <Components/AnimationController.h>
 #include <ScareTacticsApplication.h>
 #include <Vertex.h>
-
+#include <Components/AnimationUtility.h>
 
 Minion::Minion()
 {
@@ -32,6 +32,7 @@ Minion::Minion()
 	mAnimationController->mSceneObject = this;
 	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
 	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
+	SetRestFrameIndex(mAnimationController, gMinionRestFrameIndex);
 }
 
 Minion::~Minion()
@@ -47,8 +48,6 @@ void Minion::Spawn(vec3f pos, int UUID)
 
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
-
-	mAnimationController->PlayLoopingAnimation("Minion_01_Animation_Pass_1_1_1.0007");
 }
 
 void Minion::OnMove(BaseSceneObject* obj, vec3f newPos)

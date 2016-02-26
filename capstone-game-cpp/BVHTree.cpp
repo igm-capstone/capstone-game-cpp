@@ -3,6 +3,7 @@
 #include "SceneObjects/StaticCollider.h"
 #include "SceneObjects/Region.h"
 #include <SceneObjects/BaseSceneObject.h>
+#include <Components/Skill.h>
 #include <Components/ColliderComponent.h>
 #include <Rig3D/Intersection.h>
 #include <Colors.h>
@@ -14,7 +15,7 @@
 #define WALL_PARENT_LAYER_INDEX		1
 #define EXPLORER_PARENT_LAYER_INDEX 1
 #define REGION_PARENT_LAYER_INDEX   1
-
+#define SKILL_PARENT_LAYER_INDEX	1
 #define DRAW_DEBUG 1
 
 #if (DRAW_DEBUG == 1)
@@ -49,40 +50,6 @@ void RenderDebug(BVHTree& bvhTree)
 	}
 }
 #endif
-
-inline int OBBComponentTest(BaseColliderComponent* a, OrientedBoxColliderComponent* b)
-{
-	return IntersectOBBOBB(reinterpret_cast<OrientedBoxColliderComponent*>(a)->mCollider, b->mCollider);
-}
-
-inline int SphereComponentTest(BaseColliderComponent* a, OrientedBoxColliderComponent* b)
-{
-	vec3f cp;
-	return IntersectSphereOBB(reinterpret_cast<SphereColliderComponent*>(a)->mCollider, b->mCollider, cp);
-}
-
-struct BVHNodeLayerFilter
-{
-	CLayer					layer;
-
-	BVHNodeLayerFilter(CLayer layer) : layer(layer)
-	{
-		
-	}
-
-	bool operator()(const BVHNode& other) const
-	{
-
-		return layer == other.object->mLayer;
-	}
-};
-
-struct BVHNodeIntesection
-{
-	CLayer	layer;
-	int		parentIndex;
-	
-};
 
 static vec3f kDefaultOrientation[3] =
 {
@@ -133,15 +100,24 @@ void BVHTree::Update()
 #endif
 	mLayerStartIndex.erase(COLLISION_LAYER_EXPLORER);
 	mLayerStartIndex.erase(COLLISION_LAYER_MINION);
+	mLayerStartIndex.erase(COLLISION_LAYER_SKILL);
 
 	mNodes.erase(std::remove_if(mNodes.begin(), mNodes.end(), [](const BVHNode& other)
 	{
-		return other.object->mLayer == COLLISION_LAYER_EXPLORER || other.object->mLayer == COLLISION_LAYER_MINION;
+		return 
+			other.object->mLayer == COLLISION_LAYER_EXPLORER || 
+			other.object->mLayer == COLLISION_LAYER_MINION ||
+			other.object->mLayer == COLLISION_LAYER_SKILL;
 	}), mNodes.end());
 
 	for (Explorer& explorer : Factory<Explorer>())
 	{
-		AddNodeRecursively(explorer.mCollider, EXPLORER_PARENT_LAYER_INDEX, 1, 0, 0, SphereComponentTest);
+		AddNodeRecursively(explorer.mCollider, EXPLORER_PARENT_LAYER_INDEX, 1, 0, 0);
+
+		if (explorer.mMeleeColliderComponent.asBaseColliderComponent && explorer.mMeleeColliderComponent.asBaseColliderComponent->mIsActive)
+		{
+			AddNodeRecursively(explorer.mMeleeColliderComponent.asBaseColliderComponent, SKILL_PARENT_LAYER_INDEX, 1, 0, 0);
+		}
 	}
 }
 
@@ -175,18 +151,18 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 			pOBB->mLayer = COLLISION_LAYER_QUADRANT;
 			pOBB->mSceneObject = this;
 
-			AddNodeRecursively(pOBB, 0, 0, 0, 0, OBBComponentTest);
+			AddNodeRecursively(pOBB, 0, 0, 0, 0);
 		}
 	}
 
 	for (Region& region : Factory<Region>())
 	{
-		AddNodeRecursively(region.mColliderComponent, REGION_PARENT_LAYER_INDEX, 0, 0, 0, OBBComponentTest);
+		AddNodeRecursively(region.mColliderComponent, REGION_PARENT_LAYER_INDEX, 0, 0, 0);
 	}
 
 	for (StaticCollider& collider : Factory<StaticCollider>())
 	{
-		AddNodeRecursively(collider.mBoxCollider, WALL_PARENT_LAYER_INDEX, 0, 0, 0, OBBComponentTest);
+		AddNodeRecursively(collider.mBoxCollider, WALL_PARENT_LAYER_INDEX, 0, 0, 0);
 	}
 }
 
@@ -204,7 +180,7 @@ void BVHTree::AddNode(BaseColliderComponent* pColliderComponent, const int& pare
 	pNode->parentIndex	= parentIndex;
 }
 
-void BVHTree::AddNodeRecursively(BaseColliderComponent* pColliderComponent, const int& parentLayerIndex, const int& layerIndex, const int& parentIndex, const int& depth, IntersectionTest intersectionTest)
+void BVHTree::AddNodeRecursively(BaseColliderComponent* pColliderComponent, const int& parentLayerIndex, const int& layerIndex, const int& parentIndex, const int& depth)
 {
 	for (uint32_t i = parentIndex; i < mNodes.size(); i++)
 	{
@@ -213,11 +189,11 @@ void BVHTree::AddNodeRecursively(BaseColliderComponent* pColliderComponent, cons
 			OrientedBoxColliderComponent* pOBB = reinterpret_cast<OrientedBoxColliderComponent*>(mNodes[i].object);
 
 			vec3f cp;
-			if (intersectionTest(pColliderComponent, pOBB))
+			if (pColliderComponent->mOnObbTest(pColliderComponent, pOBB))
 			{
 				if (mNodes[i].object->mLayer != gAllLayers[parentLayerIndex])
 				{
-					AddNodeRecursively(pColliderComponent, parentLayerIndex, layerIndex + 1, static_cast<int>(i), depth + 1, intersectionTest);
+					AddNodeRecursively(pColliderComponent, parentLayerIndex, layerIndex + 1, static_cast<int>(i), depth + 1);
 				}
 				else
 				{
