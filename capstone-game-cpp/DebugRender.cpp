@@ -9,6 +9,7 @@
 #include  <ScareTacticsApplication.h>
 #include "SceneObjects/Region.h"
 #include "Components/Skill.h"
+#include "SceneObjects/Explorer.h"
 
 namespace
 {
@@ -88,11 +89,11 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 
 	gRenderer->VBindMesh(gSphereMesh);
 
-	for (Skill& s : Factory<Skill>())
+	for (Explorer& s : Factory<Explorer>())
 	{
-		if (s.mColliderComponent)
+		if (s.mMeleeColliderComponent.asSphereColliderComponent)
 		{
-			SphereColliderComponent* c = reinterpret_cast<SphereColliderComponent*>(s.mColliderComponent);
+			SphereColliderComponent* c = s.mMeleeColliderComponent.asSphereColliderComponent;
 			model->world = (mat4f::scale(c->mCollider.radius) * mat4f::translate(c->mCollider.origin)).transpose();
 			gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
 			gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);

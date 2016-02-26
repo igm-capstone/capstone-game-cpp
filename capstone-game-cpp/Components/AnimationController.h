@@ -83,4 +83,3 @@ public:
 	void UpdateAnimation(SkeletalAnimation* pCurrentAnimation, float milliseconds, float framesPerMS);
 	void SetRestPose();
 };
-
