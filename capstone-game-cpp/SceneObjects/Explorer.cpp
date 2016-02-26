@@ -49,7 +49,6 @@ Explorer::Explorer()
 	mController->mIsActive = false;
 	mController->mSpeed = 0.05f;
 	mController->RegisterMoveCallback(&OnMove);
-	mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
 	mController->mAnimationController = mAnimationController;	// Be careful if you move this code. AnimationController should exist before here.
 
 	mCollider = Factory<SphereColliderComponent>::Create();

@@ -15,7 +15,6 @@ class ExplorerController : public BaseComponent
 	CameraManager* mCameraManager;
 	
 	double mSprintDuration;
-	quatf mModelRotation;
 
 	float mAcceleration;
 	float mBaseMoveSpeed;
@@ -36,7 +35,6 @@ public:
 	bool Update(double milliseconds);
 	void Sprint(float duration);
 	void Melee();
-	void SetBaseRotation(const float& x, const float& y, const float& z);
 
 	void PlayStateAnimation(AnimationControllerState state);
 	void PauseStateAnimation(AnimationControllerState state);
