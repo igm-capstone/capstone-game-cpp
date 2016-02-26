@@ -10,7 +10,9 @@ class MinionController : public BaseComponent
 
 public:
 	float mSpeed;
+	float mThinkTime;
 	class AIManager& mAI;
+	class Rig3D::Timer& mTimer;
 	class BehaviorTree* mBehaviorTree;
 
 	bool Update(double milliseconds);
@@ -18,6 +20,7 @@ public:
 	vec3f mTarget;
 	static bool IsExplorerInRange(class Behavior& bh, void* data);
 	static enum class BehaviorStatus MoveTowardsExplorer(class Behavior& bh, void* data);
+	static enum class BehaviorStatus Think(class Behavior & bh, void * data);
 	static enum class BehaviorStatus FindTarget(class Behavior& bh, void* data);
 	static enum class BehaviorStatus MoveTowardsTarget(class Behavior& bh, void* data);
 
