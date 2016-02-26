@@ -3,6 +3,8 @@
 #include "BaseComponent.h"
 
 typedef int(*InteresectOBB)(class BaseColliderComponent*, class OrientedBoxColliderComponent*);
+typedef int(*InteresectSphere)(class BaseColliderComponent*, class SphereColliderComponent*);
+
 
 enum CLayer : short
 {
@@ -20,7 +22,8 @@ class BaseColliderComponent :
 	public BaseComponent
 {
 public:
-	InteresectOBB mOnObbTest;
+	InteresectOBB	 mOnObbTest;
+	InteresectSphere mOnSphereTest;
 	vec3f	mOffset;
 	CLayer	mLayer;
 	bool	mIsDynamic;
@@ -34,7 +37,7 @@ public:
 	EXPOSE_CALLBACK_1(TriggerExit, BaseSceneObject*)
 
 protected:
-	BaseColliderComponent() : mOnObbTest(nullptr), mOffset(0.0f), mLayer(COLLISION_LAYER_ROOT), mIsDynamic(true), mIsTrigger(false) {};
+	BaseColliderComponent() : mOnObbTest(nullptr), mOnSphereTest(nullptr), mOffset(0.0f), mLayer(COLLISION_LAYER_ROOT), mIsDynamic(true), mIsTrigger(false) {};
 	~BaseColliderComponent() {};
 };
 
@@ -48,6 +51,7 @@ public:
 	~BoxColliderComponent();
 
 	static int IntersectAABBOBB(class BaseColliderComponent*, class OrientedBoxColliderComponent*);
+	static int IntersectAABBSphere(class BaseColliderComponent*, class SphereColliderComponent*);
 };
 
 class OrientedBoxColliderComponent : 
@@ -60,6 +64,7 @@ public:
 	~OrientedBoxColliderComponent();
 
 	static int IntersectOBBOBB(class BaseColliderComponent*, class OrientedBoxColliderComponent*);
+	static int IntersectOBBSphere(class BaseColliderComponent*, class SphereColliderComponent*);
 };
 
 class QuadColliderComponent :
@@ -82,6 +87,7 @@ public:
 	~SphereColliderComponent();
 
 	static int IntersectSphereOBB(class BaseColliderComponent*, class OrientedBoxColliderComponent*);
+	static int IntersectSphereSphere(class BaseColliderComponent*, class SphereColliderComponent*);
 };
 
 class PlaneColliderComponent :

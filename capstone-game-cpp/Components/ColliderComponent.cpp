@@ -9,6 +9,7 @@ BoxColliderComponent::BoxColliderComponent()
 	mCollider.origin	= { 0.0f, 0.0f, 0.0f };
 	mCollider.halfSize	= { 0.5f, 0.5f, 0.5f };
 	mOnObbTest = IntersectAABBOBB;
+	mOnSphereTest = IntersectAABBSphere;
 }
 
 BoxColliderComponent::~BoxColliderComponent()
@@ -18,6 +19,12 @@ BoxColliderComponent::~BoxColliderComponent()
 int BoxColliderComponent::IntersectAABBOBB(class BaseColliderComponent* self, class OrientedBoxColliderComponent* other)
 {
 	return Rig3D::IntersectOBBAABB(other->mCollider, reinterpret_cast<BoxColliderComponent*>(self)->mCollider);
+}
+
+int BoxColliderComponent::IntersectAABBSphere(BaseColliderComponent* self, SphereColliderComponent* other)
+{
+	vec3f unused;
+	return Rig3D::IntersectSphereAABB(other->mCollider, reinterpret_cast<BoxColliderComponent*>(self)->mCollider, unused);
 }
 
 #pragma endregion 
@@ -34,6 +41,7 @@ OrientedBoxColliderComponent::OrientedBoxColliderComponent()
 	mCollider.halfSize = { 0.5f, 0.5f, 0.5f };
 
 	mOnObbTest = IntersectOBBOBB;
+	mOnSphereTest = IntersectOBBSphere;
 }
 
 OrientedBoxColliderComponent::~OrientedBoxColliderComponent()
@@ -43,6 +51,12 @@ OrientedBoxColliderComponent::~OrientedBoxColliderComponent()
 int OrientedBoxColliderComponent::IntersectOBBOBB(class BaseColliderComponent* self, class OrientedBoxColliderComponent* other)
 {
 	return Rig3D::IntersectOBBOBB(reinterpret_cast<OrientedBoxColliderComponent*>(self)->mCollider, other->mCollider);
+}
+
+int OrientedBoxColliderComponent::IntersectOBBSphere(BaseColliderComponent* self, SphereColliderComponent* other)
+{
+	vec3f unused;
+	return Rig3D::IntersectSphereOBB(other->mCollider, reinterpret_cast<OrientedBoxColliderComponent*>(self)->mCollider, unused);
 }
 
 #pragma endregion 
@@ -68,7 +82,8 @@ SphereColliderComponent::SphereColliderComponent()
 	mCollider.origin = { 0.0f, 0.0f, 0.0f };
 	mCollider.radius = 0.5f;
 
-	mOnObbTest = IntersectSphereOBB;
+	mOnObbTest		= IntersectSphereOBB;
+	mOnSphereTest	= IntersectSphereSphere;
 }
 
 SphereColliderComponent::~SphereColliderComponent()
@@ -79,6 +94,11 @@ int SphereColliderComponent::IntersectSphereOBB(class BaseColliderComponent* sel
 {
 	vec3f unused;
 	return Rig3D::IntersectSphereOBB(reinterpret_cast<SphereColliderComponent*>(self)->mCollider, other->mCollider, unused);
+}
+
+int SphereColliderComponent::IntersectSphereSphere(BaseColliderComponent* self, SphereColliderComponent* other)
+{
+	return Rig3D::IntersectSphereSphere(other->mCollider, reinterpret_cast<SphereColliderComponent*>(self)->mCollider);
 }
 
 #pragma endregion 
