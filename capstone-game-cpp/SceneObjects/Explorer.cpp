@@ -10,7 +10,8 @@
 #include <Vertex.h>
 #include <Components/AnimationUtility.h>
 
-#define MELEE_SKILL_INDEX 1
+#define SPRINT_SKILL_INDEX	0
+#define MELEE_SKILL_INDEX	1
 
 int GetExplorerID(Explorer* explorer)
 {
@@ -76,6 +77,7 @@ void Explorer::Spawn(vec3f pos, int UUID)
 
 	mAnimationController->SetState(ANIM_STATE_IDLE);
 
+	// Add more as we get more classes.
 	switch (GetExplorerID(this))
 	{
 	default:
@@ -93,7 +95,7 @@ void Explorer::Spawn(vec3f pos, int UUID)
 		sprint->SetBinding(SkillBinding().Set(KEYCODE_A));
 		sprint->Setup(2, 1, DoSprint);
 		sprint->mSceneObject = this;
-		mSkills[0] = sprint;
+		mSkills[SPRINT_SKILL_INDEX] = sprint;
 
 		auto melee = Factory<Skill>::Create();
 		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
@@ -104,24 +106,6 @@ void Explorer::Spawn(vec3f pos, int UUID)
 		break;
 	}
 	}
-	//case 1:
-	//{
-
-	//	break;
-	//}
-	//case 2:
-	//{
-
-	//	break;
-	//}
-	//case 3:
-	//{
-
-	//	break;
-	//}
-	//default:
-	//	break;
-	//}
 }
 
 void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
@@ -158,7 +142,7 @@ void Explorer::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newR
 	auto e = static_cast<Explorer*>(obj);
 	e->mTransform->SetPosition(newPos);
 	e->mTransform->SetRotation(newRot);
-	e->mCollider->mCollider.origin = newPos;
+	e->UpdateComponents(newRot, newPos);
 }
 
 void Explorer::OnNetHealthChange(BaseSceneObject* obj, float newVal)
@@ -190,39 +174,19 @@ void Explorer::UpdateComponents(quatf rotation, vec3f position)
 {
 	mCollider->mCollider.origin = position;
 	
+	// Add more cases as we add explorer types
 	switch (GetExplorerID(this))
 	{
-	case 0:
+	default:
 	{
 		mMeleeColliderComponent.asSphereColliderComponent->mCollider.origin = position + (rotation * mMeleeColliderComponent.asSphereColliderComponent->mOffset);
-		TRACE_LOG("SC POS: " << mMeleeColliderComponent.asSphereColliderComponent->mCollider.origin);
-
 		break;
 	}
-	case 1:
-	{
-
-		break;
-	}
-	case 2:
-	{
-
-		break;
-	}
-	case 3:
-	{
-
-		break;
-	}
-	default:
-		break;
 	}
 }
 
 void Explorer::DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
 {
-	TRACE_LOG("Sprint!!");
-
 	auto e = reinterpret_cast<Explorer*>(obj);
 	e->mController->Sprint(duration);
 }
@@ -247,6 +211,8 @@ void Explorer::OnMeleeStop(void* obj)
 }
 
 void Explorer::OnMeleeHit(BaseSceneObject* self, BaseSceneObject* other)
-{
-	TRACE("MELEE HIT SOMETHING\n");
+{	
+	// THis is currently an assumption that this object will have a Health component
+	auto e = reinterpret_cast<Explorer*>(other);
+	e->mHealth->TakeDamage(100.0f);
 }
