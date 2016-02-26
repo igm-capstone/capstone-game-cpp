@@ -2,9 +2,9 @@
 #include <Components/AnimationUtility.h>
 #include <Components/AnimationController.h>
 
-Animation gMinionWalk{ "Minion_01_Animation_Pass_1_1_1.0007", 10,	60 };
-Animation gMinionMelee{ "Minion_01_Animation_Pass_1_1_1.0007", 80,	110 };
-Animation gMinionRun{ "Minion_01_Animation_Pass_1_1_1.0007", 130,	160 };
+Animation gMinionWalk  { "Minion_01_Animation_Pass_1_1_1.0007", 10,  60,  1.8f };
+Animation gMinionMelee { "Minion_01_Animation_Pass_1_1_1.0007", 80,  110, 1 };
+Animation gMinionRun   { "Minion_01_Animation_Pass_1_1_1.0007", 130, 160, 1 };
 
 uint32_t gMinionRestFrameIndex = 5;
 
@@ -25,5 +25,5 @@ void PlayAnimation(AnimationController* animationController, Animation* animatio
 
 void SetStateAnimation(AnimationController* animationController, char state, Animation* animation, KeyframeOption* options, uint32_t count, bool shouldLoop)
 {
-	animationController->SetStateAnimation(static_cast<AnimationControllerState>(state), animation->takeName, animation->startFrameIndex, animation->endFrameIndex, options, count, shouldLoop);
+	animationController->SetStateAnimation(static_cast<AnimationControllerState>(state), animation->takeName, animation->startFrameIndex, animation->endFrameIndex, animation->speed, options, count, shouldLoop);
 }

@@ -45,7 +45,7 @@ void AnimationController::SetKeyframeOptions(KeyframeOption* options, uint32_t c
 	}
 }
 
-void AnimationController::SetStateAnimation(AnimationControllerState state, const char* name, uint32_t startIndex, uint32_t endIndex, KeyframeOption* options, uint32_t count, bool shouldLoop)
+void AnimationController::SetStateAnimation(AnimationControllerState state, const char* name, uint32_t startIndex, uint32_t endIndex, float speed, KeyframeOption* options, uint32_t count, bool shouldLoop)
 {
 	if (mStateAnimationMap.find(state) == mStateAnimationMap.end())
 	{
@@ -55,6 +55,7 @@ void AnimationController::SetStateAnimation(AnimationControllerState state, cons
 		pStateAnimation->index = FindAnimationIndex(name);
 		pStateAnimation->startFrameIndex = startIndex;
 		pStateAnimation->endFrameIndex = endIndex;
+		pStateAnimation->speed = speed;
 		pStateAnimation->shouldLoop = shouldLoop;
 		
 		for (uint32_t i = 0; i < count; i++)
@@ -83,6 +84,7 @@ void AnimationController::SetState(AnimationControllerState state)
 		mCurrentAnimationIndex		= pStateAnimation->index;
 		mCurrentAnimationStartIndex = pStateAnimation->startFrameIndex;
 		mCurrentAnimationEndIndex	= pStateAnimation->endFrameIndex;
+		mCurrentAnimationSpeed      = pStateAnimation->speed;
 		mIsLooping					= pStateAnimation->shouldLoop;
 		mCurrentAnimationPlayTime	= 0.0f;
 	}
@@ -147,12 +149,12 @@ void AnimationController::Update(double milliseconds)
 
 	SkeletalAnimation* currentAnimation = &(*mSkeletalAnimations)[mCurrentAnimationIndex];
 
-	float framesPerMS	= static_cast<float>(currentAnimation->frameCount) / currentAnimation->duration;
+	float framesPerMS	= (static_cast<float>(currentAnimation->frameCount) / currentAnimation->duration) * mCurrentAnimationSpeed;
 	float duration		= (mCurrentAnimationEndIndex - mCurrentAnimationStartIndex + 1) / framesPerMS;
 
 	if (mCurrentAnimationPlayTime <= duration)
 	{
-		UpdateAnimation(currentAnimation, static_cast<float>(milliseconds), framesPerMS);
+		UpdateAnimation(currentAnimation, static_cast<float>(milliseconds) * mCurrentAnimationSpeed, framesPerMS);
 	}
 	else
 	{

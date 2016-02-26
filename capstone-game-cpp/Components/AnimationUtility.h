@@ -6,6 +6,7 @@ struct Animation
 	const char* takeName;
 	uint32_t startFrameIndex;
 	uint32_t endFrameIndex;
+	float speed;
 };
 
 class AnimationController;
