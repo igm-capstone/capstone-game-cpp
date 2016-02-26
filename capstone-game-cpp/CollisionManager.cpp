@@ -79,6 +79,42 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 		}
 	}
 
+	std::vector<uint32_t> explorerIndices;
+	explorerIndices.reserve(MAX_EXPLORERS);
+	mBVHTree.GetNodeIndices(explorerIndices, [](const BVHNode& other)
+	{
+		return other.object->mLayer == COLLISION_LAYER_EXPLORER;
+	});
+
+	std::vector<uint32_t> skillIndices;
+	explorerIndices.reserve(MAX_EXPLORERS + MAX_EXPLORERS * MAX_EXPLORER_SKILLS); // this is  a guess...
+
+	for (uint32_t i : explorerIndices)
+	{
+		BVHNode* pNode = mBVHTree.GetNode(i);
+		int parentIndex = pNode->parentIndex;
+
+		mBVHTree.GetNodeIndices(skillIndices, COLLISION_LAYER_SKILL, [parentIndex](const BVHNode& other)
+		{
+			return other.parentIndex == parentIndex;
+		});
+
+		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
+
+		for (uint32_t s : skillIndices)
+		{
+			BVHNode* pSkillNode = mBVHTree.GetNode(s);
+
+			if (pSkillNode->object->mOnSphereTest(pSkillNode->object, pSphereComponent))
+			{
+				frameCollisions.push_back(Collision());
+
+				Collision* pTrigger = &frameCollisions.back();
+				pTrigger->colliderA.BaseCollider	= pSkillNode->object;
+				pTrigger->colliderB.SphereCollider	= pSphereComponent;
+			}
+		}
+	}
 	// Explorer / Skill
 
 

@@ -78,15 +78,15 @@ void Explorer::Spawn(vec3f pos, int UUID)
 
 	switch (GetExplorerID(this))
 	{
-	case 0:
+	default:
 	{
 		mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
 		mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.5f;
-		mMeleeColliderComponent.asSphereColliderComponent->mOffset		= { 0.0f, 0.0f, 2.75f };
-		mMeleeColliderComponent.asSphereColliderComponent->mIsActive	= false;
-		mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger	= true;
-		mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic	= false;
-		mMeleeColliderComponent.asSphereColliderComponent->mLayer		= COLLISION_LAYER_SKILL;
+		mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
+		mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
+		mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
+		mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;
+		mMeleeColliderComponent.asSphereColliderComponent->mLayer = COLLISION_LAYER_SKILL;
 		mMeleeColliderComponent.asSphereColliderComponent->RegisterTriggerEnterCallback(&OnMeleeHit);
 
 		auto sprint = Factory<Skill>::Create();
@@ -103,24 +103,25 @@ void Explorer::Spawn(vec3f pos, int UUID)
 
 		break;
 	}
-	case 1:
-	{
+	}
+	//case 1:
+	//{
 
-		break;
-	}
-	case 2:
-	{
+	//	break;
+	//}
+	//case 2:
+	//{
 
-		break;
-	}
-	case 3:
-	{
+	//	break;
+	//}
+	//case 3:
+	//{
 
-		break;
-	}
-	default:
-		break;
-	}
+	//	break;
+	//}
+	//default:
+	//	break;
+	//}
 }
 
 void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
