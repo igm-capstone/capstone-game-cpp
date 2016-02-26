@@ -248,7 +248,7 @@ public:
 
 					if (!unmapped)
 					{
-						vertex.SetUV(vec2f(GET_FLOAT(uv.mData[0]), GET_FLOAT(uv.mData[1])));
+						vertex.SetUV(vec2f(GET_FLOAT(uv.mData[0]), 1.0f - GET_FLOAT(uv.mData[1])));
 					}
 
 					// Blend info

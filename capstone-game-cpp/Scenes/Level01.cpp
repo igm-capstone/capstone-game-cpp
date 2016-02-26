@@ -249,6 +249,10 @@ void Level01::InitializeShaderResources()
 		size_t cbExplorerSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::Model), sizeof(mat4f) *  MAX_SKELETON_JOINTS, sizeof(vec4f)};
 
 		mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 4);
+
+		const char* filenames[] = { "Assets/Textures/basicminion_body.png" };
+		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 1);
+		mRenderer->VAddShaderLinearSamplerState(mExplorerShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 	}
 
 	// PVL
@@ -610,13 +614,19 @@ void Level01::RenderDoors()
 
 void Level01::RenderExplorers()
 {
+	// Shaders
 	mRenderer->VSetInputLayout(mApplication->mVSDefSkinnedMaterial);
 	mRenderer->VSetVertexShader(mApplication->mVSDefSkinnedMaterial);
 	mRenderer->VSetPixelShader(mApplication->mPSDefMaterial);
 
+	// Constant buffers
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
-	
+
+	// Textures
+	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 0, 0);
+	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
+
 	for (Explorer& e : Factory<Explorer>())
 	{
 		mModel.world = e.mTransform->GetWorldMatrix().transpose();
@@ -706,6 +716,9 @@ void Level01::RenderMinions()
 
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 0, 0);
+	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
+
 	for (Minion& m : Factory<Minion>())
 	{
 		mModel.world = m.mTransform->GetWorldMatrix().transpose();
