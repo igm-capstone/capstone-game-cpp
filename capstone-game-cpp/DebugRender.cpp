@@ -105,11 +105,8 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, &color[2], 3);
 	for (Door& e : Factory<Door>())
 	{
-		if (!e.mBoxCollider->mIsActive) continue;
-		Transform whyCollidersCantHaveATransform;
-		whyCollidersCantHaveATransform.SetPosition(e.mBoxCollider->mCollider.origin);
-		whyCollidersCantHaveATransform.SetScale(e.mBoxCollider->mCollider.halfSize * 2);
-		model->world = whyCollidersCantHaveATransform.GetWorldMatrix().transpose();
+		if (!e.mColliderComponent->mIsActive) continue;
+		model->world = (mat4f::scale(e.mColliderComponent->mCollider.halfSize * 2.0f) * mat4f::translate(e.mColliderComponent->mCollider.origin)).transpose();
 		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
 		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
 		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 3, 2);

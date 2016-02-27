@@ -32,7 +32,6 @@ static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 extern bool gDebugExplorer;
 
 Level01::Level01() :
-	mPlaneMesh(nullptr),
 	mNDSQuadMesh(nullptr),
 	mGBufferContext(nullptr),
 	mShadowContext(nullptr),
@@ -53,7 +52,6 @@ Level01::~Level01()
 #endif
 
 	mCubeMesh->~IMesh();
-	mPlaneMesh->~IMesh();
 	mNDSQuadMesh->~IMesh();
 
 	for (Lamp& l : Factory<Lamp>())
@@ -130,13 +128,13 @@ void Level01::VInitialize()
 void Level01::InitializeAssets()
 {
 	// Pre-load models
-	mModelManager->LoadModel<GPU::Vertex3>(kWallModelName);
-	mModelManager->LoadModel<GPU::Vertex3>(kTriangleWallModelName);
-	mModelManager->LoadModel<GPU::Vertex3>(kWallDoubleDoorModelName);
-	mModelManager->LoadModel<GPU::Vertex3>(kWallSingleDoorModelName);
-	mModelManager->LoadModel<GPU::Vertex3>(kWallSingleWindowModelName);
-	mModelManager->LoadModel<GPU::Vertex3>(kCurvedWallModelName);
-	mModelManager->LoadModel<GPU::Vertex3>(kFloorModelName);
+	mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_WALL]);
+	mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_TRI_WALL]);
+	mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_D_DOOR_WALL]);
+	mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_S_DOOR_WALL]);
+	mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_S_WINDOW_WALL]);
+	mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_WALL]);
+	mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR]);
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 
@@ -172,16 +170,6 @@ void Level01::InitializeGeometry()
 	meshLibrary.NewMesh(&mCubeMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mCubeMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
 	mRenderer->VSetMeshIndexBuffer(mCubeMesh, &indices[0], indices.size());
-
-	vertices.clear();
-	indices.clear();
-
-	// Floor
-	Geometry::Plane(vertices, indices, mLevel.floorWidth, mLevel.floorHeight, 5, 5);
-
-	meshLibrary.NewMesh(&mPlaneMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mPlaneMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
-	mRenderer->VSetMeshIndexBuffer(mPlaneMesh, &indices[0], indices.size());
 
 	vertices.clear();
 	indices.clear();
@@ -250,14 +238,14 @@ void Level01::InitializeShaderResources()
 		mRenderer->VAddShaderTextures2D(mStaticMeshShaderResource, filenames, 2);
 		mRenderer->VAddShaderLinearSamplerState(mStaticMeshShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 
-		mModelManager->GetModel(kWallModelName)->mMaterialIndex				= 0;
-		mModelManager->GetModel(kTriangleWallModelName)->mMaterialIndex		= 0;
-		mModelManager->GetModel(kWallDoubleDoorModelName)->mMaterialIndex	= 0;
-		mModelManager->GetModel(kWallSingleDoorModelName)->mMaterialIndex	= 0;
-		mModelManager->GetModel(kWallSingleWindowModelName)->mMaterialIndex = 0;
-		mModelManager->GetModel(kCurvedWallModelName)->mMaterialIndex		= 0;
-		mModelManager->GetModel(kWallModelName)->mMaterialIndex				= 0;
-		mModelManager->GetModel(kFloorModelName)->mMaterialIndex			= 1;
+		mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_WALL])->mMaterialIndex			= 0;
+		mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_TRI_WALL])->mMaterialIndex		= 0;
+		mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_D_DOOR_WALL])->mMaterialIndex	= 0;
+		mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_S_DOOR_WALL])->mMaterialIndex	= 0;
+		mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_S_WINDOW_WALL])->mMaterialIndex = 0;
+		mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_WALL])->mMaterialIndex	= 0;
+		mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR])->mMaterialIndex			= 1;
+		mModelManager->GetModel(kDoorModelName)->mMaterialIndex			= 0;
 	}
 
 	// Explorers
@@ -427,7 +415,7 @@ void Level01::VUpdate(double milliseconds)
 
 	for (auto& dc : Factory<DominationPointController>())
 	{
-		dc.Update(float(milliseconds));
+		dc.Update(milliseconds);
 	}
 
 	for (auto& skill : Factory<Skill>())
@@ -510,57 +498,76 @@ void Level01::RenderShadowMaps()
 	// Identity here just to be compatible with shader.
 	mLightPVM.view = mat4f(1.0f);	
 
-	uint32_t i = 0;
-	for (Lamp& l : Factory<Lamp>())
+	uint32_t lampIndex = 0;
+	for (Lamp& lamp : Factory<Lamp>())
 	{
-		mRenderer->VSetRenderContextDepthTarget(mShadowContext, i);
-		mRenderer->VClearDepthStencil(mShadowContext, i, 1.0f, 0);
+		mRenderer->VSetRenderContextDepthTarget(mShadowContext, lampIndex);
+		mRenderer->VClearDepthStencil(mShadowContext, lampIndex, 1.0f, 0);
 
-		// Set projection matrix for light frustum
-		mLightPVM.projection = mLevel.lampVPTMatrices[i].transpose();
+		// Set view projection matrix for light frustum
+		mLightPVM.projection = mLevel.lampVPTMatrices[lampIndex].transpose();
 		
 		// Create frustum object for culling.
 		Rig3D::Frustum frustum;
-		Rig3D::ExtractNormalizedFrustumLH(&frustum, mLevel.lampVPTMatrices[i]);
+		Rig3D::ExtractNormalizedFrustumLH(&frustum, mLevel.lampVPTMatrices[lampIndex]);
 
-		// Storage for the indices of objects we will draw
-		std::vector<uint32_t> indices;
-
-		// Walls
-
-		CullWalls(frustum, indices);
-
-		auto cluster = mModelManager->GetModel("Wall");
-		mRenderer->VBindMesh(cluster->mMesh);
-
-		for (uint32_t j : indices)
+		for (int staticMeshIndex = 0; staticMeshIndex < STATIC_MESH_MODEL_COUNT; staticMeshIndex++)
 		{
+			// Get Objects for a given mesh
+			std::vector<BaseSceneObject*>* pBaseSceneObjects = mModelManager->RequestAllUsingModel(kStaticMeshModelNames[staticMeshIndex]);
+			
+			// Storage for indices we will draw
+			std::vector<uint32_t> indices;
+			indices.reserve(pBaseSceneObjects->size());
 
-			mLightPVM.world = mLevel.staticMeshWorldMatrices[j];
+			// Cull meshes given the current lamp frustum
+			CullAABBSceneObjects<StaticMesh>(frustum, *pBaseSceneObjects, indices);
+
+			// Bind Mesh
+			IMesh* mesh = mModelManager->GetModel(kStaticMeshModelNames[staticMeshIndex])->mMesh;
+			mRenderer->VBindMesh(mesh);
+
+			uint32_t indexCount = mesh->GetIndexCount();
+
+			// Render 
+			for (uint32_t filterIndex : indices)
+			{
+				mLightPVM.world = (*pBaseSceneObjects)[filterIndex]->mTransform->GetWorldMatrix().transpose();
+				mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
+				mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM.world, 1);
+
+				mRenderer->VSetVertexShaderConstantBuffers(mExplorerShaderResource);
+				mRenderer->VDrawIndexed(0, indexCount);
+			}
+		}
+
+		std::vector<BaseSceneObject*>* pDoors = mModelManager->RequestAllUsingModel(kDoorModelName);
+
+		// Storage for indices we will draw
+		std::vector<uint32_t> indices;
+		indices.reserve(pDoors->size());
+
+		// Cull meshes given the current lamp frustum
+		CullOBBSceneObjects<Door>(frustum, *pDoors, indices);
+
+		// Bind Mesh
+		IMesh* mesh = mModelManager->GetModel(kDoorModelName)->mMesh;
+		mRenderer->VBindMesh(mesh);
+
+		uint32_t indexCount = mesh->GetIndexCount();
+
+		// Render 
+		for (uint32_t filterIndex : indices)
+		{
+			mLightPVM.world = (*pDoors)[filterIndex]->mTransform->GetWorldMatrix().transpose();
 			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
 			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM.world, 1);
 
 			mRenderer->VSetVertexShaderConstantBuffers(mExplorerShaderResource);
-			mRenderer->VDrawIndexed(0, cluster->mMesh->GetIndexCount());
+			mRenderer->VDrawIndexed(0, indexCount);
 		}
 
-		indices.clear();
-
-		// Planes
-
-		CullPlanes(frustum, indices, mLevel.floorWorldMatrices, mLevel.floorWidth, mLevel.floorHeight, mLevel.floorCount);
-
-		mRenderer->VBindMesh(mPlaneMesh);
-		
-		for (uint32_t j : indices)
-		{
-			mLightPVM.world = mLevel.floorWorldMatrices[j];
-			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM.world, 1);
-			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
-			mRenderer->VDrawIndexed(0, mPlaneMesh->GetIndexCount());
-		}
-
-		i++;
+		lampIndex++;
 	}
 }
 
@@ -572,7 +579,7 @@ void Level01::RenderStaticMeshes()
 	mRenderer->VClearContextTarget(mGBufferContext, 0, Colors::magentaAlpha.pCols);	// Position
 	mRenderer->VClearContextTarget(mGBufferContext, 1, Colors::magentaAlpha.pCols);	// Normal
 	mRenderer->VClearContextTarget(mGBufferContext, 2, Colors::magentaAlpha.pCols);	// Color
-	mRenderer->VClearDepthStencil(mGBufferContext, 0, 1.0f, 0);					// Depth
+	mRenderer->VClearDepthStencil(mGBufferContext, 0, 1.0f, 0);						// Depth
 
 	mRenderer->VSetInputLayout(mApplication->mVSDefInstancedMaterial);
 	mRenderer->VSetVertexShader(mApplication->mVSDefInstancedMaterial);
@@ -869,7 +876,7 @@ void Level01::ComputeGrid()
 		auto modelCluster = staticMesh.mModel;
 		auto numElements = modelCluster->ShareCount();
 
-		if (modelCluster->mName != kFloorModelName) {
+		if (modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR]) {
 			mRenderer->VBindMesh(modelCluster->mMesh);
 			mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
 		}
@@ -889,7 +896,7 @@ void Level01::ComputeGrid()
 
 	for each (Door& d in Factory<Door>())
 	{
-		if (d.mBoxCollider->mIsActive) continue; //Door is closed
+		if (d.mColliderComponent->mIsActive) continue; //Door is closed
 			
 		mModel.world = (mat4f::scale(d.mTrigger->mCollider.halfSize * 2.0f) * mat4f::translate(d.mTrigger->mCollider.origin)).transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);

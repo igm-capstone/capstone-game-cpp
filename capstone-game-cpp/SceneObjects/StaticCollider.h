@@ -9,16 +9,16 @@ class StaticCollider : public BaseSceneObject
 	friend class Factory<StaticCollider>;
 
 public:
-	class OrientedBoxColliderComponent* mBoxCollider;
+	class OrientedBoxColliderComponent* mColliderComponent;
 
 private:
-	StaticCollider() : mBoxCollider(Factory<OrientedBoxColliderComponent>::Create())
+	StaticCollider() : mColliderComponent(Factory<OrientedBoxColliderComponent>::Create())
 	{
-		mBoxCollider->mIsTrigger	= false;
-		mBoxCollider->mIsDynamic	= false;
-		mBoxCollider->mIsActive		= true;
+		mColliderComponent->mIsTrigger	= false;
+		mColliderComponent->mIsDynamic	= false;
+		mColliderComponent->mIsActive		= true;
 
-		mBoxCollider->mSceneObject	= this;
+		mColliderComponent->mSceneObject	= this;
 	};
 	
 	~StaticCollider() {};

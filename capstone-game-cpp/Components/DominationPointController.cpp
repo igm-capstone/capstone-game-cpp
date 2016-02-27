@@ -30,8 +30,16 @@ void DominationPointController::Update(double milliseconds)
 	auto dom = static_cast<DominationPoint*>(mSceneObject);
 	auto dt = static_cast<float>(milliseconds) * 0.001f;
 
-	TRACE_LINE(dom->mTransform->GetPosition() + vec3f(0, dom->mCollider->mCollider.radius, 0), dom->mTransform->GetPosition() + vec3f(0, -dom->mCollider->mCollider.radius, 0), Colors::red);
-	TRACE_LINE(dom->mTransform->GetPosition() + vec3f(dom->mCollider->mCollider.radius, 0, 0), dom->mTransform->GetPosition() + vec3f(-dom->mCollider->mCollider.radius, 0, 0), Colors::red);
+	auto rad = dom->mCollider->mCollider.radius;
+	auto pos = dom->mTransform->GetPosition();
+
+	TRACE_LINE(pos + vec3f(0, rad, 0), pos + vec3f(0, -rad, 0), Colors::red);
+	TRACE_LINE(pos + vec3f(rad, 0, 0), pos + vec3f(-rad, 0, 0), Colors::red);
+
+	auto prog = rad * mProgress * 0.72;
+	TRACE_LINE(pos + vec3f( prog,  prog, 0), pos + vec3f(-prog, -prog, 0), Colors::green);
+	TRACE_LINE(pos + vec3f( prog, -prog, 0), pos + vec3f(-prog,  prog, 0), Colors::green);
+
 
 	// progress variation
 	float dp = 0;

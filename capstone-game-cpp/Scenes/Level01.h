@@ -20,7 +20,6 @@ class Level01 : public BaseScene
 
 	// Mesh
 	IMesh*				mCubeMesh;
-	IMesh*				mPlaneMesh;
 	IMesh*				mNDSQuadMesh;
 
 	// RenderContext

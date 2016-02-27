@@ -138,7 +138,7 @@ bool ExplorerController::Update(double milliseconds)
 	float dt = float(milliseconds) * 0.001f;
 
 	// this line is to prevent huge dts during debug time
-	dt = min(dt, 0.05);
+	dt = min(dt, 0.05f);
 
 	auto pos = mSceneObject->mTransform->GetPosition();
 	auto rot = mSceneObject->mTransform->GetRotation();

@@ -44,18 +44,12 @@ private:
 	static void OnTriggerEnter(BaseSceneObject* obj, BaseSceneObject* other)
 	{
 		auto dom = static_cast<DominationPoint*>(obj);
-		if (dom->mController->isDominated)
+		if (dom->mController->isDominated || !other->Is<Explorer>())
 		{
 			return;
 		}
 
-		// I cant know out of the box if a class is 
-		// subtype of other if we dont have polymorphic types.
-		// For this case, I'm assuming that we only have collisions
-		// between DominationPoints AND EXPLORER.
-		// This code needs to be revised otherwise.
 		auto exp = static_cast<Explorer*>(other);
-
 		dom->mController->AddExplorer(exp);
 	}
 
@@ -67,18 +61,12 @@ private:
 	static void OnTriggerExit(BaseSceneObject* obj, BaseSceneObject* other)
 	{
 		auto dom = static_cast<DominationPoint*>(obj);
-		if (dom->mController->isDominated)
+		if (dom->mController->isDominated || !other->Is<Explorer>())
 		{
 			return;
 		}
-
-		// I cant know out of the box if a class is 
-		// subtype of other if we dont have polymorphic types.
-		// For this case, I'm assuming that we only have collisions
-		// between DominationPoints AND EXPLORER.
-		// This code needs to be revised otherwise.
+		
 		auto exp = static_cast<Explorer*>(other);
-
 		dom->mController->RemoveExplorer(exp);
 	}
 

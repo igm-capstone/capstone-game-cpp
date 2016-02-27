@@ -2,7 +2,8 @@
 #include <Rig3D/Visibility.h>
 #include "SceneObjects/StaticCollider.h"
 
-inline void CullWalls(const Rig3D::Frustum& frustum, std::vector<uint32_t>& indices)
+template <class SceneObjectType>
+inline void CullOBBSceneObjects(const Rig3D::Frustum& frustum, std::vector<BaseSceneObject*>& pBaseSceneObjects, std::vector<uint32_t>& indices)
 {
 	float distance;
 	const Plane<vec3f>* planes[6] =
@@ -15,19 +16,20 @@ inline void CullWalls(const Rig3D::Frustum& frustum, std::vector<uint32_t>& indi
 		&frustum.top,
 	};
 
-	uint32_t index = 0;
-	for (StaticCollider& w : Factory<StaticCollider>())
+	for (uint32_t idx = 0; idx < pBaseSceneObjects.size(); idx++)
 	{
+		SceneObjectType* pSceneObject = reinterpret_cast<SceneObjectType*>(pBaseSceneObjects[idx]);
+
 		bool shouldCull = false;
 		for (uint32_t p = 0; p < 6; p++)
 		{
 			float pir =
-				w.mBoxCollider->mCollider.halfSize.pCols[0] * abs(dot(planes[p]->normal, w.mBoxCollider->mCollider.axis[0])) +
-				w.mBoxCollider->mCollider.halfSize.pCols[1] * abs(dot(planes[p]->normal, w.mBoxCollider->mCollider.axis[1])) +
-				w.mBoxCollider->mCollider.halfSize.pCols[2] * abs(dot(planes[p]->normal, w.mBoxCollider->mCollider.axis[2]));
+				pSceneObject->mColliderComponent->mCollider.halfSize.pCols[0] * abs(dot(planes[p]->normal, pSceneObject->mColliderComponent->mCollider.axis[0])) +
+				pSceneObject->mColliderComponent->mCollider.halfSize.pCols[1] * abs(dot(planes[p]->normal, pSceneObject->mColliderComponent->mCollider.axis[1])) +
+				pSceneObject->mColliderComponent->mCollider.halfSize.pCols[2] * abs(dot(planes[p]->normal, pSceneObject->mColliderComponent->mCollider.axis[2]));
 
 			// Compute distance from obb center to plane
-			distance = dot(planes[p]->normal, w.mBoxCollider->mCollider.origin) - planes[p]->distance;			
+			distance = dot(planes[p]->normal, pSceneObject->mColliderComponent->mCollider.origin) - planes[p]->distance;
 			if (distance < -pir)
 			{
 				shouldCull = true;
@@ -37,10 +39,50 @@ inline void CullWalls(const Rig3D::Frustum& frustum, std::vector<uint32_t>& indi
 
 		if (!shouldCull)
 		{
-			indices.push_back(index);
+			indices.push_back(idx);
+		}
+	}
+}
+
+template <class SceneObjectType>
+inline void CullAABBSceneObjects(const Rig3D::Frustum& frustum, std::vector<BaseSceneObject*>& pBaseSceneObjects, std::vector<uint32_t>& indices)
+{
+	float distance;
+	const Plane<vec3f>* planes[6] =
+	{
+		&frustum.front,
+		&frustum.back,
+		&frustum.left,
+		&frustum.right,
+		&frustum.bottom,
+		&frustum.top,
+	};
+
+	for (uint32_t idx = 0; idx < pBaseSceneObjects.size(); idx++)
+	{
+		SceneObjectType* pSceneObject = reinterpret_cast<SceneObjectType*>(pBaseSceneObjects[idx]);
+
+		bool shouldCull = false;
+		for (uint32_t p = 0; p < 6; p++)
+		{
+			float pir =
+				pSceneObject->mColliderComponent->mCollider.halfSize.pCols[0] * abs(planes[p]->normal.pCols[0]) +
+				pSceneObject->mColliderComponent->mCollider.halfSize.pCols[1] * abs(planes[p]->normal.pCols[1]) +
+				pSceneObject->mColliderComponent->mCollider.halfSize.pCols[2] * abs(planes[p]->normal.pCols[2]);
+
+			// Compute distance from obb center to plane
+			distance = dot(planes[p]->normal, pSceneObject->mColliderComponent->mCollider.origin) - planes[p]->distance;
+			if (distance < -pir)
+			{
+				shouldCull = true;
+				break;
+			}
 		}
 
-		index++;
+		if (!shouldCull)
+		{
+			indices.push_back(idx);
+		}
 	}
 }
 

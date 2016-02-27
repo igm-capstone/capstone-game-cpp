@@ -9,17 +9,17 @@ class Door : public BaseSceneObject
 
 public:
 	bool mCanOpen;
-	OrientedBoxColliderComponent* mBoxCollider;
+	OrientedBoxColliderComponent* mColliderComponent;
 	BoxColliderComponent* mTrigger;
 
 private:
 
-	Door() : mCanOpen(false), mBoxCollider(Factory<OrientedBoxColliderComponent>::Create()), mTrigger(Factory<BoxColliderComponent>::Create())
+	Door() : mCanOpen(false), mColliderComponent(Factory<OrientedBoxColliderComponent>::Create()), mTrigger(Factory<BoxColliderComponent>::Create())
 	{
-		mBoxCollider->mIsTrigger = false;
-		mBoxCollider->mIsDynamic = false;
-		mBoxCollider->mIsActive = true;
-		mBoxCollider->mSceneObject = this;
+		mColliderComponent->mIsTrigger = false;
+		mColliderComponent->mIsDynamic = false;
+		mColliderComponent->mIsActive = true;
+		mColliderComponent->mSceneObject = this;
 
 		mTrigger->mIsTrigger = true;
 		mTrigger->mIsDynamic = false;
@@ -41,8 +41,8 @@ private:
 			Explorer* e = static_cast<Explorer*>(other);
 			if (e->mController->mIsInteracting && door->mCanOpen) {
 				e->mController->ConsumeInteractWill();
-				door->mBoxCollider->mIsActive ? door->mTransform->RotateRoll(0.5f*PI) : door->mTransform->RotateRoll(-0.5f*PI);
-				door->mBoxCollider->mIsActive = !door->mBoxCollider->mIsActive;
+				door->mColliderComponent->mIsActive ? door->mTransform->RotateRoll(0.5f*PI) : door->mTransform->RotateRoll(-0.5f*PI);
+				door->mColliderComponent->mIsActive = !door->mColliderComponent->mIsActive;
 			}
 		}
 	}

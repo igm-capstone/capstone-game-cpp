@@ -2,15 +2,20 @@
 #include "ModelManager.h"
 #include "Vertex.h"
 
-const char* kWallModelName				= "Wall";
-const char* kTriangleWallModelName		= "TriangleWall";
-const char* kWallDoubleDoorModelName	= "Wall_DoubleDoor";
-const char* kWallSingleDoorModelName	= "Wall_SingleDoor";
-const char* kWallSingleWindowModelName	= "Wall_W_SingleWindwo";
-const char* kCurvedWallModelName		= "CurvedWall";
-const char* kFloorModelName				= "Floor";
-const char* kDoorModelName				= "Door";
-const char* kMinionAnimModelName		= "Minion_Test";
+const char* kMinionAnimModelName = "Minion_Test";
+const char* kDoorModelName       = "Door";
+
+const char* kStaticMeshModelNames[STATIC_MESH_MODEL_COUNT] =
+{
+	"Wall",
+	"TriangleWall",
+	"Wall_DoubleDoor",
+	"Wall_SingleDoor",
+	"Wall_W_SingleWindwo",
+	"CurvedWall",
+	"Floor"
+};
+
 
 ModelManager::ModelManager()
 {

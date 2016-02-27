@@ -68,8 +68,8 @@ public:
 	private:
 		void Iterate()
 		{
-			const int PADDING_VALUE_SO = 0xBABACACA;
-			const int PADDING_VALUE_COMP = 0xBABACACA;
+			const int PADDING_VALUE_SO   = 0xBABACACA;
+			const int PADDING_VALUE_COMP = 0xB0B0CACA;
 
 			iterator end = EndIterator();
 			
@@ -138,7 +138,7 @@ public:
 
 	static iterator BeginIterator()
 	{
-		const int PADDING_VALUE_SO = 0xBABACACA;
+		const int PADDING_VALUE_SO   = 0xBABACACA;
 		const int PADDING_VALUE_COMP = 0xB0B0CACA;
 
 		pointer start = reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type)));
