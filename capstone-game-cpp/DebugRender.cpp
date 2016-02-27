@@ -10,6 +10,7 @@
 #include "SceneObjects/Region.h"
 #include "Components/Skill.h"
 #include "SceneObjects/Explorer.h"
+#include "SceneObjects/Door.h"
 
 namespace
 {
@@ -72,17 +73,16 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 	CameraManager* cameraManager = reinterpret_cast<CameraManager*>(pCameraManager);
 	CBuffer::Model* model = reinterpret_cast<CBuffer::Model*>(pModel);
 
-	vec4f color[1] = { vec4f(0,1,0,1) };
+	vec4f color[3] = { Colors::green, Colors::cyan, Colors::blue };
 
 	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, cameraManager->GetCBufferPersp(), 0);
-	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, &color, 3);
 	gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 0, 0);
 
 	gRenderer->VBindMesh(gColliderMesh);
 
+	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, &color[0], 3);
 	for (Region& e : Factory<Region>())
 	{
-	//	if (e.mBoxCollider->mLayer != COLLISION_LAYER_WALL) continue;
 		model->world = e.mTransform->GetWorldMatrix().transpose();
 		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
 		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
@@ -91,10 +91,25 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 		gRenderer->VDrawIndexed(0, gColliderMesh->GetIndexCount());
 	}
 
+	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, &color[1], 3);
 	for (StaticCollider& e : Factory<StaticCollider>())
 	{
-		//	if (e.mBoxCollider->mLayer != COLLISION_LAYER_WALL) continue;
 		model->world = e.mTransform->GetWorldMatrix().transpose();
+		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
+		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
+		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 3, 2);
+
+		gRenderer->VDrawIndexed(0, gColliderMesh->GetIndexCount());
+	}
+
+	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, &color[2], 3);
+	for (Door& e : Factory<Door>())
+	{
+		if (!e.mBoxCollider->mIsActive) continue;
+		Transform whyCollidersCantHaveATransform;
+		whyCollidersCantHaveATransform.SetPosition(e.mBoxCollider->mCollider.origin);
+		whyCollidersCantHaveATransform.SetScale(e.mBoxCollider->mCollider.halfSize * 2);
+		model->world = whyCollidersCantHaveATransform.GetWorldMatrix().transpose();
 		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
 		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
 		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 3, 2);

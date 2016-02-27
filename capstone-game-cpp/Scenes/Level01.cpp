@@ -24,6 +24,7 @@
 #include <DebugRender.h>
 #include <SceneObjects/Door.h>
 #include <Rig3D/Graphics/DirectX11/DX11ShaderResource.h>
+#include <SceneObjects/SpawnPoint.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };

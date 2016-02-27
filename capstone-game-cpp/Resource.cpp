@@ -71,6 +71,10 @@ void parseStaticMeshTransform(json obj, Transform* transform)
 	{
 		// In Unity, static meshes have a child elemented with rotation (-90,0,0). This is not part of the JSON file.
 		transform->SetRotation(parseQuatf(rotation)*quatf::rollPitchYaw(0, -0.5*PI, 0));
+	} 
+	else 
+	{
+		transform->SetRotation(quatf::rollPitchYaw(0, -0.5*PI, 0));
 	}
 
 	auto scale = obj["scale"];
@@ -217,6 +221,8 @@ void loadDoors(jarr_t objs)
 		auto position = parseVec3f(obj["position"]);
 		auto rotation = parseQuatf(obj["rotation"]);
 		auto scale = parseVec3f(obj["scale"]);
+		auto collOrigin = parseVec3f(obj["bounds"]["center"]);
+		auto collHalf = parseVec3f(obj["bounds"]["extents"]);
 		auto canOpen = obj["canOpen"].get<bool>();
 
 		auto door = Factory<Door>::Create();
@@ -227,6 +233,17 @@ void loadDoors(jarr_t objs)
 		door->mTransform->SetRotation(rotation);
 		door->mTransform->SetScale(scale);
 		door->mCanOpen = canOpen;
+
+		// Apparently it is too hard to export bounds from Unity.... or to decide where our pivots are consitently. Hard coded it is.
+		door->mBoxCollider->mCollider.origin = collOrigin;
+		door->mBoxCollider->mCollider.origin.z = -7.5f;
+		door->mBoxCollider->mCollider.halfSize = collHalf;
+		door->mBoxCollider->mCollider.halfSize.z = 15.0f;
+		mat3f axis = door->mTransform->GetRotationMatrix();
+		door->mBoxCollider->mCollider.axis[0] = vec3f(1, 0, 0);
+		door->mBoxCollider->mCollider.axis[1] = vec3f(0, 1, 0);
+		door->mBoxCollider->mCollider.axis[2] = vec3f(0, 0, 1);
+		door->mBoxCollider->mLayer = COLLISION_LAYER_WALL;
 	}
 }
 

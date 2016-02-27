@@ -114,11 +114,11 @@ bool ExplorerController::UpdateRotation(float angle, quatf& rot) {
 
 void ExplorerController::UpdateInteractWill()
 {
-	if (mInput->GetKeyDown(KEYCODE_OEM_PERIOD))
+	if (mInput->GetKeyDown(KEYCODE_E) || mInput->GetKeyDown(KEYCODE_OEM_PERIOD))
 	{
 		mIsInteracting = true;
 	}
-	else if (mInput->GetKeyUp(KEYCODE_OEM_PERIOD))
+	else if (mInput->GetKeyUp(KEYCODE_E) || mInput->GetKeyUp(KEYCODE_OEM_PERIOD))
 	{
 		mIsInteracting = false;
 	}

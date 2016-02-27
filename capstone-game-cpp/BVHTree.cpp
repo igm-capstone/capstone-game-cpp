@@ -8,6 +8,7 @@
 #include <Rig3D/Intersection.h>
 #include <Colors.h>
 #include "SceneObjects/Explorer.h"
+#include "SceneObjects/Door.h"
 
 #define PARTITION_X_COUNT 3
 #define PARTITION_Y_COUNT 2
@@ -164,15 +165,25 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 	{
 		AddNodeRecursively(collider.mBoxCollider, WALL_PARENT_LAYER_INDEX, 0, 0, 0);
 	}
+
+	for (Door& door : Factory<Door>())
+	{
+		AddNodeRecursively(door.mBoxCollider, WALL_PARENT_LAYER_INDEX, 0, 0, 0);
+	}
 }
 
 void BVHTree::AddNode(BaseColliderComponent* pColliderComponent, const int& parentIndex, const int& depth)
 {
+	static int i = 0;
 	if (mLayerStartIndex.find(pColliderComponent->mLayer) == mLayerStartIndex.end())
 	{
 		mLayerStartIndex.insert({ pColliderComponent->mLayer , mNodes.size() });
 	}
-
+	
+	if (pColliderComponent->mSceneObject->Is<Door>())
+	{
+		TRACE_LOG(i++);
+	}
 	mNodes.push_back(BVHNode());
 
 	BVHNode* pNode = &mNodes.back();
@@ -217,7 +228,7 @@ void BVHTree::GetNodeIndices(std::vector<uint32_t>& indices, const CLayer& layer
 
 	for (uint32_t i = startIndex; i < nodeCount; i++)
 	{
-		if (pNodes[i].object->mLayer == layer && predicate(pNodes[i]))
+		if (pNodes[i].object->mLayer == layer && predicate(pNodes[i]) && pNodes[i].object->mIsActive)
 		{
 			indices.push_back(i);
 		}
