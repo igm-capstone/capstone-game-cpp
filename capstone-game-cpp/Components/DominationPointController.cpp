@@ -36,7 +36,7 @@ void DominationPointController::Update(double milliseconds)
 	TRACE_LINE(pos + vec3f(0, rad, 0), pos + vec3f(0, -rad, 0), Colors::red);
 	TRACE_LINE(pos + vec3f(rad, 0, 0), pos + vec3f(-rad, 0, 0), Colors::red);
 
-	auto prog = rad * mProgress * 0.72;
+	auto prog = rad * mProgress * 0.72f;
 	TRACE_LINE(pos + vec3f( prog,  prog, 0), pos + vec3f(-prog, -prog, 0), Colors::green);
 	TRACE_LINE(pos + vec3f( prog, -prog, 0), pos + vec3f(-prog,  prog, 0), Colors::green);
 

@@ -55,6 +55,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)ext\fmod\studio\inc;$(SolutionDir)ext\fmod\lowlevel\inc;$(SolutionDir)ext\fmod\fsbank\inc;$(ProjectDir);$(SolutionDir)Rig3D\;$(SolutionDir);$(SolutionDir)ext\Autodesk\2016.1.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Rig3D.lib;Memory.lib;GraphicsMath.lib;EventHandler.lib;d3d11.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -83,6 +84,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)ext\fmod\studio\inc;$(SolutionDir)ext\fmod\lowlevel\inc;$(SolutionDir)ext\fmod\fsbank\inc;$(ProjectDir);$(SolutionDir)Rig3D\;$(SolutionDir);$(SolutionDir)ext\Autodesk\2016.1.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Rig3D.lib;Memory.lib;GraphicsMath.lib;EventHandler.lib;d3d11.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>

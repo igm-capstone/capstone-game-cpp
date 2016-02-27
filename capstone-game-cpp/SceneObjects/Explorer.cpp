@@ -86,6 +86,7 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	// Add more as we get more classes.
 	switch (GetExplorerID(this))
 	{
+	case 0:
 	default:
 	{
 		mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
@@ -184,6 +185,7 @@ void Explorer::UpdateComponents(quatf rotation, vec3f position)
 	// Add more cases as we add explorer types
 	switch (GetExplorerID(this))
 	{
+	case 0:
 	default:
 	{
 		if (mMeleeColliderComponent.asBaseColliderComponent)
