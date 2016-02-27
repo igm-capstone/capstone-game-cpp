@@ -154,6 +154,22 @@ void loadStaticMeshes(jarr_t objs, std::string model)
 		auto staticMesh = Factory<StaticMesh>::Create();
 		parseStaticMeshTransform(obj, staticMesh->mTransform);
 		Resource::mModelManager->GetModel(model.c_str())->Link(staticMesh);
+
+		auto bounds = obj["bounds"];
+		if (!bounds.empty())
+		{
+			auto center = bounds["center"];
+			if (!center.empty())
+			{
+				staticMesh->mColliderComponent->mCollider.origin = parseVec3f(center);
+			}
+
+			auto extents = bounds["extents"];
+			if (!extents.empty())
+			{
+				staticMesh->mColliderComponent->mCollider.halfSize = parseVec3f(extents);
+			}
+		}
 	}
 }
 
