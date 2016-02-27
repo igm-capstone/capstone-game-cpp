@@ -13,7 +13,7 @@ BaseScene::BaseScene() :
 	mStaticMemory(nullptr),
 	mStaticMemorySize(0),
 	mState(BASE_SCENE_STATE_CONSTRUCTED),
-	mDebugGrid(false), mDebugColl(false)
+	mDebugGrid(false), mDebugColl(false), mDebugGBuffer(false)
 {
 	mEngine = &Singleton<Engine>::SharedInstance();
 

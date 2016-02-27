@@ -5,6 +5,7 @@
 //Shaders - Headers are output from compiler
 #include "Shaders/obj/CSGridPass1.h"
 #include "Shaders/obj/CSGridPass2.h"
+#include "Shaders/obj/PSDef2DTexture.h"
 #include "Shaders/obj/PSDefColor.h"
 #include "Shaders/obj/PSDefMaterial.h"
 #include "Shaders/obj/PSFwd2DTexture.h"
@@ -25,26 +26,31 @@
 using namespace Rig3D;
 
 ScareTacticsApplication::ScareTacticsApplication() :
-	mVSDefInstancedMaterial(nullptr),
-	mPSDefMaterial(nullptr),
-	mVSDefSingleMaterial(nullptr),
-	mPSFwdDeferredOutput(nullptr),
-	mVSFwdSpotLightVolume(nullptr),
-	mPSFwdSpotLightVolume(nullptr),
-	mVSFwdFullScreenQuad(nullptr),
-	mPSFwd2DTexture(nullptr),
-	mVSFwdSprites(nullptr),
-	mVSDefSkinnedMaterial(nullptr),
 	mCSGridPass1(nullptr),
 	mCSGridPass2(nullptr),
+	mPSDefColor(nullptr),
+	mPSDefMaterial(nullptr),
+	mPSFwd2DTexture(nullptr),
 	mPSFwdColor(nullptr),
+	mPSFwdDeferredOutput(nullptr),
+	mPSFwdSpotLightVolume(nullptr),
+	mPSDef2DTexture(nullptr),
+	mVSDefInstancedMaterial(nullptr),
+	mVSDefSingleColor(nullptr),
+	mVSDefSingleMaterial(nullptr),
+	mVSDefSkinnedMaterial(nullptr),
+	mVSFwdFullScreenQuad(nullptr),
+	mVSFwdInstancedColor(nullptr),
+	mVSFwdSpotLightVolume(nullptr),
+	mVSFwdSprites(nullptr),
 	mStudio(nullptr),
 	mLoadingScreen(nullptr),
 	mCurrentScene(nullptr),
 	mSceneToLoad(nullptr),
 	mSceneAllocator(),
 	mStaticMemory(nullptr),
-	mStaticMemorySize(0)
+	mStaticMemorySize(0),
+	mAcumTimer(0.0f)
 {
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->AddFontDefault();
@@ -177,6 +183,9 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VCreateShader(&mPSFwdColor, &mGameAllocator);
 	renderer->VLoadPixelShader(mPSFwdColor, gPSFwdColor, sizeof(gPSFwdColor));
 
+	renderer->VCreateShader(&mPSDef2DTexture, &mGameAllocator);
+	renderer->VLoadPixelShader(mPSDef2DTexture, gPSDef2DTexture, sizeof(gPSDef2DTexture));
+
 #pragma endregion
 
 #pragma region Compute Shaders
@@ -292,6 +301,8 @@ void ScareTacticsApplication::VShutdown()
 	mPSFwdColor->~IShader();
 	mPSFwdDeferredOutput->~IShader();
 	mPSFwdSpotLightVolume->~IShader();
+	mPSDef2DTexture->~IShader();
+
 	mVSDefInstancedMaterial->~IShader();
 	mVSDefSingleColor->~IShader();
 	mVSDefSingleMaterial->~IShader();

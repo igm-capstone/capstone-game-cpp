@@ -45,6 +45,8 @@ public:
 	// Miscelanious
 	bool						mDebugGrid;
 	bool						mDebugColl;
+	bool						mDebugGBuffer;
+
 	Resource::LevelInfo			mLevel;
 	BoxCollider2D				mFloorCollider;
 

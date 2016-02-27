@@ -442,6 +442,11 @@ void Level01::VUpdate(double milliseconds)
 		mCameraManager->mIsOrto = !mCameraManager->mIsOrto;
 	}
 
+	if (mInput->GetKeyDown(KEYCODE_F6))
+	{
+		mDebugGBuffer = !mDebugGBuffer;
+	}
+
 	mCollisionManager->Update(milliseconds);
 }
 
@@ -476,7 +481,20 @@ void Level01::VRender()
 	RenderExplorers();
 	RenderMinions();
 	RenderSpotLightVolumes();
+
+#ifdef _DEBUG
+	if (mDebugGBuffer)
+	{
+		RenderGBuffer(mGBufferContext);
+	}
+	else
+	{
+		RenderFullScreenQuad();
+	}
+#elif
 	RenderFullScreenQuad();
+#endif
+
 	RenderIMGUI(); 
 	RenderSprites();
 	

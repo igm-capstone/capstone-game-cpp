@@ -18,12 +18,16 @@ namespace
 	Rig3D::IMesh* gSphereMesh = nullptr;
 	ID3D11RasterizerState* gWireframeRS = nullptr;
 	Rig3D::Renderer* gRenderer = nullptr;
+	Rig3D::Input*	gInput = nullptr;
 	Application* gApplication = nullptr;
 }
 
 void CreateWireFrameRasterizerState()
 {
-	gRenderer = Rig3D::Singleton<Rig3D::Engine>::SharedInstance().GetRenderer();
+	if (!gRenderer)
+	{
+		gRenderer = Rig3D::Singleton<Rig3D::Engine>::SharedInstance().GetRenderer();
+	}
 
 	D3D11_RASTERIZER_DESC rasterizerDesc;
 	ZeroMemory(&rasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
@@ -130,6 +134,55 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 	}
 
 	gRenderer->GetDeviceContext()->RSSetState(nullptr);
+}
+
+void RenderGBuffer(void* pRenderContext)
+{
+	static int gBufferIndex = 0;
+
+	if (!gApplication)
+	{
+		gApplication = &Application::SharedInstance();
+	}
+
+	if (!gRenderer)
+	{
+		gRenderer = Rig3D::Singleton<Rig3D::Engine>::SharedInstance().GetRenderer();
+	}
+
+	if (!gInput)
+	{
+		gInput = Rig3D::Singleton<Rig3D::Engine>::SharedInstance().GetInput();
+	}
+
+	if (gInput->GetKeyDown(KEYCODE_RIGHT))
+	{
+		gBufferIndex = min(gBufferIndex + 1, 4);
+	}
+	else if (gInput->GetKeyDown(KEYCODE_LEFT))
+	{
+		gBufferIndex = max(0, gBufferIndex - 1);
+	}
+
+	gRenderer->VSetContextTarget();
+	gRenderer->VClearContextTarget(Colors::magenta.pCols);
+
+	gRenderer->VSetInputLayout(gApplication->mVSFwdFullScreenQuad);
+	gRenderer->VSetVertexShader(gApplication->mVSFwdFullScreenQuad);
+	gRenderer->VSetPixelShader(gApplication->mPSDef2DTexture);
+
+	IRenderContext* pCtx = reinterpret_cast<IRenderContext*>(pRenderContext);
+
+	if (gBufferIndex < 4)
+	{
+		gRenderer->VSetPixelShaderResourceView(pCtx, gBufferIndex, 0);		// Color
+	}
+	else
+	{
+		gRenderer->VSetPixelShaderDepthResourceView(pCtx, 0, 0);
+	}
+
+	gRenderer->GetDeviceContext()->Draw(3, 0);
 }
 
 void ReleaseGlobals()
