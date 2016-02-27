@@ -26,7 +26,7 @@ class ModelCluster
 	friend class ModelManager;
 public:
 	class Rig3D::IMesh* mMesh;
-	uint32_t			mMaterialIndex;
+	uint32_t			mMaterialIndex;		// Index of the SRV within a shader resource
 	std::vector<SkeletalAnimation> mSkeletalAnimations;
 	SkeletalHierarchy mSkeletalHierarchy;
 
