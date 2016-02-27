@@ -154,22 +154,6 @@ void loadStaticMeshes(jarr_t objs, std::string model)
 		auto staticMesh = Factory<StaticMesh>::Create();
 		parseStaticMeshTransform(obj, staticMesh->mTransform);
 		Resource::mModelManager->GetModel(model.c_str())->Link(staticMesh);
-
-		auto bounds = obj["bounds"];
-		if (!bounds.empty())
-		{
-			auto center = bounds["center"];
-			if (!center.empty())
-			{
-				staticMesh->mColliderComponent->mCollider.origin = parseVec3f(center);
-			}
-
-			auto extents = bounds["extents"];
-			if (!extents.empty())
-			{
-				staticMesh->mColliderComponent->mCollider.halfSize = parseVec3f(extents);
-			}
-		}
 	}
 }
 
@@ -184,10 +168,6 @@ void loadRegions(jarr_t objs, CLayer layer, vec3f levelOrigin, vec3f levelExtent
 		vec3f adjustedScale = region->mTransform->GetScale();
 		adjustedScale.z = 1.0f;
 		region->mTransform->SetScale(adjustedScale);
-
-		//vec3f adjustedPos = region->mTransform->GetPosition();
-		//adjustedPos.z += 10.0f;
-		//region->mTransform->SetPosition(adjustedPos);
 
 		// Bounding volume construction for BVH Tree
 		region->mColliderComponent->mCollider.origin = region->mTransform->GetPosition();
@@ -250,16 +230,22 @@ void loadDoors(jarr_t objs)
 		door->mTransform->SetScale(scale);
 		door->mCanOpen = canOpen;
 
-		// Apparently it is too hard to export bounds from Unity.... or to decide where our pivots are consitently. Hard coded it is.
 		door->mColliderComponent->mCollider.origin = collOrigin;
 		door->mColliderComponent->mCollider.origin.z = -7.5f;
 		door->mColliderComponent->mCollider.halfSize = collHalf;
-		door->mColliderComponent->mCollider.halfSize.z = 15.0f;
-		mat3f axis = door->mTransform->GetRotationMatrix();
+		door->mColliderComponent->mCollider.halfSize.z = 7.5f;
 		door->mColliderComponent->mCollider.axis[0] = vec3f(1, 0, 0);
 		door->mColliderComponent->mCollider.axis[1] = vec3f(0, 1, 0);
 		door->mColliderComponent->mCollider.axis[2] = vec3f(0, 0, 1);
 		door->mColliderComponent->mLayer = COLLISION_LAYER_WALL;
+
+		door->mTrigger->mCollider.origin = door->mColliderComponent->mCollider.origin;
+		door->mTrigger->mCollider.halfSize = door->mColliderComponent->mCollider.halfSize;
+		if (door->mTrigger->mCollider.halfSize.x < door->mTrigger->mCollider.halfSize.y)
+			door->mTrigger->mCollider.halfSize.x = 3;
+		else
+			door->mTrigger->mCollider.halfSize.y = 3;
+		door->mTrigger->mLayer = COLLISION_LAYER_DOOR;
 	}
 }
 
