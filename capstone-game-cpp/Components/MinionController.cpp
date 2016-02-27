@@ -16,7 +16,7 @@ MinionController::MinionController():
 {
 	mBehaviorTree = new BehaviorTree();
 
-	auto baseSelector = new PrioritySelector(*mBehaviorTree, "(/!\) Priority Selector");
+	auto baseSelector = new PrioritySelector(*mBehaviorTree, "(/!\\) Priority Selector");
 	auto followExplorerSequence = new Sequence(*mBehaviorTree, "(-->) Follow Explorer");
 	auto isExplorerInRange = new Condition("(?) Is Explorer in Range");
 	auto moveTowardsExplorer = new Behavior("(!) Move Towards Explorer");
@@ -98,7 +98,7 @@ BehaviorStatus MinionController::MoveTowardsExplorer(Behavior& bh, void* data)
 	auto timer = Singleton<Engine>::SharedInstance().GetTimer();
 
 	// speed per second
-	vec3f targetVelocity = normalize(direction) * 0.01f * timer->GetDeltaTime();
+	vec3f targetVelocity = normalize(direction) * 0.01f * static_cast<float>(timer->GetDeltaTime());
 
 	// delta space for the current frame
 	vec3f ds = targetVelocity;
@@ -117,7 +117,7 @@ BehaviorStatus MinionController::Think(Behavior& bh, void* data) {
 		return BehaviorStatus::Success;
 	}
 
-	auto dt = self.mTimer.GetDeltaTime() * 0.001f;
+	auto dt = static_cast<float>(self.mTimer.GetDeltaTime()) * 0.001f;
 	self.mThinkTime = max(0, self.mThinkTime - dt);
 
 	return BehaviorStatus::Running;
@@ -156,7 +156,7 @@ BehaviorStatus MinionController::MoveTowardsTarget(Behavior& bh, void* data)
 	auto timer = Singleton<Engine>::SharedInstance().GetTimer();
 
 	// speed per second
-	vec3f targetVelocity = normalize(direction) * 0.01f * timer->GetDeltaTime();
+	vec3f targetVelocity = normalize(direction) * 0.01f * static_cast<float>(timer->GetDeltaTime());
 
 	// delta space for the current frame
 	vec3f ds = targetVelocity;
