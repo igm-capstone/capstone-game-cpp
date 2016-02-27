@@ -63,6 +63,14 @@ Explorer::Explorer()
 	mHealth->RegisterHealthChangeCallback(OnHealthChange);
 }
 
+
+void Explorer::DebugSpawn(vec3f pos, int UUID)
+{
+	Spawn(pos, UUID);
+	mNetworkID->mHasAuthority = true;
+	mController->mIsActive = true;
+}
+
 void Explorer::Spawn(vec3f pos, int UUID)
 {
 	mTransform->SetPosition(pos);		

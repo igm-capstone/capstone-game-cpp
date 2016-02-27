@@ -13,6 +13,8 @@
 
 static char gApplicationMemory[STATIC_APP_MEMORY];	// 4mb
 
+bool gDebugExplorer = false;
+
 Rig3D::IScene *gRig3DScene = nullptr;
 
 int CALLBACK WinMain(HINSTANCE hInstance,

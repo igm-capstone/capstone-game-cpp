@@ -32,6 +32,7 @@ private:
 
 public:
 	void Spawn(vec3f pos, int UUID);
+	void DebugSpawn(vec3f pos, int UUID);
 	void UpdateComponents(quatf rotation, vec3f position);
 
 	static void OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot);
