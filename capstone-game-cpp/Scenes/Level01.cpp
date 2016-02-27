@@ -547,7 +547,7 @@ void Level01::RenderShadowMaps()
 		indices.reserve(pDoors->size());
 
 		// Cull meshes given the current lamp frustum
-		CullAABBSceneObjects<Door>(frustum, *pDoors, indices);
+		CullOBBSceneObjects<Door>(frustum, *pDoors, indices);
 
 		// Bind Mesh
 		IMesh* mesh = mModelManager->GetModel(kDoorModelName)->mMesh;
