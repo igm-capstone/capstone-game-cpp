@@ -30,7 +30,6 @@ Explorer::Explorer()
 	mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
 	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
 
-	Application::SharedInstance().GetModelManager()->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 	Application::SharedInstance().GetModelManager()->GetModel(kMinionAnimModelName)->Link(this);
 
 	mAnimationController = Factory<AnimationController>::Create();
@@ -62,6 +61,14 @@ Explorer::Explorer()
 	mHealth->mSceneObject = this;
 	mHealth->SetMaxHealth(1000.0f);
 	mHealth->RegisterHealthChangeCallback(OnHealthChange);
+}
+
+
+void Explorer::DebugSpawn(vec3f pos, int UUID)
+{
+	Spawn(pos, UUID);
+	mNetworkID->mHasAuthority = true;
+	mController->mIsActive = true;
 }
 
 void Explorer::Spawn(vec3f pos, int UUID)

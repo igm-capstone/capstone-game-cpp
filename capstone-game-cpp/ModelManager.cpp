@@ -35,13 +35,13 @@ void ModelManager::SetAllocator(LinearAllocator* allocator)
 ModelCluster* ModelManager::GetModel(std::string name)
 {
 	ModelCluster* c = mModelMap[name];
-	assert(c != nullptr); //Model not load, try LoadModel first!
+	assert(c != nullptr); //Model not loaded, try LoadModel first!
 	return c;
 }
 
 std::vector<BaseSceneObject*>* ModelManager::RequestAllUsingModel(std::string name)
 {
 	ModelCluster* c = mModelMap[name];
-	assert(c != nullptr); //Model not load, try LoadModel first!
+	assert(c != nullptr); //Model not loaded, try LoadModel first!
 	return &c->mObjects;
 }

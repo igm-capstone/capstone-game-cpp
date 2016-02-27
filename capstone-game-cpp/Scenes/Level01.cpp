@@ -28,6 +28,8 @@
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 
+extern bool gDebugExplorer;
+
 Level01::Level01() :
 	mPlaneMesh(nullptr),
 	mNDSQuadMesh(nullptr),
@@ -119,8 +121,13 @@ void Level01::VInitialize()
 		mNetworkManager->mClient.SendData(&p);
 	}
 	else if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
-		auto ghost = Factory<Ghost>::Create();
-		ghost->Spawn(this);
+		Factory<Ghost>::Create()->Spawn(this);
+
+		if (gDebugExplorer) {
+			SpawnPoint& sp = *(Factory<SpawnPoint>().begin());
+			auto e = Factory<Explorer>::Create();
+			e->DebugSpawn(sp.mTransform->GetPosition(), MyUUID::GenUUID());
+		}
 	}
 
 	VOnResize();
@@ -130,6 +137,7 @@ void Level01::VInitialize()
 
 void Level01::InitializeAssets()
 {
+	// Pre-load models
 	mModelManager->LoadModel<GPU::Vertex3>(kWallModelName);
 	mModelManager->LoadModel<GPU::Vertex3>(kTriangleWallModelName);
 	mModelManager->LoadModel<GPU::Vertex3>(kWallDoubleDoorModelName);
@@ -138,6 +146,7 @@ void Level01::InitializeAssets()
 	mModelManager->LoadModel<GPU::Vertex3>(kCurvedWallModelName);
 	mModelManager->LoadModel<GPU::Vertex3>(kFloorModelName);
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
+	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 
 	mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 

@@ -11,6 +11,7 @@
 bool MainMenuScene::gLocalClient = false;
 bool MainMenuScene::gLocalServer = false;
 bool MainMenuScene::gDebugBoth = false;
+extern bool gDebugExplorer;
 
 void MainMenuScene::VInitialize()
 {
@@ -102,9 +103,7 @@ void MainMenuScene::RenderMainMenu(BaseScene* s)
 	if (ImGui::Button("Server -> Create Explorer", ImVec2(200, 0)) || (gDebugBoth))
 	{
 		scene->StartServer();
-		auto e = Factory<Explorer>::Create();
-		e->mTransform->SetPosition(0.0f, 0.0f, 7.5f);	// Centering in level based on Unity. Can be fixed when we get Z - Extents in JSON.
-		e->mController->mIsActive = true;
+		gDebugExplorer = true;
 	}
 
 	ImGui::SetCursorPosX(50);
