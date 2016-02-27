@@ -2,6 +2,15 @@
 #include "ModelManager.h"
 #include "Vertex.h"
 
+const char* kWallModelName				= "Wall";
+const char* kTriangleWallModelName		= "TriangleWall";
+const char* kWallDoubleDoorModelName	= "Wall_DoubleDoor";
+const char* kWallSingleDoorModelName	= "Wall_SingleDoor";
+const char* kWallSingleWindowModelName	= "Wall_W_SingleWindwo";
+const char* kCurvedWallModelName		= "CurvedWall";
+const char* kFloorModelName				= "Floor";
+const char* kDoorModelName				= "Door";
+const char* kMinionAnimModelName		= "Minion_Test";
 
 ModelManager::ModelManager()
 {

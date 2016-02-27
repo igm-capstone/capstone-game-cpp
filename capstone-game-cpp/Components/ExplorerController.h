@@ -41,7 +41,6 @@ public:
 	bool Update(double milliseconds);
 	void Sprint(float duration);
 	void Melee();
-	void SetBaseRotation(const float& x, const float& y, const float& z);
 
 	void PlayStateAnimation(AnimationControllerState state);
 	void PauseStateAnimation(AnimationControllerState state);

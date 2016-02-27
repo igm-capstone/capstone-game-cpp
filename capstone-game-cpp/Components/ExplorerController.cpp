@@ -179,11 +179,6 @@ void ExplorerController::Melee()
 	PlayStateAnimation(ANIM_STATE_MELEE);
 }
 
-void ExplorerController::SetBaseRotation(const float& x, const float& y, const float& z)
-{
-	mModelRotation = quatf::rollPitchYaw(z, x, y);
-}
-
 bool ExplorerController::CanMove()
 {
 	return mAnimationController->GetState() != ANIM_STATE_MELEE;

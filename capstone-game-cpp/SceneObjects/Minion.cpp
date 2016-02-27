@@ -25,8 +25,8 @@ Minion::Minion()
 	mController->mIsActive = false;
 	mController->RegisterMoveCallback(&OnMove);
 	
-	Application::SharedInstance().GetModelManager()->LoadModel<GPU::SkinnedVertex>("AnimTest");
-	Application::SharedInstance().GetModelManager()->GetModel("AnimTest")->Link(this);
+	Application::SharedInstance().GetModelManager()->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
+	Application::SharedInstance().GetModelManager()->GetModel(kMinionAnimModelName)->Link(this);
 
 	mAnimationController = Factory<AnimationController>::Create();
 	mAnimationController->mSceneObject = this;

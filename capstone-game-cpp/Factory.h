@@ -68,7 +68,8 @@ public:
 	private:
 		void Iterate()
 		{
-			const int PADDING_VALUE = 0xBABACACA;
+			const int PADDING_VALUE_SO = 0xBABACACA;
+			const int PADDING_VALUE_COMP = 0xBABACACA;
 
 			iterator end = EndIterator();
 			
@@ -79,7 +80,7 @@ public:
 			do
 			{
 				b = *reinterpret_cast<int*>(++t);
-			} while (t != end.t && b != PADDING_VALUE);
+			} while (t != end.t && b != PADDING_VALUE_SO && b != PADDING_VALUE_COMP);
 		}
 	};
 
@@ -114,7 +115,14 @@ public:
 	{
 		auto ptr = reinterpret_cast<pointer>(sAllocator.Allocate());
 		sCount += 1;
-		return new (ptr) value_type();
+		auto ret = new (ptr) value_type();
+
+		// If BaseSceneObj, set the class type
+		if (*reinterpret_cast<int*>(ret) == 0xBABACACA) {
+			reinterpret_cast<BaseSceneObject*>(ret)->mClassID = typeid(*ret).hash_code();
+		}
+
+		return ret;
 	}
 
 	static void Destroy(pointer object)
@@ -130,12 +138,13 @@ public:
 
 	static iterator BeginIterator()
 	{
-		const int PADDING_VALUE = 0xBABACACA;
+		const int PADDING_VALUE_SO = 0xBABACACA;
+		const int PADDING_VALUE_COMP = 0xB0B0CACA;
 
 		pointer start = reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type)));
 		pointer end = reinterpret_cast<pointer>(AlignedPointer(sBuffer, alignof(value_type))) + sMaxCount;
 
-		while (start != end && *reinterpret_cast<int*>(start) != PADDING_VALUE)
+		while (start != end && *reinterpret_cast<int*>(start) != PADDING_VALUE_SO && *reinterpret_cast<int*>(start) != PADDING_VALUE_COMP)
 		{
 			++start;
 		}

@@ -30,8 +30,8 @@ Explorer::Explorer()
 	mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
 	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
 
-	Application::SharedInstance().GetModelManager()->LoadModel<GPU::SkinnedVertex>("Minion_Test");
-	Application::SharedInstance().GetModelManager()->GetModel("Minion_Test")->Link(this);
+	Application::SharedInstance().GetModelManager()->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
+	Application::SharedInstance().GetModelManager()->GetModel(kMinionAnimModelName)->Link(this);
 
 	mAnimationController = Factory<AnimationController>::Create();
 	mAnimationController->mSceneObject = this;
@@ -49,7 +49,6 @@ Explorer::Explorer()
 	mController->mIsActive = false;
 	mController->mSpeed = 0.05f;
 	mController->RegisterMoveCallback(&OnMove);
-	mController->SetBaseRotation(PI * 0.5, PI, 0.0f);
 	mController->mAnimationController = mAnimationController;	// Be careful if you move this code. AnimationController should exist before here.
 
 	mCollider = Factory<SphereColliderComponent>::Create();
@@ -164,6 +163,7 @@ void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal)
 
 void Explorer::OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other)
 {
+	other->Is<Explorer>();
 	auto e = static_cast<Explorer*>(obj);
 	if (e->mNetworkID->mHasAuthority) {
 		e->mCameraManager->ChangeLookAtTo(e->mTransform->GetPosition());
