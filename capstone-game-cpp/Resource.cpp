@@ -234,16 +234,22 @@ void loadDoors(jarr_t objs)
 		door->mTransform->SetScale(scale);
 		door->mCanOpen = canOpen;
 
-		// Apparently it is too hard to export bounds from Unity.... or to decide where our pivots are consitently. Hard coded it is.
 		door->mBoxCollider->mCollider.origin = collOrigin;
 		door->mBoxCollider->mCollider.origin.z = -7.5f;
 		door->mBoxCollider->mCollider.halfSize = collHalf;
-		door->mBoxCollider->mCollider.halfSize.z = 15.0f;
-		mat3f axis = door->mTransform->GetRotationMatrix();
+		door->mBoxCollider->mCollider.halfSize.z = 7.5f;
 		door->mBoxCollider->mCollider.axis[0] = vec3f(1, 0, 0);
 		door->mBoxCollider->mCollider.axis[1] = vec3f(0, 1, 0);
 		door->mBoxCollider->mCollider.axis[2] = vec3f(0, 0, 1);
 		door->mBoxCollider->mLayer = COLLISION_LAYER_WALL;
+
+		door->mTrigger->mCollider.origin = door->mBoxCollider->mCollider.origin;
+		door->mTrigger->mCollider.halfSize = door->mBoxCollider->mCollider.halfSize;
+		if (door->mTrigger->mCollider.halfSize.x < door->mTrigger->mCollider.halfSize.y)
+			door->mTrigger->mCollider.halfSize.x = 3;
+		else
+			door->mTrigger->mCollider.halfSize.y = 3;
+		door->mTrigger->mLayer = COLLISION_LAYER_DOOR;
 	}
 }
 

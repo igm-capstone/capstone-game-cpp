@@ -87,19 +87,23 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 	});
 
 	std::vector<uint32_t> skillIndices;
-	explorerIndices.reserve(MAX_EXPLORERS + MAX_EXPLORERS * MAX_EXPLORER_SKILLS); // this is  a guess...
+	skillIndices.reserve(MAX_EXPLORERS + MAX_EXPLORERS * MAX_EXPLORER_SKILLS); // this is  a guess...
+
+	std::vector<uint32_t> doorIndices;
+	doorIndices.reserve(MAX_EXPLORERS + MAX_EXPLORERS * MAX_EXPLORER_SKILLS); // this is  a guess...
 
 	for (uint32_t i : explorerIndices)
 	{
 		BVHNode* pNode = mBVHTree.GetNode(i);
 		int parentIndex = pNode->parentIndex;
 
+		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
+		
+		// Explorer / Skill
 		mBVHTree.GetNodeIndices(skillIndices, COLLISION_LAYER_SKILL, [parentIndex](const BVHNode& other)
 		{
 			return other.parentIndex == parentIndex;
 		});
-
-		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
 
 		for (uint32_t s : skillIndices)
 		{
@@ -114,12 +118,31 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 				pTrigger->colliderB.SphereCollider	= pSphereComponent;
 			}
 		}
+
+
+		// Explorer / Door
+		mBVHTree.GetNodeIndices(doorIndices, COLLISION_LAYER_DOOR, [parentIndex](const BVHNode& other)
+		{
+			return other.parentIndex == parentIndex;
+		});
+
+		for (uint32_t s : doorIndices)
+		{
+			BVHNode* pDoorNode = mBVHTree.GetNode(s);
+
+			if (pDoorNode->object->mOnSphereTest(pDoorNode->object, pSphereComponent))
+			{
+				frameCollisions.push_back(Collision());
+				Collision* pTrigger = &frameCollisions.back();
+				pTrigger->colliderA.BaseCollider = pDoorNode->object;
+				pTrigger->colliderB.SphereCollider = pSphereComponent;
+			}
+		}
 	}
-	// Explorer / Skill
-
-
 
 	// Minion / Skill
+
+
 }
 
 void CollisionManager::DispatchTriggers(std::vector<Collision>& frameCollisions)

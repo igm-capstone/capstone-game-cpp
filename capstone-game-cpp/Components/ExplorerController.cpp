@@ -124,6 +124,11 @@ void ExplorerController::UpdateInteractWill()
 	}
 }
 
+void ExplorerController::ConsumeInteractWill()
+{
+	mIsInteracting = false;
+}
+
 // dt in milliseconds
 bool ExplorerController::Update(double milliseconds)
 {

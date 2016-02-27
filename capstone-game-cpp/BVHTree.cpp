@@ -17,6 +17,7 @@
 #define EXPLORER_PARENT_LAYER_INDEX 1
 #define REGION_PARENT_LAYER_INDEX   1
 #define SKILL_PARENT_LAYER_INDEX	1
+#define DOOR_PARENT_LAYER_INDEX		1
 #define DRAW_DEBUG 1
 
 #if (DRAW_DEBUG == 1)
@@ -70,7 +71,8 @@ namespace
 		COLLISION_LAYER_EXPLORER,
 		COLLISION_LAYER_MINION,
 		COLLISION_LAYER_SKILL,
-		COLLISION_LAYER_LAMP
+		COLLISION_LAYER_LAMP,
+		COLLISION_LAYER_DOOR
 	};
 }
 
@@ -169,21 +171,17 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 	for (Door& door : Factory<Door>())
 	{
 		AddNodeRecursively(door.mBoxCollider, WALL_PARENT_LAYER_INDEX, 0, 0, 0);
+		AddNodeRecursively(door.mTrigger, DOOR_PARENT_LAYER_INDEX, 0, 0, 0);
 	}
 }
 
 void BVHTree::AddNode(BaseColliderComponent* pColliderComponent, const int& parentIndex, const int& depth)
 {
-	static int i = 0;
 	if (mLayerStartIndex.find(pColliderComponent->mLayer) == mLayerStartIndex.end())
 	{
 		mLayerStartIndex.insert({ pColliderComponent->mLayer , mNodes.size() });
 	}
-	
-	if (pColliderComponent->mSceneObject->Is<Door>())
-	{
-		TRACE_LOG(i++);
-	}
+
 	mNodes.push_back(BVHNode());
 
 	BVHNode* pNode = &mNodes.back();

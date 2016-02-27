@@ -36,7 +36,8 @@ class ExplorerController : public BaseComponent
 public:
 	class AnimationController* mAnimationController;
 	float mSpeed;
-	bool  mIsInteracting;
+	bool mIsInteracting;
+	void ConsumeInteractWill();
 
 	bool Update(double milliseconds);
 	void Sprint(float duration);
