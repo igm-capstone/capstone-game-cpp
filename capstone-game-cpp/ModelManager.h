@@ -4,15 +4,22 @@
 #include "SceneObjects/BaseSceneObject.h"
 #include "FBXResource.h"
 
-extern const char* kWallModelName;
-extern const char* kTriangleWallModelName;
-extern const char* kWallDoubleDoorModelName;
-extern const char* kWallSingleDoorModelName;
-extern const char* kWallSingleWindowModelName;
-extern const char* kCurvedWallModelName;
-extern const char* kFloorModelName;
-extern const char* kDoorModelName;
+enum StaticMeshModel : int
+{
+	STATIC_MESH_MODEL_WALL,
+	STATIC_MESH_MODEL_TRI_WALL,
+	STATIC_MESH_MODEL_D_DOOR_WALL,
+	STATIC_MESH_MODEL_S_DOOR_WALL,
+	STATIC_MESH_MODEL_S_WINDOW_WALL,
+	STATIC_MESH_MODEL_CURVED_WALL,
+	STATIC_MESH_MODEL_FLOOR,
+	STATIC_MESH_MODEL_COUNT
+};
+
 extern const char* kMinionAnimModelName;
+extern const char* kDoorModelName;
+
+extern const char* kStaticMeshModelNames[STATIC_MESH_MODEL_COUNT];
 
 class ModelCluster
 {
