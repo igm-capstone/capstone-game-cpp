@@ -691,7 +691,7 @@ void Level01::RenderSpotLightVolumes()
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 
 		// Set Light data
-		mLightData.viewProjection	= (mLevel.lampWorldMatrices[i]).transpose();
+		mLightData.viewProjection	= (mLevel.lampVPTMatrices[i]).transpose();
 		mLightData.color			= l.mLightColor;
 		mLightData.direction		= l.mLightDirection;
 		mLightData.range			= l.mLightRadius;
