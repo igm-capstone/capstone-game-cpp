@@ -154,9 +154,9 @@ namespace Rig3D
 				for (uint32_t x = 0; x < subdivisions; x++)
 				{
 					Vertex v0;
-					v0.Position = { x * step - halfExtents, halfExtents, z * step - halfExtents };
-					v0.Normal = { 0.0f, 1.0f, 0.0f };
-					v0.UV = { static_cast<float>(x) / (subdivisions - 1), 1.0f - (static_cast<float>(z) / (subdivisions - 1)) };
+					v0.SetPosition({ x * step - halfExtents, halfExtents, z * step - halfExtents });
+					v0.SetNormal({ 0.0f, 1.0f, 0.0f });
+					v0.SetUV({ static_cast<float>(x) / (subdivisions - 1), 1.0f - (static_cast<float>(z) / (subdivisions - 1)) });
 					vertices.push_back(v0);
 				}
 			}
@@ -182,9 +182,10 @@ namespace Rig3D
 				for (uint32_t x = 0; x < subdivisions; x++)
 				{
 					Vertex v0;
-					v0.Position = { x * step - halfExtents, -halfExtents, z * step - halfExtents };
-					v0.Normal = { 0.0f, -1.0f, 0.0f };
-					v0.UV = { static_cast<float>(x) / (subdivisions - 1), 1.0f - (static_cast<float>(z) / (subdivisions - 1)) };
+
+					v0.SetPosition({ x * step - halfExtents, -halfExtents, z * step - halfExtents });
+					v0.SetNormal({ 0.0f, -1.0f, 0.0f });
+					v0.SetUV({ static_cast<float>(x) / (subdivisions - 1), 1.0f - (static_cast<float>(z) / (subdivisions - 1)) });
 					vertices.push_back(v0);
 				}
 			}
@@ -210,9 +211,9 @@ namespace Rig3D
 				for (uint32_t z = 0; z < subdivisions; z++)
 				{
 					Vertex v0;
-					v0.Position = { halfExtents, y * step - halfExtents, z * step - halfExtents };
-					v0.Normal = { 1.0f, 0.0f, 0.0f };
-					v0.UV = { static_cast<float>(y) / (subdivisions - 1), 1.0f - (static_cast<float>(z) / (subdivisions - 1)) };
+					v0.SetPosition({ halfExtents, y * step - halfExtents, z * step - halfExtents });
+					v0.SetNormal({ 1.0f, 0.0f, 0.0f });
+					v0.SetUV({ static_cast<float>(y) / (subdivisions - 1), 1.0f - (static_cast<float>(z) / (subdivisions - 1)) });
 					vertices.push_back(v0);
 				}
 			}
@@ -238,9 +239,9 @@ namespace Rig3D
 				for (uint32_t z = 0; z < subdivisions; z++)
 				{
 					Vertex v0;
-					v0.Position = { -halfExtents, y * step - halfExtents, z * step - halfExtents };
-					v0.Normal = { -1.0f, 0.0f, 0.0f };
-					v0.UV = { static_cast<float>(y) / (subdivisions - 1), 1.0f - (static_cast<float>(z) / (subdivisions - 1)) };
+					v0.SetPosition({ -halfExtents, y * step - halfExtents, z * step - halfExtents });
+					v0.SetNormal({ -1.0f, 0.0f, 0.0f });
+					v0.SetUV({ static_cast<float>(y) / (subdivisions - 1), 1.0f - (static_cast<float>(z) / (subdivisions - 1)) });
 					vertices.push_back(v0);
 				}
 			}
@@ -266,9 +267,9 @@ namespace Rig3D
 				for (uint32_t x = 0; x < subdivisions; x++)
 				{
 					Vertex v0;
-					v0.Position = { x * step - halfExtents, y * step - halfExtents, -halfExtents};
-					v0.Normal = { 0.0f, 0.0f, -1.0f };
-					v0.UV = { static_cast<float>(x) / (subdivisions - 1), 1.0f - (static_cast<float>(y) / (subdivisions - 1)) };
+					v0.SetPosition({ x * step - halfExtents, y * step - halfExtents, -halfExtents });
+					v0.SetNormal({ 0.0f, 0.0f, -1.0f });
+					v0.SetUV({ static_cast<float>(x) / (subdivisions - 1), 1.0f - (static_cast<float>(y) / (subdivisions - 1)) });
 					vertices.push_back(v0);
 				}
 			}
@@ -294,9 +295,9 @@ namespace Rig3D
 				for (uint32_t x = 0; x < subdivisions; x++)
 				{
 					Vertex v0;
-					v0.Position = { x * step - halfExtents, y * step - halfExtents, halfExtents };
-					v0.Normal = { 0.0f, 0.0f, 1.0f };
-					v0.UV = { static_cast<float>(x) / (subdivisions - 1), 1.0f - (static_cast<float>(y) / (subdivisions - 1)) };
+					v0.SetPosition({ x * step - halfExtents, y * step - halfExtents, halfExtents });
+					v0.SetNormal({ 0.0f, 0.0f, 1.0f });
+					v0.SetUV({ static_cast<float>(x) / (subdivisions - 1), 1.0f - (static_cast<float>(y) / (subdivisions - 1)) });
 					vertices.push_back(v0);
 				}
 			}
