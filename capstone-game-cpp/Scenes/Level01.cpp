@@ -427,7 +427,7 @@ void Level01::VUpdate(double milliseconds)
 
 	for (auto& dc : Factory<DominationPointController>())
 	{
-		dc.Update(float(milliseconds));
+		dc.Update(milliseconds);
 	}
 
 	for (auto& skill : Factory<Skill>())
