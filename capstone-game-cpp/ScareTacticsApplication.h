@@ -31,6 +31,7 @@ public:
 	IShader* mVSDefSkinnedMaterial;
 	IShader* mVSFwdFullScreenQuad;
 	IShader* mVSFwdInstancedColor;
+	IShader* mVSFwdSingleColor;
 	IShader* mVSFwdSpotLightVolume;
 	IShader* mVSFwdSprites;
 

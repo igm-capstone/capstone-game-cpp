@@ -18,6 +18,7 @@
     <FxCompile Include="Shaders\VSDefSingleMaterial.hlsl" />
     <FxCompile Include="Shaders\VSDefSingleColor.hlsl" />
     <FxCompile Include="Shaders\VSFwdInstancedColor.hlsl" />
+    <FxCompile Include="Shaders\VSFwdSingleColor.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
