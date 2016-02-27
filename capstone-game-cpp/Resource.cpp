@@ -217,15 +217,15 @@ void loadStaticColliders(jarr_t objs, CLayer layer, vec3f levelOrigin, vec3f lev
 		vec3f jsonScale = collider->mTransform->GetScale();
 		collider->mTransform->SetScale(jsonScale.x, jsonScale.y, 15.0f);
 
-		collider->mBoxCollider->mCollider.origin = collider->mTransform->GetPosition();
-		collider->mBoxCollider->mCollider.halfSize = collider->mTransform->GetScale() * 0.5f;
+		collider->mColliderComponent->mCollider.origin = collider->mTransform->GetPosition();
+		collider->mColliderComponent->mCollider.halfSize = collider->mTransform->GetScale() * 0.5f;
 
 		mat3f axis = collider->mTransform->GetRotationMatrix();
-		collider->mBoxCollider->mCollider.axis[0] = axis.pRows[0];
-		collider->mBoxCollider->mCollider.axis[1] = axis.pRows[1];
-		collider->mBoxCollider->mCollider.axis[2] = axis.pRows[2];
+		collider->mColliderComponent->mCollider.axis[0] = axis.pRows[0];
+		collider->mColliderComponent->mCollider.axis[1] = axis.pRows[1];
+		collider->mColliderComponent->mCollider.axis[2] = axis.pRows[2];
 
-		collider->mBoxCollider->mLayer = layer;
+		collider->mColliderComponent->mLayer = layer;
 	}
 }
 
@@ -251,15 +251,15 @@ void loadDoors(jarr_t objs)
 		door->mCanOpen = canOpen;
 
 		// Apparently it is too hard to export bounds from Unity.... or to decide where our pivots are consitently. Hard coded it is.
-		door->mBoxCollider->mCollider.origin = collOrigin;
-		door->mBoxCollider->mCollider.origin.z = -7.5f;
-		door->mBoxCollider->mCollider.halfSize = collHalf;
-		door->mBoxCollider->mCollider.halfSize.z = 15.0f;
+		door->mColliderComponent->mCollider.origin = collOrigin;
+		door->mColliderComponent->mCollider.origin.z = -7.5f;
+		door->mColliderComponent->mCollider.halfSize = collHalf;
+		door->mColliderComponent->mCollider.halfSize.z = 15.0f;
 		mat3f axis = door->mTransform->GetRotationMatrix();
-		door->mBoxCollider->mCollider.axis[0] = vec3f(1, 0, 0);
-		door->mBoxCollider->mCollider.axis[1] = vec3f(0, 1, 0);
-		door->mBoxCollider->mCollider.axis[2] = vec3f(0, 0, 1);
-		door->mBoxCollider->mLayer = COLLISION_LAYER_WALL;
+		door->mColliderComponent->mCollider.axis[0] = vec3f(1, 0, 0);
+		door->mColliderComponent->mCollider.axis[1] = vec3f(0, 1, 0);
+		door->mColliderComponent->mCollider.axis[2] = vec3f(0, 0, 1);
+		door->mColliderComponent->mLayer = COLLISION_LAYER_WALL;
 	}
 }
 

@@ -163,12 +163,12 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 
 	for (StaticCollider& collider : Factory<StaticCollider>())
 	{
-		AddNodeRecursively(collider.mBoxCollider, WALL_PARENT_LAYER_INDEX, 0, 0, 0);
+		AddNodeRecursively(collider.mColliderComponent, WALL_PARENT_LAYER_INDEX, 0, 0, 0);
 	}
 
 	for (Door& door : Factory<Door>())
 	{
-		AddNodeRecursively(door.mBoxCollider, WALL_PARENT_LAYER_INDEX, 0, 0, 0);
+		AddNodeRecursively(door.mColliderComponent, WALL_PARENT_LAYER_INDEX, 0, 0, 0);
 	}
 }
 
