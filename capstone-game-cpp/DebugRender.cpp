@@ -175,7 +175,7 @@ void RenderGBuffer(void* pRenderContext)
 
 	if (gBufferIndex < 4)
 	{
-		gRenderer->VSetPixelShaderResourceView(pCtx, gBufferIndex, 0);		// Color
+		gRenderer->VSetPixelShaderResourceView(pCtx, gBufferIndex, 0);	
 	}
 	else
 	{
