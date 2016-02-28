@@ -52,7 +52,7 @@ Pixel main( Vertex vertex )
 
 	Pixel pixel;
 	pixel.positionH = mul(float4(vertexPosePosition, 1.0f), clip);
-	pixel.positionT = mul(vertexPosePosition, (float3x3)world);
+	pixel.positionT = mul(float4(vertexPosePosition, 1.0f), world).xyz;
 	pixel.normal	= mul(vertexPoseNormal, (float3x3)world);
 	pixel.uv		= vertex.uv;
 
