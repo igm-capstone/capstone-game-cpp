@@ -19,6 +19,7 @@ class Level01 : public BaseScene
 	LinearAllocator		mAllocator;
 
 	// Mesh
+	IMesh*				mCubeMesh;
 	IMesh*				mNDSQuadMesh;
 
 	// RenderContext
