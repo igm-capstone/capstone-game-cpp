@@ -4,7 +4,7 @@ struct Pixel
 	float2 uv		: TEXCOORD;
 };
 
-Texture2D diffuseMap : register(t0);
+Texture2D diffuseMap	: register(t0);
 Texture2D lightMap		: register(t1);
 Texture2D depthMap		: register(t2);
 
