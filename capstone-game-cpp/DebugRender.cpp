@@ -11,6 +11,7 @@
 #include "Components/Skill.h"
 #include "SceneObjects/Explorer.h"
 #include "SceneObjects/Door.h"
+#include "SceneObjects/Lamp.h"
 
 namespace
 {
@@ -77,7 +78,7 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 	CameraManager* cameraManager = reinterpret_cast<CameraManager*>(pCameraManager);
 	CBuffer::Model* model = reinterpret_cast<CBuffer::Model*>(pModel);
 
-	vec4f color[3] = { Colors::green, Colors::cyan, Colors::blue };
+	vec4f color[5] = { Colors::green, Colors::cyan, Colors::blue, Colors::white, Colors::black };
 
 	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, cameraManager->GetCBufferPersp(), 0);
 	gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 0, 0);
@@ -118,6 +119,8 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 		gRenderer->VDrawIndexed(0, gColliderMesh->GetIndexCount());
 	}
 
+	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, &color[3], 3);
+
 	gRenderer->VBindMesh(gSphereMesh);
 
 	for (Explorer& s : Factory<Explorer>())
@@ -131,6 +134,20 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 
 			gRenderer->VDrawIndexed(0, gSphereMesh->GetIndexCount());
 		}
+	}
+
+	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, &color[4], 3);
+	
+	mat4f defaultRotation = mat4f::rotateZ(PI * 0.5f);
+
+	for (Lamp& l : Factory<Lamp>())
+	{
+		gRenderer->VBindMesh(l.mConeMesh);
+		model->world = (mat4f::scale(l.mLightRadius) * defaultRotation * l.mTransform->GetWorldMatrix()).transpose();
+		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
+		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
+
+		gRenderer->VDrawIndexed(0, l.mConeMesh->GetIndexCount());
 	}
 
 	gRenderer->GetDeviceContext()->RSSetState(nullptr);
