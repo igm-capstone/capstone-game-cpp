@@ -663,4 +663,19 @@ int ContainsAABB(AABB<Vector> inner, AABB<Vector> bounds)
 }
 
 #pragma endregion
+
+	inline int IntersectPlanes(const Plane<vec3f>& p0, const Plane<vec3f>& p1, const Plane<vec3f>& p2, vec3f& poi)
+	{
+		vec3f u = cliqCity::graphicsMath::cross(p1.normal, p2.normal);
+		float denom = cliqCity::graphicsMath::dot(p0.normal, u);
+
+		if (abs(denom) < 0.001f)
+		{
+			return 0;
+		}
+
+		poi = ((p0.distance * u) + cliqCity::graphicsMath::cross(p0.normal, (p2.distance * p1.normal) - (p1.distance * p2.normal))) / denom;
+
+		return 1;
+	}
 }
