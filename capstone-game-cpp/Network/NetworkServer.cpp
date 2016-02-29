@@ -201,6 +201,10 @@ void NetworkServer::ReceiveFromClients()
 					Retransmit(client.first, &packet);
 					NetworkRpc::SyncHealth(packet.UUID, packet.AsFloat);
 					break;
+				case SYNC_ANIMATION:
+					Retransmit(client.first, &packet);
+					NetworkRpc::SyncAnimation(packet.UUID, packet.AsAnimation.State, packet.AsAnimation.Command);
+					break;
 				default:
 					printf("error in packet types\n");
 					break;

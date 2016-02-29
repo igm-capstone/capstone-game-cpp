@@ -31,10 +31,17 @@ enum AnimationControllerState : char
 	ANIM_STATE_COUNT
 };
 
+enum AnimationControllerCommand : byte
+{
+	ANIM_STATE_COMMAND_PLAY,
+	ANIM_STATE_COMMAND_PAUSE,
+};
+
 class AnimationController :
 	public BaseComponent
 {
-private:
+	EXPOSE_CALLBACK_2(CommandExecuted, AnimationControllerState, AnimationControllerCommand)
+	
 	friend class Factory<AnimationController>;
 
 	int				mCurrentAnimationIndex;
@@ -68,8 +75,23 @@ public:
 	void SetState(AnimationControllerState state);
 	void SetStateAnimation(AnimationControllerState state, const char* name, uint32_t startIndex, uint32_t endIndex,float speed, KeyframeOption* options, uint32_t count, bool shouldLoop);
 
-	inline void Resume() { mIsPaused = false; };
-	inline void Pause() { mIsPaused = true; };
+	inline void Resume() {
+		if (!mIsPaused) {
+			return;
+		}
+
+		mIsPaused = false;
+		OnCommandExecuted(mState, ANIM_STATE_COMMAND_PLAY);
+	};
+
+	inline void Pause() {
+		if (mIsPaused) {
+			return;
+		}
+
+		mIsPaused = true; 
+		OnCommandExecuted(mState, ANIM_STATE_COMMAND_PAUSE);
+	};
 
 	inline AnimationControllerState GetState() { return mState; };
 	inline bool IsPaused() { return mIsPaused; };

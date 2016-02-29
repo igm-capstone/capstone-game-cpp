@@ -2,9 +2,11 @@
 #include <Components/AnimationUtility.h>
 #include <Components/AnimationController.h>
 
-Animation gMinionWalk  { "Minion_01_Animation_Pass_1_1_1.0007", 10,  60,  1.8f };
-Animation gMinionMelee { "Minion_01_Animation_Pass_1_1_1.0007", 80,  110, 1 };
-Animation gMinionRun   { "Minion_01_Animation_Pass_1_1_1.0007", 130, 160, 1 };
+Animation gMinionAnimations[Animations::MINION_ANIMATION_COUNT] = {
+	{ "Minion_01_Animation_Pass_1_1_1.0007", 10,  60,  1.8f },
+	{ "Minion_01_Animation_Pass_1_1_1.0007", 80,  110, 1 },
+	{ "Minion_01_Animation_Pass_1_1_1.0007", 130, 159, 1 }
+};
 
 uint32_t gMinionRestFrameIndex = 5;
 

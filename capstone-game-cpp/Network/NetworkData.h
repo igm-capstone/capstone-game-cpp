@@ -12,6 +12,7 @@ enum PacketTypes {
 	GRANT_AUTHORITY = 'A',
 	SYNC_TRANSFORM  = 'T',
 	SYNC_HEALTH		= 'H',
+	SYNC_ANIMATION  = 'N',
 	UNKNOWN
 };
 
@@ -30,9 +31,15 @@ struct Packet {
 	{
 		struct 
 		{
-			vec3f Position = { 0 };
+			vec3f Position = { 0, 0, 0 };
 			quatf Rotation = { 0, 0, 0, 1 };
 		} AsTransform;
+
+		struct
+		{
+			byte State;
+			byte Command;
+		} AsAnimation;
 		
 		float AsFloat;
 	}; // Package Specific Data

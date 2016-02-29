@@ -2,7 +2,6 @@
 #include "Explorer.h"
 #include <Components/NetworkID.h>
 #include <Components/ExplorerController.h>
-#include <Components/AnimationController.h>
 #include <Components/ColliderComponent.h>
 #include <ModelManager.h>
 #include <Components/Health.h>
@@ -29,6 +28,7 @@ Explorer::Explorer()
 	mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
 	mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
 	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
+	mNetworkID->RegisterNetSyncAnimationCallback(&OnNetSyncAnimation);
 
 	Application::SharedInstance().GetModelManager()->GetModel(kMinionAnimModelName)->Link(this);
 
@@ -36,11 +36,13 @@ Explorer::Explorer()
 	mAnimationController->mSceneObject = this;
 	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
 	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
+	mAnimationController->RegisterCommandExecutedCallback(&OnAnimationCommandExecuted);
 
-	KeyframeOption meleeOptions[] = { { gMinionMelee.startFrameIndex, OnMeleeStart }, { gMinionMelee.endFrameIndex, OnMeleeStop } };
-	SetStateAnimation(mAnimationController, ANIM_STATE_WALK, &gMinionWalk, nullptr, 0, true);
-	SetStateAnimation(mAnimationController, ANIM_STATE_RUN, &gMinionRun, nullptr, 0, true);
-	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionMelee, meleeOptions, 2, false);
+	Animation melee = gMinionAnimations[Animations::MINION_ATTACK];
+	KeyframeOption meleeOptions[] = { { melee.startFrameIndex, OnMeleeStart }, { melee.endFrameIndex, OnMeleeStop } };
+	SetStateAnimation(mAnimationController, ANIM_STATE_WALK,  &gMinionAnimations[Animations::MINION_WALK], nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_RUN,   &gMinionAnimations[Animations::MINION_RUN], nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionAnimations[Animations::MINION_ATTACK], meleeOptions, 2, false);
 	SetRestFrameIndex(mAnimationController, gMinionRestFrameIndex);
 
 	mController = Factory<ExplorerController>::Create();
@@ -156,6 +158,32 @@ void Explorer::OnNetHealthChange(BaseSceneObject* obj, float newVal)
 {
 	auto e = static_cast<Explorer*>(obj);
 	e->mHealth->SetHealth(newVal);
+}
+
+void Explorer::OnAnimationCommandExecuted(BaseSceneObject* obj, AnimationControllerState state, AnimationControllerCommand command) {
+	auto e = static_cast<Explorer*>(obj);
+
+	if (e->mNetworkID->mHasAuthority) {
+		Packet p(PacketTypes::SYNC_ANIMATION);
+		p.UUID = e->mNetworkID->mUUID;
+		p.AsAnimation.State = state;
+		p.AsAnimation.Command = command;
+		e->mNetworkClient->SendData(&p);
+	}
+}
+
+void Explorer::OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command)
+{
+	auto e = static_cast<Explorer*>(obj);
+	switch (command)
+	{
+	case ANIM_STATE_COMMAND_PLAY:
+		e->mController->PlayStateAnimation(AnimationControllerState(state));
+		break;
+	case ANIM_STATE_COMMAND_PAUSE:
+		e->mController->PauseStateAnimation(AnimationControllerState(state));
+		break;
+	}
 }
 
 void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal)

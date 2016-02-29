@@ -6,6 +6,7 @@ class Minion : public BaseSceneObject
 	friend class Factory<Minion>;
 
 public:
+	class NetworkClient*			mNetworkClient;
 	class NetworkID*				mNetworkID;
 	class MinionController*			mController;
 	class SphereColliderComponent*	mCollider;
