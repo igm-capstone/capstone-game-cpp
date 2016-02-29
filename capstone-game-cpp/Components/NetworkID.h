@@ -9,4 +9,5 @@ public:
 	EXPOSE_CALLBACK_1(NetAuthorityChange, bool)
 	EXPOSE_CALLBACK_2(NetSyncTransform, vec3f, quatf)
 	EXPOSE_CALLBACK_1(NetHealthChange, float)
+	EXPOSE_CALLBACK_2(NetSyncAnimation, byte, byte)
 };

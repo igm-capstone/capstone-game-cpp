@@ -1,5 +1,6 @@
 #pragma once
 #include "SceneObjects\BaseSceneObject.h"
+#include <Components/AnimationController.h>
 
 int GetExplorerID(class Explorer* explorer);
 
@@ -39,6 +40,8 @@ public:
 	static void OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth);
 	static void OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot);
 	static void OnNetHealthChange(BaseSceneObject* obj, float newVal);
+	static void OnAnimationCommandExecuted(BaseSceneObject* obj, AnimationControllerState state, AnimationControllerCommand command);
+	static void OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command);
 	static void OnHealthChange(BaseSceneObject* obj, float newVal);
 	static void OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other);
 

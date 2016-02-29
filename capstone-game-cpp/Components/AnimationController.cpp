@@ -145,6 +145,11 @@ void AnimationController::Update(double milliseconds)
 		return;
 	}
 
+	if (!mIsAnimating) {
+		mIsAnimating = true;
+		OnCommandExecuted(mState, ANIM_STATE_COMMAND_PLAY);
+	}
+
 	// So we can trigger frames at 0
 
 	SkeletalAnimation* currentAnimation = &(*mSkeletalAnimations)[mCurrentAnimationIndex];

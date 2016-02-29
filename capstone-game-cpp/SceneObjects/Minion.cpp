@@ -7,9 +7,12 @@
 #include <ScareTacticsApplication.h>
 #include <Vertex.h>
 #include <Components/AnimationUtility.h>
+#include <Network\NetworkClient.h>
 
 Minion::Minion()
 {
+	mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
+
 	mNetworkID = Factory<NetworkID>::Create();
 	mNetworkID->mSceneObject = this;
 	mNetworkID->mIsActive = false;
@@ -54,6 +57,17 @@ void Minion::OnMove(BaseSceneObject* obj, vec3f newPos)
 	auto m = static_cast<Minion*>(obj);
 	m->mTransform->SetPosition(newPos);
 	m->mCollider->mCollider.origin = newPos;
+
+
+	if (m->mNetworkID->mHasAuthority) {
+		Packet p(PacketTypes::SYNC_TRANSFORM);
+		p.UUID = m->mNetworkID->mUUID;
+		p.AsTransform.Position = newPos;
+		m->mNetworkClient->SendData(&p);
+
+		//m->mHealth->TakeDamage(1.0f);
+		//if (m->mHealth->GetHealth() <= 0) e->mHealth->TakeDamage(-1000.0f);
+	}
 }
 
 void Minion::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)

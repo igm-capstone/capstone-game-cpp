@@ -153,3 +153,12 @@ void NetworkRpc::SyncHealth(int UUID, float val)
 		}
 	}
 }
+
+void NetworkRpc::SyncAnimation(int UUID, byte state, byte command)
+{
+	for each(auto &netID in Factory<NetworkID>()) {
+		if (netID.mUUID == UUID) {
+			netID.OnNetSyncAnimation(state, command);
+		}
+	}
+}

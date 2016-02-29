@@ -1,6 +1,26 @@
 #pragma once
 #include <stdint.h>
 
+
+namespace Animations
+{
+	enum MinionAnimations: int
+	{
+		MINION_WALK,
+		MINION_RUN,
+		MINION_ATTACK,
+		MINION_ANIMATION_COUNT
+	};
+
+	enum ExplorerAnimations : int
+	{
+		EXPLORER_WALK,
+		EXPLORER_RUN,
+		EXPLORER_ATTACK,
+		EXPLORER_ANIMATION_COUNT
+	};
+}
+
 struct Animation
 {
 	const char* takeName;
@@ -12,9 +32,7 @@ struct Animation
 class AnimationController;
 struct KeyframeOption;
 
-extern Animation gMinionWalk;
-extern Animation gMinionMelee;
-extern Animation gMinionRun;
+extern Animation gMinionAnimations[Animations::MINION_ANIMATION_COUNT];
 
 extern uint32_t gMinionRestFrameIndex;
 

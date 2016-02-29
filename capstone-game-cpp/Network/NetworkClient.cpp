@@ -116,6 +116,8 @@ void NetworkClient::Update()
 			case SYNC_HEALTH:
 				NetworkRpc::SyncHealth(packet.UUID, packet.AsFloat);
 				break;
+			case SYNC_ANIMATION:
+				NetworkRpc::SyncAnimation(packet.UUID, packet.AsAnimation.State, packet.AsAnimation.Command);
 			default:
 				printf("error in packet types\n");
 				break;
