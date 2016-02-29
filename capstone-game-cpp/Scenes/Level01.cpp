@@ -270,7 +270,7 @@ void Level01::InitializeShaderResources()
 		size_t cbPVLSizes[] = { sizeof(CBuffer::Light), sizeof(vec4f) };
 
 		mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 2);
-		mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_BORDER, const_cast<float*>(Colors::whiteAlpha.pCols));
+		mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_BORDER, const_cast<float*>(Colors::black.pCols));
 		mRenderer->AddAdditiveBlendState(mPLVShaderResource);
 	}
 
