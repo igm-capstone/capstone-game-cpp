@@ -18,6 +18,7 @@
 #include "Shaders/obj/VSFwdFullScreenQuad.h"
 #include "Shaders/obj/VSFwdInstancedColor.h"
 #include "Shaders/obj/VSFwdLineTrace.h"
+#include "Shaders/obj/VSFwdSingleColor.h"
 #include "Shaders/obj/VSFwdSpotLightVolume.h"
 #include "Shaders/obj/VSFwdSprites.h"
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
@@ -35,6 +36,7 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mPSFwd2DTexture(nullptr),
 	mVSFwdSprites(nullptr),
 	mVSDefSkinnedMaterial(nullptr),
+	mVSFwdSingleColor(nullptr),
 	mCSGridPass1(nullptr),
 	mCSGridPass2(nullptr),
 	mPSFwdColor(nullptr),
@@ -116,6 +118,8 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VLoadVertexShader(mVSDefSingleMaterial, gVSDefSingleMaterial, sizeof(gVSDefSingleMaterial), vertex3Input, 3);
 	renderer->VCreateShader(&mVSDefSingleColor, &mGameAllocator);
 	renderer->VLoadVertexShader(mVSDefSingleColor, gVSDefSingleColor, sizeof(gVSDefSingleColor), vertex3Input, 3);
+	renderer->VCreateShader(&mVSFwdSingleColor, &mGameAllocator);
+	renderer->VLoadVertexShader(mVSFwdSingleColor, gVSFwdSingleColor, sizeof(gVSFwdSingleColor), vertex3Input, 3);
 
 	// Point Light
 	InputElement plvInputElements[] =
@@ -298,6 +302,7 @@ void ScareTacticsApplication::VShutdown()
 	mVSDefSkinnedMaterial->~IShader();
 	mVSFwdFullScreenQuad->~IShader();
 	mVSFwdInstancedColor->~IShader();
+	mVSFwdSingleColor->~IShader();
 	mVSFwdSpotLightVolume->~IShader();
 	mVSFwdSprites->~IShader();
 

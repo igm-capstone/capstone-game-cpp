@@ -39,7 +39,7 @@ void main(uint3 id : SV_DispatchThreadID)
 	int x = id.x;
 	int y = id.y;
 	int flatID = x * gridNumCols + y;
-	float nodeRadius = 0.70f;
+	float nodeRadius = 0.4f;
 
 	Node i = BufferIn[flatID];
 	SimpleNode o;

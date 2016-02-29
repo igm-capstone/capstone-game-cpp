@@ -51,21 +51,12 @@ Level01::~Level01()
 	ReleaseGlobals();
 #endif
 
+	mCubeMesh->~IMesh();
 	mNDSQuadMesh->~IMesh();
 
 	for (Lamp& l : Factory<Lamp>())
 	{
 		l.mConeMesh->~IMesh();
-	}
-
-	for (Explorer& e : Factory<Explorer>())
-	{
-		//e.mMesh->~IMesh();
-	}
-
-	for (Minion& m : Factory<Minion>())
-	{
-		//m.mMesh->~IMesh();
 	}
 
 	mStaticMeshShaderResource->~IShaderResource();
@@ -172,6 +163,16 @@ void Level01::InitializeGeometry()
 	CreateWireFrameRasterizerState();
 	CreateColliderMesh(&mAllocator);
 #endif
+
+	// Cube
+	Rig3D::Geometry::Cube(vertices, indices, 2);
+
+	meshLibrary.NewMesh(&mCubeMesh, mRenderer);
+	mRenderer->VSetMeshVertexBuffer(mCubeMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
+	mRenderer->VSetMeshIndexBuffer(mCubeMesh, &indices[0], indices.size());
+
+	vertices.clear();
+	indices.clear();
 
 	// Spot Light Volume 
 	std::vector<GPU::Vertex1> coneVertices;
@@ -875,11 +876,32 @@ void Level01::ComputeGrid()
 		auto modelCluster = staticMesh.mModel;
 		auto numElements = modelCluster->ShareCount();
 
-		mRenderer->VBindMesh(modelCluster->mMesh);
-		mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
+		if (modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR]) {
+			mRenderer->VBindMesh(modelCluster->mMesh);
+			mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
+		}
 		instanceCount += numElements;
 
 		for (auto i = 0; i < numElements; i++) ++it;
+	}
+
+	mRenderer->VClearDepthStencil(mGridContext, 0, 1.0f, 0);
+	mRenderer->VSetInputLayout(mApplication->mVSFwdSingleColor);
+	mRenderer->VSetVertexShader(mApplication->mVSFwdSingleColor);
+
+	obj.color = Colors::cyanAlpha;
+	mRenderer->VUpdateShaderConstantBuffer(mGridShaderResource, &obj, 2);
+	mRenderer->VSetVertexShaderConstantBuffer(mGridShaderResource, 2, 2);
+	mRenderer->VBindMesh(mCubeMesh);
+
+	for each (Door& d in Factory<Door>())
+	{
+		if (d.mColliderComponent->mIsActive) continue; //Door is closed
+			
+		mModel.world = (mat4f::scale(d.mTrigger->mCollider.halfSize * 2.0f) * mat4f::translate(d.mTrigger->mCollider.origin)).transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+		mRenderer->VDrawIndexed(0, mCubeMesh->GetIndexCount());
 	}
 
 	mRenderer->VSetContextTarget();

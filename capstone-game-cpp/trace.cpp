@@ -211,7 +211,7 @@ void Trace::TraceBox(const vec3f& pos, const vec4f& color)
 
 void Trace::TraceSmallBox(const vec3f& pos, const vec4f& color)
 {
-	const auto halfSize = 0.75f;
+	const auto halfSize = 0.5f;
 
 	auto xmin = pos.x - halfSize;
 	auto xmax = pos.x + halfSize;

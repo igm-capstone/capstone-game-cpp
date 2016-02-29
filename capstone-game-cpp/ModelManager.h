@@ -25,6 +25,7 @@ class ModelCluster
 {
 	friend class ModelManager;
 public:
+	const char * mName;
 	class Rig3D::IMesh* mMesh;
 	uint32_t			mMaterialIndex;
 	std::vector<SkeletalAnimation> mSkeletalAnimations;
@@ -60,17 +61,18 @@ public:
 	
 
 	template <class Vertex>
-	ModelCluster* LoadModel(std::string name)
+	ModelCluster* LoadModel(const char* name)
 	{
 		ModelCluster* c = mModelMap[name];
 		if (!c)
 		{
 			c = static_cast<ModelCluster*>(mAllocator->Allocate(sizeof(ModelCluster), alignof(ModelCluster), 0));
-			std::string path = "Assets/Models/" + name + ".fbx";
+			std::string path = "Assets/Models/" + std::string(name) + ".fbx";
 			FBXMeshResource<Vertex> fbxResource(path.c_str());
 			mMeshLibrary.LoadMesh(&c->mMesh, mRenderer, fbxResource);
 			c->mSkeletalHierarchy = fbxResource.mSkeletalHierarchy;
 			c->mSkeletalAnimations = fbxResource.mSkeletalAnimations;
+			c->mName = name;
 
 			mModelMap[name] = c;
 		}
