@@ -27,12 +27,12 @@ public:
 	IShader* mPSFwdSpotLightVolume;
 	IShader* mPSDef2DTexture;
 
+	IShader* mVSDefInstancedColor;
 	IShader* mVSDefInstancedMaterial;
 	IShader* mVSDefSingleColor;
 	IShader* mVSDefSingleMaterial;
 	IShader* mVSDefSkinnedMaterial;
 	IShader* mVSFwdFullScreenQuad;
-	IShader* mVSFwdInstancedColor;
 	IShader* mVSFwdSingleColor;
 	IShader* mVSFwdSpotLightVolume;
 	IShader* mVSFwdSprites;

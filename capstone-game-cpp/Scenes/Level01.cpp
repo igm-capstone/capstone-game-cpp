@@ -312,7 +312,7 @@ void Level01::InitializeShaderResources()
 		mGridData.maxTexHeight = int(mLevel.extents.y*GRID_MAP_SCALE);
 
 		// Grid
-		mRenderer->VCreateContextResourceTargets(mGridContext, 1, mGridData.mapTexWidth, mGridData.maxTexHeight);
+		mRenderer->VCreateContextResourceTargets(mGridContext, 5, mGridData.mapTexWidth, mGridData.maxTexHeight);
 		mRenderer->VCreateContextDepthStencilResourceTargets(mGridContext, 1, mGridData.mapTexWidth, mGridData.maxTexHeight);
 
 		void*  cbGridData[] = { mCameraManager->GetCBufferPersp(), &mGridData, nullptr };
@@ -860,21 +860,24 @@ void Level01::ComputeGrid()
 {
 	if (mNetworkManager->mMode != NetworkManager::SERVER) return;
 
-	// Prepare visual data (aka draw a bunch of stuff again
+	// Prepare visual data (aka draw a bunch of stuff again)
 	mRenderer->VSetRenderContextTargetsWithDepth(mGridContext, 0);
-	
-	mRenderer->VClearContextTarget(mGridContext, 0, Colors::magentaAlpha.pCols);
-	mRenderer->VClearDepthStencil(mGridContext, 0, 1.0f, 0);
 	
 	// Reset state
 	mRenderer->GetDeviceContext()->RSSetState(nullptr);
 	mRenderer->VSetPrimitiveType(GPU_PRIMITIVE_TYPE_TRIANGLE);
 	mRenderer->SetViewport(0.0f, 0.0f, static_cast<float>(mLevel.extents.x*GRID_MAP_SCALE), static_cast<float>(mLevel.extents.y*GRID_MAP_SCALE), 0.0f, 1.0f);
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, Colors::whiteAlpha.pCols, 0xffffffff);
-	
-	mRenderer->VSetInputLayout(mApplication->mVSFwdInstancedColor);
-	mRenderer->VSetVertexShader(mApplication->mVSFwdInstancedColor);
-	mRenderer->VSetPixelShader(mApplication->mPSFwdColor);
+
+	mRenderer->VClearContextTarget(mGridContext, 0, Colors::magentaAlpha.pCols);	// Position
+	mRenderer->VClearContextTarget(mGridContext, 1, Colors::magentaAlpha.pCols);	// Normal
+	mRenderer->VClearContextTarget(mGridContext, 2, Colors::magentaAlpha.pCols);	// Color
+	mRenderer->VClearDepthStencil(mGridContext, 0, 1.0f, 0);						// Depth
+
+	//Static Meshes
+	mRenderer->VSetInputLayout(mApplication->mVSDefInstancedColor);
+	mRenderer->VSetVertexShader(mApplication->mVSDefInstancedColor);
+	mRenderer->VSetPixelShader(mApplication->mPSDefColor);
 
 	CBuffer::ObjectType obj;
 	obj.color = vec4f(1, 1, 1, 1);
@@ -887,6 +890,7 @@ void Level01::ComputeGrid()
 
 	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 0, 1);
 	
+	//First no floors
 	int instanceCount = 0;
 	for (Factory<StaticMesh>::iterator it = Factory<StaticMesh>().begin(); it != Factory<StaticMesh>().end();)
 	{
@@ -903,9 +907,84 @@ void Level01::ComputeGrid()
 		for (auto i = 0; i < numElements; i++) ++it;
 	}
 
-	mRenderer->VClearDepthStencil(mGridContext, 0, 1.0f, 0);
+	mRenderer->VCopySubresource(mGridContext, 4, 2);
+
+	//Now only the floors
+	instanceCount = 0;
+	for (Factory<StaticMesh>::iterator it = Factory<StaticMesh>().begin(); it != Factory<StaticMesh>().end();)
+	{
+		auto& staticMesh = *it;
+		auto modelCluster = staticMesh.mModel;
+		auto numElements = modelCluster->ShareCount();
+
+		if (modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR]) {
+			mRenderer->VBindMesh(modelCluster->mMesh);
+			mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
+			break; // Early exit;
+		}
+		instanceCount += numElements;
+
+		for (auto i = 0; i < numElements; i++) ++it;
+	}
+
+	//mRenderer->VClearDepthStencil(mGridContext, 0, 1.0f, 0);
+
+	//mRenderer->GetDeviceContext()->VSSetShaderResources(0, 4, mNullSRV);
+	//mRenderer->GetDeviceContext()->VSSetShaderResources(0, 4, mNullSRV);
+	
+	// Lights
+	mRenderer->VSetRenderContextTarget(mGridContext, 3);
+	mRenderer->VClearContextTarget(mGridContext, 3, Colors::black.pCols);	// Albedo
+
+	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	mRenderer->SetBlendState(mPLVShaderResource, 0, color, 0xffffffff);
+
+	mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
+	mRenderer->VSetVertexShader(mApplication->mVSFwdSpotLightVolume);
+	mRenderer->VSetPixelShader(mApplication->mPSFwdSpotLightVolume);
+
+	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
+	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferFullLevelOrto(), 0);
+
+	uint32_t i = 0;
+	for (Lamp& l : Factory<Lamp>())
+	{
+		mModel.world = mLevel.lampWorldMatrices[i];
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+
+		// Set Light data
+		mLightData.viewProjection = (mLevel.lampVPTMatrices[i]).transpose();
+		mLightData.color = l.mLightColor;
+		mLightData.direction = l.mLightDirection;
+		mLightData.range = l.mLightRadius;
+		mLightData.cosAngle = cos(l.mLightAngle);
+
+		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
+
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
+		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
+		mRenderer->VSetPixelShaderResourceView(mGridContext, 0, 0);		// Position
+		mRenderer->VSetPixelShaderResourceView(mGridContext, 1, 1);		// Normal
+		mRenderer->VSetPixelShaderDepthResourceView(mShadowContext, i, 2);	// Shadow
+		mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);		// Border
+
+		mRenderer->VBindMesh(l.mConeMesh);
+
+		mRenderer->VDrawIndexed(0, l.mConeMesh->GetIndexCount());
+		i++;
+	}
+
+	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
+	
+	// Open doors
+	mRenderer->VSetRenderContextTarget(mGridContext, 4);
 	mRenderer->VSetInputLayout(mApplication->mVSFwdSingleColor);
 	mRenderer->VSetVertexShader(mApplication->mVSFwdSingleColor);
+	mRenderer->VSetPixelShader(mApplication->mPSFwdColor);
 
 	obj.color = Colors::cyanAlpha;
 	mRenderer->VUpdateShaderConstantBuffer(mGridShaderResource, &obj, 2);
@@ -921,7 +1000,7 @@ void Level01::ComputeGrid()
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 		mRenderer->VDrawIndexed(0, mCubeMesh->GetIndexCount());
 	}
-
+	
 	mRenderer->VSetContextTarget();
 
 	// Reset current grid to -10 / 0 on player
@@ -938,8 +1017,8 @@ void Level01::ComputeGrid()
 
 	mDeviceContext->UpdateSubresource(mFullSrcData, 0, NULL, mAIManager->mGrid.pList, 0, 0);
 	mDeviceContext->CSSetShaderResources(0, 1, &mFullSrcDataSRV);			//Full grid data
-	mRenderer->VSetComputeShaderResourceView(mGBufferContext, 3, 1);		//Shadow Map
-	mRenderer->VSetComputeShaderResourceView(mGridContext, 0, 2);		//Obstacles Map
+	mRenderer->VSetComputeShaderResourceView(mGridContext, 3, 1);		//Shadow Map
+	mRenderer->VSetComputeShaderResourceView(mGridContext, 4, 2);		//Walls + door Map
 	mDeviceContext->CSSetUnorderedAccessViews(0, 1, &mOutputDataSRV, NULL);	//Output
 
 	mRenderer->GetDeviceContext()->Dispatch(mAIManager->mGrid.mNumRows / GRID_MULT_OF, mAIManager->mGrid.mNumCols / GRID_MULT_OF, 1);
@@ -975,6 +1054,8 @@ void Level01::ComputeGrid()
 		}
 		mDeviceContext->Unmap(mOutputDataCPURead, 0);
 	}
+
+	mAIManager->SetGridDirty(false);
 }
 
 void Level01::VShutdown()

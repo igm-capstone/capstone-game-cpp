@@ -264,6 +264,8 @@ namespace Rig3D
 		void	VSetVertexShaderResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
 		void	VSetPixelShaderResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
 		void	VSetComputeShaderResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+		
+		void	VCopySubresource(IRenderContext* renderContext, const uint32_t& dstIndex, const uint32_t& srcIndex);
 
 #pragma endregion 
 
