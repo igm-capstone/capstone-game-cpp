@@ -1921,6 +1921,15 @@ void DX3D11Renderer::VSetComputeShaderResourceView(IRenderContext* renderContext
 	ID3D11ShaderResourceView** SRVs = static_cast<DX11RenderContext*>(renderContext)->GetShaderResourceViews();
 	mDeviceContext->CSSetShaderResources(toBindingIndex, 1, &SRVs[atIndex]);
 }
+
+void DX3D11Renderer::VCopySubresource(IRenderContext* renderContext, const uint32_t& dstIndex, const uint32_t& srcIndex)
+{
+	ID3D11ShaderResourceView** SRVs = static_cast<DX11RenderContext*>(renderContext)->GetShaderResourceViews();
+	ID3D11Resource *dst, *src;
+	SRVs[dstIndex]->GetResource(&dst);
+	SRVs[srcIndex]->GetResource(&src);
+	mDeviceContext->CopyResource(dst, src);
+}
 #pragma endregion 
 
 void DX3D11Renderer::VSwapBuffers()

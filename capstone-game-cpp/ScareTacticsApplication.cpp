@@ -17,7 +17,7 @@
 #include "Shaders/obj/VSDefSingleMaterial.h"
 #include "Shaders/obj/VSDefSkinnedMaterial.h"
 #include "Shaders/obj/VSFwdFullScreenQuad.h"
-#include "Shaders/obj/VSFwdInstancedColor.h"
+#include "Shaders/obj/VSDefInstancedColor.h"
 #include "Shaders/obj/VSFwdLineTrace.h"
 #include "Shaders/obj/VSFwdSingleColor.h"
 #include "Shaders/obj/VSFwdSpotLightVolume.h"
@@ -41,7 +41,7 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mVSDefSingleMaterial(nullptr),
 	mVSDefSkinnedMaterial(nullptr),
 	mVSFwdFullScreenQuad(nullptr),
-	mVSFwdInstancedColor(nullptr),
+	mVSDefInstancedColor(nullptr),
 	mVSFwdSingleColor(nullptr),
 	mVSFwdSpotLightVolume(nullptr),
 	mVSFwdSprites(nullptr),
@@ -110,8 +110,8 @@ void ScareTacticsApplication::InitializeShaders()
 	};
 	renderer->VCreateShader(&mVSDefInstancedMaterial, &mGameAllocator);
 	renderer->VLoadVertexShader(mVSDefInstancedMaterial, gVSDefInstancedMaterial, sizeof(gVSDefInstancedMaterial), instancingInput, 7);
-	renderer->VCreateShader(&mVSFwdInstancedColor, &mGameAllocator);
-	renderer->VLoadVertexShader(mVSFwdInstancedColor, gVSFwdInstancedColor, sizeof(gVSFwdInstancedColor), instancingInput, 7);
+	renderer->VCreateShader(&mVSDefInstancedColor, &mGameAllocator);
+	renderer->VLoadVertexShader(mVSDefInstancedColor, gVSDefInstancedColor, sizeof(gVSDefInstancedColor), instancingInput, 7);
 
 	// Single Mesh
 	InputElement vertex3Input[] =
@@ -312,7 +312,7 @@ void ScareTacticsApplication::VShutdown()
 	mVSDefSingleMaterial->~IShader();
 	mVSDefSkinnedMaterial->~IShader();
 	mVSFwdFullScreenQuad->~IShader();
-	mVSFwdInstancedColor->~IShader();
+	mVSDefInstancedColor->~IShader();
 	mVSFwdSingleColor->~IShader();
 	mVSFwdSpotLightVolume->~IShader();
 	mVSFwdSprites->~IShader();

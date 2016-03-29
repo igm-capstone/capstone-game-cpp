@@ -17,9 +17,9 @@
     <FxCompile Include="Shaders\VSDefSkinnedMaterial.hlsl" />
     <FxCompile Include="Shaders\VSDefSingleMaterial.hlsl" />
     <FxCompile Include="Shaders\VSDefSingleColor.hlsl" />
-    <FxCompile Include="Shaders\VSFwdInstancedColor.hlsl" />
     <FxCompile Include="Shaders\PSDef2DTexture.hlsl" />
     <FxCompile Include="Shaders\VSFwdSingleColor.hlsl" />
+    <FxCompile Include="Shaders\VSDefInstancedColor.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />

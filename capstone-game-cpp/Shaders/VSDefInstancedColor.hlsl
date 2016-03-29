@@ -9,6 +9,8 @@ struct Vertex
 struct Pixel
 {
 	float4 positionH	: SV_POSITION;
+	float3 positionT	: POSITIONT;
+	float3 normal		: NORMAL;
 	float4 color		: COLOR;
 };
 
@@ -31,6 +33,8 @@ Pixel main(Vertex vertex)
 
 	Pixel pixel;
 	pixel.positionH = mul(vertexPos, clip);
+	pixel.positionT = mul(vertexPos, vertex.world).xyz;
+	pixel.normal = mul(vertex.normal, (float3x3)vertex.world).xyz;
 	pixel.color = color;
 
 	return pixel;
