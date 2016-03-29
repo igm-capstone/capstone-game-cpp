@@ -128,13 +128,19 @@ void Level01::VInitialize()
 void Level01::InitializeAssets()
 {
 	// Pre-load models
-	mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_WALL]);
-	mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_TRI_WALL]);
-	mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_D_DOOR_WALL]);
-	mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_S_DOOR_WALL]);
-	mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_S_WINDOW_WALL]);
-	mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_WALL]);
-	mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR]);
+	for (int i = 0; i < STATIC_MESH_MODEL_COUNT; i++)
+	{
+		mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[i]);
+
+	}
+
+	//mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_WALL]);
+	//mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_TRI_WALL]);
+	//mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_D_DOOR_WALL]);
+	//mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_S_DOOR_WALL]);
+	//mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_S_WINDOW_WALL]);
+	//mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_WALL]);
+	//mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR]);
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 
@@ -478,10 +484,10 @@ void Level01::VRender()
 	RenderWallColliders(mExplorerShaderResource, mCameraManager, &mModel);
 #endif
 	
-	RenderDoors();
-	RenderExplorers();
-	RenderMinions();
-	RenderSpotLightVolumes();
+//	RenderDoors();
+//	RenderExplorers();
+//	RenderMinions();
+//	RenderSpotLightVolumes();
 
 #ifdef _DEBUG
 	if (mDebugGBuffer)
