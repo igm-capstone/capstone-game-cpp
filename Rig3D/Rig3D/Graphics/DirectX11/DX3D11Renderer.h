@@ -181,6 +181,8 @@ namespace Rig3D
 		void	VCreateShaderTextures2D(IShaderResource* shader, const char** filenames, const uint32_t count);
 		void	VCreateShaderContextTextures2D(IShaderResource* shader, IRenderContext* context);
 
+		void	VCreateShaderTexture2DArray(IShaderResource* shader, const char** filenames, const uint32_t count);
+
 		void	VAddShaderTextures2D(IShaderResource* shader, const char** filenames, const uint32_t count);
 
 		void	VCreateShaderTextureCubes(IShaderResource* shader, const char** filenames, const uint32_t count);

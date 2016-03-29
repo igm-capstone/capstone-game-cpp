@@ -1349,6 +1349,68 @@ void DX3D11Renderer::VCreateShaderContextTextures2D(IShaderResource* shader, IRe
 	reinterpret_cast<DX11ShaderResource*>(shader)->SetShaderResourceViews(SRVs);
 }
 
+void DX3D11Renderer::VCreateShaderTexture2DArray(IShaderResource* shader, const char** filenames, const uint32_t count)
+{
+	std::vector<ID3D11Texture2D*> textures(count);
+
+	wchar_t* filename;
+	for (uint32_t i = 0; i < count; i++)
+	{
+		CSTR2WSTR(filenames[i], filename);
+		DirectX::CreateWICTextureFromFileEx(mDevice, filename, 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, false, reinterpret_cast<ID3D11Resource**>(&textures[i]), nullptr);
+	}
+
+	D3D11_TEXTURE2D_DESC textureDesc;
+	textures[0]->GetDesc(&textureDesc);
+
+	D3D11_TEXTURE2D_DESC textureArrayDesc;
+	textureArrayDesc.Width = textureDesc.Width;
+	textureArrayDesc.Height = textureDesc.Height;
+	textureArrayDesc.MipLevels = textureDesc.MipLevels;
+	textureArrayDesc.ArraySize = count;
+	textureArrayDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	textureArrayDesc.SampleDesc.Count = 1;
+	textureArrayDesc.SampleDesc.Quality = 0;
+	textureArrayDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	textureArrayDesc.CPUAccessFlags = 0;
+	textureArrayDesc.MiscFlags = 0;
+
+	ID3D11Texture2D* textureArray;
+	mDevice->CreateTexture2D(&textureArrayDesc, nullptr, &textureArray);
+
+	D3D11_MAPPED_SUBRESOURCE mappedSubresource;
+	for (uint32_t i = 0; i < count; i++)
+	{
+		for (uint32_t j = 0; j < textureDesc.MipLevels; j++)
+		{
+			mDeviceContext->Map(textures[i], j, D3D11_MAP_READ, 0, &mappedSubresource);
+			mDeviceContext->UpdateSubresource(textureArray, D3D11CalcSubresource(j, i, textureDesc.MipLevels), nullptr, mappedSubresource.pData, mappedSubresource.RowPitch, 0);
+			mDeviceContext->Unmap(textures[i], j);
+		}
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
+	SRVDesc.Format = textureArrayDesc.Format;
+	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	SRVDesc.Texture2DArray.MostDetailedMip = 0;
+	SRVDesc.Texture2DArray.MipLevels = textureArrayDesc.MipLevels;
+	SRVDesc.Texture2DArray.FirstArraySlice = 0;
+	SRVDesc.Texture2DArray.ArraySize = count;
+
+	std::vector<ID3D11ShaderResourceView*> SRVs(1);
+
+	mDevice->CreateShaderResourceView(textureArray, &SRVDesc, &SRVs[0]);
+
+	reinterpret_cast<DX11ShaderResource*>(shader)->AddShaderResourceViews(SRVs);
+
+	ReleaseMacro(textureArray);
+	for (int i = 0; i < count; i++)
+	{
+		ReleaseMacro(textures[i]);
+	}
+}
+
 void DX3D11Renderer::VAddShaderTextures2D(IShaderResource* shader, const char** filenames, const uint32_t count)
 {
 	std::vector<ID3D11ShaderResourceView*> SRVs(count);
