@@ -1371,13 +1371,13 @@ void DX3D11Renderer::VCreateShaderTexture2DArray(IShaderResource* shader, const 
 	textureArrayDesc.Height = textureDesc.Height;
 	textureArrayDesc.MipLevels = textureDesc.MipLevels;
 	textureArrayDesc.ArraySize = count;
-	textureArrayDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	textureArrayDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 	textureArrayDesc.SampleDesc.Count = 1;
 	textureArrayDesc.SampleDesc.Quality = 0;
 	textureArrayDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	textureArrayDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE ;
 	textureArrayDesc.CPUAccessFlags = 0;
-	textureArrayDesc.MiscFlags = 0;
+	textureArrayDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
 	ID3D11Texture2D* textureArray;
 	mDevice->CreateTexture2D(&textureArrayDesc, nullptr, &textureArray);

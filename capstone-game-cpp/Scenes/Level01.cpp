@@ -475,10 +475,10 @@ void Level01::VRender()
 	RenderWallColliders(mExplorerShaderResource, mCameraManager, &mModel);
 #endif
 	
-//	RenderDoors();
-//	RenderExplorers();
-//	RenderMinions();
-//	RenderSpotLightVolumes();
+	RenderDoors();
+	RenderExplorers();
+	RenderMinions();
+	RenderSpotLightVolumes();
 
 #ifdef _DEBUG
 	if (mDebugGBuffer)
