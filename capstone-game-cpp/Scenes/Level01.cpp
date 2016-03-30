@@ -610,6 +610,8 @@ void Level01::RenderStaticMeshes()
 	mRenderer->VSetPixelShaderSamplerStates(mStaticMeshShaderResource);
 
 	int instanceCount = 0;
+	
+	// NOTE: This will break if we don't create meshes by model.
 	for (Factory<StaticMesh>::iterator it = Factory<StaticMesh>().begin(); it != Factory<StaticMesh>().end();)
 	{
 		auto& staticMesh = *it;
