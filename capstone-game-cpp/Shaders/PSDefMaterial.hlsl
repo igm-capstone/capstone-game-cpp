@@ -3,7 +3,7 @@ struct Pixel
 	float4 positionH	: SV_POSITION;
 	float3 positionT	: POSITIONT;
 	float3 normal		: NORMAL;
-	float2 uv			: TEXCOORD;
+	float3 uv			: TEXCOORD;
 };
 
 struct PS_OUT
@@ -13,7 +13,7 @@ struct PS_OUT
 	float4 color	: SV_TARGET2;
 };
 
-Texture2D diffuseTexture : register(t0);
+Texture2DArray textureArray : register(t0);
 SamplerState samplerState : register(s0);
 
 PS_OUT main(Pixel pixel)
@@ -22,7 +22,7 @@ PS_OUT main(Pixel pixel)
 
 	ps_out.position = float4(pixel.positionT, 1.0f);
 	ps_out.normal = float4(normalize(pixel.normal), 1.0f);
-	ps_out.color = diffuseTexture.Sample(samplerState, pixel.uv);
+	ps_out.color = textureArray.Sample(samplerState, pixel.uv, 0);
 
 	return ps_out;
 }
