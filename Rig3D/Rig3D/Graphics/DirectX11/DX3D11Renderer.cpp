@@ -1053,6 +1053,9 @@ void DX3D11Renderer::VLoadInputLayout(IShader* vertexShader, const void* byteCod
 			case RGBA_FLOAT32:
 				inputDescription[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 				break;
+			case R_UINT32:
+				inputDescription[i].Format = DXGI_FORMAT_R32_UINT;
+				break;
 			case RGBA_UINT32:
 				inputDescription[i].Format = DXGI_FORMAT_R32G32B32A32_UINT;
 				break;
@@ -1405,7 +1408,7 @@ void DX3D11Renderer::VCreateShaderTexture2DArray(IShaderResource* shader, const 
 	reinterpret_cast<DX11ShaderResource*>(shader)->AddShaderResourceViews(SRVs);
 
 	ReleaseMacro(textureArray);
-	for (int i = 0; i < count; i++)
+	for (uint32_t i = 0; i < count; i++)
 	{
 		ReleaseMacro(textures[i]);
 	}
