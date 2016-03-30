@@ -134,17 +134,12 @@ void Level01::InitializeAssets()
 
 	}
 
-	//mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_WALL]);
-	//mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_TRI_WALL]);
-	//mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_D_DOOR_WALL]);
-	//mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_S_DOOR_WALL]);
-	//mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_S_WINDOW_WALL]);
-	//mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_WALL]);
-	//mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR]);
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 
-	mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
+	//mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
+	mLevel = Resource::LoadLevel("Assets/Level02_Test.json", mAllocator);
+
 
 	mFloorCollider.halfSize = mLevel.extents;
 	mFloorCollider.origin = mLevel.center;
@@ -221,9 +216,9 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateShaderResource(&mStaticMeshShaderResource, &mAllocator);
 
 		// Instance buffer data
-		void*	ibStaticMeshData[] = { mLevel.staticMeshWorldMatrices, mLevel.floorWorldMatrices };
-		size_t	ibStaticMeshSizes[] = { sizeof(mat4f) * mLevel.staticMeshCount, sizeof(mat4f) * mLevel.floorCount };
-		size_t	ibStaticMeshStrides[] = { sizeof(mat4f), sizeof(mat4f) };
+		void*	ibStaticMeshData[] = { mLevel.staticMeshWorldMatrices, &mLevel.materialIDs[0] };
+		size_t	ibStaticMeshSizes[] = { sizeof(mat4f) * mLevel.staticMeshCount, sizeof(uint32_t) * mLevel.materialIDs.size() };
+		size_t	ibStaticMeshStrides[] = { sizeof(mat4f), sizeof(uint32_t) };
 		size_t	ibStaticMeshOffsets[] = { 0, 0 };
 
 		// Create the instance buffer
@@ -231,7 +226,7 @@ void Level01::InitializeShaderResources()
 
 		// Set data for instance buffer once
 		mRenderer->VUpdateShaderInstanceBuffer(mStaticMeshShaderResource, mLevel.staticMeshWorldMatrices, ibStaticMeshSizes[0], 0);
-		mRenderer->VUpdateShaderInstanceBuffer(mStaticMeshShaderResource, mLevel.floorWorldMatrices, ibStaticMeshSizes[1], 1);
+		mRenderer->VUpdateShaderInstanceBuffer(mStaticMeshShaderResource, &mLevel.materialIDs[0], ibStaticMeshSizes[1], 1);
 
 		// Constant buffer data
 		void*	cStaticMeshData[] = { mCameraManager->GetCBufferPersp() };
@@ -240,18 +235,14 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateShaderConstantBuffers(mStaticMeshShaderResource, cStaticMeshData, cbStaticMeshSizes, 1);
 
 		// Textures
-		const char* filenames[] = { "Assets/tileable5d.png", "Assets/wood floor 2.png" };
-		mRenderer->VAddShaderTextures2D(mStaticMeshShaderResource, filenames, 2);
-		mRenderer->VAddShaderLinearSamplerState(mStaticMeshShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
+		std::vector<const char*> filenames;
+		for (uint32_t i = 0; i < mLevel.textureNames.size(); i++)
+		{
+			filenames.push_back(mLevel.textureNames[i].c_str());
+		}
 
-		mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_WALL])->mMaterialIndex			= 0;
-		mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_TRI_WALL])->mMaterialIndex		= 0;
-		mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_D_DOOR_WALL])->mMaterialIndex	= 0;
-		mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_S_DOOR_WALL])->mMaterialIndex	= 0;
-		mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_S_WINDOW_WALL])->mMaterialIndex = 0;
-		mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_WALL])->mMaterialIndex	= 0;
-		mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR])->mMaterialIndex			= 1;
-		mModelManager->GetModel(kDoorModelName)->mMaterialIndex			= 0;
+		mRenderer->VCreateShaderTexture2DArray(mStaticMeshShaderResource, &filenames[0], mLevel.textureNames.size());
+		mRenderer->VAddShaderLinearSamplerState(mStaticMeshShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 	}
 
 	// Explorers
@@ -613,6 +604,9 @@ void Level01::RenderStaticMeshes()
 
 	mRenderer->VSetVertexShaderConstantBuffer(mStaticMeshShaderResource, 0, 0);
 	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 0, 1);
+	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 1, 2);
+
+	mRenderer->VSetPixelShaderResourceView(mStaticMeshShaderResource, 0, 0);
 	mRenderer->VSetPixelShaderSamplerStates(mStaticMeshShaderResource);
 
 	int instanceCount = 0;
@@ -622,8 +616,6 @@ void Level01::RenderStaticMeshes()
 		auto modelCluster = staticMesh.mModel;
 		auto numElements = modelCluster->ShareCount();
 	
-		mRenderer->VSetPixelShaderResourceView(mStaticMeshShaderResource, modelCluster->mMaterialIndex, 0);
-
 		mRenderer->VBindMesh(modelCluster->mMesh);
 		mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
 		instanceCount += numElements;
