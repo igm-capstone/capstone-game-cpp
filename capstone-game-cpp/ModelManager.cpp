@@ -2,6 +2,8 @@
 #include "ModelManager.h"
 #include "Vertex.h"
 
+const uint32_t kStaticMeshModelTextureCount = 18;
+
 const char* kMinionAnimModelName = "Minion_Test";
 const char* kDoorModelName       = "Door";
 

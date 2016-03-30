@@ -52,7 +52,6 @@ class ModelCluster
 public:
 	const char * mName;
 	class Rig3D::IMesh* mMesh;
-	uint32_t			mMaterialIndex;		// Index of the SRV within a shader resource
 	std::vector<SkeletalAnimation> mSkeletalAnimations;
 	SkeletalHierarchy mSkeletalHierarchy;
 
