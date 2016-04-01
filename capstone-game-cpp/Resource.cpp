@@ -160,6 +160,11 @@ void loadStaticMeshes(jarr_t objs, std::string model, vector<string>& textureNam
 		if (!textureName.empty())
 		{
 			string str = textureName.get<string>();
+			if (str.length() == 0)
+			{
+				str = "debugTexture.png";
+			}
+
 			vector<string>::iterator iter = find(textureNames.begin(), textureNames.end(), str);
 			if (iter != textureNames.end())
 			{
