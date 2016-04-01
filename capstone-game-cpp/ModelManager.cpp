@@ -4,8 +4,9 @@
 
 const uint32_t kStaticMeshModelTextureCount = 18;
 
-const char* kMinionAnimModelName = "Minion_Test";
-const char* kDoorModelName       = "Door";
+const char* kMinionAnimModelName	= "Minion_Test";
+const char* kDoorModelName			= "Door";
+const char* kLampModelName			= "WallLantern";
 
 const char* kStaticMeshModelNames[STATIC_MESH_MODEL_COUNT] =
 {

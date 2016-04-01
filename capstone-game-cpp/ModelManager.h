@@ -43,6 +43,7 @@ enum StaticMeshModel : int
 
 extern const char* kMinionAnimModelName;
 extern const char* kDoorModelName;
+extern const char* kLampModelName;
 
 extern const char* kStaticMeshModelNames[STATIC_MESH_MODEL_COUNT];
 
