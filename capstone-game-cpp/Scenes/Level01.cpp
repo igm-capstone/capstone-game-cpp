@@ -131,7 +131,6 @@ void Level01::InitializeAssets()
 	for (int i = 0; i < STATIC_MESH_MODEL_COUNT; i++)
 	{
 		mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[i]);
-
 	}
 
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
@@ -598,7 +597,7 @@ void Level01::RenderStaticMeshes()
 
 	mRenderer->VSetInputLayout(mApplication->mVSDefInstancedMaterial);
 	mRenderer->VSetVertexShader(mApplication->mVSDefInstancedMaterial);
-	mRenderer->VSetPixelShader(mApplication->mPSDefMaterial);
+	mRenderer->VSetPixelShader(mApplication->mPSDefInstancedMaterial);
 
 	mRenderer->VUpdateShaderConstantBuffer(mStaticMeshShaderResource, mCameraManager->GetCBufferPersp(), 0);
 
