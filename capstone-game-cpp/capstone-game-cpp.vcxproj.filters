@@ -59,6 +59,8 @@
     <ClCompile Include="BehaviorTree\IterableComposite.cpp" />
     <ClCompile Include="BehaviorTree\PrioritySelector.cpp" />
     <ClCompile Include="Components\AnimationUtility.cpp" />
+    <ClCompile Include="SceneObjects\FlyTrap.cpp" />
+    <ClCompile Include="Components\FlyTrapController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -124,6 +126,8 @@
     <ClInclude Include="BehaviorTree\IterableComposite.h" />
     <ClInclude Include="BehaviorTree\PrioritySelector.h" />
     <ClInclude Include="Components\AnimationUtility.h" />
+    <ClInclude Include="SceneObjects\FlyTrap.h" />
+    <ClInclude Include="Components\FlyTrapController.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />

@@ -25,6 +25,7 @@
 #include <SceneObjects/Door.h>
 #include <Rig3D/Graphics/DirectX11/DX11ShaderResource.h>
 #include <SceneObjects/SpawnPoint.h>
+#include <SceneObjects/FlyTrap.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -152,6 +153,9 @@ void Level01::InitializeAssets()
 	mCollisionManager->mBVHTree.SetRootBoundingVolume(mLevel.center, mLevel.extents, mLevel.staticColliderCount);
 	mAIManager->InitGrid(mLevel.center.x - mLevel.extents.x, mLevel.center.y + mLevel.extents.y, 2 * mLevel.extents.x, 2 * mLevel.extents.y);
 	mCameraManager->SetLevelBounds(mLevel.center, mLevel.extents);
+
+	Factory<FlyTrap>::Create();
+
 }
 
 void Level01::InitializeGeometry()
@@ -480,10 +484,10 @@ void Level01::VRender()
 	RenderWallColliders(mExplorerShaderResource, mCameraManager, &mModel);
 #endif
 	
-	RenderDoors();
-	RenderExplorers();
+	//RenderDoors();
+	//RenderExplorers();
 	RenderMinions();
-	RenderSpotLightVolumes();
+	//RenderSpotLightVolumes();
 
 #ifdef _DEBUG
 	if (mDebugGBuffer)
@@ -624,7 +628,7 @@ void Level01::RenderStaticMeshes()
 		auto numElements = modelCluster->ShareCount();
 	
 		mRenderer->VBindMesh(modelCluster->mMesh);
-		mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
+	//	mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
 		instanceCount += numElements;
 
 		for (auto i = 0; i < numElements; i++) ++it;
@@ -782,6 +786,21 @@ void Level01::RenderMinions()
 
 		mRenderer->VBindMesh(m.mModel->mMesh);
 		mRenderer->VDrawIndexed(0, m.mModel->mMesh->GetIndexCount());
+	}
+
+	for (FlyTrap& ft : Factory<FlyTrap>())
+	{
+		mModel.world = ft.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		ft.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatrices);
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
+
+		mRenderer->VBindMesh(ft.mModel->mMesh);
+		mRenderer->VDrawIndexed(0, ft.mModel->mMesh->GetIndexCount());
 	}
 }
 
