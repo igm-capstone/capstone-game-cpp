@@ -146,14 +146,36 @@ void loadSpawnPoints(jarr_t objs)
 }
 
 
-void loadStaticMeshes(jarr_t objs, std::string model)
+void loadStaticMeshes(jarr_t objs, std::string model, vector<string>& textureNames, vector<uint32_t>& materialIDs)
 {
 	TRACE_LOG("Loading " << int(objs->size()) << " static meshes...");
+
 	for (auto obj : *objs)
 	{
 		auto staticMesh = Factory<StaticMesh>::Create();
 		parseStaticMeshTransform(obj, staticMesh->mTransform);
 		Resource::mModelManager->GetModel(model.c_str())->Link(staticMesh);
+
+		auto textureName = obj["textureName"];
+		if (!textureName.empty())
+		{
+			string str = textureName.get<string>();
+			if (str.length() == 0)
+			{
+				str = "debugTexture.png";
+			}
+
+			vector<string>::iterator iter = find(textureNames.begin(), textureNames.end(), str);
+			if (iter != textureNames.end())
+			{
+				materialIDs.push_back(iter - textureNames.begin());
+			}
+			else
+			{
+				textureNames.push_back(str);
+				materialIDs.push_back(textureNames.size() - 1);
+			}
+		}
 
 		auto bounds = obj["bounds"];
 		if (!bounds.empty())
@@ -294,26 +316,6 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		level.extents = parseVec3f(extents);
 	}
 
-	level.floorCount = TILE_COUNT_X * TILE_COUNT_Y;
-	level.floorWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.floorCount, alignof(mat4f), 0));
-
-	float levelWidth	= level.extents.x * 2.0f;
-	float levelHeight	= level.extents.y * 2.0f;
-
-	level.floorWidth		=	levelWidth / static_cast<float>(TILE_COUNT_X);
-	level.floorHeight	=	levelHeight / static_cast<float>(TILE_COUNT_Y);
-	
-	float halfWidth		= (levelWidth - level.floorWidth) * 0.5f;
-	float halfHeight	= (levelHeight - level.floorHeight) * 0.5f;
-
-	for (int y = 0; y < TILE_COUNT_Y; y++)
-	{
-		for (int x = 0; x < TILE_COUNT_X; x++)
-		{
-			level.floorWorldMatrices[y * TILE_COUNT_X + x] = (mat4f::rotateX(-PI * 0.5f) * mat4f::translate({ level.center.x + (x * level.floorWidth - halfWidth) , level.center.y + (halfHeight - y * level.floorHeight), 0.5f })).transpose(); //FIXME: hardcoded z value
-		}
-	}
-
 	auto lamps = obj["lamps"].get_ptr<jarr_t>();
 	if (lamps != nullptr)
 	{
@@ -366,16 +368,23 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	auto staticMeshes = obj["staticMeshes"];
 	if (staticMeshes != nullptr)
 	{
-
+		
+		vector<string> l_textureNames;
+		int m = 0;
 		for (json::iterator it = staticMeshes.begin(); it != staticMeshes.end(); ++it) {
 			std::cout << it.key() << " : " << it.value() << "\n";
 
 			auto model = it.key();
 			auto meshes = obj["staticMeshes"][it.key()].get_ptr<jarr_t>();
 			if (meshes) {
-				loadStaticMeshes(meshes, model);
+				loadStaticMeshes(meshes, model, l_textureNames, level.materialIDs);
 				level.staticMeshCount += static_cast<short>(meshes->size());
 			}
+		}
+
+		for (string s : l_textureNames)
+		{
+			level.textureNames.push_back("Assets/Textures/StaticMesh/" + s);
 		}
 
 		level.staticMeshWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * level.staticMeshCount, alignof(mat4f), 0));

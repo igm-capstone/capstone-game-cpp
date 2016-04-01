@@ -46,7 +46,7 @@ REGISTER_FACTORY ( MoveableBlock,	10	)
 REGISTER_FACTORY ( SpawnPoint,		5	)
 REGISTER_FACTORY ( Pickup,			7	)
 REGISTER_FACTORY ( DominationPoint,	6	)
-REGISTER_FACTORY ( Lamp,			17	)
+REGISTER_FACTORY ( Lamp,			33	)
 REGISTER_FACTORY ( Region,			100)
 
 
