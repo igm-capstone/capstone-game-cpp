@@ -53,7 +53,7 @@ void Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject*
 {
 	auto ghost = reinterpret_cast<Ghost*>(obj);
 
-	if (target->Is<Region>()) {
+	if (target && target->Is<Region>()) {
 		ghost->mEvents->Play("Spawn");
 
 		TRACE_LOG("Spawning at" << pos);
@@ -63,7 +63,7 @@ void Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject*
 
 void Ghost::DoDoorInteract(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
-	if (target->Is<Door>()) {
+	if (target && target->Is<Door>()) {
 		auto door = reinterpret_cast<Door*>(target);
 		door->ToogleDoor();
 	}
