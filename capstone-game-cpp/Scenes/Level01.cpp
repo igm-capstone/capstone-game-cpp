@@ -242,9 +242,7 @@ void Level01::InitializeShaderResources()
 			filenames.push_back(mLevel.textureNames[i].c_str());
 		}
 
-		const char* lampTextureFilename = "Assets\Textures\StaticMesh\WallLantern.png";
 		mRenderer->VCreateShaderTexture2DArray(mStaticMeshShaderResource, &filenames[0], mLevel.textureNames.size());
-		mRenderer->VAddShaderTextures2D(mStaticMeshShaderResource, &lampTextureFilename, 1);
 		mRenderer->VAddShaderLinearSamplerState(mStaticMeshShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 	}
 
