@@ -135,6 +135,8 @@ void Level01::InitializeAssets()
 
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
+	mModelManager->LoadModel<GPU::SkinnedVertex>(kLampModelName);
+
 
 	//mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 	mLevel = Resource::LoadLevel("Assets/Level02_Test.json", mAllocator);
@@ -240,7 +242,9 @@ void Level01::InitializeShaderResources()
 			filenames.push_back(mLevel.textureNames[i].c_str());
 		}
 
+		const char* lampTextureFilename = "Assets\Textures\StaticMesh\WallLantern.png";
 		mRenderer->VCreateShaderTexture2DArray(mStaticMeshShaderResource, &filenames[0], mLevel.textureNames.size());
+		mRenderer->VAddShaderTextures2D(mStaticMeshShaderResource, &lampTextureFilename, 1);
 		mRenderer->VAddShaderLinearSamplerState(mStaticMeshShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 	}
 
