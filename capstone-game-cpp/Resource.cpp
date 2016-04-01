@@ -278,6 +278,9 @@ void loadDoors(jarr_t objs)
 		door->mColliderComponent->mCollider.axis[2] = vec3f(0, 0, 1);
 		door->mColliderComponent->mLayer = COLLISION_LAYER_WALL;
 
+		door->mTrigger->mCollider.axis[0] = vec3f(1, 0, 0);
+		door->mTrigger->mCollider.axis[1] = vec3f(0, 1, 0);
+		door->mTrigger->mCollider.axis[2] = vec3f(0, 0, 1);
 		door->mTrigger->mCollider.origin = door->mColliderComponent->mCollider.origin;
 		door->mTrigger->mCollider.halfSize = door->mColliderComponent->mCollider.halfSize;
 		if (door->mTrigger->mCollider.halfSize.x < door->mTrigger->mCollider.halfSize.y)

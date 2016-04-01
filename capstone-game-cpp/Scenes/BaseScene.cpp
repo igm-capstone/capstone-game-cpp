@@ -62,8 +62,15 @@ void GetChildAndPrint(int index)
 	{
 		auto n = bvh->mNodes[i];
 		if (n.parentIndex == index) {
-			auto label = (n.object->mSceneObject && n.object->mSceneObject->mClassName) ? n.object->mSceneObject->mClassName : "BVH Node %d";
-			if (ImGui::TreeNode((void*)(intptr_t)i, label, i)) {
+			string s = "BVH Node (%d)";
+			if (n.object->mSceneObject && n.object->mSceneObject->mClassName)
+			{
+				s = n.object->mSceneObject->mClassName;
+				s.replace(0, 6, "");
+				s.append(" (%d)");
+			}
+			
+			if (ImGui::TreeNode((void*)(intptr_t)i, s.c_str(), i)) {
 				GetChildAndPrint(i);
 				ImGui::TreePop();
 			}
@@ -75,7 +82,7 @@ void BaseScene::RenderBVHTree()
 {
 	auto bvh = &Singleton<CollisionManager>::SharedInstance().mBVHTree;
 	ImGui::SetNextWindowPos(ImVec2(20.0f, 20.0f), ImGuiSetCond_Always);
-	ImGui::SetNextWindowContentSize(ImVec2(200.0f, 600.0f));
+	ImGui::SetNextWindowSize(ImVec2(300.0f, 600.0f));
 	ImGui::Begin("BVH Tree", nullptr, ImGuiWindowFlags_NoCollapse);
 	
 	if (ImGui::TreeNode((void*)(intptr_t)0, "Root")) {

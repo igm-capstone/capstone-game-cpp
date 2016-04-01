@@ -66,13 +66,13 @@ namespace
 	{
 		COLLISION_LAYER_ROOT,
 		COLLISION_LAYER_QUADRANT,
+		COLLISION_LAYER_EXPLORER,
+		COLLISION_LAYER_DOOR,
+		COLLISION_LAYER_LAMP,
 		COLLISION_LAYER_FLOOR,
 		COLLISION_LAYER_WALL,
-		COLLISION_LAYER_EXPLORER,
 		COLLISION_LAYER_MINION,
-		COLLISION_LAYER_SKILL,
-		COLLISION_LAYER_LAMP,
-		COLLISION_LAYER_DOOR
+		COLLISION_LAYER_SKILL
 	};
 }
 
@@ -213,35 +213,43 @@ void BVHTree::AddNodeRecursively(BaseColliderComponent* pColliderComponent, cons
 	}
 }
 
-bool BVHTree::RayCastRecursively(vec3f point, const int& targetLayer, const int& layerIndex, const int& parentIndex, const int& depth)
+BaseColliderComponent* BVHTree::RayCastRecursively(Ray<vec3f> ray, vec3f &hitPos, const int& parentIndex)
 {
-	bool ret = false;
-	SphereColliderComponent pointCollider;
-
-	pointCollider.mCollider.radius = 2.5f;
-	pointCollider.mCollider.origin = point;
-	pointCollider.mOffset = { 0.0f, 0.0f, 0.0f };
+	BaseColliderComponent* ret = nullptr;
+	vec3f retPoi;
+	vec3f poi; float t;
 
 	for (uint32_t i = parentIndex; i < mNodes.size(); i++)
 	{
-		if (mNodes[i].object->mLayer == gAllLayers[layerIndex])
+		if (mNodes[i].parentIndex == parentIndex)
 		{
 			OrientedBoxColliderComponent* pOBB = reinterpret_cast<OrientedBoxColliderComponent*>(mNodes[i].object);
-
-			if (pointCollider.mOnObbTest(&pointCollider, pOBB))
+			
+			if (IntersectRayOBB(ray, pOBB->mCollider, poi, t))
 			{
-				if (mNodes[i].object->mLayer != targetLayer)
+				if (mNodes[i].object->mLayer != COLLISION_LAYER_DOOR &&
+					mNodes[i].object->mLayer != COLLISION_LAYER_LAMP &&
+					mNodes[i].object->mLayer != COLLISION_LAYER_FLOOR /*&&
+					mNodes[i].object->mLayer != COLLISION_LAYER_EXPLORER*/) //Explorer is out because right now I can only do OBB from the nodes.
 				{
-					ret |= RayCastRecursively(point, targetLayer, layerIndex + 1, static_cast<int>(i), depth + 1);
+					auto potentialTarget = RayCastRecursively(ray, poi, static_cast<int>(i));
+					
+					//Relies on CLayer numbers to get most relevant raycast target
+					if (potentialTarget && (!ret || potentialTarget->mLayer < ret->mLayer)) {
+						ret = potentialTarget;
+						retPoi = poi;
+					}
 				}
 				else
 				{
-					ret = true;
+					ret = mNodes[i].object;
+					retPoi = poi;
 				}
 			}
 		}
 	}
 
+	hitPos = retPoi;
 	return ret;
 }
 

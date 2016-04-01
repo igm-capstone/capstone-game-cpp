@@ -95,18 +95,15 @@ void Skill::Update()
 		return;
 	}
 
-	//--- set skill pos
-
-	vec3f skillPos = Application::SharedInstance().mGroundMousePosition;
-	
 	//--- set target
-
 	auto bvhTree = &Singleton<CollisionManager>::SharedInstance();
+	auto mCameraManager = &Singleton<CameraManager>::SharedInstance();
+	auto ray = mCameraManager->Screen2Ray(mInput->mousePosition);
+	vec3f skillPos;
 
-	auto ret =	bvhTree->mBVHTree.RayCastRecursively(skillPos, COLLISION_LAYER_WALL);
-	TRACE_LOG(ret);
+	auto ret =	bvhTree->mBVHTree.RayCastRecursively(ray, skillPos);
+	
 	//--- fire callback
-
-	OnUse(mDuration, nullptr, skillPos);
+	OnUse(mDuration, ret ? ret->mSceneObject : nullptr, skillPos);
 	mLastUsed = appTime;
 }
