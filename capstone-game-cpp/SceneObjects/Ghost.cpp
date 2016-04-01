@@ -6,6 +6,7 @@
 #include <Components/GhostController.h>
 #include <CameraManager.h>
 #include "Door.h"
+#include "Region.h"
 
 //#include <CameraManager.h>
 
@@ -51,18 +52,19 @@ void Ghost::Spawn(BaseScene * scene)
 void Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
 	auto ghost = reinterpret_cast<Ghost*>(obj);
-	//ghost->mEvents->Play("Spawn");
 
-	//NetworkCmd::SpawnNewMinion(pos);
+	if (target->Is<Region>()) {
+		ghost->mEvents->Play("Spawn");
+
+		TRACE_LOG("Spawning at" << pos);
+		NetworkCmd::SpawnNewMinion(pos);
+	}
 }
 
 void Ghost::DoDoorInteract(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
-	auto ghost = reinterpret_cast<Ghost*>(obj);
-
-	/*if (target->Is<Door>()) {
+	if (target->Is<Door>()) {
 		auto door = reinterpret_cast<Door*>(target);
 		door->ToogleDoor();
 	}
-	NetworkCmd::SpawnNewMinion(pos);*/
 }
