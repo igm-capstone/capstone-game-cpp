@@ -67,7 +67,7 @@ namespace test
 					if (mIsVerbose)
 					{
 						//std::cout << "PASS" << std::endl << std::flush;
-						TRACE("PASS" << Trace::endl);
+						TRACE("[PASS]" << Trace::endl);
 					}
 					else
 					{
@@ -84,7 +84,7 @@ namespace test
 						TRACE(test->first << " ");
 					}
 					//std::cout << "FAIL: " << e.mMessage << std::endl << std::flush;
-					TRACE("FAIL: " << e.mMessage << Trace::endl);
+					TRACE("[FAIL]: " << e.mMessage << Trace::endl);
 				}
 			}
 			if (!mIsVerbose)
@@ -139,3 +139,5 @@ namespace test
         os << __FILE__ << ":" << __LINE__;                    \
         throw test::TestFailedException(os.str());            \
     }
+
+#define NOT_IMPLEMENTED() throw test::TestFailedException("Not Implemented");

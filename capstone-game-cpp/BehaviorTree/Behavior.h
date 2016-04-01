@@ -1,158 +1,127 @@
-#pragma once
-
+﻿#pragma once
+#include <string>
+#include <sstream>
 #include <functional>
-#include "TestSuite.h"
 
-enum class BehaviorStatus
+namespace BehaviorTree
 {
-	Invalid,
-	Success,
-	Failure,
-	Running,
-	Suspended,
-};
-
-namespace std
-{
-	inline ostream& operator<<(std::ostream& out, const BehaviorStatus& value) {
-		static std::map<BehaviorStatus, std::string> strings;
-		if (strings.size() == 0) {
-#define INSERT_ELEMENT(p) strings[p] = #p
-		INSERT_ELEMENT(BehaviorStatus::Invalid);
-		INSERT_ELEMENT(BehaviorStatus::Success);
-		INSERT_ELEMENT(BehaviorStatus::Failure);
-		INSERT_ELEMENT(BehaviorStatus::Running);
-		INSERT_ELEMENT(BehaviorStatus::Suspended);
-#undef INSERT_ELEMENT
-		}
-
-		return out << strings[value];
-	}
+	enum class BehaviorStatus
+	{
+		Invalid,
+		Success,
+		Failure,
+		Running,
+	};
 }
 
-class Behavior;
-typedef void(*ObserverCallback)(Behavior&, void*, BehaviorStatus);
-typedef BehaviorStatus(*UpdateCallback)(Behavior&, void*);
-typedef void(*ResetCallback)(Behavior&, void*);
-typedef void(*InitializeCallback)(Behavior&, void*);
-typedef void(*TerminateCallback)(Behavior&, void*, BehaviorStatus);
+inline std::ostream& operator<<(std::ostream& out, const BehaviorTree::BehaviorStatus& value) {
+	static std::map<BehaviorTree::BehaviorStatus, std::string> strings;
+	if (strings.size() == 0) {
+		
+		using namespace BehaviorTree;
+		int idx = -1;
+		std::string str;
 
-struct BehaviorObserver
+#define INSERT_ELEMENT(p)               \
+		str = std::string(#p);          \
+		idx = str.find_last_of(':');    \
+		strings[p] = str.substr(idx+1);
+
+		INSERT_ELEMENT(BehaviorStatus::Invalid)
+		INSERT_ELEMENT(BehaviorStatus::Success)
+		INSERT_ELEMENT(BehaviorStatus::Failure)
+		INSERT_ELEMENT(BehaviorStatus::Running)
+
+#undef INSERT_ELEMENT
+	}
+
+	return out << strings[value];
+}
+
+namespace BehaviorTree
 {
-	ObserverCallback callback;
-	Behavior*        behavior;
-	void*            data;
+	class Behavior;
+	typedef void(*ObserverCallback)(Behavior&, void*, BehaviorStatus);
+	typedef BehaviorStatus(*UpdateCallback)(Behavior&, void*);
+	typedef void(*ResetCallback)(Behavior&, void*);
+	typedef void(*InitializeCallback)(Behavior&, void*);
+	typedef void(*TerminateCallback)(Behavior&, void*, BehaviorStatus);
 
-	static BehaviorObserver Default() { return{ nullptr, nullptr, nullptr }; }
-};
-
-class Behavior
-{
-	friend class BehaviorTree;
-
-public:
-
-	Behavior(std::string name = "Behavior");
-	~Behavior();
-
-	void SetInitializeCallback(InitializeCallback callback)
+	struct BehaviorObserver
 	{
-		mOnInitialize = callback;
-	}
+		ObserverCallback callback;
+		Behavior*        behavior;
+		void*            data;
 
-	void SetResetCallback(ResetCallback callback)
-	{
-		mOnReset = callback;
-	}
+		static BehaviorObserver Default() { return{ nullptr, nullptr, nullptr }; }
+	};
 
-	void SetUpdateCallback(UpdateCallback callback)
+	class Behavior
 	{
-		mOnUpdate = callback;
-	}
+		friend class Tree;
 
-	void SetTerminateCallback(TerminateCallback callback)
-	{
-		mOnTerminate = callback;
-	}
+	public:
 
-	BehaviorStatus GetStatus() const
-	{
-		return mStatus;
-	}
+		Behavior(Tree& tree, std::string name = "Behavior");
+		~Behavior();
 
-	void SetObserver(BehaviorObserver observer)
-	{
-		mObserver = observer;
-	}
-
-	void NotifyObserver(BehaviorStatus status) const
-	{
-		if (mObserver.callback)
+		void Dump(std::stringstream& ss, int level = 0)
 		{
-			mObserver.callback(*mObserver.behavior, mObserver.data, status);
+			mDumpCallback(ss, level);
 		}
-	}
 
-	BehaviorStatus Tick(void* userData);
-	void Reset(void* userData);
+		void SetInitializeCallback(InitializeCallback callback)
+		{
+			mOnInitialize = callback;
+		}
 
-protected:
-	std::string        mName;
-	BehaviorStatus     mStatus;
-	BehaviorObserver   mObserver;
+		void SetResetCallback(ResetCallback callback)
+		{
+			mOnReset = callback;
+		}
 
-	UpdateCallback     mOnUpdate;
-	ResetCallback      mOnReset;
-	InitializeCallback mOnInitialize;
-	TerminateCallback  mOnTerminate;
-};
+		void SetUpdateCallback(UpdateCallback callback)
+		{
+			mOnUpdate = callback;
+		}
 
+		void SetTerminateCallback(TerminateCallback callback)
+		{
+			mOnTerminate = callback;
+		}
 
-struct MockBehavior : public Behavior
-{
-	int mInitializeCalled;
-	int mTerminateCalled;
-	int mUpdateCalled;
-	BehaviorStatus mReturnStatus;
-	BehaviorStatus mTerminateStatus;
+		BehaviorStatus GetStatus() const
+		{
+			return mStatus;
+		}
 
-	MockBehavior()
-		: Behavior("Mock Behavior")
-		, mInitializeCalled(0)
-		, mTerminateCalled(0)
-		, mUpdateCalled(0)
-		, mReturnStatus(BehaviorStatus::Running)
-		, mTerminateStatus(BehaviorStatus::Invalid)
-	{
-		SetInitializeCallback(&OnInitialize);
-		SetUpdateCallback(&OnUpdate);
-		SetTerminateCallback(&OnTerminate);
-	}
+		void SetObserver(BehaviorObserver observer)
+		{
+			mObserver = observer;
+		}
 
-	~MockBehavior()
-	{
-	}
+		void NotifyObserver(BehaviorStatus status) const
+		{
+			if (mObserver.callback)
+			{
+				mObserver.callback(*mObserver.behavior, mObserver.data, status);
+			}
+		}
 
-	static void OnInitialize(Behavior& bh, void* data)
-	{
-		auto& self = static_cast<MockBehavior&>(bh);
+		BehaviorStatus Tick(void* userData = nullptr);
+		void Reset(void* userData);
 
-		++self.mInitializeCalled;
-	}
+	protected:
+		Tree&              mTree;
+		std::string        mName;
+		BehaviorStatus     mStatus;
+		BehaviorObserver   mObserver;
 
-	static void OnTerminate(Behavior& bh, void* data, BehaviorStatus status)
-	{
-		auto& self = static_cast<MockBehavior&>(bh);
+		UpdateCallback     mOnUpdate;
+		ResetCallback      mOnReset;
+		InitializeCallback mOnInitialize;
+		TerminateCallback  mOnTerminate;
 
-		++self.mTerminateCalled;
-		self.mTerminateStatus = status;
-	}
-
-	static BehaviorStatus OnUpdate(Behavior& bh, void* data)
-	{
-		auto& self = static_cast<MockBehavior&>(bh);
-
-		++self.mUpdateCalled;
-		return self.mReturnStatus;
-	}
-};
+		std::function<void(std::stringstream&, int)> mDumpCallback;
+	};
+}

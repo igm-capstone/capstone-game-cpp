@@ -1,32 +1,33 @@
 #include "stdafx.h"
 #include "MinionController.h"
 #include <BehaviorTree/BehaviorTree.h>
-#include <BehaviorTree/Sequence.h>
-#include <BehaviorTree/Condition.h>
-#include <BehaviorTree/PrioritySelector.h>
 #include <Rig3D\Common\Timer.h>
 #include <Rig3D\Engine.h>
 #include <AIManager.h>
 #include <Mathf.h>
 
+using namespace BehaviorTree;
+using namespace chrono;
+
 MinionController::MinionController():
 	mThinkTime(0),
 	mAI(Singleton<AIManager>::SharedInstance()),
-	mTimer(*(Singleton<Engine>::SharedInstance()).GetTimer())
+	mTimer(*Singleton<Engine>::SharedInstance().GetTimer())
 {
-	mBehaviorTree = new BehaviorTree();
+	mBehaviorTree = new Tree();
 
-	auto baseSelector = new PrioritySelector(*mBehaviorTree, "(/!\\) Priority Selector");
+	auto baseSelector = new Priority(*mBehaviorTree, "(/!\\) Priority Selector");
 	auto followExplorerSequence = new Sequence(*mBehaviorTree, "(-->) Follow Explorer");
-	auto isExplorerInRange = new Condition("(?) Is Explorer in Range");
-	auto moveTowardsExplorer = new Behavior("(!) Move Towards Explorer");
+	auto isExplorerInRange = new Predicate(*mBehaviorTree, "(?) Is Explorer in Range");
+	auto moveTowardsExplorer = new Behavior(*mBehaviorTree, "(!) Move Towards Explorer");
+	auto tryToFollowExplorer = new Conditional(*mBehaviorTree, *moveTowardsExplorer, *isExplorerInRange, "(?) Try to Follow Explorer");
 	auto patrolSequence = new Sequence(*mBehaviorTree, "(-->) Patrol");
-	auto findTarget = new Behavior("(!) Find Patrol Target");
-	auto think = new Behavior("(!) Think");
-	auto moveTowardsTarget = new Behavior("(!) Move Towards Target");
+	auto findTarget = new Behavior(*mBehaviorTree, "(!) Find Patrol Target");
+	auto think = new Behavior(*mBehaviorTree, "(!) Think");
+	auto moveTowardsTarget = new Behavior(*mBehaviorTree, "(!) Move Towards Target");
 
 
-	isExplorerInRange->SetConditionCallback(&IsExplorerInRange);
+	isExplorerInRange->SetPredicateCallback(&IsExplorerInRange);
 	moveTowardsExplorer->SetUpdateCallback(&MoveTowardsExplorer);
 	findTarget->SetUpdateCallback(&FindTarget);
 	think->SetUpdateCallback(&Think);
@@ -36,8 +37,9 @@ MinionController::MinionController():
 	baseSelector->Add(*followExplorerSequence);
 	baseSelector->Add(*patrolSequence);
 
-	followExplorerSequence->Add(*isExplorerInRange);
-	followExplorerSequence->Add(*moveTowardsExplorer);
+	followExplorerSequence->Add(*tryToFollowExplorer);
+	//followExplorerSequence->Add(*isExplorerInRange);
+	//followExplorerSequence->Add(*moveTowardsExplorer);
 
 	patrolSequence->Add(*findTarget);
 	patrolSequence->Add(*think);
@@ -58,11 +60,23 @@ bool MinionController::Update(double milliseconds)
 {
 	if (!mIsActive) return false;
 	
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	mBehaviorTree->Tick(this);
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+
+	auto duration = duration_cast<nanoseconds>(t2 - t1).count();
 	
 	auto pos = mSceneObject->mTransform->GetPosition();
 	auto dir = mSceneObject->mTransform->GetUp();
 	TRACE_LINE(pos, pos + dir, Colors::red);
+
+	if (Singleton<Engine>::SharedInstance().GetInput()->GetKeyDown(KEYCODE_D))
+	{
+		std::stringstream ss;
+		mBehaviorTree->Dump(ss);
+		TRACE(ss.str() << Trace::endl);
+		TRACE_LOG(duration);
+	}
 
 	return true;
 }

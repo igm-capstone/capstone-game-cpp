@@ -1,10 +1,21 @@
 ﻿#pragma once
-#include "IterableComposite.h"
+#include "Composite.h"
 
-class Selector : public IterableComposite
+namespace BehaviorTree
 {
 
-public:
-	Selector(BehaviorTree& bt, std::string name = "Selector");
-	static void OnReset(Behavior&, void*);
-};
+	class Selector : public Composite
+	{
+	public:
+		Selector(Tree& tree, std::string name = "Selector");
+
+	protected:
+		/*class BehaviorTree* mBehaviorTree;*/
+		std::vector<class Behavior*>::iterator mCurrent;
+
+		static void OnInitialize(Behavior& self, void* data);
+		static void OnReset(Behavior& bh, void* data);
+		static BehaviorStatus OnUpdate(Behavior& self, void* data);
+	};
+
+}

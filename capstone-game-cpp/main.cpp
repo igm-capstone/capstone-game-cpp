@@ -83,6 +83,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 	app->LoadScene<MainMenuScene>();
 
 	auto& testSuite = test::TestSuite::SharedInstance();
+	testSuite.SetVerbose(true);
 	bool allPassed = testSuite.RunAllTests();
 
 	engine.RunApplication(app);
