@@ -72,9 +72,6 @@ bool MinionController::Update(double milliseconds)
 
 	if (Singleton<Engine>::SharedInstance().GetInput()->GetKeyDown(KEYCODE_D))
 	{
-		std::stringstream ss;
-		mBehaviorTree->Dump(ss);
-		TRACE(ss.str() << Trace::endl);
 		TRACE_LOG(duration);
 	}
 

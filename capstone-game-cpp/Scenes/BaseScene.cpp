@@ -8,12 +8,16 @@
 #include <Rig3D/Graphics/DirectX11/DX11IMGUI.h>
 #include <Console.h>
 #include <ScareTacticsApplication.h>
+#include <Components/MinionController.h>
 
 BaseScene::BaseScene() : 
 	mStaticMemory(nullptr),
 	mStaticMemorySize(0),
 	mState(BASE_SCENE_STATE_CONSTRUCTED),
-	mDebugGrid(false), mDebugColl(false), mDebugGBuffer(false), mDebugBVH(false)
+	mDebugGrid(false), mDebugColl(false),
+	mDebugGBuffer(false),
+	mDebugBVH(false),
+	mDebugBT(false)
 {
 	mEngine = &Singleton<Engine>::SharedInstance();
 
@@ -82,6 +86,20 @@ void BaseScene::RenderBVHTree()
 	ImGui::End();
 }
 
+void BaseScene::RenderMinionBehaviorTrees()
+{
+	//ImGui::SetNextWindowPos(ImVec2(20.0f, 20.0f), ImGuiSetCond_Always);
+	//ImGui::SetNextWindowContentSize(ImVec2(200.0f, 600.0f));
+	ImGui::Begin("Minion Behavior Trees", nullptr, ImGuiWindowFlags_NoCollapse);
+
+	for (MinionController& minion : Factory<MinionController>())
+	{
+		minion.mBehaviorTree->DumpIMGUI();
+	}
+
+	ImGui::End();
+}
+
 /* Renders IMGUI. ideally, it is the last call in the render loop.
  * Optionally takes a void(*)(BaseScene*) function that draw custom IMGUI on top of the default FPS and Console. */
 void BaseScene::RenderIMGUI(void(*IMGUIDrawFunc)(BaseScene*))
@@ -91,6 +109,7 @@ void BaseScene::RenderIMGUI(void(*IMGUIDrawFunc)(BaseScene*))
 	RenderFPSIndicator();
 	Console::Draw();
 	if (mDebugBVH) RenderBVHTree();
+	if (mDebugBT) RenderMinionBehaviorTrees();
 	if (IMGUIDrawFunc) IMGUIDrawFunc(this);
 	ImGui::Render();
 }

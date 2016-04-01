@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "Behavior.h"
+#include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 
 using namespace BehaviorTree;
 
@@ -14,9 +15,12 @@ Behavior::Behavior(Tree& tree, std::string name) :
 	mOnInitialize(nullptr),
 	mOnTerminate(nullptr)
 {
-	mDumpCallback = [&](std::stringstream& ss, int level)
+	mOnIMGUI = [&](int level)
 	{
-		ss << "[" << mStatus << "] " << std::string(level, '\t') << mName << std::endl;
+		if (ImGui::TreeNode((void*)(intptr_t)0, "Minion"))
+		{
+			ImGui::TreePop();
+		}
 	};
 }
 

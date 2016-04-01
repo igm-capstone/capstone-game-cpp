@@ -47,6 +47,7 @@ public:
 	bool						mDebugColl;
 	bool						mDebugGBuffer;
 	bool						mDebugBVH;
+	bool						mDebugBT;
 
 	Resource::LevelInfo			mLevel;
 	BoxCollider2D				mFloorCollider;
@@ -60,6 +61,7 @@ public:
 	// Common methods
 	void RenderFPSIndicator();
 	void RenderBVHTree();
+	void RenderMinionBehaviorTrees();
 	void RenderIMGUI(void(*)(BaseScene*) = nullptr);
 };
 

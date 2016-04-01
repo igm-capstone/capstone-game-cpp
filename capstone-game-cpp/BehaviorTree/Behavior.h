@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include <functional>
+#include <trace.h>
 
 namespace BehaviorTree
 {
@@ -65,9 +66,9 @@ namespace BehaviorTree
 		Behavior(Tree& tree, std::string name = "Behavior");
 		~Behavior();
 
-		void Dump(std::stringstream& ss, int level = 0)
+		void DumpIMGUI(int level = 0)
 		{
-			mDumpCallback(ss, level);
+			mOnIMGUI(level);
 		}
 
 		void SetInitializeCallback(InitializeCallback callback)
@@ -122,6 +123,6 @@ namespace BehaviorTree
 		InitializeCallback mOnInitialize;
 		TerminateCallback  mOnTerminate;
 
-		std::function<void(std::stringstream&, int)> mDumpCallback;
+		std::function<void(int)> mOnIMGUI;
 	};
 }

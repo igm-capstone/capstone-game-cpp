@@ -2,6 +2,7 @@
 #include "Conditional.h"
 #include "Predicate.h"
 #include "Tree.h"
+#include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 
 using namespace BehaviorTree;
 
@@ -12,11 +13,14 @@ Conditional::Conditional(Tree& tree, Behavior& child, Predicate& predicate, std:
 	SetInitializeCallback(&OnInitialize);
 	SetUpdateCallback(&OnUpdate);
 
-	mDumpCallback = [&](std::stringstream& ss, int level)
+	mOnIMGUI = [&](int level)
 	{
-		ss << "[" << mStatus << "] " << std::string(level, '\t') << mName << std::endl;
-		mPredicate.Dump(ss, level + 1);
-		mChild.Dump(ss, level + 1);
+		if (ImGui::TreeNode((void*)(intptr_t)0, "Minion"))
+		{
+			mPredicate.DumpIMGUI(level + 1);
+			mChild.DumpIMGUI(level + 1);
+			ImGui::TreePop();
+		}
 	};
 }
 

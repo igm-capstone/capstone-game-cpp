@@ -451,6 +451,11 @@ void Level01::VUpdate(double milliseconds)
 		mDebugBVH = !mDebugBVH;
 	}
 
+	if (mInput->GetKeyDown(KEYCODE_F8))
+	{
+		mDebugBT = !mDebugBT;
+	}
+
 	mCollisionManager->Update(milliseconds);
 }
 
