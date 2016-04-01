@@ -90,7 +90,7 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 	skillIndices.reserve(MAX_EXPLORERS + MAX_EXPLORERS * MAX_EXPLORER_SKILLS); // this is  a guess...
 
 	std::vector<uint32_t> doorIndices;
-	doorIndices.reserve(MAX_EXPLORERS + MAX_EXPLORERS * MAX_EXPLORER_SKILLS); // this is  a guess...
+	doorIndices.reserve(MAX_DOORS);
 
 	for (uint32_t i : explorerIndices)
 	{

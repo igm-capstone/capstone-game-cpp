@@ -101,8 +101,10 @@ void Skill::Update()
 	
 	//--- set target
 
+	auto bvhTree = &Singleton<CollisionManager>::SharedInstance();
 
-
+	auto ret =	bvhTree->mBVHTree.RayCastRecursively(skillPos, COLLISION_LAYER_WALL);
+	TRACE_LOG(ret);
 	//--- fire callback
 
 	OnUse(mDuration, nullptr, skillPos);

@@ -120,6 +120,7 @@ public:
 		// If BaseSceneObj, set the class type
 		if (*reinterpret_cast<int*>(ret) == 0xBABACACA) {
 			reinterpret_cast<BaseSceneObject*>(ret)->mClassID = typeid(*ret).hash_code();
+			reinterpret_cast<BaseSceneObject*>(ret)->mClassName = typeid(*ret).name();
 		}
 
 		return ret;

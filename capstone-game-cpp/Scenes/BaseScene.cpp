@@ -13,7 +13,7 @@ BaseScene::BaseScene() :
 	mStaticMemory(nullptr),
 	mStaticMemorySize(0),
 	mState(BASE_SCENE_STATE_CONSTRUCTED),
-	mDebugGrid(false), mDebugColl(false), mDebugGBuffer(false)
+	mDebugGrid(false), mDebugColl(false), mDebugGBuffer(false), mDebugBVH(false)
 {
 	mEngine = &Singleton<Engine>::SharedInstance();
 
@@ -50,6 +50,38 @@ void BaseScene::RenderFPSIndicator()
 	ImGui::End();
 }
 
+void GetChildAndPrint(int index)
+{
+	auto bvh = &Singleton<CollisionManager>::SharedInstance().mBVHTree;
+
+	for (auto i = 0U; i < bvh->mNodes.size(); i++)
+	{
+		auto n = bvh->mNodes[i];
+		if (n.parentIndex == index) {
+			auto label = (n.object->mSceneObject && n.object->mSceneObject->mClassName) ? n.object->mSceneObject->mClassName : "BVH Node %d";
+			if (ImGui::TreeNode((void*)(intptr_t)i, label, i)) {
+				GetChildAndPrint(i);
+				ImGui::TreePop();
+			}
+		}
+	}
+}
+
+void BaseScene::RenderBVHTree()
+{
+	auto bvh = &Singleton<CollisionManager>::SharedInstance().mBVHTree;
+	ImGui::SetNextWindowPos(ImVec2(20.0f, 20.0f), ImGuiSetCond_Always);
+	ImGui::SetNextWindowContentSize(ImVec2(200.0f, 600.0f));
+	ImGui::Begin("BVH Tree", nullptr, ImGuiWindowFlags_NoCollapse);
+	
+	if (ImGui::TreeNode((void*)(intptr_t)0, "Root")) {
+		GetChildAndPrint(0);
+		ImGui::TreePop();
+	}
+	
+	ImGui::End();
+}
+
 /* Renders IMGUI. ideally, it is the last call in the render loop.
  * Optionally takes a void(*)(BaseScene*) function that draw custom IMGUI on top of the default FPS and Console. */
 void BaseScene::RenderIMGUI(void(*IMGUIDrawFunc)(BaseScene*))
@@ -58,6 +90,7 @@ void BaseScene::RenderIMGUI(void(*IMGUIDrawFunc)(BaseScene*))
 	DX11IMGUI::NewFrame();
 	RenderFPSIndicator();
 	Console::Draw();
+	if (mDebugBVH) RenderBVHTree();
 	if (IMGUIDrawFunc) IMGUIDrawFunc(this);
 	ImGui::Render();
 }

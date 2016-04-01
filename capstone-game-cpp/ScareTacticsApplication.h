@@ -21,6 +21,7 @@ public:
 	IShader* mCSGridPass2;
 	IShader* mPSDefColor;
 	IShader* mPSDefMaterial;
+	IShader* mPSDefInstancedMaterial;
 	IShader* mPSFwd2DTexture;
 	IShader* mPSFwdColor;
 	IShader* mPSFwdDeferredOutput;

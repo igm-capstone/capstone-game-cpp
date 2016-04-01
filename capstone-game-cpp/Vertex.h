@@ -99,9 +99,4 @@ namespace GPU {
 		float weight;
 		bool hasLight;
 	};
-
-
-
-
-
 }

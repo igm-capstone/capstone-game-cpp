@@ -2,20 +2,47 @@
 #include "ModelManager.h"
 #include "Vertex.h"
 
-const char* kMinionAnimModelName = "Minion_Test";
-const char* kDoorModelName       = "Door";
+const uint32_t kStaticMeshModelTextureCount = 18;
+
+const char* kMinionAnimModelName	= "Minion_Test";
+const char* kDoorModelName			= "Door";
+const char* kLampModelName			= "WallLantern";
 
 const char* kStaticMeshModelNames[STATIC_MESH_MODEL_COUNT] =
 {
-	"Wall",
+	"BathroomCabinet",
+	"Bathtub",
+	"Bookshelf",
+	"BookshelfCurved",
+	"BookshelfFlat",
+	"BottleBig",
+	"BottleSmall",
+	"Chair",
+	"Corner_Wall",
+	"CurvedWall",
+	"Couch",
+	"DiningChair",
+	"DiningTable",
+	"DomPoint",
+	"DoorBlocked",
+	"Floor",
+	"Lever",
+	"LightCannon",
+	"NormalWall",
+	"RampPrototype04x02x02",
+	"Sink",
+	"StepsPrototype04x02x02",
+	"T_Wall",
+	"Toilet",
 	"TriangleWall",
+	"Wall",
 	"Wall_DoubleDoor",
 	"Wall_SingleDoor",
 	"Wall_W_SingleWindwo",
-	"CurvedWall",
-	"Floor"
+	"Wall_Window",
+	"WallLantern",
+	"Wardrobe"
 };
-
 
 ModelManager::ModelManager()
 {

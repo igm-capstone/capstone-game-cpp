@@ -213,6 +213,38 @@ void BVHTree::AddNodeRecursively(BaseColliderComponent* pColliderComponent, cons
 	}
 }
 
+bool BVHTree::RayCastRecursively(vec3f point, const int& targetLayer, const int& layerIndex, const int& parentIndex, const int& depth)
+{
+	bool ret = false;
+	SphereColliderComponent pointCollider;
+
+	pointCollider.mCollider.radius = 2.5f;
+	pointCollider.mCollider.origin = point;
+	pointCollider.mOffset = { 0.0f, 0.0f, 0.0f };
+
+	for (uint32_t i = parentIndex; i < mNodes.size(); i++)
+	{
+		if (mNodes[i].object->mLayer == gAllLayers[layerIndex])
+		{
+			OrientedBoxColliderComponent* pOBB = reinterpret_cast<OrientedBoxColliderComponent*>(mNodes[i].object);
+
+			if (pointCollider.mOnObbTest(&pointCollider, pOBB))
+			{
+				if (mNodes[i].object->mLayer != targetLayer)
+				{
+					ret |= RayCastRecursively(point, targetLayer, layerIndex + 1, static_cast<int>(i), depth + 1);
+				}
+				else
+				{
+					ret = true;
+				}
+			}
+		}
+	}
+
+	return ret;
+}
+
 void BVHTree::GetNodeIndices(std::vector<uint32_t>& indices, const CLayer& layer, std::function<bool(const BVHNode& other)> predicate)
 {
 	uint32_t startIndex = 0;

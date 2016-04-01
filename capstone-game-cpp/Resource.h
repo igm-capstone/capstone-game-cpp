@@ -10,19 +10,19 @@ public:
 	struct LevelInfo
 	{
 		mat4f* staticMeshWorldMatrices;
-		mat4f* floorWorldMatrices;
 		mat4f* lampWorldMatrices;
 		mat4f* lampVPTMatrices;
 		Rig3D::Transform* moveableBlocks;
 
 		vec3f center, extents;
-		float floorWidth, floorHeight;
 
 		short staticColliderCount	= 0;
 		short regionCount			= 0;
 		short staticMeshCount		= 0;
-		short floorCount			= 0;
 		short lampCount				= 0;
+
+		std::vector<std::string>	textureNames;
+		std::vector<uint32_t>		materialIDs;
 	};
 
 public:

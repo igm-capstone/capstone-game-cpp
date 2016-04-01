@@ -4,6 +4,7 @@ struct Vertex
 	float3		normal		: NORMAL;
 	float2		uv			: TEXCOORD;
 	float4x4	world		: WORLD;
+	uint		matId		: BLENDINDICES;		// Not used for anim just need a semantic to store a uint
 };
 
 struct Pixel
@@ -11,7 +12,7 @@ struct Pixel
 	float4 positionH	: SV_POSITION;
 	float3 positionT	: POSITIONT;
 	float3 normal		: NORMAL;
-	float2 uv			: TEXCOORD;
+	float3 uv			: TEXCOORD;
 };
 
 cbuffer camera : register(b0)
@@ -30,7 +31,7 @@ Pixel main(Vertex vertex)
 	pixel.positionH = mul(vertexPos, clip);
 	pixel.positionT = mul(vertexPos, vertex.world).xyz;
 	pixel.normal = mul(vertex.normal, (float3x3)vertex.world).xyz;
-	pixel.uv = vertex.uv;
+	pixel.uv = float3(vertex.uv, 0.0f + vertex.matId);
 
 	return pixel;
 }
