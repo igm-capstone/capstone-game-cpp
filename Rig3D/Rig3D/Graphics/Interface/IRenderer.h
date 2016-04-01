@@ -37,6 +37,7 @@ namespace Rig3D
 		R_TYPELESS8,
 		RG_TYPELESS8,
 		RGBA_TYPELESS8,
+		R_UINT32,
 		RGBA_UINT32
 	};
 
