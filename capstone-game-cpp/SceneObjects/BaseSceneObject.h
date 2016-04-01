@@ -9,6 +9,7 @@ class BaseSceneObject
 	int __pool_padding = 0xBABACACA;
 public:
 	size_t mClassID;
+	const char* mClassName;
 
 	union
 	{

@@ -23,4 +23,5 @@ public:
 	void Spawn(class BaseScene* scene);
 
 	static void DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
+	static void DoDoorInteract(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
 };

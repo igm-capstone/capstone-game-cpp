@@ -41,9 +41,16 @@ private:
 			Explorer* e = static_cast<Explorer*>(other);
 			if (e->mController->mIsInteracting && door->mCanOpen) {
 				e->mController->ConsumeInteractWill();
-				door->mColliderComponent->mIsActive ? door->mTransform->RotateRoll(0.5f*PI) : door->mTransform->RotateRoll(-0.5f*PI);
-				door->mColliderComponent->mIsActive = !door->mColliderComponent->mIsActive;
+				door->ToogleDoor();
 			}
 		}
+	}
+
+public:
+	void ToogleDoor()
+	{
+		if (!mCanOpen) return;
+		mColliderComponent->mIsActive ? mTransform->RotateRoll(0.5f*PI) : mTransform->RotateRoll(-0.5f*PI);
+		mColliderComponent->mIsActive = !mColliderComponent->mIsActive;
 	}
 };

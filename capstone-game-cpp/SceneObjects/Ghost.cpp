@@ -5,6 +5,7 @@
 #include <Components/NetworkID.h>
 #include <Components/GhostController.h>
 #include <CameraManager.h>
+#include "Door.h"
 
 //#include <CameraManager.h>
 
@@ -30,6 +31,12 @@ Ghost::Ghost() : mNetworkID(nullptr)
 	spawnMinion->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
 	spawnMinion->Setup(0, 0, DoSpawnMinion);
 	mSkills[0] = spawnMinion;
+
+	auto doorInteract = Factory<Skill>::Create();
+	doorInteract->mSceneObject = this;
+	doorInteract->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
+	doorInteract->Setup(0, 0, DoDoorInteract);
+	mSkills[1] = doorInteract;
 }
 
 void Ghost::Spawn(BaseScene * scene)
@@ -44,7 +51,18 @@ void Ghost::Spawn(BaseScene * scene)
 void Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
 	auto ghost = reinterpret_cast<Ghost*>(obj);
-	ghost->mEvents->Play("Spawn");
+	//ghost->mEvents->Play("Spawn");
 
-	NetworkCmd::SpawnNewMinion(pos);
+	//NetworkCmd::SpawnNewMinion(pos);
+}
+
+void Ghost::DoDoorInteract(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
+{
+	auto ghost = reinterpret_cast<Ghost*>(obj);
+
+	/*if (target->Is<Door>()) {
+		auto door = reinterpret_cast<Door*>(target);
+		door->ToogleDoor();
+	}
+	NetworkCmd::SpawnNewMinion(pos);*/
 }

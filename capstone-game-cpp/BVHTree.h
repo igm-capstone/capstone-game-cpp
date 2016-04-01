@@ -39,7 +39,7 @@ public:
 
 	void AddNode(BaseColliderComponent* pColliderComponent, const int& parentIndex, const int& depth);
 	void AddNodeRecursively(class BaseColliderComponent* pColliderComponent, const int& destLayerIndex, const int& layerIndex, const int& parentIndex, const int& depth);
-
+	bool RayCastRecursively(vec3f point, const int& parentLayerIndex, const int& layerIndex = 0, const int& parentIndex = 0, const int& depth = 0);
 	void GetNodeIndices(std::vector<uint32_t>& indices, const CLayer& layer, std::function<bool(const BVHNode& other)> predicate);
 	void GetNodeIndices(std::vector<uint32_t>& indices, std::function<bool(const BVHNode& other)> predicate);
 	BVHNode* GetNode(const uint32_t& index);
