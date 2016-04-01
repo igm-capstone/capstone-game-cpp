@@ -101,7 +101,8 @@ void BaseScene::RenderMinionBehaviorTrees()
 
 	for (MinionController& minion : Factory<MinionController>())
 	{
-		minion.mBehaviorTree->DumpIMGUI();
+		int id = 0;
+		minion.mBehaviorTree->DumpIMGUI(id);
 	}
 
 	ImGui::End();

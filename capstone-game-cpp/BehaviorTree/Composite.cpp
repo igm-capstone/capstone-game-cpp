@@ -6,16 +6,22 @@ using namespace BehaviorTree;
 
 Composite::Composite(Tree& tree, std::string name) : Behavior(tree, name)
 {
-	mOnIMGUI = [&](int level)
+	mOnIMGUI = [&](int& id, int level)
 	{
-		if (ImGui::TreeNode((void*)(intptr_t)0, "Minion"))
+		BeginIMGUI();
+
+		std::stringstream ss;
+		ss << "[" << mStatus << "] " << mName;
+		if (ImGui::TreeNode(reinterpret_cast<void*>(intptr_t(id)), ss.str().c_str()))
 		{
 			for (auto child : mChildren)
 			{
-				child->DumpIMGUI(level + 1);
+				child->DumpIMGUI(++id, level + 1);
 			}
 			ImGui::TreePop();
 		}
+
+		EndIMGUI();
 	};
 }
 

@@ -3,6 +3,7 @@
 #include <sstream>
 #include <functional>
 #include <trace.h>
+#include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 
 namespace BehaviorTree
 {
@@ -66,10 +67,39 @@ namespace BehaviorTree
 		Behavior(Tree& tree, std::string name = "Behavior");
 		~Behavior();
 
-		void DumpIMGUI(int level = 0)
+		void DumpIMGUI(int& id, int level = 0)
 		{
-			mOnIMGUI(level);
+			mOnIMGUI(id, level);
 		}
+
+		void BeginIMGUI()
+		{
+			ImVec4 col;
+			switch (mStatus)
+			{
+			case BehaviorStatus::Invalid:
+				col = ImColor(204, 204, 204); // invalid
+				break;
+			case BehaviorStatus::Success:
+				col = ImColor(000, 255, 051); // success
+				break;
+			case BehaviorStatus::Failure:
+				col = ImColor(255, 000, 000); // fail
+				break;
+			case BehaviorStatus::Running:
+				col = ImColor(000, 255, 204); // running
+				break;
+			}
+
+			ImGui::PushStyleColor(ImGuiCol_Text, col);
+
+		}
+
+		void EndIMGUI()
+		{
+			ImGui::PopStyleColor();
+		}
+
 
 		void SetInitializeCallback(InitializeCallback callback)
 		{
@@ -123,6 +153,6 @@ namespace BehaviorTree
 		InitializeCallback mOnInitialize;
 		TerminateCallback  mOnTerminate;
 
-		std::function<void(int)> mOnIMGUI;
+		std::function<void(int&, int)> mOnIMGUI;
 	};
 }

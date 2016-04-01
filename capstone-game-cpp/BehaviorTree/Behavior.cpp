@@ -15,12 +15,18 @@ Behavior::Behavior(Tree& tree, std::string name) :
 	mOnInitialize(nullptr),
 	mOnTerminate(nullptr)
 {
-	mOnIMGUI = [&](int level)
+	mOnIMGUI = [&](int& id, int level)
 	{
-		if (ImGui::TreeNode((void*)(intptr_t)0, "Minion"))
+		BeginIMGUI();
+
+		std::stringstream ss;
+		ss << "[" << mStatus << "] " << mName;
+		if (ImGui::TreeNode(reinterpret_cast<void*>(intptr_t(id)), ss.str().c_str()))
 		{
 			ImGui::TreePop();
 		}
+
+		EndIMGUI();
 	};
 }
 

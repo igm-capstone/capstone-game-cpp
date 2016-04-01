@@ -13,14 +13,20 @@ Conditional::Conditional(Tree& tree, Behavior& child, Predicate& predicate, std:
 	SetInitializeCallback(&OnInitialize);
 	SetUpdateCallback(&OnUpdate);
 
-	mOnIMGUI = [&](int level)
+	mOnIMGUI = [&](int& id, int level)
 	{
-		if (ImGui::TreeNode((void*)(intptr_t)0, "Minion"))
+		BeginIMGUI();
+
+		std::stringstream ss;
+		ss << "[" << mStatus << "] " << mName;
+		if (ImGui::TreeNode(reinterpret_cast<void*>(intptr_t(id)), ss.str().c_str()))
 		{
-			mPredicate.DumpIMGUI(level + 1);
-			mChild.DumpIMGUI(level + 1);
+			mPredicate.DumpIMGUI(++id, level + 1);
+			mChild.DumpIMGUI(++id, level + 1);
 			ImGui::TreePop();
 		}
+
+		EndIMGUI();
 	};
 }
 
