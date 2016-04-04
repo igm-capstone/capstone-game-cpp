@@ -12,7 +12,6 @@
 #include "SceneObjects/Explorer.h"
 #include "SceneObjects/Door.h"
 #include "SceneObjects/Lamp.h"
-#include "SceneObjects/StaticMesh.h"
 
 namespace
 {
@@ -79,7 +78,7 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 	CameraManager* cameraManager = reinterpret_cast<CameraManager*>(pCameraManager);
 	CBuffer::Model* model = reinterpret_cast<CBuffer::Model*>(pModel);
 
-	vec4f color[6] = { Colors::green, Colors::cyan, Colors::blue, Colors::white, Colors::black, Colors::yellow };
+	vec4f color[5] = { Colors::green, Colors::cyan, Colors::blue, Colors::white, Colors::black };
 
 	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, cameraManager->GetCBufferPersp(), 0);
 	gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 0, 0);
@@ -125,18 +124,6 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 	{
 		if (!e.mTrigger->mIsActive) continue;
 		model->world = (mat4f::scale(e.mTrigger->mCollider.halfSize * 2.0f) * mat4f::translate(e.mTrigger->mCollider.origin)).transpose();
-		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
-		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
-		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 3, 2);
-
-		gRenderer->VDrawIndexed(0, gColliderMesh->GetIndexCount());
-	}
-
-	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, &color[5], 3);
-	for (StaticMesh& e : Factory<StaticMesh>())
-	{
-		if (!e.mColliderComponent->mIsActive) continue;
-		model->world = (mat4f::scale(e.mColliderComponent->mCollider.halfSize * 2.0f) * mat4f::translate(e.mColliderComponent->mCollider.origin)).transpose();
 		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
 		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
 		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 3, 2);

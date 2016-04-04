@@ -7,9 +7,9 @@ class StaticMesh : public BaseSceneObject
 	friend class Factory<StaticMesh>;
 
 public:
-	class OrientedBoxColliderComponent* mColliderComponent;
+	class BoxColliderComponent* mColliderComponent;
 
 private:
-	StaticMesh() : mColliderComponent(Factory<OrientedBoxColliderComponent>::Create()) {};
+	StaticMesh() : mColliderComponent(Factory<BoxColliderComponent>::Create()) {};
 	~StaticMesh() {};
 };

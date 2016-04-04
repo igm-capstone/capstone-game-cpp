@@ -190,14 +190,7 @@ void loadStaticMeshes(jarr_t objs, std::string model, vector<string>& textureNam
 			if (!extents.empty())
 			{
 				staticMesh->mColliderComponent->mCollider.halfSize = parseVec3f(extents);
-				/*auto temp = staticMesh->mColliderComponent->mCollider.halfSize.z;
-				staticMesh->mColliderComponent->mCollider.halfSize.z = staticMesh->mColliderComponent->mCollider.halfSize.y;
-				staticMesh->mColliderComponent->mCollider.halfSize.y = temp;*/
 			}
-			
-			staticMesh->mColliderComponent->mCollider.axis[0] = vec3f(1, 0, 0);
-			staticMesh->mColliderComponent->mCollider.axis[1] = vec3f(0, 1, 0);
-			staticMesh->mColliderComponent->mCollider.axis[2] = vec3f(0, 0, 1);
 		}
 
 	}

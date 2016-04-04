@@ -9,7 +9,6 @@
 #include <Colors.h>
 #include "SceneObjects/Explorer.h"
 #include "SceneObjects/Door.h"
-#include "SceneObjects/StaticMesh.h"
 
 #define PARTITION_X_COUNT 3
 #define PARTITION_Y_COUNT 2
@@ -165,11 +164,6 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 	}
 
 	for (StaticCollider& collider : Factory<StaticCollider>())
-	{
-		AddNodeRecursively(collider.mColliderComponent, WALL_PARENT_LAYER_INDEX, 0, 0, 0);
-	}
-
-	for (StaticMesh& collider : Factory<StaticMesh>())
 	{
 		AddNodeRecursively(collider.mColliderComponent, WALL_PARENT_LAYER_INDEX, 0, 0, 0);
 	}
