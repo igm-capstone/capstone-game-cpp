@@ -9,7 +9,7 @@ Animation gMinionAnimations[Animations::MINION_ANIMATION_COUNT] = {
 };
 
 Animation gPlantAnimations[Animations::PLANT_ANIMATION_COUNT] = {
-	{ "Flytrap_Export_Version", 10,		105,	1 },
+	{ "Flytrap_Export_Version", 5,		120,	1 },
 	{ "Flytrap_Export_Version", 120,	200,	1 },
 	{ "Flytrap_Export_Version", 230,	310,	1 },
 };
