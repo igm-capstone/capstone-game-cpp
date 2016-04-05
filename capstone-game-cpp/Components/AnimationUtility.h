@@ -19,6 +19,14 @@ namespace Animations
 		EXPLORER_ATTACK,
 		EXPLORER_ANIMATION_COUNT
 	};
+
+	enum PlantAnimations : int
+	{
+		PLANT_IDLE,
+		PLANT_BITE,
+		PLANT_SHOOT,
+		PLANT_ANIMATION_COUNT
+	};
 }
 
 struct Animation
@@ -33,6 +41,7 @@ class AnimationController;
 struct KeyframeOption;
 
 extern Animation gMinionAnimations[Animations::MINION_ANIMATION_COUNT];
+extern Animation gPlantAnimations[Animations::PLANT_ANIMATION_COUNT];
 
 extern uint32_t gMinionRestFrameIndex;
 

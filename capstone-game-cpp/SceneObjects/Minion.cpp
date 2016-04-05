@@ -5,7 +5,6 @@
 #include <Components/MinionController.h>
 #include <Components/AnimationController.h>
 #include <ScareTacticsApplication.h>
-#include <Vertex.h>
 #include <Components/AnimationUtility.h>
 #include <Network\NetworkClient.h>
 
@@ -57,7 +56,6 @@ void Minion::OnMove(BaseSceneObject* obj, vec3f newPos)
 	auto m = static_cast<Minion*>(obj);
 	m->mTransform->SetPosition(newPos);
 	m->mCollider->mCollider.origin = newPos;
-
 
 	if (m->mNetworkID->mHasAuthority) {
 		Packet p(PacketTypes::SYNC_TRANSFORM);
