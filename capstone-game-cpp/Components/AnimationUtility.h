@@ -4,20 +4,20 @@
 
 namespace Animations
 {
+	enum SprinterAnimations : int
+	{
+		SPRINTER_IDLE,
+		SPRINTER_RUN,
+		SPRINTER_ATTACK,
+		SPRINTER_ANIMATION_COUNT
+	};
+
 	enum MinionAnimations: int
 	{
 		MINION_WALK,
 		MINION_RUN,
 		MINION_ATTACK,
 		MINION_ANIMATION_COUNT
-	};
-
-	enum ExplorerAnimations : int
-	{
-		EXPLORER_WALK,
-		EXPLORER_RUN,
-		EXPLORER_ATTACK,
-		EXPLORER_ANIMATION_COUNT
 	};
 
 	enum PlantAnimations : int
@@ -40,6 +40,7 @@ struct Animation
 class AnimationController;
 struct KeyframeOption;
 
+extern Animation gSprinterAnimations[Animations::SPRINTER_ANIMATION_COUNT];
 extern Animation gMinionAnimations[Animations::MINION_ANIMATION_COUNT];
 extern Animation gPlantAnimations[Animations::PLANT_ANIMATION_COUNT];
 

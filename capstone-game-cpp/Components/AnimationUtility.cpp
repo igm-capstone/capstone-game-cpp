@@ -2,6 +2,12 @@
 #include <Components/AnimationUtility.h>
 #include <Components/AnimationController.h>
 
+Animation gSprinterAnimations[Animations::SPRINTER_ANIMATION_COUNT] = {
+	{ "Take 001", 10, 46, 1 },
+	{ "Take 001", 50, 74, 1 },
+	{ "Take 001", 80, 102, 1 }
+};
+
 Animation gMinionAnimations[Animations::MINION_ANIMATION_COUNT] = {
 	{ "Minion_01_Animation_Pass_1_1_1.0007", 10,  60,  1.8f },
 	{ "Minion_01_Animation_Pass_1_1_1.0007", 80,  110, 1 },

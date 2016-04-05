@@ -134,9 +134,11 @@ void Level01::InitializeAssets()
 		mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[i]);
 	}
 
-	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
+	mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kPlantModelName);
+
+	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
 
 	//mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 	mLevel = Resource::LoadLevel("Assets/Level02_Test.json", mAllocator);
@@ -486,10 +488,10 @@ void Level01::VRender()
 	RenderWallColliders(mExplorerShaderResource, mCameraManager, &mModel);
 #endif
 	
-	//RenderDoors();
-	//RenderExplorers();
+	RenderDoors();
+	RenderExplorers();
 	RenderMinions();
-	//RenderSpotLightVolumes();
+	RenderSpotLightVolumes();
 
 #ifdef _DEBUG
 	if (mDebugGBuffer)
@@ -630,7 +632,7 @@ void Level01::RenderStaticMeshes()
 		auto numElements = modelCluster->ShareCount();
 	
 		mRenderer->VBindMesh(modelCluster->mMesh);
-	//	mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
+		mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
 		instanceCount += numElements;
 
 		for (auto i = 0; i < numElements; i++) ++it;
