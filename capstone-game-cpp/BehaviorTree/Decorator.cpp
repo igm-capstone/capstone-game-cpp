@@ -15,6 +15,8 @@ Decorator::Decorator(Tree& tree, Behavior& child, std::string name)
 
 		std::stringstream ss;
 		ss << "[" << mStatus << "] " << mName;
+
+		ImGui::SetNextTreeNodeOpened(true, ImGuiSetCond_Appearing);
 		if (ImGui::TreeNode(reinterpret_cast<void*>(intptr_t(id)), ss.str().c_str()))
 		{
 			mChild.DumpIMGUI(++id, level + 1);

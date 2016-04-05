@@ -42,3 +42,4 @@
 #define FIXED_UPDATE 60.0  // X fixed updates per sec
 
 #define MAX_DOORS 50
+#define MAX_LAMPS 50

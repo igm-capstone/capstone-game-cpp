@@ -12,11 +12,13 @@ Composite::Composite(Tree& tree, std::string name) : Behavior(tree, name)
 
 		std::stringstream ss;
 		ss << "[" << mStatus << "] " << mName;
-		if (ImGui::TreeNode(reinterpret_cast<void*>(intptr_t(id)), ss.str().c_str()))
+
+		ImGui::SetNextTreeNodeOpened(true, ImGuiSetCond_Appearing);
+		if (ImGui::TreeNode(reinterpret_cast<void*>(intptr_t(++id)), ss.str().c_str()))
 		{
 			for (auto child : mChildren)
 			{
-				child->DumpIMGUI(++id, level + 1);
+				child->DumpIMGUI(id, level + 1);
 			}
 			ImGui::TreePop();
 		}

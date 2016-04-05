@@ -19,10 +19,12 @@ Conditional::Conditional(Tree& tree, Behavior& child, Predicate& predicate, std:
 
 		std::stringstream ss;
 		ss << "[" << mStatus << "] " << mName;
-		if (ImGui::TreeNode(reinterpret_cast<void*>(intptr_t(id)), ss.str().c_str()))
+
+		ImGui::SetNextTreeNodeOpened(true, ImGuiSetCond_Appearing);
+		if (ImGui::TreeNode(reinterpret_cast<void*>(intptr_t(++id)), ss.str().c_str()))
 		{
-			mPredicate.DumpIMGUI(++id, level + 1);
-			mChild.DumpIMGUI(++id, level + 1);
+			mPredicate.DumpIMGUI(id, level + 1);
+			mChild.DumpIMGUI(id, level + 1);
 			ImGui::TreePop();
 		}
 
