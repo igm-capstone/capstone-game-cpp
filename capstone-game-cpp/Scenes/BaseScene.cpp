@@ -81,9 +81,9 @@ void GetChildAndPrint(int index)
 void BaseScene::RenderBVHTree()
 {
 	auto bvh = &Singleton<CollisionManager>::SharedInstance().mBVHTree;
-	ImGui::SetNextWindowPos(ImVec2(20.0f, 20.0f), ImGuiSetCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(300.0f, 600.0f));
-	ImGui::Begin("BVH Tree", nullptr, ImGuiWindowFlags_NoCollapse);
+	ImGui::SetNextWindowPos(ImVec2(20.0f, 20.0f), ImGuiSetCond_Appearing);
+	ImGui::SetNextWindowSize(ImVec2(300.0f, 600.0f), ImGuiSetCond_Appearing);
+	ImGui::Begin("BVH Tree", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
 	
 	if (ImGui::TreeNode((void*)(intptr_t)0, "Root")) {
 		GetChildAndPrint(0);
