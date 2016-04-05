@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseComponent.h"
+#include <BehaviorTree/Tree.h>
 
 class MinionController : public BaseComponent
 {
@@ -13,16 +14,16 @@ public:
 	float mThinkTime;
 	class AIManager& mAI;
 	class Rig3D::Timer& mTimer;
-	class BehaviorTree* mBehaviorTree;
+	BehaviorTree::Tree* mBehaviorTree;
 
 	bool Update(double milliseconds);
 	// behavior tree code
 	vec3f mTarget;
-	static bool IsExplorerInRange(class Behavior& bh, void* data);
-	static enum class BehaviorStatus MoveTowardsExplorer(class Behavior& bh, void* data);
-	static enum class BehaviorStatus Think(class Behavior & bh, void * data);
-	static enum class BehaviorStatus FindTarget(class Behavior& bh, void* data);
-	static enum class BehaviorStatus MoveTowardsTarget(class Behavior& bh, void* data);
+	static bool IsExplorerInRange(BehaviorTree::Behavior& bh, void* data);
+	static BehaviorTree::BehaviorStatus MoveTowardsExplorer(BehaviorTree::Behavior& bh, void* data);
+	static BehaviorTree::BehaviorStatus Think(BehaviorTree::Behavior & bh, void * data);
+	static BehaviorTree::BehaviorStatus FindTarget(BehaviorTree::Behavior& bh, void* data);
+	static BehaviorTree::BehaviorStatus MoveTowardsTarget(BehaviorTree::Behavior& bh, void* data);
 
 	EXPOSE_CALLBACK_1(Move, vec3f)
 };

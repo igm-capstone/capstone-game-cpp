@@ -4,18 +4,20 @@
 namespace BehaviorTree
 {
 
-	class Sequence : public Composite
+	class Priority : public Composite
 	{
+
 	public:
-		Sequence(Tree& tree, std::string name = "Sequence");
+		Priority(Tree& tree, const std::string& name = "Priority");
 
 	protected:
-		/*class BehaviorTree* mBehaviorTree;*/
+		Behavior* mRunning;
 		std::vector<class Behavior*>::iterator mCurrent;
+		std::vector<class Behavior*>::iterator mLast;
 
 		static void OnInitialize(Behavior& self, void* data);
 		static void OnReset(Behavior& bh, void* data);
-		static BehaviorStatus OnUpdate(Behavior& self, void* data);
+		static BehaviorStatus OnUpdate(Behavior& bh, void* data);
 	};
 
 }

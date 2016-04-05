@@ -102,13 +102,16 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BehaviorTree\IterableComposite.cpp" />
+    <ClCompile Include="BehaviorTree\BehaviorTreeTests.cpp" />
+    <ClCompile Include="BehaviorTree\Conditional.cpp" />
+    <ClCompile Include="BehaviorTree\Decorator.cpp" />
+    <ClCompile Include="BehaviorTree\Predicate.cpp" />
+    <ClCompile Include="BehaviorTree\Priority.cpp" />
     <ClCompile Include="BehaviorTree\Selector.cpp" />
+    <ClCompile Include="BehaviorTree\Tree.cpp" />
     <ClCompile Include="BVHTree.cpp" />
     <ClCompile Include="BehaviorTree\Behavior.cpp" />
-    <ClCompile Include="BehaviorTree\BehaviorTree.cpp" />
     <ClCompile Include="BehaviorTree\Composite.cpp" />
-    <ClCompile Include="BehaviorTree\Condition.cpp" />
     <ClCompile Include="BehaviorTree\Sequence.cpp" />
     <ClCompile Include="BehaviorTree\TestSuite.cpp" />
     <ClCompile Include="Components\AnimationController.cpp" />
@@ -129,7 +132,6 @@
     <ClCompile Include="Components\FlyTrapController.cpp" />
     <ClCompile Include="SceneObjects\FlyTrap.cpp" />
     <ClCompile Include="ModelManager.cpp" />
-    <ClCompile Include="BehaviorTree\PrioritySelector.cpp" />
     <ClCompile Include="SceneObjects\Region.cpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="ScareTacticsApplication.cpp" />
@@ -160,13 +162,17 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BehaviorTree\IterableComposite.h" />
+    <ClInclude Include="BehaviorTree\BehaviorTree.h" />
+    <ClInclude Include="BehaviorTree\BehaviorTreeTests.h" />
+    <ClInclude Include="BehaviorTree\Conditional.h" />
+    <ClInclude Include="BehaviorTree\Decorator.h" />
+    <ClInclude Include="BehaviorTree\Predicate.h" />
+    <ClInclude Include="BehaviorTree\Priority.h" />
     <ClInclude Include="BehaviorTree\Selector.h" />
+    <ClInclude Include="BehaviorTree\Tree.h" />
     <ClInclude Include="BVHTree.h" />
     <ClInclude Include="BehaviorTree\Behavior.h" />
-    <ClInclude Include="BehaviorTree\BehaviorTree.h" />
     <ClInclude Include="BehaviorTree\Composite.h" />
-    <ClInclude Include="BehaviorTree\Condition.h" />
     <ClInclude Include="BehaviorTree\Sequence.h" />
     <ClInclude Include="BehaviorTree\TestSuite.h" />
     <ClInclude Include="Components\AnimationController.h" />
@@ -188,7 +194,6 @@
     <ClInclude Include="fmodwrap.h" />
     <ClInclude Include="Mathf.h" />
     <ClInclude Include="ModelManager.h" />
-    <ClInclude Include="BehaviorTree\PrioritySelector.h" />
     <ClInclude Include="SceneObjects\Door.h" />
     <ClInclude Include="SceneObjects\Region.h" />
     <ClInclude Include="SceneObjects\Ghost.h" />

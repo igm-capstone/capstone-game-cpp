@@ -1994,6 +1994,8 @@ void DX3D11Renderer::VCopySubresource(IRenderContext* renderContext, const uint3
 	SRVs[dstIndex]->GetResource(&dst);
 	SRVs[srcIndex]->GetResource(&src);
 	mDeviceContext->CopyResource(dst, src);
+	dst->Release();
+	src->Release();
 }
 #pragma endregion 
 

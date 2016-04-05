@@ -10,11 +10,11 @@ class Door : public BaseSceneObject
 public:
 	bool mCanOpen;
 	OrientedBoxColliderComponent* mColliderComponent;
-	BoxColliderComponent* mTrigger;
+	OrientedBoxColliderComponent* mTrigger;
 
 private:
 
-	Door() : mCanOpen(false), mColliderComponent(Factory<OrientedBoxColliderComponent>::Create()), mTrigger(Factory<BoxColliderComponent>::Create())
+	Door() : mCanOpen(false), mColliderComponent(Factory<OrientedBoxColliderComponent>::Create()), mTrigger(Factory<OrientedBoxColliderComponent>::Create())
 	{
 		mColliderComponent->mIsTrigger = false;
 		mColliderComponent->mIsDynamic = false;

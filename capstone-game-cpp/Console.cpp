@@ -230,6 +230,12 @@ void Console::DrawConsole()
 		if (strstr(item, "[Error]"))          col = ImColor(255, 100, 100);
 		else if (strstr(item, "[Warning]"))   col = ImColor(255, 255, 100);
 		else if (strstr(item, "[Log]"))	      col = ImColor(100, 255, 255);
+		else if (strstr(item, "[Invalid]"))	      col = ImColor(204, 204, 204); // invalid
+		else if (strstr(item, "[Running]"))	      col = ImColor(000, 255, 204); // running
+		else if (strstr(item, "[Success]"))	      col = ImColor(000, 255, 051); // success
+		else if (strstr(item, "[Failure]"))	      col = ImColor(255, 000, 000); // fail
+		else if (strstr(item, "[PASS]"))	      col = ImColor(000, 255, 051); // pass test
+		else if (strstr(item, "[FAIL]"))	      col = ImColor(255, 000, 000); // fail test
 		else if (strncmp(item, "$ ", 2) == 0) col = ImColor(255, 200, 150);
 		ImGui::PushStyleColor(ImGuiCol_Text, col);
 		ImGui::TextUnformatted(item);

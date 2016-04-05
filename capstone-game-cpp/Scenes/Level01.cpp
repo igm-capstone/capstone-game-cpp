@@ -454,6 +454,11 @@ void Level01::VUpdate(double milliseconds)
 		mDebugBVH = !mDebugBVH;
 	}
 
+	if (mInput->GetKeyDown(KEYCODE_F8))
+	{
+		mDebugBT = !mDebugBT;
+	}
+
 	mCollisionManager->Update(milliseconds);
 }
 
@@ -951,11 +956,6 @@ void Level01::ComputeGrid()
 		for (auto i = 0; i < numElements; i++) ++it;
 	}
 
-	//mRenderer->VClearDepthStencil(mGridContext, 0, 1.0f, 0);
-
-	//mRenderer->GetDeviceContext()->VSSetShaderResources(0, 4, mNullSRV);
-	//mRenderer->GetDeviceContext()->VSSetShaderResources(0, 4, mNullSRV);
-	
 	// Lights
 	mRenderer->VSetRenderContextTarget(mGridContext, 3);
 	mRenderer->VClearContextTarget(mGridContext, 3, Colors::black.pCols);	// Albedo
