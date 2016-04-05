@@ -57,6 +57,8 @@
     <ClCompile Include="SceneObjects\Region.cpp" />
     <ClCompile Include="BehaviorTree\Selector.cpp" />
     <ClCompile Include="Components\AnimationUtility.cpp" />
+    <ClCompile Include="SceneObjects\FlyTrap.cpp" />
+    <ClCompile Include="Components\FlyTrapController.cpp" />
     <ClCompile Include="BehaviorTree\BehaviorTreeTests.cpp" />
     <ClCompile Include="BehaviorTree\Predicate.cpp" />
     <ClCompile Include="BehaviorTree\Priority.cpp" />
@@ -126,6 +128,8 @@
     <ClInclude Include="SceneObjects\Door.h" />
     <ClInclude Include="BehaviorTree\Selector.h" />
     <ClInclude Include="Components\AnimationUtility.h" />
+    <ClInclude Include="SceneObjects\FlyTrap.h" />
+    <ClInclude Include="Components\FlyTrapController.h" />
     <ClInclude Include="BehaviorTree\BehaviorTree.h" />
     <ClInclude Include="BehaviorTree\BehaviorTreeTests.h" />
     <ClInclude Include="BehaviorTree\Priority.h" />
