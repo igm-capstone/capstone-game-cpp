@@ -31,5 +31,9 @@ public:
 	void PlayStateAnimation(AnimationControllerState state);
 	void PauseStateAnimation(AnimationControllerState state);
 
+	static void OnMeleeStart(void* obj);
+	static void OnMeleeStop(void* obj);
+	static void OnMeleeHit(BaseSceneObject* minion, BaseSceneObject* other);
+
 	EXPOSE_CALLBACK_1(Move, vec3f)
 };

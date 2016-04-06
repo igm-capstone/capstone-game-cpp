@@ -4,6 +4,8 @@
 #include <Rig3D\Common\Timer.h>
 #include <Rig3D\Engine.h>
 #include <AIManager.h>
+#include <SceneObjects/Minion.h>
+#include <Components/ColliderComponent.h>
 #include <Mathf.h>
 #include <SceneObjects/Minion.h>
 #include "AnimationController.h"
@@ -191,6 +193,23 @@ BehaviorStatus MinionController::MoveTowardsTarget(Behavior& bh, void* data)
 
 	self.PlayStateAnimation(ANIM_STATE_WALK);
 	return BehaviorStatus::Running;
+}
+
+void MinionController::OnMeleeStart(void* obj)
+{
+	auto minion = reinterpret_cast<Minion*>(obj);
+	minion->mMeleeColliderComponent->mIsActive = true;
+}
+
+void MinionController::OnMeleeStop(void* obj)
+{
+	auto minion = reinterpret_cast<Minion*>(obj);
+	minion->mMeleeColliderComponent->mIsActive = false;
+}
+
+void MinionController::OnMeleeHit(BaseSceneObject* minion, BaseSceneObject* other)
+{
+
 }
 
 
