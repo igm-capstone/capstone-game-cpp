@@ -103,8 +103,9 @@ void Explorer::Spawn(vec3f pos, int UUID)
 		mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
 		mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
 		mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;
-		mMeleeColliderComponent.asSphereColliderComponent->mLayer = COLLISION_LAYER_SKILL;
+		mMeleeColliderComponent.asSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
 		mMeleeColliderComponent.asSphereColliderComponent->RegisterTriggerEnterCallback(&OnMeleeHit);
+		mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = this;
 
 		auto sprint = Factory<Skill>::Create();
 		sprint->SetBinding(SkillBinding().Set(KEYCODE_A));

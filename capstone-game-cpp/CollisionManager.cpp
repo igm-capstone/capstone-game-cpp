@@ -100,7 +100,7 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
 		
 		// Explorer / Skill
-		mBVHTree.GetNodeIndices(skillIndices, COLLISION_LAYER_SKILL, [parentIndex](const BVHNode& other)
+		mBVHTree.GetNodeIndices(skillIndices, COLLISION_LAYER_EXPLORER_SKILL, [parentIndex](const BVHNode& other)
 		{
 			return other.parentIndex == parentIndex;
 		});
