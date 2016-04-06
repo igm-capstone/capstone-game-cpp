@@ -171,6 +171,7 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 
 	for (StaticMesh& collider : Factory<StaticMesh>())
 	{
+		if (collider.mColliderComponent->mIsActive == false) continue;
 		AddNodeRecursively(collider.mColliderComponent, WALL_PARENT_LAYER_INDEX, 0, 0, 0);
 	}
 

@@ -10,6 +10,10 @@ public:
 	class OrientedBoxColliderComponent* mColliderComponent;
 
 private:
-	StaticMesh() : mColliderComponent(Factory<OrientedBoxColliderComponent>::Create()) {};
+	StaticMesh() : mColliderComponent(Factory<OrientedBoxColliderComponent>::Create())
+	{
+		mColliderComponent->mIsDynamic = false;
+		mColliderComponent->mSceneObject = this;
+	};
 	~StaticMesh() {};
 };
