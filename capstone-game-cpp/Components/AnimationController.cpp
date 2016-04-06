@@ -72,8 +72,6 @@ void AnimationController::SetState(AnimationControllerState state)
 		return;
 	}
 
-	TRACE_LOG("STATE CHANGE: " << mState << " -> " << state);
-
 	mState = state;
 
 	if (mStateAnimationMap.find(mState) != mStateAnimationMap.end())
@@ -90,8 +88,6 @@ void AnimationController::SetState(AnimationControllerState state)
 	}
 	else
 	{
-		TRACE_LOG("STATE CHANGE: " << mState << " -> " << ANIM_STATE_NULL);
-
 		mState = ANIM_STATE_NULL;
 	}
 }
