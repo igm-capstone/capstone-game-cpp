@@ -5,6 +5,8 @@
 #include <Rig3D\Engine.h>
 #include <AIManager.h>
 #include <Mathf.h>
+#include <SceneObjects/Minion.h>
+#include "AnimationController.h"
 
 using namespace BehaviorTree;
 using namespace chrono;
@@ -47,6 +49,9 @@ MinionController::MinionController():
 
 
 	mBehaviorTree->Start(*baseSelector);
+
+	quatf rot;
+	UpdateRotation(0, rot);
 }
 
 
@@ -79,6 +84,14 @@ bool MinionController::Update(double milliseconds)
 }
 
 
+bool MinionController::UpdateRotation(float angle, quatf& rot) {
+	quatf newRot = normalize(quatf::angleAxis(angle, vec3f(0, 0, 1)) * quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0));
+	auto hasRotated = rot != newRot;
+	rot = newRot;
+	return hasRotated;
+}
+
+
 bool MinionController::IsExplorerInRange(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
@@ -93,11 +106,11 @@ BehaviorStatus MinionController::MoveTowardsExplorer(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
 
-	vec3f myPos = self.mSceneObject->mTransform->GetPosition();
+	vec2f myPos = self.mSceneObject->mTransform->GetPosition();
 	auto myNode = self.mAI.GetNodeAt(myPos);
 
 	auto targetConn = self.mAI.mGrid.GetBestFitConnection(myNode);
-	vec3f direction = targetConn.to->worldPos - myPos;
+	vec2f direction = vec2f(targetConn.to->worldPos) - myPos;
 	
 	float distanceSquared = magnitudeSquared(direction);
 
@@ -109,13 +122,14 @@ BehaviorStatus MinionController::MoveTowardsExplorer(Behavior& bh, void* data)
 	auto timer = Singleton<Engine>::SharedInstance().GetTimer();
 
 	// speed per second
-	vec3f targetVelocity = normalize(direction) * 0.01f * static_cast<float>(timer->GetDeltaTime());
+	vec2f targetVelocity = normalize(direction) * 0.01f * static_cast<float>(timer->GetDeltaTime());
 
 	// delta space for the current frame
-	vec3f ds = targetVelocity;
+	vec2f ds = targetVelocity;
 
 	self.OnMove(myPos + ds);
 
+	self.PlayStateAnimation(ANIM_STATE_WALK);
 	return BehaviorStatus::Running;
 }
 
@@ -131,6 +145,7 @@ BehaviorStatus MinionController::Think(Behavior& bh, void* data) {
 	auto dt = static_cast<float>(self.mTimer.GetDeltaTime()) * 0.001f;
 	self.mThinkTime = max(0, self.mThinkTime - dt);
 
+	self.PlayStateAnimation(ANIM_STATE_IDLE);
 	return BehaviorStatus::Running;
 }
 
@@ -155,8 +170,8 @@ BehaviorStatus MinionController::MoveTowardsTarget(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
 
-	vec3f myPos = self.mSceneObject->mTransform->GetPosition();
-	vec3f direction = self.mTarget - myPos;
+	vec2f myPos = self.mSceneObject->mTransform->GetPosition();
+	vec2f direction = vec2f(self.mTarget) - myPos;
 	float distanceSquared = magnitudeSquared(direction);
 
 	if (distanceSquared < .25)
@@ -167,12 +182,30 @@ BehaviorStatus MinionController::MoveTowardsTarget(Behavior& bh, void* data)
 	auto timer = Singleton<Engine>::SharedInstance().GetTimer();
 
 	// speed per second
-	vec3f targetVelocity = normalize(direction) * 0.01f * static_cast<float>(timer->GetDeltaTime());
+	vec2f targetVelocity = normalize(direction) * 0.01f * static_cast<float>(timer->GetDeltaTime());
 
 	// delta space for the current frame
-	vec3f ds = targetVelocity;
+	vec2f ds = targetVelocity;
 
 	self.OnMove(myPos + ds);
 
+	self.PlayStateAnimation(ANIM_STATE_WALK);
 	return BehaviorStatus::Running;
+}
+
+
+void MinionController::PlayStateAnimation(AnimationControllerState state)
+{
+	AnimationController* pAnimationController = reinterpret_cast<Minion*>(mSceneObject)->mAnimationController;
+	pAnimationController->SetState(state);
+	pAnimationController->Resume();
+}
+
+void MinionController::PauseStateAnimation(AnimationControllerState state)
+{
+	AnimationController* pAnimationController = reinterpret_cast<Minion*>(mSceneObject)->mAnimationController;
+	if (pAnimationController->GetState() == state)
+	{
+		pAnimationController->Pause();
+	}
 }
