@@ -169,7 +169,7 @@ int Console::TextEditCallback(ImGuiTextEditCallbackData* data)
 	return 0;
 }
 
-void Console::DrawConsole()
+void* Console::DrawConsole()
 {
 	auto input = Rig3D::Singleton<Rig3D::Engine>::SharedInstance().GetInput();
 
@@ -185,8 +185,8 @@ void Console::DrawConsole()
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
 	ImGui::Begin("Console", nullptr, ImVec2(1600, 300), mVisible ? 0.80f : 0.0f, flags);
-
-
+	ImGuiWindow* window = ImGui::GetCurrentWindow();
+	
 	static ImGuiTextFilter filter;
 	
 	if (mVisible)
@@ -276,6 +276,8 @@ void Console::DrawConsole()
 
 	ImGui::End();
 	ImGui::PopStyleVar();
+
+	return window;
 }
 
 void Console::ClearLog()
@@ -303,6 +305,11 @@ void Console::Clear()
 	Rig3D::Singleton<Console>::SharedInstance().ClearLog();
 }
 
+bool Console::IsVisible()
+{
+	return Rig3D::Singleton<Console>::SharedInstance().mVisible;
+}
+
 void Console::Log(const char* fmt, ...)
 {
 	va_list args;
@@ -311,9 +318,9 @@ void Console::Log(const char* fmt, ...)
 	va_end(args);
 }
 
-void Console::Draw()
+void* Console::Draw()
 {
-	Rig3D::Singleton<Console>::SharedInstance().DrawConsole();
+	return Rig3D::Singleton<Console>::SharedInstance().DrawConsole();
 }
 
 void Console::Show()

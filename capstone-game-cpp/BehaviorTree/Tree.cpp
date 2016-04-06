@@ -15,9 +15,11 @@ Tree::Tree(std::string name) : Behavior(*this, name), mRootBehavior(nullptr)
 
 		std::stringstream ss;
 		ss << "[" << mStatus << "] " << mName;
-		if (ImGui::TreeNode(reinterpret_cast<void*>(intptr_t(id)), ss.str().c_str()))
+
+		ImGui::SetNextTreeNodeOpened(true, ImGuiSetCond_Appearing);
+		if (ImGui::TreeNode(reinterpret_cast<void*>(intptr_t(++id)), ss.str().c_str()))
 		{
-			mRootBehavior->DumpIMGUI(++id, level + 1);
+			mRootBehavior->DumpIMGUI(id, level + 1);
 			ImGui::TreePop();
 		}
 

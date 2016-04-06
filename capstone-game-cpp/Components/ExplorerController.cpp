@@ -155,12 +155,12 @@ bool ExplorerController::Update(double milliseconds)
 
 	if (hasMoved /*|| hasRotated*/)
 	{
-		PlayStateAnimation(ANIM_STATE_WALK);
+		PlayStateAnimation(ANIM_STATE_RUN);
 		OnMove(pos, rot);
 	}
 	else
 	{
-		PauseStateAnimation(ANIM_STATE_WALK);
+		PauseStateAnimation(ANIM_STATE_RUN);
 	}
 
 	if (mInput->GetMouseButtonDown(MOUSEBUTTON_RIGHT)) {

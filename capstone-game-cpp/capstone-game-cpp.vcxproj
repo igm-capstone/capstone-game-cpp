@@ -129,6 +129,8 @@
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="DebugRender.cpp" />
     <ClCompile Include="Factory.cpp" />
+    <ClCompile Include="Components\FlyTrapController.cpp" />
+    <ClCompile Include="SceneObjects\FlyTrap.cpp" />
     <ClCompile Include="ModelManager.cpp" />
     <ClCompile Include="SceneObjects\Region.cpp" />
     <ClCompile Include="Resource.cpp" />
@@ -188,6 +190,8 @@
     <ClInclude Include="Components\MinionController.h" />
     <ClInclude Include="DebugRender.h" />
     <ClInclude Include="FBXResource.h" />
+    <ClInclude Include="Components\FlyTrapController.h" />
+    <ClInclude Include="SceneObjects\FlyTrap.h" />
     <ClInclude Include="fmodwrap.h" />
     <ClInclude Include="Mathf.h" />
     <ClInclude Include="ModelManager.h" />

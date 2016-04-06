@@ -9,6 +9,7 @@
 #include <Console.h>
 #include <ScareTacticsApplication.h>
 #include <Components/MinionController.h>
+#include <Rig3D/Graphics/DirectX11/imgui/imgui_internal.h>
 
 BaseScene::BaseScene() : 
 	mStaticMemory(nullptr),
@@ -81,9 +82,9 @@ void GetChildAndPrint(int index)
 void BaseScene::RenderBVHTree()
 {
 	auto bvh = &Singleton<CollisionManager>::SharedInstance().mBVHTree;
-	ImGui::SetNextWindowPos(ImVec2(20.0f, 20.0f), ImGuiSetCond_Always);
-	ImGui::SetNextWindowSize(ImVec2(300.0f, 600.0f));
-	ImGui::Begin("BVH Tree", nullptr, ImGuiWindowFlags_NoCollapse);
+	ImGui::SetNextWindowPos(ImVec2(20.0f, 20.0f), ImGuiSetCond_Appearing);
+	ImGui::SetNextWindowSize(ImVec2(300.0f, 600.0f), ImGuiSetCond_Appearing);
+	ImGui::Begin("BVH Tree", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
 	
 	if (ImGui::TreeNode((void*)(intptr_t)0, "Root")) {
 		GetChildAndPrint(0);
@@ -115,9 +116,13 @@ void BaseScene::RenderIMGUI(void(*IMGUIDrawFunc)(BaseScene*))
 	mRenderer->VSetContextTarget();
 	DX11IMGUI::NewFrame();
 	RenderFPSIndicator();
-	Console::Draw();
+	ImGuiWindow* console = static_cast<ImGuiWindow*>(Console::Draw());
 	if (mDebugBVH) RenderBVHTree();
 	if (mDebugBT) RenderMinionBehaviorTrees();
 	if (IMGUIDrawFunc) IMGUIDrawFunc(this);
 	ImGui::Render();
+
+	ImGuiState* state = static_cast<ImGuiState*>(ImGui::GetInternalState());
+	ImGuiWindow* root = state->HoveredRootWindow;
+	mInput->SetMouseActive(root == nullptr || !Console::IsVisible() && root == console);
 }
