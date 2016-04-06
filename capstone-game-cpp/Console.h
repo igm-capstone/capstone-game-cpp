@@ -38,7 +38,7 @@ protected:
 	static int TextEditCallbackStub(ImGuiTextEditCallbackData* data);
 	int TextEditCallback(ImGuiTextEditCallbackData* data);
 
-	void DrawConsole();
+	void* DrawConsole();
 	void AddLog(const char* fmt, ...) IM_PRINTFARGS(2);
 	void ClearLog();
 
@@ -46,7 +46,8 @@ public:
 	static void Show();
 	static void Hide();
 	static void Toggle();
-	static void Draw();
+	static void* Draw();
 	static void Log(const char* fmt, ...) IM_PRINTFARGS(2);
 	static void Clear();
+	static bool IsVisible();
 };

@@ -42,6 +42,7 @@ namespace Rig3D
 	private:
 		short	mCurrMouseState;
 		short	mPrevMouseState;
+		bool    mIsMouseActive;
 
 		XINPUT_STATE mCurrGamepadState[XUSER_MAX_COUNT];
 		XINPUT_STATE mPrevGamepadState[XUSER_MAX_COUNT];
@@ -73,6 +74,9 @@ namespace Rig3D
 		ScreenPoint mousePosition;
 		ScreenPoint prevMousePosition;
 		ScreenPoint delta;
+
+		bool IsMouseActive() const { return mIsMouseActive; }
+		void SetMouseActive(bool active) { mIsMouseActive = active; }
 
 		bool GetKeyDown(KeyCode key);
 		bool GetKeyUp(KeyCode key);

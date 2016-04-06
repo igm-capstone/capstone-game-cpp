@@ -7,13 +7,13 @@
 using namespace Rig3D;
 
 Input::Input()
+	: mCurrMouseState(0)
+	, mPrevMouseState(0)
+	, mIsMouseActive(true)
 {
 	mKeysDown = new std::unordered_set<KeyCode>();
 	mKeysUp = new std::unordered_set<KeyCode>();
 	mKeysPressed = new std::unordered_set<KeyCode>();
-
-	mPrevMouseState = 0;
-	mCurrMouseState = 0;
 
 	mEventHandler = &WMEventHandler::SharedInstance();
 }
@@ -72,6 +72,11 @@ bool Input::GetKeyUp(KeyCode key)
 
 bool Input::GetMouseButtonDown(MouseButton button)
 {
+	if (!mIsMouseActive)
+	{
+		return false;
+	}
+
 	bool wasNotPressed = (mPrevMouseState & button) == 0;
 	bool isPressed = (mCurrMouseState & button) == button;
 
@@ -80,6 +85,11 @@ bool Input::GetMouseButtonDown(MouseButton button)
 
 bool Input::GetMouseButtonUp(MouseButton button)
 {
+	if (!mIsMouseActive)
+	{
+		return false;
+	}
+
 	bool wasPressed = (mPrevMouseState & button) == button;
 	bool isNotPressed = (mCurrMouseState & button) == 0;
 
@@ -88,6 +98,11 @@ bool Input::GetMouseButtonUp(MouseButton button)
 
 bool Input::GetMouseButton(MouseButton button)
 {
+	if (!mIsMouseActive)
+	{
+		return false;
+	}
+
 	bool isPressed = (mCurrMouseState & button) == button;
 
 	return isPressed;

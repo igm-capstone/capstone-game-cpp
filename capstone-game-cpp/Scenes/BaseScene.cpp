@@ -9,6 +9,7 @@
 #include <Console.h>
 #include <ScareTacticsApplication.h>
 #include <Components/MinionController.h>
+#include <Rig3D/Graphics/DirectX11/imgui/imgui_internal.h>
 
 BaseScene::BaseScene() : 
 	mStaticMemory(nullptr),
@@ -115,9 +116,13 @@ void BaseScene::RenderIMGUI(void(*IMGUIDrawFunc)(BaseScene*))
 	mRenderer->VSetContextTarget();
 	DX11IMGUI::NewFrame();
 	RenderFPSIndicator();
-	Console::Draw();
+	ImGuiWindow* console = static_cast<ImGuiWindow*>(Console::Draw());
 	if (mDebugBVH) RenderBVHTree();
 	if (mDebugBT) RenderMinionBehaviorTrees();
 	if (IMGUIDrawFunc) IMGUIDrawFunc(this);
 	ImGui::Render();
+
+	ImGuiState* state = static_cast<ImGuiState*>(ImGui::GetInternalState());
+	ImGuiWindow* root = state->HoveredRootWindow;
+	mInput->SetMouseActive(root == nullptr || !Console::IsVisible() && root == console);
 }
