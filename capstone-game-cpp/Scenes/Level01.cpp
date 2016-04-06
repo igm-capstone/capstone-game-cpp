@@ -285,8 +285,9 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateShaderConstantBuffers(mSpritesShaderResource, cbSpritesData, cbSpritesSizes, 2);
 		mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, &mSpriteSheetData, 1);
 
+		// SpriteSheets
 		const char* filenames[] = { "Assets/Health.png" };
-		mRenderer->VAddShaderTextures2D(mSpritesShaderResource, filenames, 1);
+		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, &filenames[0], 1);
 		mRenderer->VAddShaderPointSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 
 		// Instance buffer data

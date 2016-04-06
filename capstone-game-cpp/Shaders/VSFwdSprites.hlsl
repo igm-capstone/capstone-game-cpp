@@ -8,6 +8,7 @@ cbuffer spriteSheet : register(b1)
 {
 	float sliceWidth;
 	float sliceHeight;
+	float mapID;
 }
 
 struct Sprite
@@ -24,7 +25,7 @@ struct Sprite
 struct Pixel
 {
 	float4 position : SV_POSITION;
-	float2 uv : TEXCOORD;
+	float3 uv : TEXCOORD;
 };
 
 Texture2D mTexture : register(t0);
@@ -67,7 +68,7 @@ Pixel main(Sprite input)
 	output.position = mul(float4(input.position.xyz, 1.0f), clip);
 
 	// Modify UV coordinates to grab the appropriate slice.
-	output.uv = float2((input.uv.x / slicesX) + (((textureWidth / slicesX) * float(hIndex)) / textureWidth), (input.uv.y / slicesY) + (((textureHeight / slicesY) * float(vIndex)) / textureHeight));
+	output.uv = float3((input.uv.x / slicesX) + (((textureWidth / slicesX) * float(hIndex)) / textureWidth), (input.uv.y / slicesY) + (((textureHeight / slicesY) * float(vIndex)) / textureHeight), mapID);
 	
 	return output;
 }

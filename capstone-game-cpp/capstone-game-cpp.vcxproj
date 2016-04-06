@@ -153,6 +153,7 @@
     </ClCompile>
     <ClCompile Include="TargetFollower.cpp" />
     <ClCompile Include="trace.cpp" />
+    <ClCompile Include="UI\SkillBar.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rig3D\Rig3D\Rig3D.vcxproj">
@@ -229,6 +230,7 @@
     <ClInclude Include="Scenes\LoadingScreen.h" />
     <ClInclude Include="Scenes\MainMenuScene.h" />
     <ClInclude Include="SkeletalHierarchy.h" />
+    <ClInclude Include="UI\SkillBar.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TargetFollower.h" />
     <ClInclude Include="trace.h" />

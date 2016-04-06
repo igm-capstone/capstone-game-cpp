@@ -34,7 +34,8 @@ namespace CBuffer {
 	{
 		float sliceWidth;
 		float sliceHeight;
-		float padding[2];
+		float mapID;
+		float padding;
 	};
 
 	struct GridData
