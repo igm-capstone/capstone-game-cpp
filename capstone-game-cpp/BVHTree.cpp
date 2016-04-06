@@ -118,6 +118,7 @@ void BVHTree::Update()
 			other.object->mLayer == COLLISION_LAYER_MINION_SKILL;
 	}), mNodes.end());
 
+	// Add Explorers and explorer skills
 	for (Explorer& explorer : Factory<Explorer>())
 	{
 		AddNodeRecursively(explorer.mCollider, EXPLORER_PARENT_LAYER_INDEX, 1, 0, 0);
@@ -125,6 +126,17 @@ void BVHTree::Update()
 		if (explorer.mMeleeColliderComponent.asBaseColliderComponent && explorer.mMeleeColliderComponent.asBaseColliderComponent->mIsActive)
 		{
 			AddNodeRecursively(explorer.mMeleeColliderComponent.asBaseColliderComponent, SKILL_PARENT_LAYER_INDEX, 1, 0, 0);
+		}
+	}
+
+	// Add Minion and minion skills.
+	for (Minion& minion : Factory<Minion>())
+	{
+		AddNodeRecursively(minion.mCollider, EXPLORER_PARENT_LAYER_INDEX, 1, 0, 0);
+	
+		if (minion.mMeleeColliderComponent->mIsActive)
+		{
+			AddNodeRecursively(minion.mMeleeColliderComponent, SKILL_PARENT_LAYER_INDEX, 1, 0, 0);
 		}
 	}
 }

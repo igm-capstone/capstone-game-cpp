@@ -25,5 +25,9 @@ public:
 	static BehaviorTree::BehaviorStatus FindTarget(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus MoveTowardsTarget(BehaviorTree::Behavior& bh, void* data);
 
+	static void OnMeleeStart(void* obj);
+	static void OnMeleeStop(void* obj);
+	static void OnMeleeHit(BaseSceneObject* minion, BaseSceneObject* other);
+
 	EXPOSE_CALLBACK_1(Move, vec3f)
 };
