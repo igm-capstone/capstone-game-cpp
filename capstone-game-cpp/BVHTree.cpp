@@ -8,6 +8,7 @@
 #include <Rig3D/Intersection.h>
 #include <Colors.h>
 #include "SceneObjects/Explorer.h"
+#include "SceneObjects/Minion.h"
 #include "SceneObjects/Door.h"
 #include "SceneObjects/StaticMesh.h"
 
@@ -73,7 +74,7 @@ namespace
 		COLLISION_LAYER_FLOOR,
 		COLLISION_LAYER_WALL,
 		COLLISION_LAYER_MINION,
-		COLLISION_LAYER_SKILL
+		COLLISION_LAYER_EXPLORER_SKILL
 	};
 }
 
@@ -104,16 +105,20 @@ void BVHTree::Update()
 #endif
 	mLayerStartIndex.erase(COLLISION_LAYER_EXPLORER);
 	mLayerStartIndex.erase(COLLISION_LAYER_MINION);
-	mLayerStartIndex.erase(COLLISION_LAYER_SKILL);
+	mLayerStartIndex.erase(COLLISION_LAYER_EXPLORER_SKILL);
+	mLayerStartIndex.erase(COLLISION_LAYER_MINION_SKILL);
+
 
 	mNodes.erase(std::remove_if(mNodes.begin(), mNodes.end(), [](const BVHNode& other)
 	{
 		return 
 			other.object->mLayer == COLLISION_LAYER_EXPLORER || 
 			other.object->mLayer == COLLISION_LAYER_MINION ||
-			other.object->mLayer == COLLISION_LAYER_SKILL;
+			other.object->mLayer == COLLISION_LAYER_EXPLORER_SKILL ||
+			other.object->mLayer == COLLISION_LAYER_MINION_SKILL;
 	}), mNodes.end());
 
+	// Add Explorers and explorer skills
 	for (Explorer& explorer : Factory<Explorer>())
 	{
 		AddNodeRecursively(explorer.mCollider, EXPLORER_PARENT_LAYER_INDEX, 1, 0, 0);
@@ -121,6 +126,17 @@ void BVHTree::Update()
 		if (explorer.mMeleeColliderComponent.asBaseColliderComponent && explorer.mMeleeColliderComponent.asBaseColliderComponent->mIsActive)
 		{
 			AddNodeRecursively(explorer.mMeleeColliderComponent.asBaseColliderComponent, SKILL_PARENT_LAYER_INDEX, 1, 0, 0);
+		}
+	}
+
+	// Add Minion and minion skills.
+	for (Minion& minion : Factory<Minion>())
+	{
+		AddNodeRecursively(minion.mCollider, EXPLORER_PARENT_LAYER_INDEX, 1, 0, 0);
+	
+		if (minion.mMeleeColliderComponent->mIsActive)
+		{
+			AddNodeRecursively(minion.mMeleeColliderComponent, SKILL_PARENT_LAYER_INDEX, 1, 0, 0);
 		}
 	}
 }
@@ -171,6 +187,7 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 
 	for (StaticMesh& collider : Factory<StaticMesh>())
 	{
+		if (collider.mColliderComponent->mIsActive == false) continue;
 		AddNodeRecursively(collider.mColliderComponent, WALL_PARENT_LAYER_INDEX, 0, 0, 0);
 	}
 

@@ -21,6 +21,17 @@ Minion::Minion()
 	mCollider->mSceneObject = this;
 	mCollider->mIsActive = false;
 	mCollider->mIsDynamic = true;
+	mCollider->mLayer = COLLISION_LAYER_MINION;
+
+	mMeleeColliderComponent = Factory<SphereColliderComponent>::Create();
+	mMeleeColliderComponent->mCollider.radius = 2.5f;
+	mMeleeColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
+	mMeleeColliderComponent->mIsActive = false;
+	mMeleeColliderComponent->mIsDynamic = true;
+	mMeleeColliderComponent->mIsTrigger = true;
+	mMeleeColliderComponent->mSceneObject = this;
+	mMeleeColliderComponent->mLayer = COLLISION_LAYER_MINION_SKILL;
+	mMeleeColliderComponent->RegisterTriggerEnterCallback(&MinionController::OnMeleeHit);
 
 	mController = Factory<MinionController>::Create();
 	mController->mSceneObject = this;
@@ -33,6 +44,17 @@ Minion::Minion()
 	mAnimationController->mSceneObject = this;
 	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
 	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
+	SetRestFrameIndex(mAnimationController, gMinionRestFrameIndex);
+
+	//mAnimationController->RegisterCommandExecutedCallback(&OnAnimationCommandExecuted);
+
+	//Animation melee = gMinionAnimations[Animations::MINION_ATTACK];
+	//KeyframeOption meleeOptions[] = { { melee.startFrameIndex, OnMeleeStart },{ melee.endFrameIndex, OnMeleeStop } };
+	//SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionAnimations[Animations::MINION_ATTACK], meleeOptions, 2, false);
+	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionAnimations[Animations::MINION_ATTACK], nullptr, 0, false);
+	SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gMinionAnimations[Animations::MINION_WALK], nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_WALK, &gMinionAnimations[Animations::MINION_WALK], nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_RUN, &gMinionAnimations[Animations::MINION_RUN], nullptr, 0, true);
 	SetRestFrameIndex(mAnimationController, gMinionRestFrameIndex);
 }
 
@@ -55,7 +77,7 @@ void Minion::OnMove(BaseSceneObject* obj, vec3f newPos)
 {
 	auto m = static_cast<Minion*>(obj);
 	m->mTransform->SetPosition(newPos);
-	m->mCollider->mCollider.origin = newPos;
+	m->UpdateComponents(m->mTransform->GetRotation(), newPos);
 
 	if (m->mNetworkID->mHasAuthority) {
 		Packet p(PacketTypes::SYNC_TRANSFORM);
@@ -66,6 +88,12 @@ void Minion::OnMove(BaseSceneObject* obj, vec3f newPos)
 		//m->mHealth->TakeDamage(1.0f);
 		//if (m->mHealth->GetHealth() <= 0) e->mHealth->TakeDamage(-1000.0f);
 	}
+}
+
+void Minion::UpdateComponents(quatf rotation, vec3f position)
+{
+	mCollider->mCollider.origin = position;
+	mMeleeColliderComponent->mCollider.origin = position + (rotation * mMeleeColliderComponent->mOffset);
 }
 
 void Minion::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)

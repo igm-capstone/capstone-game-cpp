@@ -180,6 +180,8 @@ void loadStaticMeshes(jarr_t objs, std::string model, vector<string>& textureNam
 		auto bounds = obj["bounds"];
 		if (!bounds.empty())
 		{
+			staticMesh->mColliderComponent->mLayer = COLLISION_LAYER_WALL;
+
 			auto center = bounds["center"];
 			if (!center.empty())
 			{
@@ -191,10 +193,6 @@ void loadStaticMeshes(jarr_t objs, std::string model, vector<string>& textureNam
 			{
 				staticMesh->mColliderComponent->mCollider.halfSize = parseVec3f(extents);
 			}
-			
-			staticMesh->mColliderComponent->mCollider.axis[0] = vec3f(1, 0, 0);
-			staticMesh->mColliderComponent->mCollider.axis[1] = vec3f(0, 1, 0);
-			staticMesh->mColliderComponent->mCollider.axis[2] = vec3f(0, 0, 1);
 		}
 
 	}
@@ -399,6 +397,32 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		}
 	}
 
+	// Set wall, and floor mesh colliders inactive.
+
+	vector<StaticMeshModel> inactiveStaticMeshModels = {
+		STATIC_MESH_MODEL_CORNER_WALL,
+		STATIC_MESH_MODEL_CURVED_WALL,
+		STATIC_MESH_MODEL_DOOR_BLOCKED,
+		STATIC_MESH_MODEL_FLOOR,
+		STATIC_MESH_NORMAL_WALL,
+		STATIC_MESH_T_WALL,
+		STATIC_MESH_MODEL_TRI_WALL,
+		STATIC_MESH_MODEL_WALL,
+		STATIC_MESH_MODEL_D_DOOR_WALL,
+		STATIC_MESH_MODEL_S_DOOR_WALL,
+		STATIC_MESH_MODEL_S_WINDOW_WALL,
+		STATIC_MESH_MODEL_WINDOW_WALL
+	};
+
+	for (StaticMeshModel smm : inactiveStaticMeshModels)
+	{
+		vector<BaseSceneObject*>* pStaticMeshes = mModelManager->RequestAllUsingModel(kStaticMeshModelNames[smm]);
+		for (unsigned int i = 0; i < pStaticMeshes->size(); i++)
+		{
+			StaticMesh* pStaticMesh = reinterpret_cast<StaticMesh*>((*pStaticMeshes)[i]);
+			pStaticMesh->mColliderComponent->mIsActive = false;
+		}
+	}
 
 	auto regions = obj["regions"].get_ptr<jarr_t>();
 	if (regions != nullptr)

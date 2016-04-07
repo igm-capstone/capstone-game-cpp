@@ -92,6 +92,9 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 	std::vector<uint32_t> doorIndices;
 	doorIndices.reserve(MAX_DOORS);
 
+	std::vector<uint32_t> minionSkills;
+	minionSkills.reserve(MAX_MINIONS);
+
 	for (uint32_t i : explorerIndices)
 	{
 		BVHNode* pNode = mBVHTree.GetNode(i);
@@ -100,7 +103,7 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
 		
 		// Explorer / Skill
-		mBVHTree.GetNodeIndices(skillIndices, COLLISION_LAYER_SKILL, [parentIndex](const BVHNode& other)
+		mBVHTree.GetNodeIndices(skillIndices, COLLISION_LAYER_EXPLORER_SKILL, [parentIndex](const BVHNode& other)
 		{
 			return other.parentIndex == parentIndex;
 		});
@@ -119,6 +122,24 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 			}
 		}
 
+		mBVHTree.GetNodeIndices(minionSkills, COLLISION_LAYER_MINION_SKILL, [parentIndex](const BVHNode& other)
+		{
+			return other.parentIndex == parentIndex;
+		});
+
+		for (uint32_t ms : minionSkills)
+		{
+			BVHNode* pMinionSkillNode = mBVHTree.GetNode(ms);
+
+			if (pMinionSkillNode->object->mOnSphereTest(pMinionSkillNode->object, pSphereComponent))
+			{
+				frameCollisions.push_back(Collision());
+
+				Collision* pTrigger = &frameCollisions.back();
+				pTrigger->colliderA.BaseCollider = pMinionSkillNode->object;
+				pTrigger->colliderB.SphereCollider = pSphereComponent;
+			}
+		}
 
 		// Explorer / Door
 		mBVHTree.GetNodeIndices(doorIndices, COLLISION_LAYER_DOOR, [parentIndex](const BVHNode& other)
@@ -235,20 +256,25 @@ void CollisionManager::DetectCollisions()
 	std::vector<Collision>& collisions = mCollisions;
 
 	// Get node indices for explorers 
-	std::vector<uint32_t> indices;
-
-	indices.reserve(MAX_EXPLORERS);
-	
-	mBVHTree.GetNodeIndices(indices, [](const BVHNode& other)
+	std::vector<uint32_t> explorerIndices;
+	explorerIndices.reserve(MAX_EXPLORERS);
+	mBVHTree.GetNodeIndices(explorerIndices, [](const BVHNode& other)
 	{
 		return other.object->mLayer == COLLISION_LAYER_EXPLORER;
 	});
 
-	// Explorer / Explorer Collisions
-
-	for (uint32_t i : indices)
+	std::vector<uint32_t> minionIndices;
+	minionIndices.reserve(MAX_MINIONS);
+	mBVHTree.GetNodeIndices(minionIndices, [](const BVHNode& other)
 	{
-		for (uint32_t j : indices)
+		return other.object->mLayer == COLLISION_LAYER_MINION;
+	});
+
+	for (uint32_t i : explorerIndices)
+	{
+		// Explorer / Explorer Collisions
+
+		for (uint32_t j : explorerIndices)
 		{
 			if (i == j) continue;
 
@@ -277,18 +303,44 @@ void CollisionManager::DetectCollisions()
 				}
 			}
 		}
+		
+		// Explorer / Minion Collisions
+
+		for (uint32_t j : minionIndices)
+		{
+			BVHNode* pNode_e1 = mBVHTree.GetNode(i);
+			BVHNode* pNode_e2 = mBVHTree.GetNode(j);
+
+			if (pNode_e1->parentIndex == pNode_e2->parentIndex)
+			{
+				SphereColliderComponent* pSC_e1 = reinterpret_cast<SphereColliderComponent*>(pNode_e1->object);
+				SphereColliderComponent* pSC_e2 = reinterpret_cast<SphereColliderComponent*>(pNode_e2->object);
+
+				if (IntersectSphereSphere(pSC_e1->mCollider, pSC_e2->mCollider))
+				{
+					float overlap = (pSC_e1->mCollider.radius + pSC_e2->mCollider.radius)
+						- magnitude(pSC_e1->mCollider.origin - pSC_e2->mCollider.origin);
+					vec3f AtoB = (pSC_e2->mCollider.origin - pSC_e1->mCollider.origin);
+
+					collisions.push_back(Collision());
+
+					Collision* pCollision = &collisions.back();
+					pCollision->colliderA.SphereCollider = pSC_e1;
+					pCollision->colliderB.SphereCollider = pSC_e2;
+					pCollision->minimumOverlap = -AtoB * overlap;
+
+					pSC_e1->OnCollisionEnter(pSC_e2->mSceneObject, overlap);
+				}
+			}
+		}
 	}
-
-	// Minion / Minion Collisions
-
-	// Explorer / Minion Collisions
 
 	// Explorer / Wall Collisions
 
 	std::vector<uint32_t> colliderIndices;
 	colliderIndices.reserve(50);
 
-	for (uint32_t idx : indices)
+	for (uint32_t idx : explorerIndices)
 	{
 		BVHNode* pNode = mBVHTree.GetNode(idx);
 		int parentIndex = pNode->parentIndex;
@@ -326,7 +378,15 @@ void CollisionManager::DetectCollisions()
 	}
 
 	// Floor Overlaps
-	for (uint32_t idx : indices)
+	std::vector<uint32_t> allIndices;
+	allIndices.reserve(MAX_MINIONS);
+
+	mBVHTree.GetNodeIndices(allIndices, [](const BVHNode& other)
+	{
+		return other.object->mLayer == COLLISION_LAYER_EXPLORER || other.object->mLayer == COLLISION_LAYER_MINION;
+	});
+
+	for (uint32_t idx : allIndices)
 	{
 		BVHNode* pNode = mBVHTree.GetNode(idx);
 		int parentIndex = pNode->parentIndex;
