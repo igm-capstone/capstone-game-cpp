@@ -278,9 +278,6 @@ void Level01::InitializeShaderResources()
 	{
 		mRenderer->VCreateShaderResource(&mSpritesShaderResource, &mAllocator);
 
-		mSpriteSheetData.sliceWidth = 100 / 1;
-		mSpriteSheetData.sliceHeight = 32 / 2;
-
 		void*  cbSpritesData[] = { mCameraManager->GetCBufferPersp(), &mSpriteSheetData };
 		size_t cbSpritesSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::SpriteSheet) };
 
@@ -288,8 +285,20 @@ void Level01::InitializeShaderResources()
 		mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, &mSpriteSheetData, 1);
 
 		// SpriteSheets
-		const char* filenames[] = { "Assets/Health.png" };
-		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, &filenames[0], 1);
+		const char* filenames[] = { "Assets/UI/Health.png", "Assets/UI/UI_ghostIcons.png" };
+		mSpriteSheetData[0].sheetID = 0;
+		mSpriteSheetData[0].sheetWidth = 100;
+		mSpriteSheetData[0].sheetHeight = 32;
+		mSpriteSheetData[0].slicesX = 1;
+		mSpriteSheetData[0].slicesY = 2;
+
+		mSpriteSheetData[1].sheetID = 1;
+		mSpriteSheetData[1].sheetWidth = 1024;
+		mSpriteSheetData[1].sheetHeight = 1024;
+		mSpriteSheetData[1].slicesX = 4;
+		mSpriteSheetData[1].slicesY = 4;
+
+		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, &filenames[0], 2);
 		mRenderer->VAddShaderPointSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 
 		// Instance buffer data
@@ -508,7 +517,7 @@ void Level01::VRender()
 #endif
 
 	RenderIMGUI(); 
-	RenderSprites();
+	RenderHealthBars();
 	
 	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, mNullSRV);
 
@@ -811,16 +820,16 @@ void Level01::RenderMinions()
 	}
 }
 
-void Level01::RenderSprites()
+void Level01::RenderHealthBars()
 {
 	mRenderer->VSetContextTarget();
-	auto currentTexture = -1;
 
 	mRenderer->VSetInputLayout(mApplication->mVSFwdSprites);
 	mRenderer->VSetVertexShader(mApplication->mVSFwdSprites);
 	mRenderer->VSetPixelShader(mApplication->mPSFwd2DTexture);
 
 	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferScreenOrto(), 0);
+	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, &mSpriteSheetData[1], 1);
 	mRenderer->VSetVertexShaderConstantBuffers(mSpritesShaderResource);
 
 	UINT sCount = 0;
@@ -828,13 +837,11 @@ void Level01::RenderSprites()
 	{
 		mSpriteInstanceData[sCount].pointpos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, -32);
 		mSpriteInstanceData[sCount].id = 1;
-		mSpriteInstanceData[sCount].size = { 100, 16 };
 		mSpriteInstanceData[sCount].scale = { h.GetHealthPerc(), 1 };
 		sCount++;
 
 		mSpriteInstanceData[sCount].pointpos = mSpriteInstanceData[sCount - 1].pointpos;
 		mSpriteInstanceData[sCount].id = 0;
-		mSpriteInstanceData[sCount].size = { 100, 16 };
 		mSpriteInstanceData[sCount].scale = { 1, 1 };
 		sCount++;
 	}

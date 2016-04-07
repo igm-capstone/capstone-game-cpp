@@ -9,7 +9,7 @@ class Level01 : public BaseScene
 	CBuffer::Model			mModel;
 	CBuffer::LightPVM		mLightPVM;			// Used for spotlight matrices
 	CBuffer::Light			mLightData;			// Used for spotlight data (color, angle, etc).
-	CBuffer::SpriteSheet	mSpriteSheetData;
+	CBuffer::SpriteSheet	mSpriteSheetData[MAX_SPRITESHEETS];
 
 	// GPU Data
 	GPU::Sprite			mSpriteInstanceData[MAX_SPRITES];
@@ -67,7 +67,7 @@ public:
 	void RenderSpotLightVolumes();
 	void RenderFullScreenQuad();
 	void RenderMinions();
-	void RenderSprites();
+	void RenderHealthBars();
 	void RenderGrid();
 	void ComputeGrid();
 	void VShutdown() override;

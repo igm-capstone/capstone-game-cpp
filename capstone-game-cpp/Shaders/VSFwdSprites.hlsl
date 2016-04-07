@@ -6,9 +6,11 @@ cbuffer camera : register(b0)
 
 cbuffer spriteSheet : register(b1)
 {
-	float sliceWidth;
-	float sliceHeight;
-	float mapID;
+	float sheetID;
+	float sheetWidth;
+	float sheetHeight;
+	float slicesX;
+	float slicesY;
 }
 
 struct Sprite
@@ -17,9 +19,8 @@ struct Sprite
 	float2		uv			: TEXCOORD;
 	//Per Sprite
 	float3		pointpos	: POINTPOS;
-	float2		size		: SIZE;
 	float2		scale		: SCALE;
-	float		texid		: TEXID;
+	float		spriteID	: SPRITEID;
 };
 
 struct Pixel
@@ -28,23 +29,20 @@ struct Pixel
 	float3 uv : TEXCOORD;
 };
 
-Texture2D mTexture : register(t0);
+Texture2DArray mTexture : register(t0);
 
 Pixel main(Sprite input)
 {
 	Pixel output;
 
-	float sliceIndex = input.texid;
+	float sliceIndex = input.spriteID;
 
-	float textureWidth;
-	float textureHeight;
-	mTexture.GetDimensions(textureWidth, textureHeight);
-
-	uint slicesX = textureWidth / sliceWidth;
-	uint slicesY = textureHeight / sliceHeight;
 	uint totalSlices = slicesX * slicesY;
 	uint vIndex = sliceIndex / slicesX;
 	uint hIndex = sliceIndex - (slicesX * vIndex);
+
+	float sizeX = sheetWidth / slicesX;
+	float sizeY = sheetHeight / slicesY;
 
 	float4x4 translatePivot = {
 		1, 0, 0, 0,
@@ -52,15 +50,15 @@ Pixel main(Sprite input)
 		0, 0, 1, 0,
 		1, 1, 0, 1 };
 	float4x4 scale = {
-		input.size.x / 2 * input.scale.x, 0, 0, 0,
-		0, input.size.y / 2 * input.scale.y, 0, 0,
+		sizeX / 2 * input.scale.x, 0, 0, 0,
+		0, sizeY / 2 * input.scale.y, 0, 0,
 		0, 0, 1, 0,
 		0, 0, 0, 1 };
 	float4x4 translatePosAndUndoPivot = {
 		1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, 1, 0,
-		input.pointpos.x - input.size.x / 2 , input.pointpos.y - input.size.y / 2, 0, 1 };
+		input.pointpos.x - sizeX / 2 , input.pointpos.y - sizeY / 2, 0, 1 };
 	
 	float4x4 world = mul(mul(translatePivot,scale), translatePosAndUndoPivot);
 
@@ -68,7 +66,9 @@ Pixel main(Sprite input)
 	output.position = mul(float4(input.position.xyz, 1.0f), clip);
 
 	// Modify UV coordinates to grab the appropriate slice.
-	output.uv = float3((input.uv.x / slicesX) + (((textureWidth / slicesX) * float(hIndex)) / textureWidth), (input.uv.y / slicesY) + (((textureHeight / slicesY) * float(vIndex)) / textureHeight), mapID);
+	output.uv = float3( (input.uv.x / slicesX) + (((sheetWidth / slicesX) * float(hIndex)) / sheetWidth), 
+						(input.uv.y / slicesY) + (((sheetHeight / slicesY) * float(vIndex)) / sheetHeight), 
+						sheetID);
 	
 	return output;
 }

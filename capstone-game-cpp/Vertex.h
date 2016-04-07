@@ -80,7 +80,6 @@ namespace GPU {
 	struct Sprite
 	{
 		vec3f pointpos;
-		vec2f size;
 		vec2f scale;
 		float id;
 	};

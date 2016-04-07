@@ -478,10 +478,10 @@ namespace Rig3D
 			v2.Position = { +1.0f, -1.0f, 0.0f };
 			v3.Position = { -1.0f, -1.0f, 0.0f };
 
-			v0.UV = { 0.0f, 0.0f };
-			v1.UV = { 1.0f, 0.0f };
-			v2.UV = { 1.0f, 1.0f };
-			v3.UV = { 0.0f, 1.0f };
+			v0.UV = { 0.0f, 1.0f };
+			v1.UV = { 1.0f, 1.0f };
+			v2.UV = { 1.0f, 0.0f };
+			v3.UV = { 0.0f, 0.0f };
 
 			vertices.push_back(v0);
 			vertices.push_back(v1);

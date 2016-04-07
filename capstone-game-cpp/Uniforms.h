@@ -32,10 +32,12 @@ namespace CBuffer {
 
 	struct SpriteSheet
 	{
-		float sliceWidth;
-		float sliceHeight;
-		float mapID;
-		float padding;
+		float sheetID;
+		float sheetWidth;
+		float sheetHeight;
+		float slicesX;
+		float slicesY;
+		float padding[3];
 	};
 
 	struct GridData
