@@ -65,6 +65,7 @@
     <ClCompile Include="BehaviorTree\Tree.cpp" />
     <ClCompile Include="BehaviorTree\Conditional.cpp" />
     <ClCompile Include="BehaviorTree\Decorator.cpp" />
+    <ClCompile Include="SceneObjects\Heal.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -137,6 +138,7 @@
     <ClInclude Include="BehaviorTree\Tree.h" />
     <ClInclude Include="BehaviorTree\Conditional.h" />
     <ClInclude Include="BehaviorTree\Decorator.h" />
+    <ClInclude Include="SceneObjects\Heal.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
