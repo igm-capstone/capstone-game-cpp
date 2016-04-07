@@ -71,7 +71,6 @@ Explorer::Explorer()
 	mHealth->RegisterHealthChangeCallback(OnHealthChange);
 }
 
-
 void Explorer::DebugSpawn(vec3f pos, int UUID)
 {
 	Spawn(pos, UUID);

@@ -5,11 +5,11 @@
 #include "Explorer.h"
 #include "Components/Health.h"
 
-Heal::Heal() : mSphereColliderComponent(Factory<SphereColliderComponent>::Create()), mNetworkID(Factory<NetworkID>::Create()), mDuration(0.0f)
+Heal::Heal() : mSphereColliderComponent(Factory<SphereColliderComponent>::Create()), mNetworkID(Factory<NetworkID>::Create()), mDuration(0.0f), mHealthRestored(50.0f)
 {
 	mSphereColliderComponent->mCollider.radius = 5.0f;
 	mSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
-	mSphereColliderComponent->mIsTrigger = false;
+	mSphereColliderComponent->mIsTrigger = true;
 	mSphereColliderComponent->mIsDynamic = false;
 	mSphereColliderComponent->mSceneObject = this;
 	mSphereColliderComponent->RegisterTriggerEnterCallback(OnTriggerEnter);
@@ -29,6 +29,7 @@ Heal::~Heal()
 void Heal::Spawn(vec3f pos, int UUID, float duration)
 {
 	mTransform->SetPosition(pos);
+	mSphereColliderComponent->mCollider.origin = pos;
 	mNetworkID->mUUID = UUID;
 	mDuration = duration;
 }
@@ -46,5 +47,5 @@ void Heal::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 void Heal::OnTriggerEnter(BaseSceneObject* self, BaseSceneObject* other)
 {
 	Explorer* pExlorer = reinterpret_cast<Explorer*>(other);
-	pExlorer->mHealth->SetHealth(pExlorer->mHealth->GetHealth() + 25.0f);
+	pExlorer->mHealth->SetHealth(pExlorer->mHealth->GetHealth() + reinterpret_cast<Heal*>(self)->mHealthRestored);
 }
