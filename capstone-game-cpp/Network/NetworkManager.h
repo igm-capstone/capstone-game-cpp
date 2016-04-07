@@ -39,6 +39,7 @@ class NetworkCmd
 public:
 	static void SpawnNewExplorer(int clientID);
 	static void SpawnNewMinion(vec3f pos);
+	static void SpawnNewHeal(vec3f pos, float duration);
 };
 
 class NetworkRpc {
@@ -46,6 +47,7 @@ class NetworkRpc {
 public:
 	static void SpawnExistingExplorer(int UUID, vec3f pos);
 	static void SpawnExistingMinion(int UUID, vec3f pos);
+	static void SpawnExistingHeal(int UUID, vec3f pos, float duration);
 
 	static void GrantAuthority(int UUID);
 	static void SyncTransform(int UUID, vec3f pos, quatf rot);

@@ -5,6 +5,7 @@
 #include <SceneObjects/Explorer.h>
 #include <SceneObjects/Minion.h>
 #include <Components/NetworkID.h>
+#include <SceneObjects/Heal.h>
 
 NetworkManager::NetworkManager()
 {
@@ -125,6 +126,31 @@ void NetworkRpc::SpawnExistingMinion(int UUID, vec3f pos) {
 
 	auto m = Factory<Minion>::Create();
 	m->Spawn(pos, UUID);
+}
+
+void NetworkCmd::SpawnNewHeal(vec3f pos, float duration)
+{
+	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER);
+
+	auto h = Factory<Heal>::Create();
+	h->Spawn(pos, MyUUID::GenUUID(), duration);
+
+	h->mNetworkID->mHasAuthority = true;
+	h->mNetworkID->OnNetAuthorityChange(true);
+
+	Packet p(PacketTypes::SPAWN_HEAL);
+	p.UUID = h->mNetworkID->mUUID;
+	p.AsSkill.Position = pos;
+	p.AsSkill.Duration = duration;
+	mNetworkManager->mServer.SendToAll(&p);
+}
+
+void NetworkRpc::SpawnExistingHeal(int UUID, vec3f pos, float duration)
+{
+	assert(mNetworkManager->mMode == NetworkManager::Mode::CLIENT);
+
+	auto h = Factory<Heal>::Create();
+	h->Spawn(pos, UUID, duration);
 }
 
 void NetworkRpc::GrantAuthority(int UUID) {
