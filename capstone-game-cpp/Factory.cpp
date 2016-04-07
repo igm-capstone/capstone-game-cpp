@@ -13,6 +13,7 @@
 #include "SceneObjects\Ghost.h"
 #include "SceneObjects\Region.h"
 #include "SceneObjects\Door.h"
+#include "SceneObjects\Heal.h"
 
 #include "Components\NetworkID.h"
 #include "Components\ColliderComponent.h"
@@ -74,3 +75,5 @@ REGISTER_FACTORY ( FmodEventCollection,				10	)
 REGISTER_FACTORY ( AnimationController,				MAX_EXPLORERS + MAX_MINIONS)
 REGISTER_FACTORY ( PlaneColliderComponent,			100)
 REGISTER_FACTORY ( Door,							MAX_DOORS)
+
+REGISTER_FACTORY ( Heal, 5)
