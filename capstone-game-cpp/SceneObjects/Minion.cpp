@@ -21,6 +21,7 @@ Minion::Minion()
 	mCollider->mSceneObject = this;
 	mCollider->mIsActive = false;
 	mCollider->mIsDynamic = true;
+	mCollider->mLayer = COLLISION_LAYER_MINION;
 
 	mMeleeColliderComponent = Factory<SphereColliderComponent>::Create();
 	mMeleeColliderComponent->mCollider.radius = 2.5f;
@@ -43,6 +44,17 @@ Minion::Minion()
 	mAnimationController->mSceneObject = this;
 	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
 	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
+	SetRestFrameIndex(mAnimationController, gMinionRestFrameIndex);
+
+	//mAnimationController->RegisterCommandExecutedCallback(&OnAnimationCommandExecuted);
+
+	//Animation melee = gMinionAnimations[Animations::MINION_ATTACK];
+	//KeyframeOption meleeOptions[] = { { melee.startFrameIndex, OnMeleeStart },{ melee.endFrameIndex, OnMeleeStop } };
+	//SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionAnimations[Animations::MINION_ATTACK], meleeOptions, 2, false);
+	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionAnimations[Animations::MINION_ATTACK], nullptr, 0, false);
+	SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gMinionAnimations[Animations::MINION_WALK], nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_WALK, &gMinionAnimations[Animations::MINION_WALK], nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_RUN, &gMinionAnimations[Animations::MINION_RUN], nullptr, 0, true);
 	SetRestFrameIndex(mAnimationController, gMinionRestFrameIndex);
 }
 
