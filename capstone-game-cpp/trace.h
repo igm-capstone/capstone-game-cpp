@@ -9,6 +9,7 @@
 #define TRACE_ERROR(message)                    Trace::GetTrace() << "[Error] " << message << Trace::endl
 #define TRACE_WARN(message)                     Trace::GetTrace() << "[Warning] " << message << Trace::endl
 #define TRACE_LOG(message)                      Trace::GetTrace() << "[Log] " << message << Trace::endl
+#define TRACE_WATCH(label, value)               Trace::GetTrace().Watch(label, value)
 #define TRACE_LINE(from, to, color)             Trace::TraceLine          (from, to, color)
 #define TRACE_BOX(position, color)              Trace::TraceBox           (position, color)
 #define TRACE_DIAMOND(position, color)          Trace::TraceDiamond       (position, color)
@@ -20,6 +21,7 @@
 #define TRACE_SMALL_XCROSS(position, color)     Trace::TraceSmallXCross   (position, color)
 
 #define RENDER_TRACE()                          Trace::GetTrace().Render();
+#define RENDER_TRACE_WATCH()					Trace::GetTrace().RenderWatch();
 
 typedef std::function<void(const float&, const float&, const float&, const float&, const float&, const float&, const vec4f& color)> __TraceFunction;
 
@@ -42,6 +44,7 @@ private:
 	LinearAllocator					mTraceAllocator;
 	LinearAllocator					mStaticMeshAllocator;
 	MeshLibrary<LinearAllocator>	mStaticMeshLibrary;
+	std::vector<std::pair<std::string, std::string>> mWatch;
 
 	std::stringstream ss;
 	char buff[128];
@@ -69,7 +72,19 @@ public:
 		static Trace trace;
 		return trace;
 	}
+
 	void Render();
+	void RenderWatch();
+
+	void Watch(std::string label, std::string value)  { mWatch.push_back(std::pair<std::string, std::string>(label, value)); };
+	void Watch(std::string label, int value)          { Watch(label, std::to_string(value)); };
+	void Watch(std::string label, unsigned int value) { Watch(label, std::to_string(value)); };
+	void Watch(std::string label, short value)        { Watch(label, std::to_string(value)); };
+	void Watch(std::string label, float value)        { Watch(label, std::to_string(value)); };
+	void Watch(std::string label, double value)       { Watch(label, std::to_string(value)); };
+	void Watch(std::string label, long value)         { Watch(label, std::to_string(value)); };
+	void Watch(std::string label, long long value)    { Watch(label, std::to_string(value)); };
+	void Watch(std::string label, bool value)         { Watch(label, std::to_string(value)); };
 
 	Trace &operator << (int value) { ss << value; return *this; }
 	Trace &operator << (unsigned int value) { ss << value; return *this; }
@@ -102,16 +117,16 @@ public:
 	void TraceLine(const float& from_x, const float& from_y, const float& from_z, const float& to_x, const float& to_y, const float& to_z, const vec4f& color);
 };
 
-
 #else
 
 #define TRACE(message)
-#define TRACE_LINE(from, to, color)
 #define TRACE_ERROR(message)
 #define TRACE_WARN(message)
 #define TRACE_LOG(message)
+#define TRACE_WATCH(label, value)
+#define TRACE_LINE(from, to, color)
 #define TRACE_BOX(position, color)
-#define TRACE_DIAMOND(position, color)
+#define TRACE_DIAMOND(position, color)          
 #define TRACE_CROSS(position, color)
 #define TRACE_XCROSS(position, color)
 #define TRACE_SMALL_BOX(position, color)
@@ -120,5 +135,6 @@ public:
 #define TRACE_SMALL_XCROSS(position, color)
 
 #define RENDER_TRACE()
+#define RENDER_TRACE_WATCH()
 
 #endif

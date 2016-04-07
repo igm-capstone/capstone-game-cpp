@@ -73,22 +73,26 @@ void Minion::Spawn(vec3f pos, int UUID)
 	mNetworkID->mUUID = UUID;
 }
 
-void Minion::OnMove(BaseSceneObject* obj, vec3f newPos)
+void Minion::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 {
 	auto m = static_cast<Minion*>(obj);
 	m->mTransform->SetPosition(newPos);
-	m->UpdateComponents(m->mTransform->GetRotation(), newPos);
+	m->mTransform->SetRotation(newRot);
+
+	m->UpdateComponents(newRot, newPos);
 
 	if (m->mNetworkID->mHasAuthority) {
 		Packet p(PacketTypes::SYNC_TRANSFORM);
 		p.UUID = m->mNetworkID->mUUID;
 		p.AsTransform.Position = newPos;
+		p.AsTransform.Rotation = newRot;
 		m->mNetworkClient->SendData(&p);
 
 		//m->mHealth->TakeDamage(1.0f);
 		//if (m->mHealth->GetHealth() <= 0) e->mHealth->TakeDamage(-1000.0f);
 	}
 }
+
 
 void Minion::UpdateComponents(quatf rotation, vec3f position)
 {

@@ -74,7 +74,7 @@ bool ExplorerController::RotateTowardsMoveDirection(float dt, vec3f& pos, quatf&
 
 	//TRACE_LINE(lastPos, lastPos + dir * 5, Colors::red);
 
-	float targetAngle = atan2(dir.y, dir.x);
+	float targetAngle = atan2f(dir.y, dir.x);
 	mAngle = Mathf::LerpAngle(mAngle, targetAngle, 8 * dt);
 
 	return UpdateRotation(mAngle, rot);

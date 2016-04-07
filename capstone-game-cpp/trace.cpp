@@ -1,5 +1,6 @@
 #include <stdafx.h>
 #include "CameraManager.h"
+#include "ScareTacticsApplication.h"
 #if defined _DEBUG
 
 #include <trace.h>
@@ -164,7 +165,25 @@ void Trace::Render() {
 	// reset line trace count
 	mLineTraceDrawCount = 0;
 	mLineTraceOverflow = false;
-};
+}
+
+void Trace::RenderWatch()
+{
+	if (mWatch.empty())
+	{
+		return;
+	}
+	
+	ImGui::SetNextWindowPos(ImVec2(Application::SharedInstance().mOptions.mWindowWidth - 220.0f, 30.0f), ImGuiSetCond_Appearing);
+	ImGui::Begin("Watch", nullptr, ImVec2(200, 600));
+	for (auto pair : mWatch)
+	{
+		ImGui::LabelText(pair.first.c_str(), pair.second.c_str());
+	}
+	ImGui::End();
+
+	mWatch.clear();
+}
 
 Trace& Trace::endl(Trace &trace)
 {

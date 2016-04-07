@@ -105,8 +105,10 @@
     <ClCompile Include="BehaviorTree\BehaviorTreeTests.cpp" />
     <ClCompile Include="BehaviorTree\Conditional.cpp" />
     <ClCompile Include="BehaviorTree\Decorator.cpp" />
+    <ClCompile Include="BehaviorTree\Parallel.cpp" />
     <ClCompile Include="BehaviorTree\Predicate.cpp" />
     <ClCompile Include="BehaviorTree\Priority.cpp" />
+    <ClCompile Include="BehaviorTree\Race.cpp" />
     <ClCompile Include="BehaviorTree\Selector.cpp" />
     <ClCompile Include="BehaviorTree\Tree.cpp" />
     <ClCompile Include="BVHTree.cpp" />
@@ -166,8 +168,10 @@
     <ClInclude Include="BehaviorTree\BehaviorTreeTests.h" />
     <ClInclude Include="BehaviorTree\Conditional.h" />
     <ClInclude Include="BehaviorTree\Decorator.h" />
+    <ClInclude Include="BehaviorTree\Parallel.h" />
     <ClInclude Include="BehaviorTree\Predicate.h" />
     <ClInclude Include="BehaviorTree\Priority.h" />
+    <ClInclude Include="BehaviorTree\Race.h" />
     <ClInclude Include="BehaviorTree\Selector.h" />
     <ClInclude Include="BehaviorTree\Tree.h" />
     <ClInclude Include="BVHTree.h" />

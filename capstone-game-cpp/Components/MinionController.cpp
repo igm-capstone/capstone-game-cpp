@@ -9,9 +9,11 @@
 #include <Mathf.h>
 #include <SceneObjects/Minion.h>
 #include "AnimationController.h"
+#include <BehaviorTree/Parallel.h>
 
 using namespace BehaviorTree;
 using namespace chrono;
+using namespace cliqCity::graphicsMath;
 
 MinionController::MinionController():
 	mThinkTime(0),
@@ -28,6 +30,8 @@ MinionController::MinionController():
 	auto patrolSequence = new Sequence(*mBehaviorTree, "(-->) Patrol");
 	auto findTarget = new Behavior(*mBehaviorTree, "(!) Find Patrol Target");
 	auto think = new Behavior(*mBehaviorTree, "(!) Think");
+	auto followTarget = new Parallel(*mBehaviorTree, "(!!) Follow Target");
+	auto rotateTowardsTarget = new Behavior(*mBehaviorTree, "(!) Rotate Towards Target");
 	auto moveTowardsTarget = new Behavior(*mBehaviorTree, "(!) Move Towards Target");
 
 
@@ -36,7 +40,7 @@ MinionController::MinionController():
 	findTarget->SetUpdateCallback(&FindTarget);
 	think->SetUpdateCallback(&Think);
 	moveTowardsTarget->SetUpdateCallback(&MoveTowardsTarget);
-
+	rotateTowardsTarget->SetUpdateCallback(&RotateTowardsTarget);
 
 	baseSelector->Add(*followExplorerSequence);
 	baseSelector->Add(*patrolSequence);
@@ -45,15 +49,15 @@ MinionController::MinionController():
 	//followExplorerSequence->Add(*isExplorerInRange);
 	//followExplorerSequence->Add(*moveTowardsExplorer);
 
+	followTarget->Add(*moveTowardsTarget);
+	followTarget->Add(*rotateTowardsTarget);
+
 	patrolSequence->Add(*findTarget);
 	patrolSequence->Add(*think);
-	patrolSequence->Add(*moveTowardsTarget);
+	patrolSequence->Add(*followTarget);
 
 
 	mBehaviorTree->Start(*baseSelector);
-
-	quatf rot;
-	UpdateRotation(0, rot);
 }
 
 
@@ -67,15 +71,23 @@ bool MinionController::Update(double milliseconds)
 {
 	if (!mIsActive) return false;
 	
+	mPosition = mSceneObject->mTransform->GetPosition();
+	//mAngle = mSceneObject->mTransform->GetRollPitchYaw().x;
+
 	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	mBehaviorTree->Tick(this);
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
 	auto duration = duration_cast<nanoseconds>(t2 - t1).count();
 	
-	auto pos = mSceneObject->mTransform->GetPosition();
-	auto dir = mSceneObject->mTransform->GetUp();
-	TRACE_LINE(pos, pos + dir, Colors::red);
+	//auto pos = mSceneObject->mTransform->GetPosition();
+	//auto dir = mSceneObject->mTransform->GetForward();
+	//TRACE_LINE(pos, pos + dir, Colors::red);
+
+	if (mIsTransformDirty)
+	{
+		OnMove(mPosition, GetRotation(mAngle));
+	}
 
 	if (Singleton<Engine>::SharedInstance().GetInput()->GetKeyDown(KEYCODE_D))
 	{
@@ -86,11 +98,8 @@ bool MinionController::Update(double milliseconds)
 }
 
 
-bool MinionController::UpdateRotation(float angle, quatf& rot) {
-	quatf newRot = normalize(quatf::angleAxis(angle, vec3f(0, 0, 1)) * quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0));
-	auto hasRotated = rot != newRot;
-	rot = newRot;
-	return hasRotated;
+quatf MinionController::GetRotation(float angle) {
+	return normalize(quatf::angleAxis(angle, vec3f(0, 0, 1)) * quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0));
 }
 
 
@@ -108,11 +117,10 @@ BehaviorStatus MinionController::MoveTowardsExplorer(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
 
-	vec3f myPos = self.mSceneObject->mTransform->GetPosition();
-	auto myNode = self.mAI.GetNodeAt(myPos);
+	auto myNode = self.mAI.GetNodeAt(self.mPosition);
 
 	auto targetConn = self.mAI.mGrid.GetBestFitConnection(myNode);
-	vec2f direction = vec2f(targetConn.to->worldPos) - vec2f(myPos);
+	vec2f direction = vec2f(targetConn.to->worldPos) - vec2f(self.mPosition);
 	
 	float distanceSquared = magnitudeSquared(direction);
 
@@ -129,7 +137,8 @@ BehaviorStatus MinionController::MoveTowardsExplorer(Behavior& bh, void* data)
 	// delta space for the current frame
 	vec3f ds = targetVelocity;
 
-	self.OnMove(myPos + ds);
+	self.mPosition += ds;
+	self.mIsTransformDirty = true;
 
 	self.PlayStateAnimation(ANIM_STATE_WALK);
 	return BehaviorStatus::Running;
@@ -155,8 +164,8 @@ BehaviorStatus MinionController::FindTarget(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
 	
-	auto node = self.mAI.GetNodeAt(self.mSceneObject->mTransform->GetPosition());
-	auto target = self.mAI.mGrid(node->x + rand() % 9 - 4, node->y + rand() % 9 - 4);
+	Node& node = *self.mAI.GetNodeAt(self.mSceneObject->mTransform->GetPosition());
+	Node& target = self.mAI.mGrid(node.x + rand() % 9 - 4, node.y + rand() % 9 - 4);
 	auto nodeState = target.GetState();
 
 	if (nodeState != Node::CLEAN && nodeState != Node::PATH)
@@ -164,7 +173,32 @@ BehaviorStatus MinionController::FindTarget(Behavior& bh, void* data)
 		return BehaviorStatus::Failure;
 	}
 
-	self.mTarget =target.worldPos;
+	self.mTarget = target.worldPos;
+
+	return BehaviorStatus::Success;
+}
+
+
+BehaviorStatus MinionController::RotateTowardsTarget(Behavior& bh, void* data)
+{
+	auto& self = *static_cast<MinionController*>(data);
+	float dt = float(self.mTimer.GetDeltaTime()) * 0.001f;
+
+	vec2f dir = normalize(self.mTarget - vec2f(self.mPosition));
+
+	//TRACE_LINE(lastPos, lastPos + dir * 5, Colors::red);
+
+	float targetAngle = atan2f(dir.y, dir.x);
+
+
+	if (abs(self.mAngle - targetAngle) < 0.001f) {
+		return BehaviorStatus::Success;
+	}
+
+	self.mAngle = Mathf::LerpAngle(self.mAngle, targetAngle, 8 * dt);
+	self.mIsTransformDirty = true;
+
+
 	return BehaviorStatus::Success;
 }
 
@@ -172,8 +206,7 @@ BehaviorStatus MinionController::MoveTowardsTarget(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
 
-	vec3f myPos = self.mSceneObject->mTransform->GetPosition();
-	vec2f direction = self.mTarget - vec2f(myPos);
+	vec2f direction = self.mTarget - vec2f(self.mPosition);
 	float distanceSquared = magnitudeSquared(direction);
 
 	if (distanceSquared < .25)
@@ -189,7 +222,8 @@ BehaviorStatus MinionController::MoveTowardsTarget(Behavior& bh, void* data)
 	// delta space for the current frame
 	vec3f ds = targetVelocity;
 
-	self.OnMove(myPos + ds);
+	self.mPosition += ds;
+	self.mIsTransformDirty = true;
 
 	self.PlayStateAnimation(ANIM_STATE_WALK);
 	return BehaviorStatus::Running;
