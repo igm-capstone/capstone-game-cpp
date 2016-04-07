@@ -16,7 +16,7 @@ public:
 	class AIManager& mAI;
 	class Rig3D::Timer& mTimer;
 	BehaviorTree::Tree* mBehaviorTree;
-	vec3f mTarget;
+	vec2f mTarget;
 
 	bool Update(double milliseconds);
 	bool UpdateRotation(float angle, quatf& rot);

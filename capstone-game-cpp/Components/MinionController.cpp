@@ -108,11 +108,11 @@ BehaviorStatus MinionController::MoveTowardsExplorer(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
 
-	vec2f myPos = self.mSceneObject->mTransform->GetPosition();
+	vec3f myPos = self.mSceneObject->mTransform->GetPosition();
 	auto myNode = self.mAI.GetNodeAt(myPos);
 
 	auto targetConn = self.mAI.mGrid.GetBestFitConnection(myNode);
-	vec2f direction = vec2f(targetConn.to->worldPos) - myPos;
+	vec2f direction = vec2f(targetConn.to->worldPos) - vec2f(myPos);
 	
 	float distanceSquared = magnitudeSquared(direction);
 
@@ -127,7 +127,7 @@ BehaviorStatus MinionController::MoveTowardsExplorer(Behavior& bh, void* data)
 	vec2f targetVelocity = normalize(direction) * 0.01f * static_cast<float>(timer->GetDeltaTime());
 
 	// delta space for the current frame
-	vec2f ds = targetVelocity;
+	vec3f ds = targetVelocity;
 
 	self.OnMove(myPos + ds);
 
@@ -172,8 +172,8 @@ BehaviorStatus MinionController::MoveTowardsTarget(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
 
-	vec2f myPos = self.mSceneObject->mTransform->GetPosition();
-	vec2f direction = vec2f(self.mTarget) - myPos;
+	vec3f myPos = self.mSceneObject->mTransform->GetPosition();
+	vec2f direction = self.mTarget - vec2f(myPos);
 	float distanceSquared = magnitudeSquared(direction);
 
 	if (distanceSquared < .25)
@@ -187,7 +187,7 @@ BehaviorStatus MinionController::MoveTowardsTarget(Behavior& bh, void* data)
 	vec2f targetVelocity = normalize(direction) * 0.01f * static_cast<float>(timer->GetDeltaTime());
 
 	// delta space for the current frame
-	vec2f ds = targetVelocity;
+	vec3f ds = targetVelocity;
 
 	self.OnMove(myPos + ds);
 
