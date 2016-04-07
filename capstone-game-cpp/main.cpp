@@ -59,7 +59,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 	Options options;
 	options.mWindowCaption = "Scare Tactics";
 	options.mWindowWidth = 1600;
-	options.mWindowHeight = 1000;
+	options.mWindowHeight = 900;
 	options.mGraphicsAPI = GRAPHICS_API_DIRECTX11;
 	options.mFullScreen = false;
 
