@@ -26,6 +26,7 @@
 #include <Rig3D/Graphics/DirectX11/DX11ShaderResource.h>
 #include <SceneObjects/SpawnPoint.h>
 #include <SceneObjects/FlyTrap.h>
+#include <SceneObjects/Heal.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -426,6 +427,18 @@ void Level01::VUpdate(double milliseconds)
 	for (AnimationController& ac : Factory<AnimationController>())
 	{
 		ac.Update(milliseconds);
+	}
+
+	float seconds = static_cast<float>(milliseconds) / 1000.0f;
+	for (Heal& h : Factory<Heal>())
+	{
+		TRACE_LOG("HEAL: " << h.mDuration);
+		h.mDuration -= seconds;
+		if (h.mDuration <= 0.0f)
+		{
+			TRACE_LOG("HEAL: DESTROYED");
+			Factory<Heal>::Destroy(&h);
+		}
 	}
 
 	if (mInput->GetKeyDown(KEYCODE_F3))

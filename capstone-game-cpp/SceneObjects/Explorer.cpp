@@ -6,10 +6,10 @@
 #include <ModelManager.h>
 #include <Components/Health.h>
 #include <Components/Skill.h>
-#include <Vertex.h>
 #include <Components/AnimationUtility.h>
 
 #define SPRINT_SKILL_INDEX	0
+#define HEAL_SKILL_INDEX	0
 #define MELEE_SKILL_INDEX	1
 
 int GetExplorerID(Explorer* explorer)
@@ -95,6 +95,31 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	switch (GetExplorerID(this))
 	{
 	case 0:
+	{
+		mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
+		mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.5f;
+		mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
+		mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
+		mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
+		mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;
+		mMeleeColliderComponent.asSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
+		mMeleeColliderComponent.asSphereColliderComponent->RegisterTriggerEnterCallback(&OnMeleeHit);
+		mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = this;
+
+		auto heal = Factory<Skill>::Create();
+		heal->SetBinding(SkillBinding().Set(KEYCODE_A));
+		heal->Setup(2, 1, DoHeal);
+		heal->mSceneObject = this;
+		mSkills[HEAL_SKILL_INDEX] = heal;
+
+		auto melee = Factory<Skill>::Create();
+		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
+		melee->Setup(2, 1, DoMelee);
+		melee->mSceneObject = this;
+		mSkills[MELEE_SKILL_INDEX] = melee;
+		
+		break;
+	}
 	default:
 	{
 		mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
@@ -242,6 +267,19 @@ void Explorer::DoMelee(BaseSceneObject* obj, float duration, BaseSceneObject* ta
 {
 	auto e = reinterpret_cast<Explorer*>(obj);
 	e->mController->Melee();
+}
+
+void Explorer::DoHeal(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+{
+	Explorer* explorer = reinterpret_cast<Explorer*>(obj);
+	if (explorer->mNetworkID->mHasAuthority)
+	{
+		Packet p(PacketTypes::SPAWN_HEAL);
+		p.AsSkill.Position = explorer->mTransform->GetPosition();
+		p.AsSkill.Duration = explorer->mSkills[HEAL_SKILL_INDEX]->mDuration;
+		p.UUID = explorer->mNetworkID->mUUID;
+		explorer->mNetworkClient->SendData(&p);
+	}
 }
 
 void Explorer::OnMeleeStart(void* obj)
