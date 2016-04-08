@@ -6,6 +6,8 @@
 #include <SceneObjects/Minion.h>
 #include <Components/NetworkID.h>
 #include <SceneObjects/Heal.h>
+#include <SceneObjects/Trap.h>
+#include <SceneObjects/StatusEffect.h>
 
 NetworkManager::NetworkManager()
 {
@@ -128,29 +130,83 @@ void NetworkRpc::SpawnExistingMinion(int UUID, vec3f pos) {
 	m->Spawn(pos, UUID);
 }
 
-void NetworkCmd::SpawnNewHeal(vec3f pos, float duration)
+void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 {
 	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER);
 
-	auto h = Factory<Heal>::Create();
-	h->Spawn(pos, MyUUID::GenUUID(), duration);
+	int UUID = MyUUID::GenUUID();
 
-	h->mNetworkID->mHasAuthority = true;
-	h->mNetworkID->OnNetAuthorityChange(true);
+	switch (type)
+	{
+	case SKILL_TYPE_HEAL:
+	{
+		auto h = Factory<Heal>::Create();
+		h->Spawn(pos, UUID, duration);
+		h->mNetworkID->mHasAuthority = true;
+		h->mNetworkID->OnNetAuthorityChange(true);
+		break;
+	}
+	case SKILL_TYPE_POISON:
+	{
+		auto p = Factory<Trap>::Create();
+		p->Spawn(UUID, pos, duration);
+		p->mNetworkID->mHasAuthority = true;
+		p->mNetworkID->OnNetAuthorityChange(true);
+		p->mEffect->OnUpdate = StatusEffect::OnPoisonUpdate;
+		break;
+	}
+	case SKILL_TYPE_SLOW:
+	{
+		auto s = Factory<Trap>::Create();
+		s->Spawn(UUID, pos, duration);
+		s->mNetworkID->mHasAuthority = true;
+		s->mNetworkID->OnNetAuthorityChange(true);
+		s->mEffect->OnUpdate = StatusEffect::OnSlowUpdate;
+		break;
+	}
+	case SKILL_TYPE_UNKNOWN:
+	default:
+		break;
+	}
 
 	Packet p(PacketTypes::SPAWN_HEAL);
-	p.UUID = h->mNetworkID->mUUID;
+	p.UUID = UUID;
 	p.AsSkill.Position = pos;
 	p.AsSkill.Duration = duration;
+	p.AsSkill.Type = type;
 	mNetworkManager->mServer.SendToAll(&p);
 }
 
-void NetworkRpc::SpawnExistingHeal(int UUID, vec3f pos, float duration)
+void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, float duration)
 {
 	assert(mNetworkManager->mMode == NetworkManager::Mode::CLIENT);
 
-	auto h = Factory<Heal>::Create();
-	h->Spawn(pos, UUID, duration);
+	switch (type)
+	{
+	case SKILL_TYPE_HEAL:
+	{
+		auto h = Factory<Heal>::Create();
+		h->Spawn(pos, UUID, duration);
+		break;
+	}
+	case SKILL_TYPE_POISON:
+	{
+		auto p = Factory<Trap>::Create();
+		p->Spawn(UUID, pos, duration);
+		p->mEffect->OnUpdate = StatusEffect::OnPoisonUpdate;
+		break;
+	}
+	case SKILL_TYPE_SLOW:
+	{
+		auto s = Factory<Trap>::Create();
+		s->Spawn(UUID, pos, duration);
+		s->mEffect->OnUpdate = StatusEffect::OnSlowUpdate;
+		break;
+	}
+	case SKILL_TYPE_UNKNOWN:
+	default:
+		break;
+	}
 }
 
 void NetworkRpc::GrantAuthority(int UUID) {
