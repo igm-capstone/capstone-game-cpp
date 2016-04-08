@@ -2,8 +2,9 @@
 #include "SpriteManager.h"
 #include <Rig3D/Graphics/Interface/IShaderResource.h>
 
-void SpriteManager::Initialize(IMesh* spriteMesh, IShaderResource* spriteShaderResource)
+void SpriteManager::Initialize(Rig3D::IMesh* spriteMesh, Rig3D::IShaderResource* spriteShaderResource)
 {
+	mRenderer = (Rig3D::Singleton<Rig3D::Engine>::SharedInstance()).GetRenderer();
 	mSpritesShaderResource = spriteShaderResource;
 	mSpriteMesh = spriteMesh;
 }
@@ -29,4 +30,13 @@ void SpriteManager::DrawSprite(int sheetID, int spriteID, vec2f pos, vec2f scale
 	mSpriteInstanceData[mSprites].anchorScale = anchorScale;
 	
 	mSprites++;
+}
+
+void SpriteManager::DrawSpriteAtPerc(int sheetID, int spriteID, vec2f screenPerc, vec2f scale, vec2f anchorScale)
+{
+	auto pos = screenPerc;
+	pos.x *= mRenderer->GetWindowWidth();
+	pos.y *= mRenderer->GetWindowHeight();
+	
+	DrawSprite(sheetID, spriteID, pos, scale, anchorScale);
 }

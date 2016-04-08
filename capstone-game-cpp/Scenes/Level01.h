@@ -2,6 +2,7 @@
 #include "Scenes/BaseScene.h"
 #include <Uniforms.h>
 #include <Vertex.h>
+#include <UI/SkillBar.h>
 
 class Level01 : public BaseScene
 {
@@ -42,6 +43,8 @@ class Level01 : public BaseScene
 	ID3D11Buffer*				mOutputData;
 	ID3D11Buffer*				mOutputDataCPURead;
 	ID3D11UnorderedAccessView*	mOutputDataSRV;
+
+	SkillBar	mSkillBar;
 
 public:
 	Level01();

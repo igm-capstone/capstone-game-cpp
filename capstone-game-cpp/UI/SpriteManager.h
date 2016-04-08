@@ -2,10 +2,12 @@
 #include <Vertex.h>
 #include <Uniforms.h>
 
+
 class SpriteManager
 {
-	class IMesh*				mSpriteMesh;
-	class IShaderResource*		mSpritesShaderResource;
+	Rig3D::Renderer*			mRenderer;
+	Rig3D::IMesh*				mSpriteMesh;
+	Rig3D::IShaderResource*		mSpritesShaderResource;
 
 	int						mSheets = 0;
 	int						mSprites = 0;
@@ -13,23 +15,19 @@ class SpriteManager
 	CBuffer::SpriteSheet	mSpriteSheetData[MAX_SPRITESHEETS];
 	GPU::Sprite				mSpriteInstanceData[MAX_SPRITES];
 
-
 public:
-	SpriteManager()	{};
-	~SpriteManager()
-	{
-		
-	};
+	SpriteManager(): mRenderer(nullptr), mSpriteMesh(nullptr), mSpritesShaderResource(nullptr) {};
+	~SpriteManager() {};
 
-	void Initialize(IMesh* spriteMesh, IShaderResource* spriteShaderResource);
+	void Initialize(Rig3D::IMesh* spriteMesh, Rig3D::IShaderResource* spriteShaderResource);
 
 	void NewFrame() { mSprites = 0; }
 	void LoadSpriteSheet(const char* filename, int width, int height, int slicesX, int slicesY);
-	void DrawSprite(int sheetID, int spriteID, vec2f pos, vec2f scale = vec2f(1,1), vec2f anchorScale = vec2f(1, 1));
+	void DrawSprite(int sheetID, int spriteID, vec2f pos, vec2f scale = vec2f(1, 1), vec2f anchorScale = vec2f(1, 1));
+	void DrawSpriteAtPerc(int sheetID, int spriteID, vec2f screenPerc, vec2f scale = vec2f(1, 1), vec2f anchorScale = vec2f(1, 1));
 
 	const char** GetFilenames() { return mFilenames; };
 	CBuffer::SpriteSheet* GetCBuffer() { return mSpriteSheetData; };
 	GPU::Sprite* GetInstanceBuffer() { return mSpriteInstanceData; };
-	int GetInstanceBufferCount() { return mSprites; };
-
+	int GetInstanceBufferCount() const { return mSprites; };
 };

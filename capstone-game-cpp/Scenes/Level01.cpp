@@ -108,6 +108,8 @@ void Level01::VInitialize()
 
 	mCollisionManager->Initialize();
 
+	mSpriteManager->Initialize(mNDSQuadMesh, mSpritesShaderResource);
+
 	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
 		Packet p(PacketTypes::INIT_CONNECTION);
 		mNetworkManager->mClient.SendData(&p);
@@ -283,8 +285,8 @@ void Level01::InitializeShaderResources()
 		mSpriteManager->LoadSpriteSheet("Assets/UI/Health.png", 900, 224, 1, 2);
 		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_ghostIcons.png", 1024, 1024, 4, 4);
 		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_playerIcons1024.png", 1024, 1024, 4, 4);
-		mSpriteManager->LoadSpriteSheet("Assets/UI/panels.png", 1024, 1024, 4, 4);
-		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, mSpriteManager->GetFilenames(), 2);
+		mSpriteManager->LoadSpriteSheet("Assets/UI/Panels.png", 1024, 1024, 1, 1);
+		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, mSpriteManager->GetFilenames(), 4);
 		mRenderer->VAddShaderPointSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 
 		void*  cbSpritesData[] = { mCameraManager->GetCBufferPersp(), mSpriteManager->GetCBuffer() };
@@ -521,6 +523,7 @@ void Level01::VRender()
 
 	mSpriteManager->NewFrame();
 	RenderHealthBars();
+	mSkillBar.RenderPanel();
 
 	RenderIMGUI(); 
 	RenderSprites();
