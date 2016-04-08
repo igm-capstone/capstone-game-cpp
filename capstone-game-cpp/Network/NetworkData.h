@@ -34,6 +34,7 @@ struct Packet {
 
 	union {
 		unsigned int ClientID = 0;
+		unsigned int MinionType;
 	}; // Data
 
 	union

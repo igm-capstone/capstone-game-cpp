@@ -109,13 +109,13 @@ void Explorer::Spawn(vec3f pos, int UUID)
 
 		auto heal = Factory<Skill>::Create();
 		heal->SetBinding(SkillBinding().Set(KEYCODE_A));
-		heal->Setup(2, 1, DoHeal);
+		heal->Setup("Heal", 2, 1, DoHeal);
 		heal->mSceneObject = this;
 		mSkills[HEAL_SKILL_INDEX] = heal;
 
 		auto melee = Factory<Skill>::Create();
 		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
-		melee->Setup(2, 1, DoMelee);
+		melee->Setup("Melee", 2, 1, DoMelee);
 		melee->mSceneObject = this;
 		mSkills[MELEE_SKILL_INDEX] = melee;
 		
@@ -135,19 +135,19 @@ void Explorer::Spawn(vec3f pos, int UUID)
 
 		auto poison = Factory<Skill>::Create();
 		poison->SetBinding(SkillBinding().Set(KEYCODE_A));
-		poison->Setup(2, 1, DoPoison);
+		poison->Setup("Poison", 2, 1, DoPoison);
 		poison->mSceneObject = this;
 		mSkills[POISON_SKILL_INDEX] = poison;
 
 		auto slow = Factory<Skill>::Create();
 		slow->SetBinding(SkillBinding().Set(KEYCODE_D));
-		slow->Setup(2, 1, DoSlow);
+		slow->Setup("Slow", 2, 1, DoSlow);
 		slow->mSceneObject = this;
 		mSkills[POISON_SKILL_INDEX] = slow;
 
 		auto melee = Factory<Skill>::Create();
 		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
-		melee->Setup(2, 1, DoMelee);
+		melee->Setup("Melee", 2, 1, DoMelee);
 		melee->mSceneObject = this;
 		mSkills[MELEE_SKILL_INDEX] = melee;
 
@@ -167,13 +167,13 @@ void Explorer::Spawn(vec3f pos, int UUID)
 
 		auto sprint = Factory<Skill>::Create();
 		sprint->SetBinding(SkillBinding().Set(KEYCODE_A));
-		sprint->Setup(2, 1, DoSprint);
+		sprint->Setup("Sprint", 2, 1, DoSprint);
 		sprint->mSceneObject = this;
 		mSkills[SPRINT_SKILL_INDEX] = sprint;
 
 		auto melee = Factory<Skill>::Create();
 		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
-		melee->Setup(2, 1, DoMelee);
+		melee->Setup("Melee", 2, 1, DoMelee);
 		melee->mSceneObject = this;
 		mSkills[MELEE_SKILL_INDEX] = melee;
 

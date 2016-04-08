@@ -104,7 +104,7 @@ void NetworkClient::Update()
 				NetworkRpc::SpawnExistingExplorer(packet.UUID, packet.AsTransform.Position);
 				break;
 			case SPAWN_MINION:
-				NetworkRpc::SpawnExistingMinion(packet.UUID, packet.AsTransform.Position);
+				NetworkRpc::SpawnExistingMinion(packet.UUID, packet.AsTransform.Position, packet.MinionType);
 				break;
 			case GRANT_AUTHORITY:
 				NetworkRpc::GrantAuthority(packet.UUID);
