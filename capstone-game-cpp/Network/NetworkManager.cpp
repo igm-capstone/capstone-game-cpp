@@ -108,60 +108,6 @@ void NetworkRpc::SpawnExistingExplorer(int UUID, vec3f pos) {
 	e->Spawn(pos, UUID);
 }
 
-void NetworkCmd::SpawnNewMinion(vec3f pos, int minionType) {
-	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER);
-
-	auto uuid = MyUUID::GenUUID();
-
-	switch (minionType) {
-	case 2: //FlyTrap
-	{
-		auto f = Factory<FlyTrap>::Create();
-		f->Spawn(pos, uuid);
-		f->mNetworkID->mHasAuthority = true;
-		f->mNetworkID->OnNetAuthorityChange(true);
-	}
-	break;
-
-	default: //Basic and Bomber for now
-	{
-		auto m = Factory<Minion>::Create();
-		m->Spawn(pos, uuid);
-		m->mNetworkID->mHasAuthority = true;
-		m->mNetworkID->OnNetAuthorityChange(true);
-	}
-	break;
-
-	}
-
-	Packet p(PacketTypes::SPAWN_MINION);
-	p.UUID = uuid;
-	p.MinionType = minionType;
-	p.AsTransform.Position = pos;
-	mNetworkManager->mServer.SendToAll(&p);
-}
-
-void NetworkRpc::SpawnExistingMinion(int UUID, vec3f pos, int minionType) {
-	assert(mNetworkManager->mMode == NetworkManager::Mode::CLIENT);
-	
-	switch (minionType) {
-	case 2: //FlyTrap
-	{
-		auto f = Factory<FlyTrap>::Create();
-		f->Spawn(pos, UUID);
-	}
-	break;
-
-	default: //Basic and Bomber for now
-	{
-		auto m = Factory<Minion>::Create();
-		m->Spawn(pos, UUID);
-	}
-	break;
-
-	}
-}
-
 void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 {
 	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER);
@@ -196,12 +142,29 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		s->mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
 		break;
 	}
+	case SKILL_TYPE_PLANT_MINION:
+	{
+		auto f = Factory<FlyTrap>::Create();
+		f->Spawn(pos, UUID);
+		f->mNetworkID->mHasAuthority = true;
+		f->mNetworkID->OnNetAuthorityChange(true);
+		break;
+	}
+	case SKILL_TYPE_BASIC_MINION:
+	case SKILL_TYPE_BOMBER_MINION: // for now
+	{
+		auto m = Factory<Minion>::Create();
+		m->Spawn(pos, UUID);
+		m->mNetworkID->mHasAuthority = true;
+		m->mNetworkID->OnNetAuthorityChange(true);
+		break;
+	}
 	case SKILL_TYPE_UNKNOWN:
 	default:
 		break;
 	}
-
-	Packet p(PacketTypes::SPAWN_HEAL);
+	
+	Packet p(PacketTypes::SPAWN_SKILL);
 	p.UUID = UUID;
 	p.AsSkill.Position = pos;
 	p.AsSkill.Duration = duration;
@@ -233,6 +196,19 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 		auto s = Factory<Trap>::Create();
 		s->Spawn(UUID, pos, duration);
 		s->mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
+		break;
+	}
+	case SKILL_TYPE_PLANT_MINION:
+	{
+		auto f = Factory<FlyTrap>::Create();
+		f->Spawn(pos, UUID);
+		break;
+	}
+	case SKILL_TYPE_BASIC_MINION:
+	case SKILL_TYPE_BOMBER_MINION:
+	{
+		auto m = Factory<Minion>::Create();
+		m->Spawn(pos, UUID);
 		break;
 	}
 	case SKILL_TYPE_UNKNOWN:

@@ -143,7 +143,7 @@ void Explorer::Spawn(vec3f pos, int UUID)
 		slow->SetBinding(SkillBinding().Set(KEYCODE_D));
 		slow->Setup("Slow", 2, 1, DoSlow);
 		slow->mSceneObject = this;
-		mSkills[POISON_SKILL_INDEX] = slow;
+		mSkills[SLOW_SKILL_INDEX] = slow;
 
 		auto melee = Factory<Skill>::Create();
 		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
@@ -307,7 +307,7 @@ void Explorer::DoHeal(BaseSceneObject* obj, float duration, BaseSceneObject* tar
 	Explorer* explorer = reinterpret_cast<Explorer*>(obj);
 	if (explorer->mNetworkID->mHasAuthority)
 	{
-		Packet p(PacketTypes::SPAWN_HEAL);
+		Packet p(PacketTypes::SPAWN_SKILL);
 		p.AsSkill.Position = explorer->mTransform->GetPosition();
 		p.AsSkill.Duration = explorer->mSkills[HEAL_SKILL_INDEX]->mDuration;
 		p.AsSkill.Type = SkillPacketTypes::SKILL_TYPE_HEAL;
@@ -321,7 +321,7 @@ void Explorer::DoPoison(BaseSceneObject* obj, float duration, BaseSceneObject* t
 	Explorer* explorer = reinterpret_cast<Explorer*>(obj);
 	if (explorer->mNetworkID->mHasAuthority)
 	{
-		Packet p(PacketTypes::SPAWN_HEAL);
+		Packet p(PacketTypes::SPAWN_SKILL);
 		p.AsSkill.Position = explorer->mTransform->GetPosition();
 		p.AsSkill.Duration = explorer->mSkills[POISON_SKILL_INDEX]->mDuration;
 		p.AsSkill.Type = SkillPacketTypes::SKILL_TYPE_POISON;
@@ -335,7 +335,7 @@ void Explorer::DoSlow(BaseSceneObject* obj, float duration, BaseSceneObject* tar
 	Explorer* explorer = reinterpret_cast<Explorer*>(obj);
 	if (explorer->mNetworkID->mHasAuthority)
 	{
-		Packet p(PacketTypes::SPAWN_HEAL);
+		Packet p(PacketTypes::SPAWN_SKILL);
 		p.AsSkill.Position = explorer->mTransform->GetPosition();
 		p.AsSkill.Duration = explorer->mSkills[SLOW_SKILL_INDEX]->mDuration;
 		p.AsSkill.Type = SkillPacketTypes::SKILL_TYPE_SLOW;

@@ -72,24 +72,24 @@ void Ghost::Spawn(BaseScene * scene)
 
 void Ghost::DoSpawnBasicMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
-	DoSpawnMinion(obj, duration, target, pos, 0);
+	DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_BASIC_MINION);
 }
 void Ghost::DoSpawnBomberMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
-	DoSpawnMinion(obj, duration, target, pos, 1);
+	DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_BOMBER_MINION);
 }
 void Ghost::DoSpawnPlantMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
-	DoSpawnMinion(obj, duration, target, pos, 2);
+	DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_PLANT_MINION);
 }
 
-void Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos, int minionType)
+void Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos, SkillPacketTypes minionType)
 {
 	auto ghost = reinterpret_cast<Ghost*>(obj);
 	ghost->mEvents->Play("Spawn");
 
 	TRACE_LOG("Spawning at" << pos);
-	NetworkCmd::SpawnNewMinion(pos, minionType);
+	NetworkCmd::SpawnNewSkill(minionType, pos, duration);
 }
 
 void Ghost::DoTransmogrify(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)

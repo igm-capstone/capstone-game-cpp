@@ -33,5 +33,5 @@ public:
 	static void DoTransmogrify(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
 
 private:
-	static void DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos, int minionType);
+	static void DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos, SkillPacketTypes minionType);
 };

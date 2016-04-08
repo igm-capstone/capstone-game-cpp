@@ -205,7 +205,7 @@ void NetworkServer::ReceiveFromClients()
 					Retransmit(client.first, &packet);
 					NetworkRpc::SyncAnimation(packet.UUID, packet.AsAnimation.State, packet.AsAnimation.Command);
 					break;
-				case SPAWN_HEAL:
+				case SPAWN_SKILL:
 					NetworkCmd::SpawnNewSkill(packet.AsSkill.Type, packet.AsSkill.Position, packet.AsSkill.Duration);
 					break;
 				default:
