@@ -39,7 +39,7 @@ void Trap::OnTriggerEnter(BaseSceneObject* self, BaseSceneObject* other)
 	if (other->Is<Explorer>())
 	{
 		Explorer* pExplorer = reinterpret_cast<Explorer*>(other);
-		if (!pTrap->mEffect->mExplorers[pExplorer])
+		if (pTrap->mEffect->mExplorers.find(pExplorer) == pTrap->mEffect->mExplorers.end())
 		{
 			pTrap->mEffect->mExplorers[pExplorer] = pTrap->mEffect->mDuration;
 		}
@@ -47,7 +47,7 @@ void Trap::OnTriggerEnter(BaseSceneObject* self, BaseSceneObject* other)
 	else if (other->Is<Minion>())
 	{
 		Minion* pMinion = reinterpret_cast<Minion*>(other);
-		if (!pTrap->mEffect->mMinions[pMinion])
+		if (pTrap->mEffect->mMinions.find(pMinion) == pTrap->mEffect->mMinions.end())
 		{
 			pTrap->mEffect->mMinions[pMinion] = pTrap->mEffect->mDuration;
 		}

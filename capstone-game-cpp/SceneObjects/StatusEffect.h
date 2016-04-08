@@ -2,6 +2,8 @@
 #include "BaseSceneObject.h"
 #include <map>
 
+typedef void(*StatusUpdateCallback)(class StatusEffect* self, float seconds);
+
 class StatusEffect
 {
 	const int __pool_padding = 0xB0B0CACA;
@@ -13,10 +15,10 @@ public:
 	std::map<class Minion*, float> mMinions;
 
 	float mDuration;
-	void* OnUpdate;
+	StatusUpdateCallback mOnUpdateCallback;
 
-	static void OnPoisonUpdate(StatusEffect* self, BaseSceneObject* other, float seconds);
-	static void OnSlowUpdate(StatusEffect* self, BaseSceneObject* other, float seconds);
+	static void OnPoisonUpdate(StatusEffect* self, float seconds);
+	static void OnSlowUpdate(StatusEffect* self, float seconds);
 
 private:
 

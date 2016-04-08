@@ -152,7 +152,7 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		p->Spawn(UUID, pos, duration);
 		p->mNetworkID->mHasAuthority = true;
 		p->mNetworkID->OnNetAuthorityChange(true);
-		p->mEffect->OnUpdate = StatusEffect::OnPoisonUpdate;
+		p->mEffect->mOnUpdateCallback = StatusEffect::OnPoisonUpdate;
 		break;
 	}
 	case SKILL_TYPE_SLOW:
@@ -161,7 +161,7 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		s->Spawn(UUID, pos, duration);
 		s->mNetworkID->mHasAuthority = true;
 		s->mNetworkID->OnNetAuthorityChange(true);
-		s->mEffect->OnUpdate = StatusEffect::OnSlowUpdate;
+		s->mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
 		break;
 	}
 	case SKILL_TYPE_UNKNOWN:
@@ -193,14 +193,14 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 	{
 		auto p = Factory<Trap>::Create();
 		p->Spawn(UUID, pos, duration);
-		p->mEffect->OnUpdate = StatusEffect::OnPoisonUpdate;
+		p->mEffect->mOnUpdateCallback = StatusEffect::OnPoisonUpdate;
 		break;
 	}
 	case SKILL_TYPE_SLOW:
 	{
 		auto s = Factory<Trap>::Create();
 		s->Spawn(UUID, pos, duration);
-		s->mEffect->OnUpdate = StatusEffect::OnSlowUpdate;
+		s->mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
 		break;
 	}
 	case SKILL_TYPE_UNKNOWN:

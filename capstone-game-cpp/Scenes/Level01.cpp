@@ -27,6 +27,8 @@
 #include <SceneObjects/SpawnPoint.h>
 #include <SceneObjects/FlyTrap.h>
 #include <SceneObjects/Heal.h>
+#include <SceneObjects/Trap.h>
+#include <SceneObjects/StatusEffect.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -441,6 +443,11 @@ void Level01::VUpdate(double milliseconds)
 			TRACE_LOG("HEAL: DESTROYED");
 			Factory<Heal>::Destroy(&h);
 		}
+	}
+
+	for (StatusEffect& s : Factory<StatusEffect>())
+	{
+		s.mOnUpdateCallback(&s, seconds);
 	}
 
 	if (mInput->GetKeyDown(KEYCODE_F3))
