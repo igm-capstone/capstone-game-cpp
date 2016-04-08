@@ -1,8 +1,12 @@
-#include <stdafx.h>
+#include "stdafx.h"
 #include "SkillBar.h"
 
 
-void SkillBar::Init()
+SkillBar::SkillBar()
 {
+}
 
+
+SkillBar::~SkillBar()
+{
 }

@@ -65,6 +65,7 @@
     <ClCompile Include="BehaviorTree\Tree.cpp" />
     <ClCompile Include="BehaviorTree\Conditional.cpp" />
     <ClCompile Include="BehaviorTree\Decorator.cpp" />
+    <ClCompile Include="UI\SpriteManager.cpp" />
     <ClCompile Include="UI\SkillBar.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -138,6 +139,7 @@
     <ClInclude Include="BehaviorTree\Tree.h" />
     <ClInclude Include="BehaviorTree\Conditional.h" />
     <ClInclude Include="BehaviorTree\Decorator.h" />
+    <ClInclude Include="UI\SpriteManager.h" />
     <ClInclude Include="UI\SkillBar.h" />
   </ItemGroup>
   <ItemGroup>

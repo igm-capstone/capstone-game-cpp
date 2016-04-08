@@ -81,7 +81,9 @@ namespace GPU {
 	{
 		vec3f pointpos;
 		vec2f scale;
-		float id;
+		vec2f anchorScale;
+		int sheetID;
+		int spriteID;
 	};
 
 	struct Node

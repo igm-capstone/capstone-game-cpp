@@ -10,6 +10,7 @@
 #include <ScareTacticsApplication.h>
 #include <Components/MinionController.h>
 #include <Rig3D/Graphics/DirectX11/imgui/imgui_internal.h>
+#include <UI/SpriteManager.h>
 
 BaseScene::BaseScene() : 
 	mStaticMemory(nullptr),
@@ -34,6 +35,7 @@ BaseScene::BaseScene() :
 	mCollisionManager = &Singleton<CollisionManager>::SharedInstance();
 	mAIManager = &Singleton<AIManager>::SharedInstance();
 	mModelManager = Application::SharedInstance().GetModelManager();
+	mSpriteManager = &Singleton<SpriteManager>::SharedInstance();
 }
 
 BaseScene::~BaseScene()

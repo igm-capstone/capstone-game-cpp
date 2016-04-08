@@ -5,6 +5,7 @@
 #include <CameraManager.h>
 #include <CollisionManager.h>
 #include <AIManager.h>
+#include <UI\SpriteManager.h>
 #include <Resource.h>
 
 using namespace Rig3D;
@@ -35,6 +36,7 @@ protected:
 	CollisionManager*			mCollisionManager;
 	AIManager*					mAIManager;
 	ModelManager*				mModelManager;
+	SpriteManager*				mSpriteManager;
 
 	uint8_t*					mStaticMemory;
 	size_t						mStaticMemorySize;

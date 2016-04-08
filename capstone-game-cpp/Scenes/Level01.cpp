@@ -278,31 +278,21 @@ void Level01::InitializeShaderResources()
 	{
 		mRenderer->VCreateShaderResource(&mSpritesShaderResource, &mAllocator);
 
-		void*  cbSpritesData[] = { mCameraManager->GetCBufferPersp(), &mSpriteSheetData };
-		size_t cbSpritesSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::SpriteSheet) };
-
-		mRenderer->VCreateShaderConstantBuffers(mSpritesShaderResource, cbSpritesData, cbSpritesSizes, 2);
-		mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, &mSpriteSheetData, 1);
-
 		// SpriteSheets
-		const char* filenames[] = { "Assets/UI/Health.png", "Assets/UI/UI_ghostIcons.png" };
-		mSpriteSheetData[0].sheetID = 0;
-		mSpriteSheetData[0].sheetWidth = 100;
-		mSpriteSheetData[0].sheetHeight = 32;
-		mSpriteSheetData[0].slicesX = 1;
-		mSpriteSheetData[0].slicesY = 2;
-
-		mSpriteSheetData[1].sheetID = 1;
-		mSpriteSheetData[1].sheetWidth = 1024;
-		mSpriteSheetData[1].sheetHeight = 1024;
-		mSpriteSheetData[1].slicesX = 4;
-		mSpriteSheetData[1].slicesY = 4;
-
-		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, &filenames[0], 2);
+		mSpriteManager->LoadSpriteSheet("Assets/UI/Health.png", 900, 224, 1, 2);
+		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_ghostIcons.png", 1024, 1024, 4, 4);
+		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_playerIcons1024.png", 1024, 1024, 4, 4);
+		mSpriteManager->LoadSpriteSheet("Assets/UI/panels.png", 1024, 1024, 4, 4);
+		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, mSpriteManager->GetFilenames(), 2);
 		mRenderer->VAddShaderPointSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 
+		void*  cbSpritesData[] = { mCameraManager->GetCBufferPersp(), mSpriteManager->GetCBuffer() };
+		size_t cbSpritesSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::SpriteSheet) * MAX_SPRITESHEETS };
+
+		mRenderer->VCreateShaderConstantBuffers(mSpritesShaderResource, cbSpritesData, cbSpritesSizes, 2);
+
 		// Instance buffer data
-		void*	ibSpriteData[] = { &mSpriteInstanceData };
+		void*	ibSpriteData[] = { mSpriteManager->GetInstanceBuffer() };
 		size_t	ibSpriteSizes[] = { sizeof(GPU::Sprite) * MAX_SPRITES };
 		size_t	ibSpriteStrides[] = { sizeof(GPU::Sprite) };
 		size_t	ibSpriteOffsets[] = { 0 };
@@ -516,9 +506,12 @@ void Level01::VRender()
 	RenderFullScreenQuad();
 #endif
 
-	RenderIMGUI(); 
+	mSpriteManager->NewFrame();
 	RenderHealthBars();
-	
+
+	RenderIMGUI(); 
+	RenderSprites();
+
 	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, mNullSRV);
 
 	RenderGrid();
@@ -822,6 +815,16 @@ void Level01::RenderMinions()
 
 void Level01::RenderHealthBars()
 {
+	UINT sCount = 0;
+	for (Health& h : Factory<Health>())
+	{
+		auto screenPos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, -32);
+		mSpriteManager->DrawSprite(0, 1, screenPos, vec2f(0.1f, 0.1f), vec2f(h.GetHealthPerc(), 1));
+		mSpriteManager->DrawSprite(0, 0, screenPos, vec2f(0.1f, 0.1f));
+	}
+}
+
+void Level01::RenderSprites() {
 	mRenderer->VSetContextTarget();
 
 	mRenderer->VSetInputLayout(mApplication->mVSFwdSprites);
@@ -829,32 +832,16 @@ void Level01::RenderHealthBars()
 	mRenderer->VSetPixelShader(mApplication->mPSFwd2DTexture);
 
 	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferScreenOrto(), 0);
-	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, &mSpriteSheetData[1], 1);
 	mRenderer->VSetVertexShaderConstantBuffers(mSpritesShaderResource);
 
-	UINT sCount = 0;
-	for (Health& h : Factory<Health>())
-	{
-		mSpriteInstanceData[sCount].pointpos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, -32);
-		mSpriteInstanceData[sCount].id = 1;
-		mSpriteInstanceData[sCount].scale = { h.GetHealthPerc(), 1 };
-		sCount++;
+	mRenderer->VUpdateShaderInstanceBuffer(mSpritesShaderResource, mSpriteManager->GetInstanceBuffer(), sizeof(GPU::Sprite) * mSpriteManager->GetInstanceBufferCount(), 0);
 
-		mSpriteInstanceData[sCount].pointpos = mSpriteInstanceData[sCount - 1].pointpos;
-		mSpriteInstanceData[sCount].id = 0;
-		mSpriteInstanceData[sCount].scale = { 1, 1 };
-		sCount++;
-	}
-
-	mRenderer->VUpdateShaderInstanceBuffer(mSpritesShaderResource, &mSpriteInstanceData, sizeof(GPU::Sprite) * sCount, 0);
-
-	mRenderer->VSetVertexShaderResourceView(mSpritesShaderResource, 0, 0);
 	mRenderer->VSetPixelShaderResourceView(mSpritesShaderResource, 0, 0);
 	mRenderer->VSetPixelShaderSamplerStates(mSpritesShaderResource);
 
 	mRenderer->VBindMesh(mNDSQuadMesh);
 	mRenderer->VSetVertexShaderInstanceBuffer(mSpritesShaderResource, 0, 1);
-	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), sCount, 0, 0, 0);
+	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), mSpriteManager->GetInstanceBufferCount(), 0, 0, 0);
 }
 
 void Level01::RenderGrid()
