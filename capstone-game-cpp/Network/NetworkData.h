@@ -52,8 +52,6 @@ struct Packet {
 
 		struct
 		{
-			
-
 			vec3f Position = { 0, 0, 0 };
 			float Duration = 0;
 			SkillPacketTypes Type = SKILL_TYPE_UNKNOWN;
