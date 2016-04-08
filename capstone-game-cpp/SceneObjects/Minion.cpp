@@ -6,6 +6,7 @@
 #include <Components/AnimationController.h>
 #include <ScareTacticsApplication.h>
 #include <Components/AnimationUtility.h>
+#include <Components/Health.h>
 #include <Network\NetworkClient.h>
 
 Minion::Minion()

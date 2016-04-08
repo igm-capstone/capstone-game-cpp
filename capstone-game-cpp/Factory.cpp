@@ -14,6 +14,7 @@
 #include "SceneObjects\Region.h"
 #include "SceneObjects\Door.h"
 #include "SceneObjects\Heal.h"
+#include "SceneObjects\StatusEffect.h"
 
 #include "Components\NetworkID.h"
 #include "Components\ColliderComponent.h"
@@ -77,3 +78,4 @@ REGISTER_FACTORY ( PlaneColliderComponent,			100)
 REGISTER_FACTORY ( Door,							MAX_DOORS)
 
 REGISTER_FACTORY ( Heal, 5)
+REGISTER_FACTORY ( StatusEffect, 8);
