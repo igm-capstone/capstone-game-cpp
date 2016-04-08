@@ -5,7 +5,7 @@
 #include "Explorer.h"
 #include "Components/Health.h"
 
-Heal::Heal() : mSphereColliderComponent(Factory<SphereColliderComponent>::Create()), mNetworkID(Factory<NetworkID>::Create()), mDuration(0.0f), mHealthRestored(50.0f)
+Heal::Heal() : mSphereColliderComponent(Factory<SphereColliderComponent>::Create()), mNetworkID(Factory<NetworkID>::Create()), mHealthRestored(50.0f), mDuration(0.0f)
 {
 	mSphereColliderComponent->mCollider.radius = 5.0f;
 	mSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
@@ -15,8 +15,6 @@ Heal::Heal() : mSphereColliderComponent(Factory<SphereColliderComponent>::Create
 	mSphereColliderComponent->RegisterTriggerEnterCallback(OnTriggerEnter);
 
 	mNetworkID->mIsActive = false;
-	mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
-	mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
 	mNetworkID->mSceneObject = this;
 }
 
@@ -32,16 +30,6 @@ void Heal::Spawn(vec3f pos, int UUID, float duration)
 	mSphereColliderComponent->mCollider.origin = pos;
 	mNetworkID->mUUID = UUID;
 	mDuration = duration;
-}
-
-void Heal::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
-{
-
-}
-
-void Heal::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot)
-{
-
 }
 
 void Heal::OnTriggerEnter(BaseSceneObject* self, BaseSceneObject* other)

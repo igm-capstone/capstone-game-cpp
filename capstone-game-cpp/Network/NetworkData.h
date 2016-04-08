@@ -17,6 +17,14 @@ enum PacketTypes {
 	UNKNOWN
 };
 
+enum SkillPacketTypes : char
+{
+	SKILL_TYPE_UNKNOWN,
+	SKILL_TYPE_HEAL,
+	SKILL_TYPE_POISON,
+	SKILL_TYPE_SLOW
+};
+
 struct Packet {
 	unsigned char Type = UNKNOWN;
 	
@@ -47,6 +55,7 @@ struct Packet {
 		{
 			vec3f Position = { 0, 0, 0 };
 			float Duration = 0;
+			SkillPacketTypes Type = SKILL_TYPE_UNKNOWN;
 		} AsSkill;
 		
 		float AsFloat;
