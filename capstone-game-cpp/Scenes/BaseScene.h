@@ -7,6 +7,7 @@
 #include <AIManager.h>
 #include <UI\SpriteManager.h>
 #include <Resource.h>
+#include <UI/SkillBar.h>
 
 using namespace Rig3D;
 
@@ -53,6 +54,8 @@ public:
 
 	Resource::LevelInfo			mLevel;
 	BoxCollider2D				mFloorCollider;
+
+	SkillBar					mSkillBar;
 
 	BaseScene();
 	virtual ~BaseScene();

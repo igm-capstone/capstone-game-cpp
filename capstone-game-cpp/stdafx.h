@@ -20,7 +20,7 @@
 #define MAX_EXPLORERS 4
 #define MAX_EXPLORER_SKILLS  5
 
-#define MAX_GHOST_SKILLS 4
+#define MAX_GHOST_SKILLS 5
 
 #define MAX_MINIONS 50
 

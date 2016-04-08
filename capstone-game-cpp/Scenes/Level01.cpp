@@ -117,11 +117,11 @@ void Level01::VInitialize()
 	else if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
 		Factory<Ghost>::Create()->Spawn(this);
 
-		if (gDebugExplorer) {
+		/*if (gDebugExplorer) {
 			SpawnPoint& sp = *(Factory<SpawnPoint>().begin());
 			auto e = Factory<Explorer>::Create();
 			e->DebugSpawn(sp.mTransform->GetPosition(), MyUUID::GenUUID());
-		}
+		}*/
 	}
 
 	VOnResize();
@@ -285,7 +285,7 @@ void Level01::InitializeShaderResources()
 		mSpriteManager->LoadSpriteSheet("Assets/UI/Health.png", 900, 224, 1, 2);
 		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_ghostIcons.png", 1024, 1024, 4, 4);
 		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_playerIcons1024.png", 1024, 1024, 4, 4);
-		mSpriteManager->LoadSpriteSheet("Assets/UI/Panels.png", 1024, 1024, 1, 1);
+		mSpriteManager->LoadSpriteSheet("Assets/UI/Panels.png", 1024, 1024, 1, 4);
 		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, mSpriteManager->GetFilenames(), 4);
 		mRenderer->VAddShaderPointSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 
@@ -504,7 +504,7 @@ void Level01::VRender()
 #endif
 	
 	RenderDoors();
-	RenderExplorers();
+	//RenderExplorers();
 	RenderMinions();
 	RenderSpotLightVolumes();
 

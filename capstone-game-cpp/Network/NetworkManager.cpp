@@ -6,6 +6,7 @@
 #include <SceneObjects/Minion.h>
 #include <Components/NetworkID.h>
 #include <SceneObjects/Heal.h>
+#include <SceneObjects/FlyTrap.h>
 
 NetworkManager::NetworkManager()
 {
@@ -105,27 +106,58 @@ void NetworkRpc::SpawnExistingExplorer(int UUID, vec3f pos) {
 	e->Spawn(pos, UUID);
 }
 
-void NetworkCmd::SpawnNewMinion(vec3f pos) {
+void NetworkCmd::SpawnNewMinion(vec3f pos, int minionType) {
 	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER);
 
-	auto m = Factory<Minion>::Create();
-	m->Spawn(pos, MyUUID::GenUUID());
+	auto uuid = MyUUID::GenUUID();
 
-	// set auhtority for the server
-	m->mNetworkID->mHasAuthority = true;
-	m->mNetworkID->OnNetAuthorityChange(true);
+	switch (minionType) {
+	case 2: //FlyTrap
+	{
+		auto f = Factory<FlyTrap>::Create();
+		f->Spawn(pos, uuid);
+		f->mNetworkID->mHasAuthority = true;
+		f->mNetworkID->OnNetAuthorityChange(true);
+	}
+	break;
+
+	default: //Basic and Bomber for now
+	{
+		auto m = Factory<Minion>::Create();
+		m->Spawn(pos, uuid);
+		m->mNetworkID->mHasAuthority = true;
+		m->mNetworkID->OnNetAuthorityChange(true);
+	}
+	break;
+
+	}
 
 	Packet p(PacketTypes::SPAWN_MINION);
-	p.UUID = m->mNetworkID->mUUID;
+	p.UUID = uuid;
+	p.MinionType = minionType;
 	p.AsTransform.Position = pos;
 	mNetworkManager->mServer.SendToAll(&p);
 }
 
-void NetworkRpc::SpawnExistingMinion(int UUID, vec3f pos) {
+void NetworkRpc::SpawnExistingMinion(int UUID, vec3f pos, int minionType) {
 	assert(mNetworkManager->mMode == NetworkManager::Mode::CLIENT);
+	
+	switch (minionType) {
+	case 2: //FlyTrap
+	{
+		auto f = Factory<FlyTrap>::Create();
+		f->Spawn(pos, UUID);
+	}
+	break;
 
-	auto m = Factory<Minion>::Create();
-	m->Spawn(pos, UUID);
+	default: //Basic and Bomber for now
+	{
+		auto m = Factory<Minion>::Create();
+		m->Spawn(pos, UUID);
+	}
+	break;
+
+	}
 }
 
 void NetworkCmd::SpawnNewHeal(vec3f pos, float duration)

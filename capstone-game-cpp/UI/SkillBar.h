@@ -1,25 +1,27 @@
 #pragma once
-#include <Scenes/BaseScene.h>
+#include <Components/Skill.h>
 
 struct Button
 {
 	bool isHighlighted = false;
 	int sheetID;
 	int spriteID;
-	const char* name;
+	Skill* skill;
 };
 
 class SkillBar
 {
-	SpriteManager* mSpriteManager;
+	class SpriteManager* mSpriteManager;
 	Button mButtons[4];
+	int numBtns = 0;
 
 public:
 	SkillBar();
 	~SkillBar();
 
 	void RenderPanel();
-	void RenderButton();
-	void AddSkill(const char* name, int sheetID, int spriteID);
+	void RenderButton(Button* b, vec2f pos);
+	void AddSkill(Skill* name, int sheetID, int spriteID);
+	void SetActive(Skill* skill);
 };
 
