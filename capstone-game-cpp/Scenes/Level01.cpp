@@ -436,18 +436,36 @@ void Level01::VUpdate(double milliseconds)
 	float seconds = static_cast<float>(milliseconds) / 1000.0f;
 	for (Heal& h : Factory<Heal>())
 	{
-		TRACE_LOG("HEAL: " << h.mDuration);
 		h.mDuration -= seconds;
 		if (h.mDuration <= 0.0f)
 		{
-			TRACE_LOG("HEAL: DESTROYED");
 			Factory<Heal>::Destroy(&h);
+		}
+	}
+
+	for (Trap& t: Factory<Trap>())
+	{
+		TRACE_LOG("TRAP UPDATE:");
+		t.mDuration -= seconds;
+		if (t.mDuration <= 0.0f)
+		{
+			TRACE_LOG("TRAP DESTROY:");
+
+			Factory<Trap>::Destroy(&t);
 		}
 	}
 
 	for (StatusEffect& s : Factory<StatusEffect>())
 	{
+		TRACE_LOG("STATUS UPDATE:");
+
 		s.mOnUpdateCallback(&s, seconds);
+		s.mDuration -= seconds;
+		if (s.mDuration <= 0.0f)
+		{
+			TRACE_LOG("STATUS DESTROY:");
+			Factory<StatusEffect>::Destroy(&s);
+		}
 	}
 
 	if (mInput->GetKeyDown(KEYCODE_F3))
