@@ -65,6 +65,9 @@
     <ClCompile Include="BehaviorTree\Tree.cpp" />
     <ClCompile Include="BehaviorTree\Conditional.cpp" />
     <ClCompile Include="BehaviorTree\Decorator.cpp" />
+    <ClCompile Include="BehaviorTree\Race.cpp" />
+    <ClCompile Include="BehaviorTree\Parallel.cpp" />
+    <ClCompile Include="SceneObjects\Heal.cpp" />
     <ClCompile Include="UI\SpriteManager.cpp" />
     <ClCompile Include="UI\SkillBar.cpp" />
   </ItemGroup>

@@ -22,7 +22,7 @@ public:
 
 	void UpdateComponents(quatf rotation, vec3f position);
 
-	static void OnMove(BaseSceneObject* obj, vec3f newPos);
+	static void OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot);
 	static void OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth);
 
 };

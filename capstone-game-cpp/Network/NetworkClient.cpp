@@ -118,6 +118,10 @@ void NetworkClient::Update()
 				break;
 			case SYNC_ANIMATION:
 				NetworkRpc::SyncAnimation(packet.UUID, packet.AsAnimation.State, packet.AsAnimation.Command);
+				break;
+			case SPAWN_HEAL:
+				NetworkRpc::SpawnExistingHeal(packet.UUID, packet.AsSkill.Position, packet.AsSkill.Duration);
+				break;
 			default:
 				printf("error in packet types\n");
 				break;

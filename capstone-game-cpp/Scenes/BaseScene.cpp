@@ -118,10 +118,11 @@ void BaseScene::RenderIMGUI(void(*IMGUIDrawFunc)(BaseScene*))
 	mRenderer->VSetContextTarget();
 	DX11IMGUI::NewFrame();
 	RenderFPSIndicator();
-	ImGuiWindow* console = static_cast<ImGuiWindow*>(Console::Draw());
 	if (mDebugBVH) RenderBVHTree();
 	if (mDebugBT) RenderMinionBehaviorTrees();
 	if (IMGUIDrawFunc) IMGUIDrawFunc(this);
+	RENDER_TRACE_WATCH();
+	ImGuiWindow* console = static_cast<ImGuiWindow*>(Console::Draw());
 	ImGui::Render();
 
 	ImGuiState* state = static_cast<ImGuiState*>(ImGui::GetInternalState());

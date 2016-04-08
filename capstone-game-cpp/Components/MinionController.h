@@ -16,16 +16,22 @@ public:
 	class AIManager& mAI;
 	class Rig3D::Timer& mTimer;
 	BehaviorTree::Tree* mBehaviorTree;
+	
 	vec2f mTarget;
+	vec3f mPosition;
+	float mAngle;
+	bool mIsTransformDirty;
+
 
 	bool Update(double milliseconds);
-	bool UpdateRotation(float angle, quatf& rot);
+	quatf GetRotation(float angle);
 
 	// behavior tree code
 	static bool IsExplorerInRange(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus MoveTowardsExplorer(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus Think(BehaviorTree::Behavior & bh, void * data);
 	static BehaviorTree::BehaviorStatus FindTarget(BehaviorTree::Behavior& bh, void* data);
+	static BehaviorTree::BehaviorStatus RotateTowardsTarget(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus MoveTowardsTarget(BehaviorTree::Behavior& bh, void* data);
 
 	void PlayStateAnimation(AnimationControllerState state);
@@ -35,5 +41,5 @@ public:
 	static void OnMeleeStop(void* obj);
 	static void OnMeleeHit(BaseSceneObject* minion, BaseSceneObject* other);
 
-	EXPOSE_CALLBACK_1(Move, vec3f)
+	EXPOSE_CALLBACK_2(Move, vec3f, quatf)
 };
