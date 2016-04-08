@@ -135,13 +135,13 @@ void Explorer::Spawn(vec3f pos, int UUID)
 
 		auto poison = Factory<Skill>::Create();
 		poison->SetBinding(SkillBinding().Set(KEYCODE_A));
-		poison->Setup(2, 1, DoHeal);
+		poison->Setup(2, 1, DoPoison);
 		poison->mSceneObject = this;
 		mSkills[POISON_SKILL_INDEX] = poison;
 
 		auto slow = Factory<Skill>::Create();
-		slow->SetBinding(SkillBinding().Set(KEYCODE_A));
-		slow->Setup(2, 1, DoHeal);
+		slow->SetBinding(SkillBinding().Set(KEYCODE_D));
+		slow->Setup(2, 1, DoSlow);
 		slow->mSceneObject = this;
 		mSkills[POISON_SKILL_INDEX] = slow;
 
