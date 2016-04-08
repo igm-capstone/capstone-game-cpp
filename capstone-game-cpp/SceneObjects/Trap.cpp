@@ -3,9 +3,9 @@
 #include "Components/ColliderComponent.h"
 #include "Factory.h"
 #include "Components/NetworkID.h"
+#include "StatusEffect.h"
 
-
-Trap::Trap() : mSphereColliderComponent(Factory<SphereColliderComponent>::Create()), mNetworkID(Factory<NetworkID>::Create()), mDuration(0.0f)
+Trap::Trap() : mSphereColliderComponent(Factory<SphereColliderComponent>::Create()), mNetworkID(Factory<NetworkID>::Create()), mEffect(Factory<StatusEffect>::Create()), mDuration(5.0f)
 {
 	mSphereColliderComponent->mCollider.radius = 5.0f;
 	mSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
@@ -17,7 +17,6 @@ Trap::Trap() : mSphereColliderComponent(Factory<SphereColliderComponent>::Create
 	mNetworkID->mIsActive = false;
 	mNetworkID->mSceneObject = this;
 }
-
 
 Trap::~Trap()
 {
@@ -35,5 +34,22 @@ void Trap::Spawn(int UUID, vec3f position, float duration)
 
 void Trap::OnTriggerEnter(BaseSceneObject* self, BaseSceneObject* other)
 {
+	Trap* pTrap = reinterpret_cast<Trap*>(self);
 	
+	if (other->Is<Explorer>())
+	{
+		Explorer* pExplorer = reinterpret_cast<Explorer*>(other);
+		if (!pTrap->mEffect->mExplorers[pExplorer])
+		{
+			pTrap->mEffect->mExplorers[pExplorer] = pTrap->mEffect->mDuration;
+		}
+	}
+	else if (other->Is<Minion>())
+	{
+		Minion* pMinion = reinterpret_cast<Minion*>(other);
+		if (!pTrap->mEffect->mMinions[pMinion])
+		{
+			pTrap->mEffect->mMinions[pMinion] = pTrap->mEffect->mDuration;
+		}
+	}
 }

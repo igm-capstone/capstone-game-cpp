@@ -8,6 +8,7 @@ class Trap : public BaseSceneObject
 public:
 	class SphereColliderComponent*	mSphereColliderComponent;
 	class NetworkID*				mNetworkID;
+	class StatusEffect*				mEffect;
 
 	float mDuration;
 
