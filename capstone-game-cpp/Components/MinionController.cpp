@@ -10,23 +10,54 @@
 #include <SceneObjects/Minion.h>
 #include "AnimationController.h"
 #include <BehaviorTree/Parallel.h>
+#include <BehaviorTree/Builder.h>
 
 using namespace BehaviorTree;
 using namespace chrono;
 using namespace cliqCity::graphicsMath;
+
+// unnormalized direction vectors, going clockwise
+const vec2f MinionController::sDirections[] = {
+	{  1,  0 }, {  1, -1 }, {  0, -1 }, { -1, -1 },
+	{ -1,  0 }, { -1,  1 }, {  0,  1 }, {  1,  1 },
+};
 
 MinionController::MinionController():
 	mThinkTime(0),
 	mAI(Singleton<AIManager>::SharedInstance()),
 	mTimer(*Singleton<Engine>::SharedInstance().GetTimer())
 {
+
+	Tree* wander = &TreeBuilder()
+		.End();
+
+	mBehaviorTree = &TreeBuilder()
+		.Composite<Priority>("(/!\\) Priority Selector")
+			.Composite<Sequence>("(-->) Follow Explorer")
+				.Conditional()
+					.Predicate(&IsExplorerInRange, "(?) Is Explorer in Range")
+					.Action(&MoveTowardsExplorer, "(!) Move Towards Explorer")
+				.End()
+			.End()
+			.Composite<Sequence>("(-->) Wander Arround")
+				.Action(&Think, "(!) Think")
+				.Action(&FindTarget, "(!) Find Patrol Target")
+				.Composite<Parallel>()
+					.Action(&RotateTowardsTarget, "(!) Rotate Towards Target")
+					.Action(&MoveTowardsTarget, "(!) Move Towards Target")
+				.End()
+			.End()
+		.End()
+	.End();
+
+	return;
 	mBehaviorTree = new Tree();
 
 	auto baseSelector = new Priority(*mBehaviorTree, "(/!\\) Priority Selector");
 	auto followExplorerSequence = new Sequence(*mBehaviorTree, "(-->) Follow Explorer");
 	auto isExplorerInRange = new Predicate(*mBehaviorTree, "(?) Is Explorer in Range");
 	auto moveTowardsExplorer = new Behavior(*mBehaviorTree, "(!) Move Towards Explorer");
-	auto tryToFollowExplorer = new Conditional(*mBehaviorTree, *moveTowardsExplorer, *isExplorerInRange, "(?) Try to Follow Explorer");
+	auto tryToFollowExplorer = new Conditional(*mBehaviorTree, moveTowardsExplorer, isExplorerInRange, "(?) Try to Follow Explorer");
 	auto patrolSequence = new Sequence(*mBehaviorTree, "(-->) Patrol");
 	auto findTarget = new Behavior(*mBehaviorTree, "(!) Find Patrol Target");
 	auto think = new Behavior(*mBehaviorTree, "(!) Think");

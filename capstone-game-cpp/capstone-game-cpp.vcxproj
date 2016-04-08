@@ -103,6 +103,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BehaviorTree\BehaviorTreeTests.cpp" />
+    <ClCompile Include="BehaviorTree\Builder.cpp" />
     <ClCompile Include="BehaviorTree\Conditional.cpp" />
     <ClCompile Include="BehaviorTree\Decorator.cpp" />
     <ClCompile Include="BehaviorTree\Parallel.cpp" />
@@ -169,6 +170,7 @@
   <ItemGroup>
     <ClInclude Include="BehaviorTree\BehaviorTree.h" />
     <ClInclude Include="BehaviorTree\BehaviorTreeTests.h" />
+    <ClInclude Include="BehaviorTree\Builder.h" />
     <ClInclude Include="BehaviorTree\Conditional.h" />
     <ClInclude Include="BehaviorTree\Decorator.h" />
     <ClInclude Include="BehaviorTree\Parallel.h" />

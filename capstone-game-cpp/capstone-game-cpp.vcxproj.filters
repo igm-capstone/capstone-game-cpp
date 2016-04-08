@@ -70,6 +70,7 @@
     <ClCompile Include="SceneObjects\Heal.cpp" />
     <ClCompile Include="UI\SpriteManager.cpp" />
     <ClCompile Include="UI\SkillBar.cpp" />
+    <ClCompile Include="BehaviorTree\Builder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -144,6 +145,10 @@
     <ClInclude Include="BehaviorTree\Decorator.h" />
     <ClInclude Include="UI\SpriteManager.h" />
     <ClInclude Include="UI\SkillBar.h" />
+    <ClInclude Include="BehaviorTree\Parallel.h" />
+    <ClInclude Include="BehaviorTree\Race.h" />
+    <ClInclude Include="SceneObjects\Heal.h" />
+    <ClInclude Include="BehaviorTree\Builder.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />

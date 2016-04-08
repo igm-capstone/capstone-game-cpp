@@ -6,7 +6,7 @@
 
 using namespace BehaviorTree;
 
-Conditional::Conditional(Tree& tree, Behavior& child, Predicate& predicate, std::string name)
+Conditional::Conditional(Tree& tree, Behavior* child, Predicate* predicate, std::string name)
 	: Decorator(tree, child, name)
 	, mPredicate(predicate)
 {
@@ -23,8 +23,8 @@ Conditional::Conditional(Tree& tree, Behavior& child, Predicate& predicate, std:
 		ImGui::SetNextTreeNodeOpened(true, ImGuiSetCond_Appearing);
 		if (ImGui::TreeNode(reinterpret_cast<void*>(intptr_t(++id)), ss.str().c_str()))
 		{
-			mPredicate.DumpIMGUI(id, level + 1);
-			mChild.DumpIMGUI(id, level + 1);
+			mPredicate->DumpIMGUI(id, level + 1);
+			mChild->DumpIMGUI(id, level + 1);
 			ImGui::TreePop();
 		}
 
@@ -43,12 +43,12 @@ BehaviorStatus Conditional::OnUpdate(Behavior& bh, void* data)
 {
 	auto& self = reinterpret_cast<Conditional&>(bh);
 
-	self.mPredicate.Tick(data);
+	self.mPredicate->Tick(data);
 
-	if (!self.mPredicate.IsValid())
+	if (!self.mPredicate->IsValid())
 	{
 		return BehaviorStatus::Failure;
 	}
 	
-	return self.mChild.Tick(data);
+	return self.mChild->Tick(data);
 }

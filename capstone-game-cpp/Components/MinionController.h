@@ -17,11 +17,13 @@ public:
 	class Rig3D::Timer& mTimer;
 	BehaviorTree::Tree* mBehaviorTree;
 	
+	vec2f mDirection;
 	vec2f mTarget;
 	vec3f mPosition;
 	float mAngle;
 	bool mIsTransformDirty;
 
+	static const vec2f sDirections[];
 
 	bool Update(double milliseconds);
 	quatf GetRotation(float angle);
