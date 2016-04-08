@@ -117,11 +117,11 @@ void Level01::VInitialize()
 	else if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
 		Factory<Ghost>::Create()->Spawn(this);
 
-		/*if (gDebugExplorer) {
+		if (gDebugExplorer) {
 			SpawnPoint& sp = *(Factory<SpawnPoint>().begin());
 			auto e = Factory<Explorer>::Create();
 			e->DebugSpawn(sp.mTransform->GetPosition(), MyUUID::GenUUID());
-		}*/
+		}
 	}
 
 	VOnResize();
@@ -504,7 +504,7 @@ void Level01::VRender()
 #endif
 	
 	RenderDoors();
-	//RenderExplorers();
+	RenderExplorers();
 	RenderMinions();
 	RenderSpotLightVolumes();
 
