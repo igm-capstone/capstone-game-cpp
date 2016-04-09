@@ -119,3 +119,13 @@ void Skill::UseSkill(BaseSceneObject* target, vec3f skillPos)
 
 	mLastUsed = appTime;
 }
+
+float Skill::Recharged()
+{
+	float appTime = float(mTimer->GetApplicationTime()) * 0.001f;
+	float timeFromLastUse = appTime - mLastUsed;
+
+	if (timeFromLastUse < mCoolDown) return timeFromLastUse / mCoolDown;
+	
+	return 1;
+}

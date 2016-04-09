@@ -23,8 +23,8 @@ public:
 
 	void NewFrame() { mSprites = 0; }
 	void LoadSpriteSheet(const char* filename, int width, int height, int slicesX, int slicesY);
-	void DrawSprite(int sheetID, int spriteID, vec2f pos, vec2f scale = vec2f(1, 1), vec2f anchorScale = vec2f(1, 1));
-	void DrawSpriteAtPerc(int sheetID, int spriteID, vec2f screenPerc, vec2f scale = vec2f(1, 1), vec2f anchorScale = vec2f(1, 1));
+	void DrawSprite(int sheetID, int spriteID, vec2f pos, vec2f scale = vec2f(1, 1), vec2f linearFill = vec2f(1, 1), float radialFill = -1);
+	void DrawSpriteAtPerc(int sheetID, int spriteID, vec2f screenPerc, vec2f scale = vec2f(1, 1), vec2f linearFill = vec2f(1, 1), float radialFill = -1);
 
 	const char** GetFilenames() { return mFilenames; };
 	CBuffer::SpriteSheet* GetCBuffer() { return mSpriteSheetData; };

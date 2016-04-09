@@ -48,6 +48,7 @@ public:
 	void Setup(const char* name, float cooldown, float duration, UseCallback callback);
 	void Update();
 	void UseSkill(BaseSceneObject* target = nullptr, vec3f skillPos = vec3f(0,0,0));
+	float Recharged();
 };
 
 inline BindingType operator|(BindingType a, BindingType b)

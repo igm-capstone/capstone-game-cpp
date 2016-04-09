@@ -81,7 +81,8 @@ namespace GPU {
 	{
 		vec3f pointpos;
 		vec2f scale;
-		vec2f anchorScale;
+		vec2f linearFill;
+		float radialFill;
 		int sheetID;
 		int spriteID;
 	};

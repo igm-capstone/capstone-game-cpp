@@ -23,7 +23,8 @@ struct Sprite
 	//Per Sprite
 	float3		pointpos	: POINTPOS;
 	float2		scale		: SCALE;
-	float2		anchorScale	: ANCHSCALE;
+	float3		linearFill	: LINFILL;
+	float3		radialFill	: RADFILL;
 	uint		sheetID		: SHEETID;
 	uint		spriteID	: SPRITEID;
 };
@@ -32,6 +33,9 @@ struct Pixel
 {
 	float4 position : SV_POSITION;
 	float3 uv : TEXCOORD;
+	float2 midUV : TEXCOORD1;
+	float2 maxUV : TEXCOORD2;
+	float maxAngle : TEXCOORD3;
 };
 
 Pixel main(Sprite input)
@@ -39,41 +43,14 @@ Pixel main(Sprite input)
 	Pixel output;
 
 	Sheet sheet = sheets[input.sheetID];
-	float sheetWidth = sheet.realWidth;
-	float sheetHeight = sheet.realHeight;
-	float slicesX = sheet.slicesX;
-	float slicesY = sheet.slicesY;
+	float2 sheetSize = float2(sheet.realWidth, sheet.realHeight);
+	float2 slices = float2(sheet.slicesX, sheet.slicesY);
 
-	float sizeX = sheetWidth / slicesX;
-	float sizeY = sheetHeight / slicesY;
-
-	float adjU = input.uv.x / (1024 / sheetWidth);
-	float adjV = input.uv.y / (1024 / sheetHeight);
-
-	uint spriteID = input.spriteID;
-
-	uint vIndex = spriteID / slicesX;
-	uint hIndex = spriteID - (slicesX * vIndex);
-
-	float4x4 translatePivot = {
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		1, 1, 0, 1 };
-	float4x4 scaleAnchored = {
-		sizeX / 2 * input.anchorScale.x, 0, 0, 0,
-		0, sizeY / 2 * input.anchorScale.y, 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1 };
-	float4x4 translateUndoPivot = {
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		-sizeX / 2 , -sizeY / 2, 0, 1 };
+	float2 sprSize = sheetSize / slices;
 
 	float4x4 scale = {
-		input.scale.x, 0, 0, 0,
-		0, input.scale.y, 0, 0,
+		sprSize.x / 2 * input.scale.x, 0, 0, 0,
+		0, sprSize.y / 2 * input.scale.y, 0, 0,
 		0, 0, 1, 0,
 		0, 0, 0, 1 };
 	float4x4 translate = {
@@ -82,15 +59,29 @@ Pixel main(Sprite input)
 		0, 0, 1, 0,
 		input.pointpos.x, input.pointpos.y, 0, 1 };
 
-	float4x4 world = mul(mul(mul(mul(translatePivot, scaleAnchored), translateUndoPivot), scale), translate);
+	float4x4 world = mul(scale, translate);
 
 	matrix clip = mul(world, projection);
 	output.position = mul(float4(input.position.xyz, 1.0f), clip);
 
 	// Modify UV coordinates to grab the appropriate slice.
-	output.uv = float3((adjU / slicesX) + (((sheetWidth / slicesX) * float(hIndex)) / sheetWidth) / (1024 / sheetWidth),
-		(adjV / slicesY) + (((sheetHeight / slicesY) * float(vIndex)) / sheetHeight) / (1024 / sheetHeight),
-		input.sheetID);
+	float2 texScale = 1024 / sheetSize;
+	float2 adjUV = input.uv / texScale;
 
+	uint spriteID = input.spriteID;
+	uint vIndex = spriteID / slices.x;
+	uint hIndex = spriteID - (slices.x * vIndex);
+	float2 sprIndex = float2((float)hIndex, (float)vIndex);
+
+
+	output.uv.xy = adjUV / slices + ((sprSize * sprIndex) / sheetSize) / texScale;
+	output.uv.z = input.sheetID;
+
+	float2 oneUV = (1 / texScale) / slices + ((sprSize * sprIndex) / sheetSize) / texScale;
+	float2 midUV = (0.5f / texScale) / slices + ((sprSize * sprIndex) / sheetSize) / texScale;
+
+	output.midUV = midUV;
+	output.maxUV = oneUV - ((1 / texScale) / slices) * (1.0f - input.linearFill);
+	output.maxAngle = input.radialFill;
 	return output;
 }

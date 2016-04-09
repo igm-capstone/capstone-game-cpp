@@ -30,7 +30,8 @@ void SkillBar::RenderPanel()
 
 void SkillBar::RenderButton(Button* b, vec2f pos)
 {
-	mSpriteManager->DrawSpriteAtPerc(b->sheetID, b->spriteID, pos, vec2f(0.4f, 0.4f));
+	mSpriteManager->DrawSpriteAtPerc(b->sheetID, 8+b->spriteID, pos, vec2f(0.4f, 0.4f));
+	mSpriteManager->DrawSpriteAtPerc(b->sheetID, b->spriteID, pos, vec2f(0.4f, 0.4f), vec3f(1,1), 2*PI * b->skill->Recharged());
 	if (b->isHighlighted) mSpriteManager->DrawSpriteAtPerc(b->sheetID, 15, pos, vec2f(0.4f, 0.4f));
 }
 
