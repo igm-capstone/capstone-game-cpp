@@ -29,6 +29,7 @@ public:
 	void SetActiveSkill(int skillNum);
 	void TickMana(float milliseconds);
 	float GetMana() { return mMana; };
+	float GetManaPerc() { return mMana/mMaxMana; };
 
 	static bool DoMouseClick(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
 	static bool DoSpawnBasicMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);

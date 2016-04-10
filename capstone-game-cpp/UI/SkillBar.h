@@ -24,5 +24,6 @@ public:
 	void RenderButton(Button* b, vec2f pos);
 	void AddSkill(Skill* name, int sheetID, int spriteID, int keySpriteID = -1);
 	void SetActive(Skill* skill);
+	void RenderManaBar();
 };
 

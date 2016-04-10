@@ -552,6 +552,8 @@ void Level01::VRender()
 	mSpriteManager->NewFrame();
 	RenderHealthBars();
 	mSkillBar.RenderPanel();
+	if (mNetworkManager->mMode == NetworkManager::SERVER)
+	mSkillBar.RenderManaBar();
 
 	RenderIMGUI(); 
 	RenderSprites();

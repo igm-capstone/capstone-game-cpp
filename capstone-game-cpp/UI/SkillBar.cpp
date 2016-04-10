@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "SkillBar.h"
 #include "SpriteManager.h"
+#include <SceneObjects/Ghost.h>
 
 
 SkillBar::SkillBar()
@@ -54,5 +55,14 @@ void SkillBar::SetActive(Skill* skill)
 	for each (Button &b in mButtons)
 	{
 		b.isHighlighted = (b.skill == skill);
+	}
+}
+
+void SkillBar::RenderManaBar()
+{
+	auto posYPerc = 0.95f;
+	for each (Ghost& ghost in Factory<Ghost>()) {
+		mSpriteManager->DrawSpriteAtPerc(0, 2, vec2f(0.5f, posYPerc), vec2f(0.5f, 0.5f), vec2f(ghost.GetManaPerc(), 1));
+		mSpriteManager->DrawSpriteAtPerc(0, 0, vec2f(0.5f, posYPerc), vec2f(0.5f, 0.5f));
 	}
 }
