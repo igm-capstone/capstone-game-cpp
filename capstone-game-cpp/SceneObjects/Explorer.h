@@ -48,6 +48,8 @@ public:
 	static void DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
 	static void DoMelee(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
 	static void DoHeal(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
+	static void DoPoison(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
+	static void DoSlow(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
 
 	static void OnMeleeStart(void* obj);
 	static void OnMeleeStop(void* obj);

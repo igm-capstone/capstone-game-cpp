@@ -12,6 +12,7 @@ public:
 	class SphereColliderComponent*	mCollider;
 	class SphereColliderComponent*  mMeleeColliderComponent;
 	class AnimationController*		mAnimationController;
+	class Health*					mHealth;
 
 private:
 	Minion();

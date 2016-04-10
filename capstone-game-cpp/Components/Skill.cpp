@@ -47,8 +47,9 @@ void Skill::SetBinding(SkillBinding& binding)
 	mBinding = binding;
 }
 
-void Skill::Setup(float cooldown, float duration, UseCallback callback)
+void Skill::Setup(const char* name, float cooldown, float duration, UseCallback callback)
 {
+	mName = name;
 	mCoolDown = cooldown;
 	mDuration = duration;
 	RegisterUseCallback(callback);
@@ -82,8 +83,26 @@ void Skill::Update()
 		return;
 	}
 
-	//--- check if skill is still on cooldown
+	BaseSceneObject* target = nullptr;
+	vec3f skillPos;
 
+	if ((mBinding.bindingType & MOUSE_BUTTON)) {
+		//--- set target
+		auto bvhTree = &Singleton<CollisionManager>::SharedInstance();
+		auto mCameraManager = &Singleton<CameraManager>::SharedInstance();
+		auto ray = mCameraManager->Screen2Ray(mInput->mousePosition);
+
+
+		auto ret = bvhTree->mBVHTree.RayCastRecursively(ray, skillPos);
+		target = ret ? ret->mSceneObject : nullptr;
+	}
+
+	UseSkill(target, skillPos);
+}
+
+void Skill::UseSkill(BaseSceneObject* target, vec3f skillPos)
+{
+	//--- check if skill is still on cooldown
 	// app time in seconds
 	float appTime = float(mTimer->GetApplicationTime()) * 0.001f;
 	float timeFromLastUse = appTime - mLastUsed;
@@ -95,15 +114,18 @@ void Skill::Update()
 		return;
 	}
 
-	//--- set target
-	auto bvhTree = &Singleton<CollisionManager>::SharedInstance();
-	auto mCameraManager = &Singleton<CameraManager>::SharedInstance();
-	auto ray = mCameraManager->Screen2Ray(mInput->mousePosition);
-	vec3f skillPos;
-
-	auto ret =	bvhTree->mBVHTree.RayCastRecursively(ray, skillPos);
-	
 	//--- fire callback
-	OnUse(mDuration, ret ? ret->mSceneObject : nullptr, skillPos);
+	OnUse(mDuration, target, skillPos);
+
 	mLastUsed = appTime;
+}
+
+float Skill::Recharged()
+{
+	float appTime = float(mTimer->GetApplicationTime()) * 0.001f;
+	float timeFromLastUse = appTime - mLastUsed;
+
+	if (timeFromLastUse < mCoolDown) return timeFromLastUse / mCoolDown;
+	
+	return 1;
 }

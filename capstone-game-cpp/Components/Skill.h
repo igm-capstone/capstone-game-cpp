@@ -30,6 +30,7 @@ public:
 	float mCoolDown;
 	float mDuration;
 	float mLastUsed;
+	const char* mName;
 	
 	UseCallback mCallback;
 	SkillBinding  mBinding;
@@ -44,8 +45,10 @@ private:
 
 public:
 	void SetBinding(SkillBinding& binding);
-	void Setup(float cooldown, float duration, UseCallback callback);
+	void Setup(const char* name, float cooldown, float duration, UseCallback callback);
 	void Update();
+	void UseSkill(BaseSceneObject* target = nullptr, vec3f skillPos = vec3f(0,0,0));
+	float Recharged();
 };
 
 inline BindingType operator|(BindingType a, BindingType b)

@@ -27,6 +27,8 @@
 #include <SceneObjects/SpawnPoint.h>
 #include <SceneObjects/FlyTrap.h>
 #include <SceneObjects/Heal.h>
+#include <SceneObjects/Trap.h>
+#include <SceneObjects/StatusEffect.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -285,7 +287,7 @@ void Level01::InitializeShaderResources()
 		mSpriteManager->LoadSpriteSheet("Assets/UI/Health.png", 900, 224, 1, 2);
 		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_ghostIcons.png", 1024, 1024, 4, 4);
 		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_playerIcons1024.png", 1024, 1024, 4, 4);
-		mSpriteManager->LoadSpriteSheet("Assets/UI/Panels.png", 1024, 1024, 1, 1);
+		mSpriteManager->LoadSpriteSheet("Assets/UI/Panels.png", 1024, 1024, 1, 4);
 		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, mSpriteManager->GetFilenames(), 4);
 		mRenderer->VAddShaderPointSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 
@@ -434,12 +436,35 @@ void Level01::VUpdate(double milliseconds)
 	float seconds = static_cast<float>(milliseconds) / 1000.0f;
 	for (Heal& h : Factory<Heal>())
 	{
-		TRACE_LOG("HEAL: " << h.mDuration);
 		h.mDuration -= seconds;
 		if (h.mDuration <= 0.0f)
 		{
-			TRACE_LOG("HEAL: DESTROYED");
 			Factory<Heal>::Destroy(&h);
+		}
+	}
+
+	for (Trap& t: Factory<Trap>())
+	{
+		TRACE_LOG("TRAP UPDATE:");
+		t.mDuration -= seconds;
+		if (t.mDuration <= 0.0f)
+		{
+			TRACE_LOG("TRAP DESTROY:");
+
+			Factory<Trap>::Destroy(&t);
+		}
+	}
+
+	for (StatusEffect& s : Factory<StatusEffect>())
+	{
+		TRACE_LOG("STATUS UPDATE:");
+
+		s.mOnUpdateCallback(&s, seconds);
+		s.mDuration -= seconds;
+		if (s.mDuration <= 0.0f)
+		{
+			TRACE_LOG("STATUS DESTROY:");
+			Factory<StatusEffect>::Destroy(&s);
 		}
 	}
 

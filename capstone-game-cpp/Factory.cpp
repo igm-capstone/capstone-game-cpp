@@ -14,6 +14,8 @@
 #include "SceneObjects\Region.h"
 #include "SceneObjects\Door.h"
 #include "SceneObjects\Heal.h"
+#include "SceneObjects\Trap.h"
+#include "SceneObjects\StatusEffect.h"
 
 #include "Components\NetworkID.h"
 #include "Components\ColliderComponent.h"
@@ -50,7 +52,7 @@ REGISTER_FACTORY ( MoveableBlock,	10	)
 REGISTER_FACTORY ( SpawnPoint,		5	)
 REGISTER_FACTORY ( Pickup,			7	)
 REGISTER_FACTORY ( DominationPoint,	6	)
-REGISTER_FACTORY ( Lamp,			33	)
+REGISTER_FACTORY ( Lamp,			MAX_LAMPS)
 REGISTER_FACTORY ( Region,			100)
 
 
@@ -68,7 +70,7 @@ REGISTER_FACTORY ( MinionController,				MAX_MINIONS)
 REGISTER_FACTORY ( FlyTrapController,				MAX_MINIONS)
 
 REGISTER_FACTORY ( DominationPointController,		5	)
-REGISTER_FACTORY ( Skill,							20	)
+REGISTER_FACTORY ( Skill,							MAX_EXPLORERS * MAX_EXPLORER_SKILLS + MAX_GHOST_SKILLS)
 REGISTER_FACTORY ( Health,							MAX_EXPLORERS + MAX_MINIONS)
 REGISTER_FACTORY ( FmodEvent,						100	)
 REGISTER_FACTORY ( FmodEventCollection,				10	)
@@ -77,3 +79,5 @@ REGISTER_FACTORY ( PlaneColliderComponent,			100)
 REGISTER_FACTORY ( Door,							MAX_DOORS)
 
 REGISTER_FACTORY ( Heal, 5)
+REGISTER_FACTORY ( Trap, 5)
+REGISTER_FACTORY ( StatusEffect, 8)

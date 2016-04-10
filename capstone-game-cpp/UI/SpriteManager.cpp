@@ -21,22 +21,23 @@ void SpriteManager::LoadSpriteSheet(const char* filename, int width, int height,
 	mSheets++;
 }
 
-void SpriteManager::DrawSprite(int sheetID, int spriteID, vec2f pos, vec2f scale, vec2f anchorScale)
+void SpriteManager::DrawSprite(int sheetID, int spriteID, vec2f pos, vec2f scale, vec2f linearFill, float radialFill)
 {
 	mSpriteInstanceData[mSprites].pointpos = pos;
 	mSpriteInstanceData[mSprites].sheetID = sheetID;
 	mSpriteInstanceData[mSprites].spriteID = spriteID;
 	mSpriteInstanceData[mSprites].scale = scale;
-	mSpriteInstanceData[mSprites].anchorScale = anchorScale;
+	mSpriteInstanceData[mSprites].linearFill = linearFill;
+	mSpriteInstanceData[mSprites].radialFill = radialFill;
 	
 	mSprites++;
 }
 
-void SpriteManager::DrawSpriteAtPerc(int sheetID, int spriteID, vec2f screenPerc, vec2f scale, vec2f anchorScale)
+void SpriteManager::DrawSpriteAtPerc(int sheetID, int spriteID, vec2f screenPerc, vec2f scale, vec2f linearFill, float radialFill)
 {
 	auto pos = screenPerc;
 	pos.x *= mRenderer->GetWindowWidth();
 	pos.y *= mRenderer->GetWindowHeight();
 	
-	DrawSprite(sheetID, spriteID, pos, scale, anchorScale);
+	DrawSprite(sheetID, spriteID, pos, scale, linearFill, radialFill);
 }

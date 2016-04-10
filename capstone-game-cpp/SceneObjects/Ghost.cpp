@@ -29,15 +29,29 @@ Ghost::Ghost() : mNetworkID(nullptr)
 
 	auto spawnMinion = Factory<Skill>::Create();
 	spawnMinion->mSceneObject = this;
-	spawnMinion->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
-	spawnMinion->Setup(0, 0, DoSpawnMinion);
-	mSkills[0] = spawnMinion;
+	spawnMinion->Setup("Basic Minion", 10, 0, DoSpawnBasicMinion);
+	mSkills[1] = spawnMinion;
 
-	auto doorInteract = Factory<Skill>::Create();
-	doorInteract->mSceneObject = this;
-	doorInteract->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
-	doorInteract->Setup(0, 0, DoDoorInteract);
-	mSkills[1] = doorInteract;
+	spawnMinion = Factory<Skill>::Create();
+	spawnMinion->mSceneObject = this;
+	spawnMinion->Setup("Bomber Minion", 20, 0, DoSpawnBomberMinion);
+	mSkills[2] = spawnMinion;
+
+	spawnMinion = Factory<Skill>::Create();
+	spawnMinion->mSceneObject = this;
+	spawnMinion->Setup("Plant Minion", 10, 0, DoSpawnPlantMinion);
+	mSkills[3] = spawnMinion;
+
+	spawnMinion = Factory<Skill>::Create();
+	spawnMinion->mSceneObject = this;
+	spawnMinion->Setup("Transmogrify", 40, 20, DoTransmogrify);
+	mSkills[4] = spawnMinion;
+	
+	auto clickInteraction = Factory<Skill>::Create();
+	clickInteraction->mSceneObject = this;
+	clickInteraction->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
+	clickInteraction->Setup("Left Click", 0, 0, DoMouseClick);
+	mSkills[0] = clickInteraction;
 }
 
 void Ghost::Spawn(BaseScene * scene)
@@ -47,24 +61,66 @@ void Ghost::Spawn(BaseScene * scene)
 
 	auto level = scene->mLevel;
 	mCameraManager->MoveCamera(level.center, level.center + vec3f(0.0f, 0.0f, -85.5f));
+
+	mSkillBar = &scene->mSkillBar;
+	mSkillBar->AddSkill(mSkills[1], 1, 0);
+	mSkillBar->AddSkill(mSkills[2], 1, 1);
+	mSkillBar->AddSkill(mSkills[3], 1, 5);
+	mSkillBar->AddSkill(mSkills[4], 1, 4);
+	SetActiveSkill(1);
 }
 
-void Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
+void Ghost::DoSpawnBasicMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
+{
+	DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_BASIC_MINION);
+}
+void Ghost::DoSpawnBomberMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
+{
+	DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_BOMBER_MINION);
+}
+void Ghost::DoSpawnPlantMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
+{
+	DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_PLANT_MINION);
+}
+
+void Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos, SkillPacketTypes minionType)
+{
+	auto ghost = reinterpret_cast<Ghost*>(obj);
+	ghost->mEvents->Play("Spawn");
+
+	TRACE_LOG("Spawning at" << pos);
+	NetworkCmd::SpawnNewSkill(minionType, pos, duration);
+}
+
+void Ghost::DoTransmogrify(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
+{
+	auto victim = reinterpret_cast<Explorer*>(target);
+
+	//TODO
+}
+
+void Ghost::DoMouseClick(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
 	auto ghost = reinterpret_cast<Ghost*>(obj);
 
-	if (target && target->Is<Region>()) {
-		ghost->mEvents->Play("Spawn");
-
-		TRACE_LOG("Spawning at" << pos);
-		NetworkCmd::SpawnNewMinion(pos);
+	if (target) {
+		if (target->Is<Door>()) {
+			auto door = reinterpret_cast<Door*>(target);
+			door->ToogleDoor();
+		}
+		else if (target->Is<Region>()) {
+			if (ghost->mActiveSkill <= 3)
+				ghost->mSkills[ghost->mActiveSkill]->UseSkill(target, pos);
+		}
+		else if (target->Is<Explorer>()) {
+			if (ghost->mActiveSkill == 3)
+				ghost->mSkills[ghost->mActiveSkill]->UseSkill(target, pos);
+		}
 	}
 }
 
-void Ghost::DoDoorInteract(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
+void Ghost::SetActiveSkill(int skillNum)
 {
-	if (target && target->Is<Door>()) {
-		auto door = reinterpret_cast<Door*>(target);
-		door->ToogleDoor();
-	}
+	mActiveSkill = skillNum;
+	mSkillBar->SetActive(mSkills[mActiveSkill]);
 }

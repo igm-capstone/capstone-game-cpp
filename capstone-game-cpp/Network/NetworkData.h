@@ -8,13 +8,23 @@ enum PacketTypes {
 	INIT_CONNECTION = '0',
 	SET_CLIENT_ID	= '1',
 	SPAWN_EXPLORER	= 'E',
-	SPAWN_MINION	= 'M',
+	SPAWN_SKILL		= 'S',
 	GRANT_AUTHORITY = 'A',
 	SYNC_TRANSFORM	= 'T',
 	SYNC_HEALTH		= 'H',
 	SYNC_ANIMATION	= 'N',
-	SPAWN_HEAL		= 'h',
 	UNKNOWN
+};
+
+enum SkillPacketTypes : char
+{
+	SKILL_TYPE_UNKNOWN,
+	SKILL_TYPE_HEAL,
+	SKILL_TYPE_POISON,
+	SKILL_TYPE_SLOW,
+	SKILL_TYPE_BASIC_MINION,
+	SKILL_TYPE_BOMBER_MINION,
+	SKILL_TYPE_PLANT_MINION
 };
 
 struct Packet {
@@ -46,6 +56,7 @@ struct Packet {
 		{
 			vec3f Position = { 0, 0, 0 };
 			float Duration = 0;
+			SkillPacketTypes Type = SKILL_TYPE_UNKNOWN;
 		} AsSkill;
 		
 		float AsFloat;

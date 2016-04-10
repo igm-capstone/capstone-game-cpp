@@ -24,6 +24,7 @@
 
 #if (DRAW_DEBUG == 1)
 #include <trace.h>
+#include "SceneObjects/Trap.h"
 
 void RenderDebug(BVHTree& bvhTree)
 {
@@ -138,6 +139,11 @@ void BVHTree::Update()
 		{
 			AddNodeRecursively(minion.mMeleeColliderComponent, SKILL_PARENT_LAYER_INDEX, 1, 0, 0);
 		}
+	}
+
+	for (Trap& trap : Factory<Trap>())
+	{
+		AddNodeRecursively(trap.mSphereColliderComponent, EXPLORER_PARENT_LAYER_INDEX, 1, 0, 0);
 	}
 }
 

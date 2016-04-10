@@ -6,6 +6,9 @@
 #include <SceneObjects/Minion.h>
 #include <Components/NetworkID.h>
 #include <SceneObjects/Heal.h>
+#include <SceneObjects/Trap.h>
+#include <SceneObjects/StatusEffect.h>
+#include <SceneObjects/FlyTrap.h>
 
 NetworkManager::NetworkManager()
 {
@@ -105,52 +108,113 @@ void NetworkRpc::SpawnExistingExplorer(int UUID, vec3f pos) {
 	e->Spawn(pos, UUID);
 }
 
-void NetworkCmd::SpawnNewMinion(vec3f pos) {
-	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER);
-
-	auto m = Factory<Minion>::Create();
-	m->Spawn(pos, MyUUID::GenUUID());
-
-	// set auhtority for the server
-	m->mNetworkID->mHasAuthority = true;
-	m->mNetworkID->OnNetAuthorityChange(true);
-
-	Packet p(PacketTypes::SPAWN_MINION);
-	p.UUID = m->mNetworkID->mUUID;
-	p.AsTransform.Position = pos;
-	mNetworkManager->mServer.SendToAll(&p);
-}
-
-void NetworkRpc::SpawnExistingMinion(int UUID, vec3f pos) {
-	assert(mNetworkManager->mMode == NetworkManager::Mode::CLIENT);
-
-	auto m = Factory<Minion>::Create();
-	m->Spawn(pos, UUID);
-}
-
-void NetworkCmd::SpawnNewHeal(vec3f pos, float duration)
+void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 {
 	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER);
 
-	auto h = Factory<Heal>::Create();
-	h->Spawn(pos, MyUUID::GenUUID(), duration);
+	int UUID = MyUUID::GenUUID();
 
-	h->mNetworkID->mHasAuthority = true;
-	h->mNetworkID->OnNetAuthorityChange(true);
-
-	Packet p(PacketTypes::SPAWN_HEAL);
-	p.UUID = h->mNetworkID->mUUID;
+	switch (type)
+	{
+	case SKILL_TYPE_HEAL:
+	{
+		auto h = Factory<Heal>::Create();
+		h->Spawn(pos, UUID, duration);
+		h->mNetworkID->mHasAuthority = true;
+		h->mNetworkID->OnNetAuthorityChange(true);
+		break;
+	}
+	case SKILL_TYPE_POISON:
+	{
+		auto p = Factory<Trap>::Create();
+		p->Spawn(UUID, pos, duration);
+		p->mNetworkID->mHasAuthority = true;
+		p->mNetworkID->OnNetAuthorityChange(true);
+		p->mEffect->mOnUpdateCallback = StatusEffect::OnPoisonUpdate;
+		break;
+	}
+	case SKILL_TYPE_SLOW:
+	{
+		auto s = Factory<Trap>::Create();
+		s->Spawn(UUID, pos, duration);
+		s->mNetworkID->mHasAuthority = true;
+		s->mNetworkID->OnNetAuthorityChange(true);
+		s->mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
+		break;
+	}
+	case SKILL_TYPE_PLANT_MINION:
+	{
+		auto f = Factory<FlyTrap>::Create();
+		f->Spawn(pos, UUID);
+		f->mNetworkID->mHasAuthority = true;
+		f->mNetworkID->OnNetAuthorityChange(true);
+		break;
+	}
+	case SKILL_TYPE_BASIC_MINION:
+	case SKILL_TYPE_BOMBER_MINION: // for now
+	{
+		auto m = Factory<Minion>::Create();
+		m->Spawn(pos, UUID);
+		m->mNetworkID->mHasAuthority = true;
+		m->mNetworkID->OnNetAuthorityChange(true);
+		break;
+	}
+	case SKILL_TYPE_UNKNOWN:
+	default:
+		break;
+	}
+	
+	Packet p(PacketTypes::SPAWN_SKILL);
+	p.UUID = UUID;
 	p.AsSkill.Position = pos;
 	p.AsSkill.Duration = duration;
+	p.AsSkill.Type = type;
 	mNetworkManager->mServer.SendToAll(&p);
 }
 
-void NetworkRpc::SpawnExistingHeal(int UUID, vec3f pos, float duration)
+void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, float duration)
 {
 	assert(mNetworkManager->mMode == NetworkManager::Mode::CLIENT);
 
-	auto h = Factory<Heal>::Create();
-	h->Spawn(pos, UUID, duration);
+	switch (type)
+	{
+	case SKILL_TYPE_HEAL:
+	{
+		auto h = Factory<Heal>::Create();
+		h->Spawn(pos, UUID, duration);
+		break;
+	}
+	case SKILL_TYPE_POISON:
+	{
+		auto p = Factory<Trap>::Create();
+		p->Spawn(UUID, pos, duration);
+		p->mEffect->mOnUpdateCallback = StatusEffect::OnPoisonUpdate;
+		break;
+	}
+	case SKILL_TYPE_SLOW:
+	{
+		auto s = Factory<Trap>::Create();
+		s->Spawn(UUID, pos, duration);
+		s->mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
+		break;
+	}
+	case SKILL_TYPE_PLANT_MINION:
+	{
+		auto f = Factory<FlyTrap>::Create();
+		f->Spawn(pos, UUID);
+		break;
+	}
+	case SKILL_TYPE_BASIC_MINION:
+	case SKILL_TYPE_BOMBER_MINION:
+	{
+		auto m = Factory<Minion>::Create();
+		m->Spawn(pos, UUID);
+		break;
+	}
+	case SKILL_TYPE_UNKNOWN:
+	default:
+		break;
+	}
 }
 
 void NetworkRpc::GrantAuthority(int UUID) {

@@ -8,9 +8,11 @@
 #include <Components/Skill.h>
 #include <Components/AnimationUtility.h>
 
-#define SPRINT_SKILL_INDEX	0
-#define HEAL_SKILL_INDEX	0
-#define MELEE_SKILL_INDEX	1
+#define SPRINT_SKILL_INDEX	1
+#define HEAL_SKILL_INDEX	1
+#define MELEE_SKILL_INDEX	0
+#define POISON_SKILL_INDEX  1
+#define SLOW_SKILL_INDEX	2
 
 int GetExplorerID(Explorer* explorer)
 {
@@ -107,16 +109,48 @@ void Explorer::Spawn(vec3f pos, int UUID)
 
 		auto heal = Factory<Skill>::Create();
 		heal->SetBinding(SkillBinding().Set(KEYCODE_A));
-		heal->Setup(2, 1, DoHeal);
+		heal->Setup("Heal", 2, 1, DoHeal);
 		heal->mSceneObject = this;
 		mSkills[HEAL_SKILL_INDEX] = heal;
 
 		auto melee = Factory<Skill>::Create();
 		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
-		melee->Setup(2, 1, DoMelee);
+		melee->Setup("Melee", 2, 1, DoMelee);
 		melee->mSceneObject = this;
 		mSkills[MELEE_SKILL_INDEX] = melee;
 		
+		break;
+	}
+	case 1:
+	{
+		mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
+		mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.5f;
+		mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
+		mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
+		mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
+		mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;
+		mMeleeColliderComponent.asSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
+		mMeleeColliderComponent.asSphereColliderComponent->RegisterTriggerEnterCallback(&OnMeleeHit);
+		mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = this;
+
+		auto poison = Factory<Skill>::Create();
+		poison->SetBinding(SkillBinding().Set(KEYCODE_A));
+		poison->Setup("Poison", 2, 1, DoPoison);
+		poison->mSceneObject = this;
+		mSkills[POISON_SKILL_INDEX] = poison;
+
+		auto slow = Factory<Skill>::Create();
+		slow->SetBinding(SkillBinding().Set(KEYCODE_D));
+		slow->Setup("Slow", 2, 1, DoSlow);
+		slow->mSceneObject = this;
+		mSkills[SLOW_SKILL_INDEX] = slow;
+
+		auto melee = Factory<Skill>::Create();
+		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
+		melee->Setup("Melee", 2, 1, DoMelee);
+		melee->mSceneObject = this;
+		mSkills[MELEE_SKILL_INDEX] = melee;
+
 		break;
 	}
 	default:
@@ -133,13 +167,13 @@ void Explorer::Spawn(vec3f pos, int UUID)
 
 		auto sprint = Factory<Skill>::Create();
 		sprint->SetBinding(SkillBinding().Set(KEYCODE_A));
-		sprint->Setup(2, 1, DoSprint);
+		sprint->Setup("Sprint", 2, 1, DoSprint);
 		sprint->mSceneObject = this;
 		mSkills[SPRINT_SKILL_INDEX] = sprint;
 
 		auto melee = Factory<Skill>::Create();
 		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
-		melee->Setup(2, 1, DoMelee);
+		melee->Setup("Melee", 2, 1, DoMelee);
 		melee->mSceneObject = this;
 		mSkills[MELEE_SKILL_INDEX] = melee;
 
@@ -273,9 +307,38 @@ void Explorer::DoHeal(BaseSceneObject* obj, float duration, BaseSceneObject* tar
 	Explorer* explorer = reinterpret_cast<Explorer*>(obj);
 	if (explorer->mNetworkID->mHasAuthority)
 	{
-		Packet p(PacketTypes::SPAWN_HEAL);
+		Packet p(PacketTypes::SPAWN_SKILL);
 		p.AsSkill.Position = explorer->mTransform->GetPosition();
 		p.AsSkill.Duration = explorer->mSkills[HEAL_SKILL_INDEX]->mDuration;
+		p.AsSkill.Type = SkillPacketTypes::SKILL_TYPE_HEAL;
+		p.UUID = explorer->mNetworkID->mUUID;
+		explorer->mNetworkClient->SendData(&p);
+	}
+}
+
+void Explorer::DoPoison(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+{
+	Explorer* explorer = reinterpret_cast<Explorer*>(obj);
+	if (explorer->mNetworkID->mHasAuthority)
+	{
+		Packet p(PacketTypes::SPAWN_SKILL);
+		p.AsSkill.Position = explorer->mTransform->GetPosition();
+		p.AsSkill.Duration = explorer->mSkills[POISON_SKILL_INDEX]->mDuration;
+		p.AsSkill.Type = SkillPacketTypes::SKILL_TYPE_POISON;
+		p.UUID = explorer->mNetworkID->mUUID;
+		explorer->mNetworkClient->SendData(&p);
+	}
+}
+
+void Explorer::DoSlow(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+{
+	Explorer* explorer = reinterpret_cast<Explorer*>(obj);
+	if (explorer->mNetworkID->mHasAuthority)
+	{
+		Packet p(PacketTypes::SPAWN_SKILL);
+		p.AsSkill.Position = explorer->mTransform->GetPosition();
+		p.AsSkill.Duration = explorer->mSkills[SLOW_SKILL_INDEX]->mDuration;
+		p.AsSkill.Type = SkillPacketTypes::SKILL_TYPE_SLOW;
 		p.UUID = explorer->mNetworkID->mUUID;
 		explorer->mNetworkClient->SendData(&p);
 	}
