@@ -255,12 +255,13 @@ void loadDoors(jarr_t objs)
 	TRACE_LOG("Loading " << int(objs->size()) << " doors...");
 	for (auto obj : *objs)
 	{
+		auto canOpen = obj["canOpen"].get<bool>();
+		if (!canOpen) continue;
 		auto position = parseVec3f(obj["position"]);
 		auto rotation = parseQuatf(obj["rotation"]);
 		auto scale = parseVec3f(obj["scale"]);
 		auto collOrigin = parseVec3f(obj["bounds"]["center"]);
 		auto collHalf = parseVec3f(obj["bounds"]["extents"]);
-		auto canOpen = obj["canOpen"].get<bool>();
 
 		auto door = Factory<Door>::Create();
 		parseTransform(obj, door->mTransform);
@@ -269,7 +270,6 @@ void loadDoors(jarr_t objs)
 		door->mTransform->SetPosition(position);
 		door->mTransform->SetRotation(rotation);
 		door->mTransform->SetScale(scale);
-		door->mCanOpen = canOpen;
 
 		door->mColliderComponent->mCollider.origin = collOrigin;
 		door->mColliderComponent->mCollider.origin.z = -7.5f;

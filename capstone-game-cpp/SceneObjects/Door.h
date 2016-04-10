@@ -8,13 +8,12 @@ class Door : public BaseSceneObject
 	friend class Factory<Door>;
 
 public:
-	bool mCanOpen;
 	OrientedBoxColliderComponent* mColliderComponent;
 	OrientedBoxColliderComponent* mTrigger;
 
 private:
 
-	Door() : mCanOpen(false), mColliderComponent(Factory<OrientedBoxColliderComponent>::Create()), mTrigger(Factory<OrientedBoxColliderComponent>::Create())
+	Door() : mColliderComponent(Factory<OrientedBoxColliderComponent>::Create()), mTrigger(Factory<OrientedBoxColliderComponent>::Create())
 	{
 		mColliderComponent->mIsTrigger = false;
 		mColliderComponent->mIsDynamic = false;
@@ -39,7 +38,7 @@ private:
 		if (other->Is<Explorer>())
 		{
 			Explorer* e = static_cast<Explorer*>(other);
-			if (e->mController->mIsInteracting && door->mCanOpen) {
+			if (e->mController->mIsInteracting) {
 				e->mController->ConsumeInteractWill();
 				door->ToogleDoor();
 			}
@@ -49,7 +48,6 @@ private:
 public:
 	void ToogleDoor()
 	{
-		if (!mCanOpen) return;
 		mColliderComponent->mIsActive ? mTransform->RotateRoll(0.5f*PI) : mTransform->RotateRoll(-0.5f*PI);
 		mColliderComponent->mIsActive = !mColliderComponent->mIsActive;
 	}

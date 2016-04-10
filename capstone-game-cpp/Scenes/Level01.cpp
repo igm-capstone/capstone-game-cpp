@@ -258,12 +258,12 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateShaderResource(&mExplorerShaderResource, &mAllocator);
 
 		void* cbExplorerData[] = { mCameraManager->GetCBufferPersp(), &mModel, mSkinnedMeshMatrices, nullptr };
-		size_t cbExplorerSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::Model), sizeof(mat4f) *  MAX_SKELETON_JOINTS, sizeof(vec4f)};
+		size_t cbExplorerSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::Model), sizeof(mat4f) *  MAX_SKELETON_JOINTS, sizeof(vec4f) };
 
 		mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 4);
 
-		const char* filenames[] = { "Assets/Textures/BascMinionFull.png", "Assets/Textures/flytraptxt.png" };
-		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 2);
+		const char* filenames[] = { "Assets/Textures/BascMinionFull.png", "Assets/Textures/flytraptxt.png", "Assets/Textures/StaticMesh/Door.png" };
+		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 3);
 		mRenderer->VAddShaderLinearSamplerState(mExplorerShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 	}
 
@@ -693,16 +693,14 @@ void Level01::RenderStaticMeshes()
 
 void Level01::RenderDoors()
 {
-	mRenderer->VSetInputLayout(mApplication->mVSDefSingleColor);
-	mRenderer->VSetVertexShader(mApplication->mVSDefSingleColor);
-	mRenderer->VSetPixelShader(mApplication->mPSDefColor);
-
-	vec4f color[1] = { Colors::yellow };
+	mRenderer->VSetInputLayout(mApplication->mVSDefSingleMaterial);
+	mRenderer->VSetVertexShader(mApplication->mVSDefSingleMaterial);
+	mRenderer->VSetPixelShader(mApplication->mPSDefMaterial);
 
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
-	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, color, 3);
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 3, 2);
+	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 2, 0);
 
 	ModelCluster* model = nullptr;
 
