@@ -68,6 +68,8 @@ void GhostController::Update(double milliseconds)
 	{
 		ghost->SetActiveSkill(4);
 	}
+
+	ghost->TickMana(float(milliseconds));
 }
 
 GhostController::GhostController(): 

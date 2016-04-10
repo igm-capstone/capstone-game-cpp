@@ -16,6 +16,9 @@ private:
 	class CameraManager*		mCameraManager;
 	class SkillBar*				mSkillBar;
 	int							mActiveSkill;
+	float						mMana;
+	const float					mMaxMana = 100;
+	const float					mManaRegenPerS = 1;
 
 private:
 	Ghost();
@@ -24,14 +27,15 @@ private:
 public:
 	void Spawn(class BaseScene* scene);
 	void SetActiveSkill(int skillNum);
+	void TickMana(float milliseconds);
+	float GetMana() { return mMana; };
 
-	static void DoMouseClick(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
-	
-	static void DoSpawnBasicMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
-	static void DoSpawnBomberMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
-	static void DoSpawnPlantMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
-	static void DoTransmogrify(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
+	static bool DoMouseClick(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
+	static bool DoSpawnBasicMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
+	static bool DoSpawnBomberMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
+	static bool DoSpawnPlantMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
+	static bool DoTransmogrify(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
 
 private:
-	static void DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos, SkillPacketTypes minionType);
+	static bool DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos, SkillPacketTypes minionType);
 };

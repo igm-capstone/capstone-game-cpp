@@ -290,19 +290,21 @@ void Explorer::UpdateComponents(quatf rotation, vec3f position)
 	}
 }
 
-void Explorer::DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+bool Explorer::DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
 {
 	auto e = reinterpret_cast<Explorer*>(obj);
 	e->mController->Sprint(duration);
+	return true;
 }
 
-void Explorer::DoMelee(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+bool Explorer::DoMelee(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
 {
 	auto e = reinterpret_cast<Explorer*>(obj);
 	e->mController->Melee();
+	return true;
 }
 
-void Explorer::DoHeal(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+bool Explorer::DoHeal(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
 {
 	Explorer* explorer = reinterpret_cast<Explorer*>(obj);
 	if (explorer->mNetworkID->mHasAuthority)
@@ -314,9 +316,10 @@ void Explorer::DoHeal(BaseSceneObject* obj, float duration, BaseSceneObject* tar
 		p.UUID = explorer->mNetworkID->mUUID;
 		explorer->mNetworkClient->SendData(&p);
 	}
+	return true;
 }
 
-void Explorer::DoPoison(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+bool Explorer::DoPoison(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
 {
 	Explorer* explorer = reinterpret_cast<Explorer*>(obj);
 	if (explorer->mNetworkID->mHasAuthority)
@@ -328,9 +331,10 @@ void Explorer::DoPoison(BaseSceneObject* obj, float duration, BaseSceneObject* t
 		p.UUID = explorer->mNetworkID->mUUID;
 		explorer->mNetworkClient->SendData(&p);
 	}
+	return true;
 }
 
-void Explorer::DoSlow(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+bool Explorer::DoSlow(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
 {
 	Explorer* explorer = reinterpret_cast<Explorer*>(obj);
 	if (explorer->mNetworkID->mHasAuthority)
@@ -342,6 +346,7 @@ void Explorer::DoSlow(BaseSceneObject* obj, float duration, BaseSceneObject* tar
 		p.UUID = explorer->mNetworkID->mUUID;
 		explorer->mNetworkClient->SendData(&p);
 	}
+	return true;
 }
 
 void Explorer::OnMeleeStart(void* obj)

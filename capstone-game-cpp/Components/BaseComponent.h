@@ -38,10 +38,10 @@ private: \
 	name##Callback m##name = nullptr;
 
 
-#define EXPOSE_CALLBACK_3(name, argtype1, argtype2, argtype3) 	\
-typedef void(*name##Callback)(BaseSceneObject*, argtype1, argtype2, argtype3); \
+#define EXPOSE_CALLBACK_BOOL_3(name, argtype1, argtype2, argtype3) 	\
+typedef bool(*name##Callback)(BaseSceneObject*, argtype1, argtype2, argtype3); \
 public: \
 	void Register##name##Callback(name##Callback handler) { m##name = handler; } \
-	void On##name(argtype1 arg1, argtype2 arg2, argtype3 arg3) { if (m##name) return m##name(mSceneObject, arg1, arg2, arg3); };\
+	bool On##name(argtype1 arg1, argtype2 arg2, argtype3 arg3) { if (m##name) return m##name(mSceneObject, arg1, arg2, arg3); return false; };\
 private: \
 	name##Callback m##name = nullptr;

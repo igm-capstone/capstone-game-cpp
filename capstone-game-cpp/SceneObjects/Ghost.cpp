@@ -29,22 +29,22 @@ Ghost::Ghost() : mNetworkID(nullptr)
 
 	auto spawnMinion = Factory<Skill>::Create();
 	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Basic Minion", 10, 0, DoSpawnBasicMinion);
+	spawnMinion->Setup("Basic Minion", 10, 0, DoSpawnBasicMinion, 10);
 	mSkills[1] = spawnMinion;
 
 	spawnMinion = Factory<Skill>::Create();
 	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Bomber Minion", 20, 0, DoSpawnBomberMinion);
+	spawnMinion->Setup("Bomber Minion", 20, 0, DoSpawnBomberMinion, 20);
 	mSkills[2] = spawnMinion;
 
 	spawnMinion = Factory<Skill>::Create();
 	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Plant Minion", 10, 0, DoSpawnPlantMinion);
+	spawnMinion->Setup("Plant Minion", 10, 0, DoSpawnPlantMinion, 50);
 	mSkills[3] = spawnMinion;
 
 	spawnMinion = Factory<Skill>::Create();
 	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Transmogrify", 40, 20, DoTransmogrify);
+	spawnMinion->Setup("Transmogrify", 40, 20, DoTransmogrify, 0);
 	mSkills[4] = spawnMinion;
 	
 	auto clickInteraction = Factory<Skill>::Create();
@@ -52,6 +52,8 @@ Ghost::Ghost() : mNetworkID(nullptr)
 	clickInteraction->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
 	clickInteraction->Setup("Left Click", 0, 0, DoMouseClick);
 	mSkills[0] = clickInteraction;
+
+	mMana = mMaxMana;
 }
 
 void Ghost::Spawn(BaseScene * scene)
@@ -70,57 +72,77 @@ void Ghost::Spawn(BaseScene * scene)
 	SetActiveSkill(1);
 }
 
-void Ghost::DoSpawnBasicMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
+bool Ghost::DoSpawnBasicMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
-	DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_BASIC_MINION);
+	return DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_BASIC_MINION);
 }
-void Ghost::DoSpawnBomberMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
+bool Ghost::DoSpawnBomberMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
-	DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_BOMBER_MINION);
+	return DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_BOMBER_MINION);
 }
-void Ghost::DoSpawnPlantMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
+bool Ghost::DoSpawnPlantMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
-	DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_PLANT_MINION);
+	return DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_PLANT_MINION);
 }
 
-void Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos, SkillPacketTypes minionType)
+bool Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos, SkillPacketTypes minionType)
 {
+	if (!target->Is<Region>()) return false;
+
 	auto ghost = reinterpret_cast<Ghost*>(obj);
 	ghost->mEvents->Play("Spawn");
 
 	TRACE_LOG("Spawning at" << pos);
 	NetworkCmd::SpawnNewSkill(minionType, pos, duration);
+
+	return true;
 }
 
-void Ghost::DoTransmogrify(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
+bool Ghost::DoTransmogrify(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
+	if (!target->Is<Explorer>()) return false;
+
 	auto victim = reinterpret_cast<Explorer*>(target);
 
 	//TODO
+	return true;
 }
 
-void Ghost::DoMouseClick(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
+bool Ghost::DoMouseClick(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
 	auto ghost = reinterpret_cast<Ghost*>(obj);
 
-	if (target) {
-		if (target->Is<Door>()) {
-			auto door = reinterpret_cast<Door*>(target);
-			door->ToogleDoor();
-		}
-		else if (target->Is<Region>()) {
-			if (ghost->mActiveSkill <= 3)
-				ghost->mSkills[ghost->mActiveSkill]->UseSkill(target, pos);
-		}
-		else if (target->Is<Explorer>()) {
-			if (ghost->mActiveSkill == 3)
-				ghost->mSkills[ghost->mActiveSkill]->UseSkill(target, pos);
+	if (!target) return false;
+
+	if (target->Is<Door>()) {
+		auto door = reinterpret_cast<Door*>(target);
+		door->ToogleDoor();
+	}
+	else {
+		//Spawn X or transmogrify
+		Skill* activeSkill = ghost->mSkills[ghost->mActiveSkill];
+
+		if (ghost->mMana >= activeSkill->mCost) {
+			if (activeSkill->UseSkill(target, pos)) {
+				ghost->mMana -= activeSkill->mCost;
+			}
+		} else {
+			TRACE_LOG("No mana for skill");
 		}
 	}
+
+	return true;
 }
 
 void Ghost::SetActiveSkill(int skillNum)
 {
 	mActiveSkill = skillNum;
 	mSkillBar->SetActive(mSkills[mActiveSkill]);
+}
+
+void Ghost::TickMana(float milliseconds)
+{
+	mMana += mManaRegenPerS * (milliseconds / 1000);
+	if (mMana > mMaxMana) mMana = mMaxMana;
+	if (mMana < 0) mMana = 0;
 }
