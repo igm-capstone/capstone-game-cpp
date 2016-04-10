@@ -3,6 +3,14 @@
 #include <Uniforms.h>
 #include <Vertex.h>
 
+enum GameState : char
+{
+	GAME_STATE_INITIAL,		// Use to check for players ready
+	GAME_STATE_CAPTURE_0,	// Players capturing tier 0 dom points
+	GAME_STATE_CAPTURE_1,	// Players capturing tier 1 dom point
+	GAME_STATE_FINAL		// All players dead or dom points captured
+};
+
 class Level01 : public BaseScene
 {
 	// Cbuffer data
@@ -43,6 +51,9 @@ class Level01 : public BaseScene
 	ID3D11Buffer*				mOutputDataCPURead;
 	ID3D11UnorderedAccessView*	mOutputDataSRV;
 
+	GameState mGameState;
+	char mTiersCaptured[2];	
+
 public:
 	Level01();
 	~Level01();
@@ -56,6 +67,8 @@ public:
 	
 	void VUpdate(double milliseconds) override;
 	void VFixedUpdate(double milliseconds) override;
+	void UpdateGameState(double milliseconds);
+	bool IsExplorerAlive();
 
 	void VRender() override;
 	void RenderShadowMaps();	// Not called per frame
@@ -69,5 +82,7 @@ public:
 	void RenderSprites();
 	void RenderGrid();
 	void ComputeGrid();
+
 	void VShutdown() override;
+
 };

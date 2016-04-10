@@ -23,13 +23,13 @@
 #include <Components/MinionController.h>
 #include <DebugRender.h>
 #include <SceneObjects/Door.h>
-#include <Rig3D/Graphics/DirectX11/DX11ShaderResource.h>
 #include <SceneObjects/SpawnPoint.h>
 #include <SceneObjects/FlyTrap.h>
 #include <SceneObjects/Heal.h>
 #include <SceneObjects/Trap.h>
 #include <SceneObjects/StatusEffect.h>
 #include <SceneObjects/DominationPoint.h>
+#include <Components/DominationPointController.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -37,6 +37,7 @@ static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 extern bool gDebugExplorer;
 
 Level01::Level01() :
+	mCubeMesh(nullptr),
 	mNDSQuadMesh(nullptr),
 	mGBufferContext(nullptr),
 	mShadowContext(nullptr),
@@ -45,7 +46,15 @@ Level01::Level01() :
 	mExplorerShaderResource(nullptr),
 	mPLVShaderResource(nullptr), 
 	mSpritesShaderResource(nullptr),
-	mGridShaderResource(nullptr)
+	mGridShaderResource(nullptr),
+	mFullSrcData(nullptr),
+	mFullSrcDataSRV(nullptr),
+	mSimpleSrcData(nullptr),
+	mSimpleSrcDataSRV(nullptr),
+	mOutputData(nullptr),
+	mOutputDataCPURead(nullptr),
+	mOutputDataSRV(nullptr),
+	mGameState(GAME_STATE_INITIAL)
 {
 	mAIManager->SetAllocator(&mAllocator);
 }
@@ -511,7 +520,101 @@ void Level01::VFixedUpdate(double milliseconds)
 	mAIManager->Update();
 
 	mNetworkManager->Update();
+
+	UpdateGameState(milliseconds);
 }
+
+void Level01::UpdateGameState(double milliseconds)
+{
+	GameState currentState = mGameState;
+
+	static DominationPoint* finalDP = nullptr;
+
+	switch (currentState)
+	{
+	case GAME_STATE_INITIAL:
+		// Check for ready status
+		break;
+	case GAME_STATE_CAPTURE_0:
+	{
+		bool checkDomPoints = IsExplorerAlive();
+		if (checkDomPoints)
+		{
+			// Count dom points captured
+			char tiersCaptured[2] = { 0, 0 };
+			for (DominationPoint& dp : Factory<DominationPoint>())
+			{
+				if (dp.mTier == 1)
+				{
+					finalDP = &dp;
+				}
+
+				if (dp.mController->mIsActive && dp.mController->isDominated)
+				{
+					tiersCaptured[dp.mTier]++;
+				}
+			}
+
+			if (tiersCaptured[0] == 3)
+			{
+				finalDP->mController->mIsActive = true;
+				currentState = GAME_STATE_CAPTURE_1;
+			}
+		}
+		else
+		{
+			currentState = GAME_STATE_FINAL;
+		}
+		
+		break;	
+	}
+	case GAME_STATE_CAPTURE_1:
+	{
+		bool checkDomPoints = IsExplorerAlive();
+		if (checkDomPoints)
+		{
+			if (finalDP->mController->isDominated)
+			{
+				currentState = GAME_STATE_FINAL;
+			}
+		}
+		else
+		{
+			currentState = GAME_STATE_FINAL;
+		}
+
+		break;
+	}
+	case GAME_STATE_FINAL:
+		// Check for RESTART / EXIT.
+		break;
+	}
+
+	mGameState = currentState;
+}
+
+bool Level01::IsExplorerAlive()
+{
+	int explorerCount = 0;
+	bool activeExplorers[4] = { 0, 0, 0, 0 };
+
+	for (Explorer& e : Factory<Explorer>())
+	{
+		if (e.mHealth->GetHealth() > 0)
+		{
+			activeExplorers[explorerCount++] = 1;
+		}
+	}
+
+	bool atLeastOneAlive = 1;
+	for (int i = 0; i < explorerCount; i++)
+	{
+		atLeastOneAlive &= activeExplorers[i];
+	}
+
+	return atLeastOneAlive;
+}
+
 #pragma endregion
 
 #pragma region Render
