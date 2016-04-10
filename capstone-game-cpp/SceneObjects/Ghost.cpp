@@ -63,10 +63,10 @@ void Ghost::Spawn(BaseScene * scene)
 	mCameraManager->MoveCamera(level.center, level.center + vec3f(0.0f, 0.0f, -85.5f));
 
 	mSkillBar = &scene->mSkillBar;
-	mSkillBar->AddSkill(mSkills[1], 1, 0);
-	mSkillBar->AddSkill(mSkills[2], 1, 1);
-	mSkillBar->AddSkill(mSkills[3], 1, 5);
-	mSkillBar->AddSkill(mSkills[4], 1, 4);
+	mSkillBar->AddSkill(mSkills[1], 1, 0, 0);
+	mSkillBar->AddSkill(mSkills[2], 1, 1, 1);
+	mSkillBar->AddSkill(mSkills[3], 1, 5, 2);
+	mSkillBar->AddSkill(mSkills[4], 1, 4, 9);
 	SetActiveSkill(1);
 }
 

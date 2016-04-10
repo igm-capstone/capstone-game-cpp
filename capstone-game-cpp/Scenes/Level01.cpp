@@ -288,8 +288,9 @@ void Level01::InitializeShaderResources()
 		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_ghostIcons.png", 1024, 1024, 4, 4);
 		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_playerIcons1024.png", 1024, 1024, 4, 4);
 		mSpriteManager->LoadSpriteSheet("Assets/UI/Panels.png", 1024, 1024, 1, 4);
-		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, mSpriteManager->GetFilenames(), 4);
-		mRenderer->VAddShaderPointSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
+		mSpriteManager->LoadSpriteSheet("Assets/UI/Keys.png", 8*96, 2*96, 8, 2);
+		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, mSpriteManager->GetFilenames(), 5);
+		mRenderer->VAddShaderLinearSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 
 		void*  cbSpritesData[] = { mCameraManager->GetCBufferPersp(), mSpriteManager->GetCBuffer() };
 		size_t cbSpritesSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::SpriteSheet) * MAX_SPRITESHEETS };

@@ -32,17 +32,20 @@ void SkillBar::RenderButton(Button* b, vec2f pos)
 {
 	mSpriteManager->DrawSpriteAtPerc(b->sheetID, 8+b->spriteID, pos, vec2f(0.4f, 0.4f));
 	mSpriteManager->DrawSpriteAtPerc(b->sheetID, b->spriteID, pos, vec2f(0.4f, 0.4f), vec3f(1,1), 2*PI * b->skill->Recharged());
+	if (b->keySpriteID != -1) mSpriteManager->DrawSpriteAtPerc(4, b->keySpriteID, pos + vec2f(0.02f, 0.035f), vec2f(0.3f, 0.3f));
 	if (b->isHighlighted) mSpriteManager->DrawSpriteAtPerc(b->sheetID, 15, pos, vec2f(0.4f, 0.4f));
+	
 }
 
-void SkillBar::AddSkill(Skill* skill, int sheetID, int spriteID)
+void SkillBar::AddSkill(Skill* skill, int sheetID, int spriteID, int keySpriteID)
 {
 	assert(numBtns < 4);
 
 	mButtons[numBtns].sheetID = sheetID;
 	mButtons[numBtns].spriteID = spriteID;
 	mButtons[numBtns].skill = skill;
-	
+	mButtons[numBtns].keySpriteID = keySpriteID;
+
 	numBtns++;
 }
 
