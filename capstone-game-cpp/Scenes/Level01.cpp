@@ -139,7 +139,7 @@ void Level01::InitializeAssets()
 		mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[i]);
 	}
 
-	mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
+	//mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kPlantModelName);
 
@@ -469,35 +469,37 @@ void Level01::VUpdate(double milliseconds)
 		}
 	}
 
+#ifdef _DEBUG
 	if (mInput->GetKeyDown(KEYCODE_F3))
 	{
-		mDebugGrid = !mDebugGrid;
+		gDebugGrid = !gDebugGrid;
 	}
 
 	if (mInput->GetKeyDown(KEYCODE_F4))
 	{
-		mDebugColl = !mDebugColl;
+		gDebugColl = !gDebugColl;
 	}
 
 	if (mInput->GetKeyDown(KEYCODE_F5))
 	{
-		mCameraManager->mIsOrto = !mCameraManager->mIsOrto;
+		gDebugOrto = !gDebugOrto;
 	}
 
 	if (mInput->GetKeyDown(KEYCODE_F6))
 	{
-		mDebugGBuffer = !mDebugGBuffer;
+		gDebugGBuffer = !gDebugGBuffer;
 	}
 
 	if (mInput->GetKeyDown(KEYCODE_F7))
 	{
-		mDebugBVH = !mDebugBVH;
+		gDebugBVH = !gDebugBVH;
 	}
 
 	if (mInput->GetKeyDown(KEYCODE_F8))
 	{
-		mDebugBT = !mDebugBT;
+		gDebugBT = !gDebugBT;
 	}
+#endif
 
 	mCollisionManager->Update(milliseconds);
 }
@@ -525,7 +527,7 @@ void Level01::VRender()
 	RenderStaticMeshes();
 
 #ifdef _DEBUG
-	if (mDebugColl)
+	if (gDebugColl)
 	RenderWallColliders(mExplorerShaderResource, mCameraManager, &mModel);
 #endif
 	
@@ -535,7 +537,7 @@ void Level01::VRender()
 	RenderSpotLightVolumes();
 
 #ifdef _DEBUG
-	if (mDebugGBuffer)
+	if (gDebugGBuffer)
 	{
 		RenderGBuffer(mGBufferContext);
 	}
@@ -556,8 +558,11 @@ void Level01::VRender()
 
 	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, mNullSRV);
 
-	RenderGrid();
+#ifdef _DEBUG
+	if (gDebugGrid) RenderGrid();
 	RENDER_TRACE();
+#endif
+
 	mRenderer->VSwapBuffers();
 }
 
@@ -888,15 +893,13 @@ void Level01::RenderSprites() {
 
 void Level01::RenderGrid()
 {
-#ifdef _DEBUG
-	if (!mDebugGrid) return;
 	for (auto i = 0; i < mAIManager->mGrid.mNumRows; i++)
 		for (auto j = 0; j < mAIManager->mGrid.mNumCols; j++)
 		{
 			auto n = mAIManager->mGrid(i, j);
 			vec4f c;
 			if (n.weight == -1 && !n.hasLight) continue;
-			
+
 			switch ((int)n.weight) {
 			case -10:
 				c = Colors::magenta;
@@ -918,7 +921,6 @@ void Level01::RenderGrid()
 			TRACE_SMALL_BOX(n.worldPos, c * vec4f(1, 1, 1, 0.4f));
 			if (n.hasLight) { TRACE_SMALL_CROSS(n.worldPos, Colors::yellow * vec4f(1, 1, 1, 0.4f)); }
 		}
-#endif
 }
 
 #pragma endregion

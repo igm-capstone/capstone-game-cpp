@@ -11,6 +11,7 @@
 #include "SceneObjects/Minion.h"
 #include "SceneObjects/Door.h"
 #include "SceneObjects/StaticMesh.h"
+#include "SceneObjects/Trap.h"
 
 #define PARTITION_X_COUNT 3
 #define PARTITION_Y_COUNT 2
@@ -20,11 +21,9 @@
 #define REGION_PARENT_LAYER_INDEX   1
 #define SKILL_PARENT_LAYER_INDEX	1
 #define DOOR_PARENT_LAYER_INDEX		1
-#define DRAW_DEBUG 1
 
-#if (DRAW_DEBUG == 1)
+#ifdef _DEBUG
 #include <trace.h>
-#include "SceneObjects/Trap.h"
 
 void RenderDebug(BVHTree& bvhTree)
 {
@@ -101,9 +100,10 @@ void BVHTree::Initialize()
 
 void BVHTree::Update()
 {
-#if (DRAW_DEBUG == 1)
-	RenderDebug(*this);
-#endif
+#ifdef _DEBUG
+	if (gDebugBVH) RenderDebug(*this);
+#endif 
+
 	mLayerStartIndex.erase(COLLISION_LAYER_EXPLORER);
 	mLayerStartIndex.erase(COLLISION_LAYER_MINION);
 	mLayerStartIndex.erase(COLLISION_LAYER_EXPLORER_SKILL);

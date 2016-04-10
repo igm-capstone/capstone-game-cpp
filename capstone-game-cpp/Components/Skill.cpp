@@ -30,7 +30,7 @@ SkillBinding& SkillBinding::Set(KeyCode value)
 Skill::Skill() :
 	mCoolDown(0),
 	mDuration(0),
-	mLastUsed(0),
+	mLastUsed(-FLT_MAX),
 	mCallback(nullptr)
 {
 	Engine& engine = Singleton<Engine>::SharedInstance();
