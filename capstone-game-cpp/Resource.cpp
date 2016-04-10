@@ -113,7 +113,9 @@ void loadDomPoints(jarr_t objs)
 	for (auto obj : *objs)
 	{
 		auto dom = Factory<DominationPoint>::Create();
-		parseTransform(obj, dom->mTransform);
+		parseStaticMeshTransform(obj, dom->mTransform);
+		dom->mTransform->SetScale(vec3f(0.1f));
+
 
 		dom->mDominationTime = obj["captureTime"].get<float>();
 		dom->mTier = obj["tier"].get<int>();

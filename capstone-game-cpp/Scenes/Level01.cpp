@@ -29,6 +29,7 @@
 #include <SceneObjects/Heal.h>
 #include <SceneObjects/Trap.h>
 #include <SceneObjects/StatusEffect.h>
+#include <SceneObjects/DominationPoint.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -706,7 +707,7 @@ void Level01::RenderDoors()
 
 	for (Door& d : Factory<Door>())
 	{
-		if(!model)
+		if (!model)
 		{
 			model = d.mModel;
 			mRenderer->VBindMesh(model->mMesh);
@@ -715,7 +716,24 @@ void Level01::RenderDoors()
 		mModel.world = d.mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
-		
+
+		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
+	}
+
+	// Putting Domination Points here for now.
+	model = mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_DOM_POINT]);
+	mRenderer->VBindMesh(model->mMesh);
+
+	vec4f gray = { 0.75f, 0.75f, 0.75f, 1.0f };
+
+	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &gray, 3);
+
+	for (DominationPoint& dp : Factory<DominationPoint>())
+	{
+		mModel.world = dp.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
 		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
 	}
 }
