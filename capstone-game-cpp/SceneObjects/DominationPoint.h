@@ -12,7 +12,6 @@ class DominationPoint : public BaseSceneObject
 
 public:
 
-
 	SphereColliderComponent* mCollider;
 	DominationPointController* mController;
 
