@@ -22,9 +22,9 @@ void SkillBar::RenderPanel()
 
 	mSpriteManager->DrawSpriteAtPerc(3, numBtns - 1, vec2f(0.5f, posYPerc), vec2f(0.5f, 0.5f));
 
-	for each (Button &b in mButtons)
+	for (auto i = 0; i < numBtns; i++)
 	{
-		RenderButton(&b, vec2f(startPt, posYPerc));
+		RenderButton(&mButtons[i], vec2f(startPt, posYPerc));
 		startPt += 0.04f * 2.0f;
 	}
 }
@@ -52,9 +52,9 @@ void SkillBar::AddSkill(Skill* skill, int sheetID, int spriteID, int keySpriteID
 
 void SkillBar::SetActive(Skill* skill)
 {
-	for each (Button &b in mButtons)
+	for (auto i = 0; i < numBtns; i++)
 	{
-		b.isHighlighted = (b.skill == skill);
+		mButtons[i].isHighlighted = (mButtons[i].skill == skill);
 	}
 }
 
