@@ -552,6 +552,7 @@ void Level01::UpdateGameState(double milliseconds)
 	{
 	case GAME_STATE_INITIAL:
 		// Check for ready status
+		currentState = GAME_STATE_CAPTURE;
 		break;
 	case GAME_STATE_CAPTURE:
 	{
@@ -569,12 +570,16 @@ void Level01::UpdateGameState(double milliseconds)
 			{
 				// Explorers Win
 				currentState = GAME_STATE_FINAL;
+				TRACE_LOG("EXPLORERS WIN");
+
 			}
 		}
 		else
 		{
 			// Ghost Wins
 			currentState = GAME_STATE_FINAL;
+			TRACE_LOG("GHOST WIN");
+
 		}
 		
 		break;	
