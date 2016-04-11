@@ -35,11 +35,9 @@ public:
 	vec3f GetOrigin() { return mOrigin; };
 	vec3f GetLookAt() { return mLookAt; };
 
-	CBuffer::Camera* GetCBufferPersp() { return mIsOrto ? &mCBufferFullLevelOrto : &mCBufferPersp; }
-	CBuffer::Camera* GetCBufferScreenOrto() { return mIsOrto ? &mCBufferFullLevelOrto : &mCBufferScreenOrto; }
+	CBuffer::Camera* GetCBufferPersp() { return gDebugOrto ? &mCBufferFullLevelOrto : &mCBufferPersp; }
+	CBuffer::Camera* GetCBufferScreenOrto() { return gDebugOrto ? &mCBufferFullLevelOrto : &mCBufferScreenOrto; }
 	CBuffer::Camera* GetCBufferFullLevelOrto() { return &mCBufferFullLevelOrto; }
-
-	bool mIsOrto;
 
 	void SetLevelBounds(vec2f center, vec2f extends);
 	void ChangeLookAtTo(const vec3f& newLookAt);

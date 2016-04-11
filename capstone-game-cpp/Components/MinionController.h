@@ -11,30 +11,33 @@ class MinionController : public BaseComponent
 	~MinionController();
 
 public:
-	float mSpeed;
-	float mThinkTime;
+
 	class AIManager& mAI;
 	class Rig3D::Timer& mTimer;
 	BehaviorTree::Tree* mBehaviorTree;
 	
-	vec2f mDirection;
-	vec2f mTarget;
+	// variables used by BT
+	float mSpeed;
+	float mThinkTime;
+	float mWanderTime;
 	vec3f mPosition;
+	vec3f mLastPosition;
 	float mAngle;
+	int mDirectionIndex;
 	bool mIsTransformDirty;
 
 	static const vec2f sDirections[];
 
 	bool Update(double milliseconds);
-	quatf GetRotation(float angle);
+	quatf GetAdjustedRotation(float angle);
 
 	// behavior tree code
 	static bool IsExplorerInRange(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus MoveTowardsExplorer(BehaviorTree::Behavior& bh, void* data);
-	static BehaviorTree::BehaviorStatus Think(BehaviorTree::Behavior & bh, void * data);
-	static BehaviorTree::BehaviorStatus FindTarget(BehaviorTree::Behavior& bh, void* data);
-	static BehaviorTree::BehaviorStatus RotateTowardsTarget(BehaviorTree::Behavior& bh, void* data);
-	static BehaviorTree::BehaviorStatus MoveTowardsTarget(BehaviorTree::Behavior& bh, void* data);
+	static BehaviorTree::BehaviorStatus Think(BehaviorTree::Behavior& bh, void* data);
+	static BehaviorTree::BehaviorStatus MoveForward(BehaviorTree::Behavior& bh, void* data);
+	static BehaviorTree::BehaviorStatus UpdateWanderDirection(BehaviorTree::Behavior& bh, void* data);
+	static BehaviorTree::BehaviorStatus LookForward(BehaviorTree::Behavior& bh, void* data);
 
 	void PlayStateAnimation(AnimationControllerState state);
 	void PauseStateAnimation(AnimationControllerState state);

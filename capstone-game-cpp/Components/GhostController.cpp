@@ -51,6 +51,25 @@ void GhostController::Update(double milliseconds)
 		camManager->ChangeLookAtBy(ds);
 	}
 
+
+	if (mInput->GetKeyDown(KEYCODE_1))
+	{
+		ghost->SetActiveSkill(1);
+	} 
+	else if (mInput->GetKeyDown(KEYCODE_2))
+	{
+		ghost->SetActiveSkill(2);
+	}
+	else if (mInput->GetKeyDown(KEYCODE_3))
+	{
+		ghost->SetActiveSkill(3);
+	}
+	else if (mInput->GetKeyDown(KEYCODE_4))
+	{
+		ghost->SetActiveSkill(4);
+	}
+
+	ghost->TickMana(float(milliseconds));
 }
 
 GhostController::GhostController(): 

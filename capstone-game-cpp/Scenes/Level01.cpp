@@ -29,6 +29,7 @@
 #include <SceneObjects/Heal.h>
 #include <SceneObjects/Trap.h>
 #include <SceneObjects/StatusEffect.h>
+#include <SceneObjects/DominationPoint.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -139,7 +140,7 @@ void Level01::InitializeAssets()
 		mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[i]);
 	}
 
-	mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
+	//mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kPlantModelName);
 
@@ -258,12 +259,12 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateShaderResource(&mExplorerShaderResource, &mAllocator);
 
 		void* cbExplorerData[] = { mCameraManager->GetCBufferPersp(), &mModel, mSkinnedMeshMatrices, nullptr };
-		size_t cbExplorerSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::Model), sizeof(mat4f) *  MAX_SKELETON_JOINTS, sizeof(vec4f)};
+		size_t cbExplorerSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::Model), sizeof(mat4f) *  MAX_SKELETON_JOINTS, sizeof(vec4f) };
 
 		mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 4);
 
-		const char* filenames[] = { "Assets/Textures/BascMinionFull.png", "Assets/Textures/flytraptxt.png" };
-		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 2);
+		const char* filenames[] = { "Assets/Textures/BascMinionFull.png", "Assets/Textures/flytraptxt.png", "Assets/Textures/StaticMesh/Door.png" };
+		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 3);
 		mRenderer->VAddShaderLinearSamplerState(mExplorerShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 	}
 
@@ -287,9 +288,10 @@ void Level01::InitializeShaderResources()
 		mSpriteManager->LoadSpriteSheet("Assets/UI/Health.png", 900, 224, 1, 2);
 		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_ghostIcons.png", 1024, 1024, 4, 4);
 		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_playerIcons1024.png", 1024, 1024, 4, 4);
-		mSpriteManager->LoadSpriteSheet("Assets/UI/Panels.png", 1024, 1024, 1, 1);
-		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, mSpriteManager->GetFilenames(), 4);
-		mRenderer->VAddShaderPointSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
+		mSpriteManager->LoadSpriteSheet("Assets/UI/Panels.png", 1024, 1024, 1, 4);
+		mSpriteManager->LoadSpriteSheet("Assets/UI/Keys.png", 8*96, 2*96, 8, 2);
+		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, mSpriteManager->GetFilenames(), 5);
+		mRenderer->VAddShaderLinearSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 
 		void*  cbSpritesData[] = { mCameraManager->GetCBufferPersp(), mSpriteManager->GetCBuffer() };
 		size_t cbSpritesSizes[] = { sizeof(CBuffer::Camera), sizeof(CBuffer::SpriteSheet) * MAX_SPRITESHEETS };
@@ -436,49 +438,69 @@ void Level01::VUpdate(double milliseconds)
 	float seconds = static_cast<float>(milliseconds) / 1000.0f;
 	for (Heal& h : Factory<Heal>())
 	{
-		TRACE_LOG("HEAL: " << h.mDuration);
 		h.mDuration -= seconds;
 		if (h.mDuration <= 0.0f)
 		{
-			TRACE_LOG("HEAL: DESTROYED");
 			Factory<Heal>::Destroy(&h);
+		}
+	}
+
+	for (Trap& t: Factory<Trap>())
+	{
+		TRACE_LOG("TRAP UPDATE:");
+		t.mDuration -= seconds;
+		if (t.mDuration <= 0.0f)
+		{
+			TRACE_LOG("TRAP DESTROY:");
+
+			Factory<Trap>::Destroy(&t);
 		}
 	}
 
 	for (StatusEffect& s : Factory<StatusEffect>())
 	{
+		TRACE_LOG("STATUS UPDATE:");
+
 		s.mOnUpdateCallback(&s, seconds);
+		s.mDuration -= seconds;
+		if (s.mDuration <= 0.0f)
+		{
+			TRACE_LOG("STATUS DESTROY:");
+			Factory<StatusEffect>::Destroy(&s);
+		}
 	}
 
+#ifdef _DEBUG
 	if (mInput->GetKeyDown(KEYCODE_F3))
 	{
-		mDebugGrid = !mDebugGrid;
+		gDebugGrid = !gDebugGrid;
 	}
 
 	if (mInput->GetKeyDown(KEYCODE_F4))
 	{
-		mDebugColl = !mDebugColl;
+		gDebugColl = !gDebugColl;
 	}
 
 	if (mInput->GetKeyDown(KEYCODE_F5))
 	{
-		mCameraManager->mIsOrto = !mCameraManager->mIsOrto;
+		gDebugOrto = !gDebugOrto;
 	}
 
 	if (mInput->GetKeyDown(KEYCODE_F6))
 	{
-		mDebugGBuffer = !mDebugGBuffer;
+		gDebugGBuffer = !gDebugGBuffer;
 	}
 
 	if (mInput->GetKeyDown(KEYCODE_F7))
 	{
-		mDebugBVH = !mDebugBVH;
+		gDebugBVH = !gDebugBVH;
 	}
 
 	if (mInput->GetKeyDown(KEYCODE_F8))
 	{
-		mDebugBT = !mDebugBT;
+		gDebugBT = !gDebugBT;
 	}
+#endif
 
 	mCollisionManager->Update(milliseconds);
 }
@@ -506,7 +528,7 @@ void Level01::VRender()
 	RenderStaticMeshes();
 
 #ifdef _DEBUG
-	if (mDebugColl)
+	if (gDebugColl)
 	RenderWallColliders(mExplorerShaderResource, mCameraManager, &mModel);
 #endif
 	
@@ -516,7 +538,7 @@ void Level01::VRender()
 	RenderSpotLightVolumes();
 
 #ifdef _DEBUG
-	if (mDebugGBuffer)
+	if (gDebugGBuffer)
 	{
 		RenderGBuffer(mGBufferContext);
 	}
@@ -531,14 +553,19 @@ void Level01::VRender()
 	mSpriteManager->NewFrame();
 	RenderHealthBars();
 	mSkillBar.RenderPanel();
+	if (mNetworkManager->mMode == NetworkManager::SERVER)
+	mSkillBar.RenderManaBar();
 
 	RenderIMGUI(); 
 	RenderSprites();
 
 	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, mNullSRV);
 
-	RenderGrid();
+#ifdef _DEBUG
+	if (gDebugGrid) RenderGrid();
 	RENDER_TRACE();
+#endif
+
 	mRenderer->VSwapBuffers();
 }
 
@@ -667,22 +694,20 @@ void Level01::RenderStaticMeshes()
 
 void Level01::RenderDoors()
 {
-	mRenderer->VSetInputLayout(mApplication->mVSDefSingleColor);
-	mRenderer->VSetVertexShader(mApplication->mVSDefSingleColor);
-	mRenderer->VSetPixelShader(mApplication->mPSDefColor);
-
-	vec4f color[1] = { Colors::yellow };
+	mRenderer->VSetInputLayout(mApplication->mVSDefSingleMaterial);
+	mRenderer->VSetVertexShader(mApplication->mVSDefSingleMaterial);
+	mRenderer->VSetPixelShader(mApplication->mPSDefMaterial);
 
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
-	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, color, 3);
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 3, 2);
+	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 2, 0);
 
 	ModelCluster* model = nullptr;
 
 	for (Door& d : Factory<Door>())
 	{
-		if(!model)
+		if (!model)
 		{
 			model = d.mModel;
 			mRenderer->VBindMesh(model->mMesh);
@@ -691,7 +716,24 @@ void Level01::RenderDoors()
 		mModel.world = d.mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
-		
+
+		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
+	}
+
+	// Putting Domination Points here for now.
+	model = mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_DOM_POINT]);
+	mRenderer->VBindMesh(model->mMesh);
+
+	vec4f gray = { 0.75f, 0.75f, 0.75f, 1.0f };
+
+	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &gray, 3);
+
+	for (DominationPoint& dp : Factory<DominationPoint>())
+	{
+		mModel.world = dp.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
 		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
 	}
 }
@@ -745,31 +787,34 @@ void Level01::RenderSpotLightVolumes()
 	uint32_t i = 0;
 	for (Lamp& l : Factory<Lamp>())
 	{
-		mModel.world = mLevel.lampWorldMatrices[i];
-		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		if (l.mStatus != LAMP_OFF) {
+			mModel.world = mLevel.lampWorldMatrices[i];
+			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 
-		// Set Light data
-		mLightData.viewProjection	= (mLevel.lampVPTMatrices[i]).transpose();
-		mLightData.color			= l.mLightColor;
-		mLightData.direction		= l.mLightDirection;
-		mLightData.range			= l.mLightRadius;
-		mLightData.cosAngle			= cos(l.mLightAngle);
+			// Set Light data
+			mLightData.viewProjection = (mLevel.lampVPTMatrices[i]).transpose();
+			mLightData.color = l.mLightColor;
+			if (l.mStatus == LAMP_DIMMED) mLightData.color *= 0.4f;
+			mLightData.direction = l.mLightDirection;
+			mLightData.range = l.mLightRadius;
+			mLightData.cosAngle = cos(l.mLightAngle);
 
-		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
+			mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
 
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 
-		mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
-		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
-		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);		// Position
-		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);		// Normal
-		mRenderer->VSetPixelShaderDepthResourceView(mShadowContext, i, 2);	// Shadow
-		mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);		// Border
-		
-		mRenderer->VBindMesh(l.mConeMesh);
+			mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
+			mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
+			mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);		// Position
+			mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);		// Normal
+			mRenderer->VSetPixelShaderDepthResourceView(mShadowContext, i, 2);	// Shadow
+			mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);		// Border
 
-		mRenderer->VDrawIndexed(0, l.mConeMesh->GetIndexCount());
+			mRenderer->VBindMesh(l.mConeMesh);
+
+			mRenderer->VDrawIndexed(0, l.mConeMesh->GetIndexCount());
+		}
 		i++;
 	}
 
@@ -869,15 +914,13 @@ void Level01::RenderSprites() {
 
 void Level01::RenderGrid()
 {
-#ifdef _DEBUG
-	if (!mDebugGrid) return;
 	for (auto i = 0; i < mAIManager->mGrid.mNumRows; i++)
 		for (auto j = 0; j < mAIManager->mGrid.mNumCols; j++)
 		{
 			auto n = mAIManager->mGrid(i, j);
 			vec4f c;
 			if (n.weight == -1 && !n.hasLight) continue;
-			
+
 			switch ((int)n.weight) {
 			case -10:
 				c = Colors::magenta;
@@ -899,7 +942,6 @@ void Level01::RenderGrid()
 			TRACE_SMALL_BOX(n.worldPos, c * vec4f(1, 1, 1, 0.4f));
 			if (n.hasLight) { TRACE_SMALL_CROSS(n.worldPos, Colors::yellow * vec4f(1, 1, 1, 0.4f)); }
 		}
-#endif
 }
 
 #pragma endregion

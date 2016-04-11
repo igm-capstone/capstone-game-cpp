@@ -59,7 +59,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>Rig3D.lib;Memory.lib;GraphicsMath.lib;EventHandler.lib;d3d11.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)ext\fmod\fsbank\lib;$(SolutionDir)ext\fmod\lowlevel\lib;$(SolutionDir)ext\fmod\studio\lib;$(SolutionDir)ext\Autodesk\2016.1.2\lib\vs2015\x86\debug;$(TargetDir)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)ext\fmod\fsbank\lib;$(SolutionDir)ext\fmod\lowlevel\lib;$(SolutionDir)ext\fmod\studio\lib;$(SolutionDir)ext\Autodesk\2016.1.2\lib\vs2015\x86\release;$(TargetDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>

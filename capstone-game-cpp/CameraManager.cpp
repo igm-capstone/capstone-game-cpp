@@ -12,8 +12,6 @@ CameraManager::CameraManager()
 
 	pPlane.normal = vec3f(0, 0, 1);
 	pPlane.distance = 0;
-
-	mIsOrto = false;
 }
 
 CameraManager::~CameraManager()

@@ -91,95 +91,6 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	mNetworkID->mUUID = UUID;
 
 	mAnimationController->SetState(ANIM_STATE_IDLE);
-
-	// Add more as we get more classes.
-	switch (GetExplorerID(this))
-	{
-	case 0:
-	{
-		mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
-		mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.5f;
-		mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
-		mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
-		mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
-		mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;
-		mMeleeColliderComponent.asSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
-		mMeleeColliderComponent.asSphereColliderComponent->RegisterTriggerEnterCallback(&OnMeleeHit);
-		mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = this;
-
-		auto heal = Factory<Skill>::Create();
-		heal->SetBinding(SkillBinding().Set(KEYCODE_A));
-		heal->Setup(2, 1, DoHeal);
-		heal->mSceneObject = this;
-		mSkills[HEAL_SKILL_INDEX] = heal;
-
-		auto melee = Factory<Skill>::Create();
-		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
-		melee->Setup(2, 1, DoMelee);
-		melee->mSceneObject = this;
-		mSkills[MELEE_SKILL_INDEX] = melee;
-		
-		break;
-	}
-	case 1:
-	{
-		mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
-		mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.5f;
-		mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
-		mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
-		mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
-		mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;
-		mMeleeColliderComponent.asSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
-		mMeleeColliderComponent.asSphereColliderComponent->RegisterTriggerEnterCallback(&OnMeleeHit);
-		mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = this;
-
-		auto poison = Factory<Skill>::Create();
-		poison->SetBinding(SkillBinding().Set(KEYCODE_A));
-		poison->Setup(2, 1, DoHeal);
-		poison->mSceneObject = this;
-		mSkills[POISON_SKILL_INDEX] = poison;
-
-		auto slow = Factory<Skill>::Create();
-		slow->SetBinding(SkillBinding().Set(KEYCODE_A));
-		slow->Setup(2, 1, DoHeal);
-		slow->mSceneObject = this;
-		mSkills[POISON_SKILL_INDEX] = slow;
-
-		auto melee = Factory<Skill>::Create();
-		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
-		melee->Setup(2, 1, DoMelee);
-		melee->mSceneObject = this;
-		mSkills[MELEE_SKILL_INDEX] = melee;
-
-		break;
-	}
-	default:
-	{
-		mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
-		mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.5f;
-		mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
-		mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
-		mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
-		mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;
-		mMeleeColliderComponent.asSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
-		mMeleeColliderComponent.asSphereColliderComponent->RegisterTriggerEnterCallback(&OnMeleeHit);
-		mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = this;
-
-		auto sprint = Factory<Skill>::Create();
-		sprint->SetBinding(SkillBinding().Set(KEYCODE_A));
-		sprint->Setup(2, 1, DoSprint);
-		sprint->mSceneObject = this;
-		mSkills[SPRINT_SKILL_INDEX] = sprint;
-
-		auto melee = Factory<Skill>::Create();
-		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
-		melee->Setup(2, 1, DoMelee);
-		melee->mSceneObject = this;
-		mSkills[MELEE_SKILL_INDEX] = melee;
-
-		break;
-	}
-	}
 }
 
 void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
@@ -209,6 +120,109 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	auto e = static_cast<Explorer*>(obj);
 	e->mController->mIsActive = newAuth;
 	e->mCameraManager->MoveCamera(e->mTransform->GetPosition(), e->mTransform->GetPosition() + vec3f(0,-7,-15));
+
+	if (!e->mNetworkID->mHasAuthority) return;
+	// Add more as we get more classes.
+	switch (GetExplorerID(e))
+	{
+	case 0:
+	{
+		e->mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
+		e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.5f;
+		e->mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
+		e->mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
+		e->mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
+		e->mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;
+		e->mMeleeColliderComponent.asSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
+		e->mMeleeColliderComponent.asSphereColliderComponent->RegisterTriggerEnterCallback(&OnMeleeHit);
+		e->mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = e;
+
+		auto heal = Factory<Skill>::Create();
+		heal->SetBinding(SkillBinding().Set(KEYCODE_A));
+		heal->Setup("Heal", 2, 1, DoHeal);
+		heal->mSceneObject = e;
+		e->mSkills[HEAL_SKILL_INDEX] = heal;
+
+		auto melee = Factory<Skill>::Create();
+		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
+		melee->Setup("Melee", 2, 1, DoMelee);
+		melee->mSceneObject = e;
+		e->mSkills[MELEE_SKILL_INDEX] = melee;
+
+		SkillBar* mSkillBar = &Application::SharedInstance().GetCurrentScene()->mSkillBar;
+		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], 2, 5, 8);
+		mSkillBar->AddSkill(e->mSkills[HEAL_SKILL_INDEX], 2, 0, 6);
+
+		break;
+	}
+	case 1:
+	{
+		e->mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
+		e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.5f;
+		e->mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
+		e->mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
+		e->mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
+		e->mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;
+		e->mMeleeColliderComponent.asSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
+		e->mMeleeColliderComponent.asSphereColliderComponent->RegisterTriggerEnterCallback(&OnMeleeHit);
+		e->mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = e;
+
+		auto poison = Factory<Skill>::Create();
+		poison->SetBinding(SkillBinding().Set(KEYCODE_A));
+		poison->Setup("Poison Trap", 2, 1, DoPoison);
+		poison->mSceneObject = e;
+		e->mSkills[POISON_SKILL_INDEX] = poison;
+
+		auto slow = Factory<Skill>::Create();
+		slow->SetBinding(SkillBinding().Set(KEYCODE_D));
+		slow->Setup("Glue Trap", 2, 1, DoSlow);
+		slow->mSceneObject = e;
+		e->mSkills[SLOW_SKILL_INDEX] = slow;
+
+		auto melee = Factory<Skill>::Create();
+		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
+		melee->Setup("Melee", 2, 1, DoMelee);
+		melee->mSceneObject = e;
+		e->mSkills[MELEE_SKILL_INDEX] = melee;
+
+		SkillBar* mSkillBar = &Application::SharedInstance().GetCurrentScene()->mSkillBar;
+		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], 2, 5, 8);
+		mSkillBar->AddSkill(e->mSkills[POISON_SKILL_INDEX], 2, 2, 6);
+		mSkillBar->AddSkill(e->mSkills[SLOW_SKILL_INDEX], 2, 4, 4);
+
+		break;
+	}
+	default:
+	{
+		e->mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
+		e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.5f;
+		e->mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
+		e->mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
+		e->mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
+		e->mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;
+		e->mMeleeColliderComponent.asSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
+		e->mMeleeColliderComponent.asSphereColliderComponent->RegisterTriggerEnterCallback(&OnMeleeHit);
+		e->mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = e;
+
+		auto sprint = Factory<Skill>::Create();
+		sprint->SetBinding(SkillBinding().Set(KEYCODE_A));
+		sprint->Setup("Sprint", 2, 1, DoSprint);
+		sprint->mSceneObject = e;
+		e->mSkills[SPRINT_SKILL_INDEX] = sprint;
+
+		auto melee = Factory<Skill>::Create();
+		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
+		melee->Setup("Melee", 2, 1, DoMelee);
+		melee->mSceneObject = e;
+		e->mSkills[MELEE_SKILL_INDEX] = melee;
+
+		SkillBar* mSkillBar = &Application::SharedInstance().GetCurrentScene()->mSkillBar;
+		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], 2, 5, 8);
+		mSkillBar->AddSkill(e->mSkills[SPRINT_SKILL_INDEX], 2, 1, 6);
+
+		break;
+	}
+	}
 }
 
 void Explorer::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot)
@@ -290,58 +304,63 @@ void Explorer::UpdateComponents(quatf rotation, vec3f position)
 	}
 }
 
-void Explorer::DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+bool Explorer::DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
 {
 	auto e = reinterpret_cast<Explorer*>(obj);
 	e->mController->Sprint(duration);
+	return true;
 }
 
-void Explorer::DoMelee(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+bool Explorer::DoMelee(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
 {
 	auto e = reinterpret_cast<Explorer*>(obj);
 	e->mController->Melee();
+	return true;
 }
 
-void Explorer::DoHeal(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+bool Explorer::DoHeal(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
 {
 	Explorer* explorer = reinterpret_cast<Explorer*>(obj);
 	if (explorer->mNetworkID->mHasAuthority)
 	{
-		Packet p(PacketTypes::SPAWN_HEAL);
+		Packet p(PacketTypes::SPAWN_SKILL);
 		p.AsSkill.Position = explorer->mTransform->GetPosition();
 		p.AsSkill.Duration = explorer->mSkills[HEAL_SKILL_INDEX]->mDuration;
 		p.AsSkill.Type = SkillPacketTypes::SKILL_TYPE_HEAL;
 		p.UUID = explorer->mNetworkID->mUUID;
 		explorer->mNetworkClient->SendData(&p);
 	}
+	return true;
 }
 
-void Explorer::DoPoison(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+bool Explorer::DoPoison(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
 {
 	Explorer* explorer = reinterpret_cast<Explorer*>(obj);
 	if (explorer->mNetworkID->mHasAuthority)
 	{
-		Packet p(PacketTypes::SPAWN_HEAL);
+		Packet p(PacketTypes::SPAWN_SKILL);
 		p.AsSkill.Position = explorer->mTransform->GetPosition();
 		p.AsSkill.Duration = explorer->mSkills[POISON_SKILL_INDEX]->mDuration;
 		p.AsSkill.Type = SkillPacketTypes::SKILL_TYPE_POISON;
 		p.UUID = explorer->mNetworkID->mUUID;
 		explorer->mNetworkClient->SendData(&p);
 	}
+	return true;
 }
 
-void Explorer::DoSlow(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+bool Explorer::DoSlow(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
 {
 	Explorer* explorer = reinterpret_cast<Explorer*>(obj);
 	if (explorer->mNetworkID->mHasAuthority)
 	{
-		Packet p(PacketTypes::SPAWN_HEAL);
+		Packet p(PacketTypes::SPAWN_SKILL);
 		p.AsSkill.Position = explorer->mTransform->GetPosition();
 		p.AsSkill.Duration = explorer->mSkills[SLOW_SKILL_INDEX]->mDuration;
 		p.AsSkill.Type = SkillPacketTypes::SKILL_TYPE_SLOW;
 		p.UUID = explorer->mNetworkID->mUUID;
 		explorer->mNetworkClient->SendData(&p);
 	}
+	return true;
 }
 
 void Explorer::OnMeleeStart(void* obj)

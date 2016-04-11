@@ -163,12 +163,13 @@ void ScareTacticsApplication::InitializeShaders()
 		{ "TEXCOORD",	0, 0, 12, 0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX },
 		{ "POINTPOS",	0, 1, 0,  1, RGB_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
 		{ "SCALE",		0, 1, 12, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
-		{ "ANCHSCALE",	0, 1, 20, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
-		{ "SHEETID",	0, 1, 28, 1, R_UINT32,  INPUT_CLASS_PER_INSTANCE },
-		{ "SPRITEID",	0, 1, 29, 1, R_UINT32,  INPUT_CLASS_PER_INSTANCE }
+		{ "LINFILL",	0, 1, 20, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "RADFILL",	0, 1, 28, 1, R_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "SHEETID",	0, 1, 29, 1, R_UINT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "SPRITEID",	0, 1, 30, 1, R_UINT32,  INPUT_CLASS_PER_INSTANCE }
 	};
 	renderer->VCreateShader(&mVSFwdSprites, &mGameAllocator);
-	renderer->VLoadVertexShader(mVSFwdSprites, gVSFwdSprites, sizeof(gVSFwdSprites), spriteInputElements, 7);
+	renderer->VLoadVertexShader(mVSFwdSprites, gVSFwdSprites, sizeof(gVSFwdSprites), spriteInputElements, 8);
 
 	// Skinned Vertex
 	InputElement skinnedInputElements[] =

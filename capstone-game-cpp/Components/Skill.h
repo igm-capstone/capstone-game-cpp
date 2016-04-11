@@ -23,13 +23,15 @@ struct SkillBinding
 class Skill : public BaseComponent
 {
 	friend class Factory<Skill>;
-	EXPOSE_CALLBACK_3(Use, float, BaseSceneObject*, vec3f)
+	EXPOSE_CALLBACK_BOOL_3(Use, float, BaseSceneObject*, vec3f)
 
 public:
 	vec3f mColliderOffset;
 	float mCoolDown;
+	float mCost;
 	float mDuration;
 	float mLastUsed;
+	const char* mName;
 	
 	UseCallback mCallback;
 	SkillBinding  mBinding;
@@ -44,8 +46,10 @@ private:
 
 public:
 	void SetBinding(SkillBinding& binding);
-	void Setup(float cooldown, float duration, UseCallback callback);
+	void Setup(const char* name, float cooldown, float duration, UseCallback callback, float cost = 0);
 	void Update();
+	bool UseSkill(BaseSceneObject* target = nullptr, vec3f skillPos = vec3f(0,0,0));
+	float Recharged();
 };
 
 inline BindingType operator|(BindingType a, BindingType b)

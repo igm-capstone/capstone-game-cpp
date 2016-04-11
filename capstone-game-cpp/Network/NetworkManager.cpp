@@ -8,6 +8,7 @@
 #include <SceneObjects/Heal.h>
 #include <SceneObjects/Trap.h>
 #include <SceneObjects/StatusEffect.h>
+#include <SceneObjects/FlyTrap.h>
 
 NetworkManager::NetworkManager()
 {
@@ -107,29 +108,6 @@ void NetworkRpc::SpawnExistingExplorer(int UUID, vec3f pos) {
 	e->Spawn(pos, UUID);
 }
 
-void NetworkCmd::SpawnNewMinion(vec3f pos) {
-	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER);
-
-	auto m = Factory<Minion>::Create();
-	m->Spawn(pos, MyUUID::GenUUID());
-
-	// set auhtority for the server
-	m->mNetworkID->mHasAuthority = true;
-	m->mNetworkID->OnNetAuthorityChange(true);
-
-	Packet p(PacketTypes::SPAWN_MINION);
-	p.UUID = m->mNetworkID->mUUID;
-	p.AsTransform.Position = pos;
-	mNetworkManager->mServer.SendToAll(&p);
-}
-
-void NetworkRpc::SpawnExistingMinion(int UUID, vec3f pos) {
-	assert(mNetworkManager->mMode == NetworkManager::Mode::CLIENT);
-
-	auto m = Factory<Minion>::Create();
-	m->Spawn(pos, UUID);
-}
-
 void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 {
 	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER);
@@ -164,12 +142,29 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		s->mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
 		break;
 	}
+	case SKILL_TYPE_PLANT_MINION:
+	{
+		auto f = Factory<FlyTrap>::Create();
+		f->Spawn(pos, UUID);
+		f->mNetworkID->mHasAuthority = true;
+		f->mNetworkID->OnNetAuthorityChange(true);
+		break;
+	}
+	case SKILL_TYPE_BASIC_MINION:
+	case SKILL_TYPE_BOMBER_MINION: // for now
+	{
+		auto m = Factory<Minion>::Create();
+		m->Spawn(pos, UUID);
+		m->mNetworkID->mHasAuthority = true;
+		m->mNetworkID->OnNetAuthorityChange(true);
+		break;
+	}
 	case SKILL_TYPE_UNKNOWN:
 	default:
 		break;
 	}
-
-	Packet p(PacketTypes::SPAWN_HEAL);
+	
+	Packet p(PacketTypes::SPAWN_SKILL);
 	p.UUID = UUID;
 	p.AsSkill.Position = pos;
 	p.AsSkill.Duration = duration;
@@ -201,6 +196,19 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 		auto s = Factory<Trap>::Create();
 		s->Spawn(UUID, pos, duration);
 		s->mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
+		break;
+	}
+	case SKILL_TYPE_PLANT_MINION:
+	{
+		auto f = Factory<FlyTrap>::Create();
+		f->Spawn(pos, UUID);
+		break;
+	}
+	case SKILL_TYPE_BASIC_MINION:
+	case SKILL_TYPE_BOMBER_MINION:
+	{
+		auto m = Factory<Minion>::Create();
+		m->Spawn(pos, UUID);
 		break;
 	}
 	case SKILL_TYPE_UNKNOWN:

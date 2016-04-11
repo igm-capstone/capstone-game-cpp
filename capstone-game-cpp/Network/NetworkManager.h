@@ -13,14 +13,15 @@ public:
 	enum Mode {
 		IDLE,
 		SERVER,
-		CLIENT,
-		BOTH
+		CLIENT
 	};
 
 	Mode mMode;
 
 	NetworkServer mServer;
 	NetworkClient mClient;
+
+	int ID() { return (mMode == CLIENT ? mClient.mID : (mMode == SERVER ? 0 : -1)); }
 
 	bool StartServer();
 	bool StartClient();
@@ -38,7 +39,6 @@ class NetworkCmd
 	static NetworkManager* mNetworkManager;
 public:
 	static void SpawnNewExplorer(int clientID);
-	static void SpawnNewMinion(vec3f pos);
 	static void SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration);
 };
 
@@ -46,7 +46,6 @@ class NetworkRpc {
 	static NetworkManager* mNetworkManager;
 public:
 	static void SpawnExistingExplorer(int UUID, vec3f pos);
-	static void SpawnExistingMinion(int UUID, vec3f pos);
 	static void SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, float duration);
 
 	static void GrantAuthority(int UUID);

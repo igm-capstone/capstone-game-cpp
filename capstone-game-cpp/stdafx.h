@@ -15,12 +15,26 @@
 
 #include "Network\NetworkManager.h"
 
+//Debug
+
+extern bool gDebugExplorer;
+extern bool gDebugGrid;
+extern bool gDebugOrto;
+extern bool gDebugColl;
+extern bool gDebugGBuffer;
+extern bool gDebugBVH;
+extern bool gDebugBT;
+
 //Config
+
+#define STATIC_APP_MEMORY		8000000
+#define STATIC_SCENE_MEMORY		2000000
+#define SCENE_ALIGNMENT_PADDING 6
 
 #define MAX_EXPLORERS 4
 #define MAX_EXPLORER_SKILLS  5
 
-#define MAX_GHOST_SKILLS 4
+#define MAX_GHOST_SKILLS 5
 
 #define MAX_MINIONS 50
 

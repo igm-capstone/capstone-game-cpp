@@ -103,6 +103,13 @@ void loadLamps(jarr_t objs)
 		lamp->mLightDirection	= defaultDirection * lamp->mTransform->GetRotationMatrix();
 		lamp->mLightRadius		= obj["lightRadius"].get<float>();
 		lamp->mLightAngle		= obj["angle"].get<float>() * radians;
+
+		lamp->mTrigger->mCollider.axis[0] = vec3f(1, 0, 0);
+		lamp->mTrigger->mCollider.axis[1] = vec3f(0, 1, 0);
+		lamp->mTrigger->mCollider.axis[2] = vec3f(0, 0, 1);
+		lamp->mTrigger->mCollider.origin = lamp->mTransform->GetPosition();
+		lamp->mTrigger->mCollider.halfSize = vec3f(2.0f, 2.0f, 2.0f);
+		lamp->mTrigger->mLayer = COLLISION_LAYER_INTERACTABLE;
 	}
 }
 
@@ -113,7 +120,9 @@ void loadDomPoints(jarr_t objs)
 	for (auto obj : *objs)
 	{
 		auto dom = Factory<DominationPoint>::Create();
-		parseTransform(obj, dom->mTransform);
+		parseStaticMeshTransform(obj, dom->mTransform);
+		dom->mTransform->SetScale(vec3f(0.1f));
+
 
 		dom->mDominationTime = obj["captureTime"].get<float>();
 		dom->mTier = obj["tier"].get<int>();
@@ -255,12 +264,13 @@ void loadDoors(jarr_t objs)
 	TRACE_LOG("Loading " << int(objs->size()) << " doors...");
 	for (auto obj : *objs)
 	{
+		auto canOpen = obj["canOpen"].get<bool>();
+		if (!canOpen) continue;
 		auto position = parseVec3f(obj["position"]);
 		auto rotation = parseQuatf(obj["rotation"]);
 		auto scale = parseVec3f(obj["scale"]);
 		auto collOrigin = parseVec3f(obj["bounds"]["center"]);
 		auto collHalf = parseVec3f(obj["bounds"]["extents"]);
-		auto canOpen = obj["canOpen"].get<bool>();
 
 		auto door = Factory<Door>::Create();
 		parseTransform(obj, door->mTransform);
@@ -269,12 +279,9 @@ void loadDoors(jarr_t objs)
 		door->mTransform->SetPosition(position);
 		door->mTransform->SetRotation(rotation);
 		door->mTransform->SetScale(scale);
-		door->mCanOpen = canOpen;
 
 		door->mColliderComponent->mCollider.origin = collOrigin;
-		door->mColliderComponent->mCollider.origin.z = -7.5f;
 		door->mColliderComponent->mCollider.halfSize = collHalf;
-		door->mColliderComponent->mCollider.halfSize.z = 7.5f;
 		door->mColliderComponent->mCollider.axis[0] = vec3f(1, 0, 0);
 		door->mColliderComponent->mCollider.axis[1] = vec3f(0, 1, 0);
 		door->mColliderComponent->mCollider.axis[2] = vec3f(0, 0, 1);
@@ -289,7 +296,7 @@ void loadDoors(jarr_t objs)
 			door->mTrigger->mCollider.halfSize.x = 3;
 		else
 			door->mTrigger->mCollider.halfSize.y = 3;
-		door->mTrigger->mLayer = COLLISION_LAYER_DOOR;
+		door->mTrigger->mLayer = COLLISION_LAYER_INTERACTABLE;
 	}
 }
 

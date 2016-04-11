@@ -103,8 +103,8 @@ void NetworkClient::Update()
 			case SPAWN_EXPLORER:
 				NetworkRpc::SpawnExistingExplorer(packet.UUID, packet.AsTransform.Position);
 				break;
-			case SPAWN_MINION:
-				NetworkRpc::SpawnExistingMinion(packet.UUID, packet.AsTransform.Position);
+			case SPAWN_SKILL:
+				NetworkRpc::SpawnExistingSkill(packet.AsSkill.Type, packet.UUID, packet.AsSkill.Position, packet.AsSkill.Duration);
 				break;
 			case GRANT_AUTHORITY:
 				NetworkRpc::GrantAuthority(packet.UUID);
@@ -118,9 +118,6 @@ void NetworkClient::Update()
 				break;
 			case SYNC_ANIMATION:
 				NetworkRpc::SyncAnimation(packet.UUID, packet.AsAnimation.State, packet.AsAnimation.Command);
-				break;
-			case SPAWN_HEAL:
-				NetworkRpc::SpawnExistingSkill(packet.AsSkill.Type, packet.UUID, packet.AsSkill.Position, packet.AsSkill.Duration);
 				break;
 			default:
 				printf("error in packet types\n");

@@ -7,6 +7,7 @@
 #include <AIManager.h>
 #include <UI\SpriteManager.h>
 #include <Resource.h>
+#include <UI/SkillBar.h>
 
 using namespace Rig3D;
 
@@ -44,15 +45,10 @@ protected:
 public:
 	BaseSceneState				mState;
 
-	// Miscelanious
-	bool						mDebugGrid;
-	bool						mDebugColl;
-	bool						mDebugGBuffer;
-	bool						mDebugBVH;
-	bool						mDebugBT;
-
 	Resource::LevelInfo			mLevel;
 	BoxCollider2D				mFloorCollider;
+
+	SkillBar					mSkillBar;
 
 	BaseScene();
 	virtual ~BaseScene();

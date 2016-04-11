@@ -11,6 +11,7 @@ public:
 	class StatusEffect*				mEffect;
 
 	float mDuration;
+	float mEffectDuration;
 
 	void Spawn(int UUID, vec3f position, float duration);
 

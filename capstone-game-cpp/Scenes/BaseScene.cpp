@@ -15,11 +15,7 @@
 BaseScene::BaseScene() : 
 	mStaticMemory(nullptr),
 	mStaticMemorySize(0),
-	mState(BASE_SCENE_STATE_CONSTRUCTED),
-	mDebugGrid(false), mDebugColl(false),
-	mDebugGBuffer(false),
-	mDebugBVH(false),
-	mDebugBT(false)
+	mState(BASE_SCENE_STATE_CONSTRUCTED)
 {
 	mEngine = &Singleton<Engine>::SharedInstance();
 
@@ -118,10 +114,12 @@ void BaseScene::RenderIMGUI(void(*IMGUIDrawFunc)(BaseScene*))
 	mRenderer->VSetContextTarget();
 	DX11IMGUI::NewFrame();
 	RenderFPSIndicator();
-	if (mDebugBVH) RenderBVHTree();
-	if (mDebugBT) RenderMinionBehaviorTrees();
-	if (IMGUIDrawFunc) IMGUIDrawFunc(this);
+#ifdef _DEBUG
+	if (gDebugBVH) RenderBVHTree();
+	if (gDebugBT) RenderMinionBehaviorTrees();
 	RENDER_TRACE_WATCH();
+#endif
+	if (IMGUIDrawFunc) IMGUIDrawFunc(this);
 	ImGuiWindow* console = static_cast<ImGuiWindow*>(Console::Draw());
 	ImGui::Render();
 
