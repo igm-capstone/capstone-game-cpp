@@ -23,13 +23,13 @@
 #include <Components/MinionController.h>
 #include <DebugRender.h>
 #include <SceneObjects/Door.h>
-#include <Rig3D/Graphics/DirectX11/DX11ShaderResource.h>
 #include <SceneObjects/SpawnPoint.h>
 #include <SceneObjects/FlyTrap.h>
 #include <SceneObjects/Heal.h>
 #include <SceneObjects/Trap.h>
 #include <SceneObjects/StatusEffect.h>
 #include <SceneObjects/DominationPoint.h>
+#include <Components/DominationPointController.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -37,6 +37,7 @@ static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
 extern bool gDebugExplorer;
 
 Level01::Level01() :
+	mCubeMesh(nullptr),
 	mNDSQuadMesh(nullptr),
 	mGBufferContext(nullptr),
 	mShadowContext(nullptr),
@@ -45,7 +46,15 @@ Level01::Level01() :
 	mExplorerShaderResource(nullptr),
 	mPLVShaderResource(nullptr), 
 	mSpritesShaderResource(nullptr),
-	mGridShaderResource(nullptr)
+	mGridShaderResource(nullptr),
+	mFullSrcData(nullptr),
+	mFullSrcDataSRV(nullptr),
+	mSimpleSrcData(nullptr),
+	mSimpleSrcDataSRV(nullptr),
+	mOutputData(nullptr),
+	mOutputDataCPURead(nullptr),
+	mOutputDataSRV(nullptr),
+	mGameState(GAME_STATE_INITIAL)
 {
 	mAIManager->SetAllocator(&mAllocator);
 }
@@ -126,6 +135,8 @@ void Level01::VInitialize()
 			e->DebugSpawn(sp.mTransform->GetPosition(), MyUUID::GenUUID());
 		}
 	}
+
+	InitializeGameState();
 
 	VOnResize();
 
@@ -398,6 +409,22 @@ void Level01::InitializeShaderResources()
 		}
 	}
 }
+
+void Level01::InitializeGameState()
+{
+	for (DominationPoint& dp : Factory<DominationPoint>())
+	{
+		if (dp.mTier == 0)
+		{
+			dp.mController->mActivationPredicate = nullptr;
+		}
+		else
+		{
+			dp.mController->mActivationPredicate = Level01::ActivationPredicate;
+		}
+	}
+}
+
 #pragma endregion
 
 #pragma region Update
@@ -511,7 +538,82 @@ void Level01::VFixedUpdate(double milliseconds)
 	mAIManager->Update();
 
 	mNetworkManager->Update();
+
+	UpdateGameState(milliseconds);
 }
+
+void Level01::UpdateGameState(double milliseconds)
+{
+	GameState currentState = mGameState;
+
+	static DominationPoint* finalDP = nullptr;
+
+	switch (currentState)
+	{
+	case GAME_STATE_INITIAL:
+		// Check for ready status
+		currentState = GAME_STATE_CAPTURE;
+		break;
+	case GAME_STATE_CAPTURE:
+	{
+		bool checkDomPoints = IsExplorerAlive();
+		if (checkDomPoints)
+		{
+			// Count dom points captured
+			char dominationPointsCaptured = 0;
+			for (DominationPoint& dp : Factory<DominationPoint>())
+			{
+				if (dp.mController->isDominated) { dominationPointsCaptured++; }
+			}
+
+			if (dominationPointsCaptured == 4)
+			{
+				// Explorers Win
+				currentState = GAME_STATE_FINAL;
+				TRACE_LOG("EXPLORERS WIN");
+
+			}
+		}
+		else
+		{
+			// Ghost Wins
+			currentState = GAME_STATE_FINAL;
+			TRACE_LOG("GHOST WIN");
+
+		}
+		
+		break;	
+	}
+	case GAME_STATE_FINAL:
+		// Check for RESTART / EXIT.
+		break;
+	}
+
+	mGameState = currentState;
+}
+
+bool Level01::IsExplorerAlive()
+{
+	int explorerCount = 0;
+	bool activeExplorers[4] = { 0, 0, 0, 0 };
+
+	for (Explorer& e : Factory<Explorer>())
+	{
+		if (e.mHealth->GetHealth() > 0)
+		{
+			activeExplorers[explorerCount++] = 1;
+		}
+	}
+
+	bool atLeastOneAlive = 1;
+	for (int i = 0; i < explorerCount; i++)
+	{
+		atLeastOneAlive &= activeExplorers[i];
+	}
+
+	return atLeastOneAlive;
+}
+
 #pragma endregion
 
 #pragma region Render
@@ -594,6 +696,8 @@ void Level01::RenderShadowMaps()
 
 		for (int staticMeshIndex = 0; staticMeshIndex < STATIC_MESH_MODEL_COUNT; staticMeshIndex++)
 		{
+			if (staticMeshIndex == STATIC_MESH_WALL_LANTERN) { continue; }
+
 			// Get Objects for a given mesh
 			std::vector<BaseSceneObject*>* pBaseSceneObjects = mModelManager->RequestAllUsingModel(kStaticMeshModelNames[staticMeshIndex]);
 			
@@ -1146,4 +1250,19 @@ void Level01::ComputeGrid()
 void Level01::VShutdown()
 {
 
+}
+
+bool Level01::ActivationPredicate(class Explorer* explorer)
+{
+	for (DominationPoint& dp : Factory<DominationPoint>())
+	{
+		if (dp.mTier == 1) { continue; }
+		
+		if (dp.mController->isDominated == false)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }

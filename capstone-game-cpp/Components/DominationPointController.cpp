@@ -70,11 +70,10 @@ void DominationPointController::Update(double milliseconds)
 	// TODO: Fire ChangeProgress callback
 		
 	mProgress = newProgress;
-
+	
 	if (mProgress == 1)
 	{
 		// TODO: Fire Dominated callback
-
 		isDominated = true;
 	}
 }
