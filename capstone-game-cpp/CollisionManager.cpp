@@ -167,10 +167,10 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 		}
 	}
 
-	// Explorer / Doors
+	// Explorer / Doors&Lamps
 
-	std::vector<uint32_t> doorIndices;
-	doorIndices.reserve(MAX_DOORS);
+	std::vector<uint32_t> interactIndices;
+	interactIndices.reserve(MAX_DOORS + MAX_LAMPS);
 
 	for (uint32_t i : explorerIndices)
 	{
@@ -180,12 +180,12 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
 
 		// Explorer / Door
-		mBVHTree.GetNodeIndices(doorIndices, COLLISION_LAYER_DOOR, [parentIndex](const BVHNode& other)
+		mBVHTree.GetNodeIndices(interactIndices, COLLISION_LAYER_INTERACTABLE, [parentIndex](const BVHNode& other)
 		{
 			return other.parentIndex == parentIndex;
 		});
 
-		for (uint32_t s : doorIndices)
+		for (uint32_t s : interactIndices)
 		{
 			BVHNode* pDoorNode = mBVHTree.GetNode(s);
 

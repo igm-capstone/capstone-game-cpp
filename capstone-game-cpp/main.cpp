@@ -9,13 +9,7 @@
 #include "capstone-game-cpp.rc.h"
 #include "BehaviorTree/TestSuite.h"
 
-#define STATIC_APP_MEMORY 8000000
-
-static char gApplicationMemory[STATIC_APP_MEMORY];	// 4mb
-
-bool gDebugExplorer = false;
-
-Rig3D::IScene *gRig3DScene = nullptr;
+static char gApplicationMemory[STATIC_APP_MEMORY];
 
 int CALLBACK WinMain(HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,

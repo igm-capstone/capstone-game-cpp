@@ -11,6 +11,8 @@
 #include "SceneObjects/Minion.h"
 #include "SceneObjects/Door.h"
 #include "SceneObjects/StaticMesh.h"
+#include "SceneObjects/Trap.h"
+#include "SceneObjects/Lamp.h"
 
 #define PARTITION_X_COUNT 3
 #define PARTITION_Y_COUNT 2
@@ -20,11 +22,9 @@
 #define REGION_PARENT_LAYER_INDEX   1
 #define SKILL_PARENT_LAYER_INDEX	1
 #define DOOR_PARENT_LAYER_INDEX		1
-#define DRAW_DEBUG 1
 
-#if (DRAW_DEBUG == 1)
+#ifdef _DEBUG
 #include <trace.h>
-#include "SceneObjects/Trap.h"
 
 void RenderDebug(BVHTree& bvhTree)
 {
@@ -70,8 +70,7 @@ namespace
 		COLLISION_LAYER_ROOT,
 		COLLISION_LAYER_QUADRANT,
 		COLLISION_LAYER_EXPLORER,
-		COLLISION_LAYER_DOOR,
-		COLLISION_LAYER_LAMP,
+		COLLISION_LAYER_INTERACTABLE,
 		COLLISION_LAYER_FLOOR,
 		COLLISION_LAYER_WALL,
 		COLLISION_LAYER_MINION,
@@ -101,9 +100,10 @@ void BVHTree::Initialize()
 
 void BVHTree::Update()
 {
-#if (DRAW_DEBUG == 1)
-	RenderDebug(*this);
-#endif
+#ifdef _DEBUG
+	if (gDebugBVH) RenderDebug(*this);
+#endif 
+
 	mLayerStartIndex.erase(COLLISION_LAYER_EXPLORER);
 	mLayerStartIndex.erase(COLLISION_LAYER_MINION);
 	mLayerStartIndex.erase(COLLISION_LAYER_EXPLORER_SKILL);
@@ -202,6 +202,11 @@ void BVHTree::BuildBoundingVolumeHierarchy()
 		AddNodeRecursively(door.mColliderComponent, WALL_PARENT_LAYER_INDEX, 0, 0, 0);
 		AddNodeRecursively(door.mTrigger, DOOR_PARENT_LAYER_INDEX, 0, 0, 0);
 	}
+
+	for (Lamp& door : Factory<Lamp>())
+	{
+		AddNodeRecursively(door.mTrigger, DOOR_PARENT_LAYER_INDEX, 0, 0, 0);
+	}
 }
 
 void BVHTree::AddNode(BaseColliderComponent* pColliderComponent, const int& parentIndex, const int& depth)
@@ -256,8 +261,7 @@ BaseColliderComponent* BVHTree::RayCastRecursively(Ray<vec3f> ray, vec3f &hitPos
 			
 			if (IntersectRayOBB(ray, pOBB->mCollider, poi, t))
 			{
-				if (mNodes[i].object->mLayer != COLLISION_LAYER_DOOR &&
-					mNodes[i].object->mLayer != COLLISION_LAYER_LAMP &&
+				if (mNodes[i].object->mLayer != COLLISION_LAYER_INTERACTABLE &&
 					mNodes[i].object->mLayer != COLLISION_LAYER_FLOOR /*&&
 					mNodes[i].object->mLayer != COLLISION_LAYER_EXPLORER*/) //Explorer is out because right now I can only do OBB from the nodes.
 				{

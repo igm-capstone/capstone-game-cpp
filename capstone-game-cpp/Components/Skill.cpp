@@ -30,7 +30,7 @@ SkillBinding& SkillBinding::Set(KeyCode value)
 Skill::Skill() :
 	mCoolDown(0),
 	mDuration(0),
-	mLastUsed(0),
+	mLastUsed(-FLT_MAX),
 	mCallback(nullptr)
 {
 	Engine& engine = Singleton<Engine>::SharedInstance();
@@ -47,11 +47,12 @@ void Skill::SetBinding(SkillBinding& binding)
 	mBinding = binding;
 }
 
-void Skill::Setup(const char* name, float cooldown, float duration, UseCallback callback)
+void Skill::Setup(const char* name, float cooldown, float duration, UseCallback callback, float cost)
 {
 	mName = name;
 	mCoolDown = cooldown;
 	mDuration = duration;
+	mCost = cost;
 	RegisterUseCallback(callback);
 }
 
@@ -65,23 +66,15 @@ public:
 
 void Skill::Update()
 {
-	if (!mIsActive)
-	{
-		return;
-	}
+	if (!mIsActive) return;
 
 	//--- check if a binding was activated
-
 	bool useSkill = false;
-
 	useSkill = useSkill || (mBinding.bindingType & KEY_CODE)       && mInput->GetKeyDown(mBinding.keyCode);
 	useSkill = useSkill || (mBinding.bindingType & MOUSE_BUTTON)   && mInput->GetMouseButtonDown(mBinding.mouseButton);
 	useSkill = useSkill || (mBinding.bindingType & GAMEPAD_BUTTON) && mInput->GetGamepadButtonDown(mBinding.gamepadButton);
 
-	if (!useSkill)
-	{
-		return;
-	}
+	if (!useSkill) return;
 
 	BaseSceneObject* target = nullptr;
 	vec3f skillPos;
@@ -100,24 +93,25 @@ void Skill::Update()
 	UseSkill(target, skillPos);
 }
 
-void Skill::UseSkill(BaseSceneObject* target, vec3f skillPos)
+bool Skill::UseSkill(BaseSceneObject* target, vec3f skillPos)
 {
-	//--- check if skill is still on cooldown
-	// app time in seconds
+	//Cooldown
 	float appTime = float(mTimer->GetApplicationTime()) * 0.001f;
 	float timeFromLastUse = appTime - mLastUsed;
 
 	if (timeFromLastUse < mCoolDown)
 	{
-		// on cooldown
 		TRACE_WARN("Skill on cooldown: " << (mCoolDown - timeFromLastUse));
-		return;
+		return false;
 	}
 
-	//--- fire callback
-	OnUse(mDuration, target, skillPos);
+	//Fire callback
+	if (OnUse(mDuration, target, skillPos)) {
+		mLastUsed = appTime;
+		return true;
+	}
 
-	mLastUsed = appTime;
+	return false;
 }
 
 float Skill::Recharged()

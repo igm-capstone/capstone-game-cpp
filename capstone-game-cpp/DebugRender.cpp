@@ -131,6 +131,16 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 
 		gRenderer->VDrawIndexed(0, gColliderMesh->GetIndexCount());
 	}
+	for (Lamp& e : Factory<Lamp>())
+	{
+		if (!e.mTrigger->mIsActive) continue;
+		model->world = (mat4f::scale(e.mTrigger->mCollider.halfSize * 2.0f) * mat4f::translate(e.mTrigger->mCollider.origin)).transpose();
+		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
+		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
+		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 3, 2);
+
+		gRenderer->VDrawIndexed(0, gColliderMesh->GetIndexCount());
+	}
 
 	gRenderer->VUpdateShaderConstantBuffer(iShaderResource, &color[5], 3);
 	for (StaticMesh& e : Factory<StaticMesh>())

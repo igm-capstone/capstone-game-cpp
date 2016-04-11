@@ -13,14 +13,15 @@ public:
 	enum Mode {
 		IDLE,
 		SERVER,
-		CLIENT,
-		BOTH
+		CLIENT
 	};
 
 	Mode mMode;
 
 	NetworkServer mServer;
 	NetworkClient mClient;
+
+	int ID() { return (mMode == CLIENT ? mClient.mID : (mMode == SERVER ? 0 : -1)); }
 
 	bool StartServer();
 	bool StartClient();

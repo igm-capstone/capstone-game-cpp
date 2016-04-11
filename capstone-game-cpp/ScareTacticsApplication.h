@@ -7,9 +7,6 @@
 #include "fmodwrap.h"
 #include "ModelManager.h"
 
-#define STATIC_SCENE_MEMORY		2000000
-#define SCENE_ALIGNMENT_PADDING 6
-
 using namespace Rig3D;
 
 class ScareTacticsApplication : public IApplication

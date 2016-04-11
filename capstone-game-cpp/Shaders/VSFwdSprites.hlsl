@@ -23,8 +23,8 @@ struct Sprite
 	//Per Sprite
 	float3		pointpos	: POINTPOS;
 	float2		scale		: SCALE;
-	float3		linearFill	: LINFILL;
-	float3		radialFill	: RADFILL;
+	float2		linearFill	: LINFILL;
+	float		radialFill	: RADFILL;
 	uint		sheetID		: SHEETID;
 	uint		spriteID	: SPRITEID;
 };

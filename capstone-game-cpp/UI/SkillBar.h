@@ -6,6 +6,7 @@ struct Button
 	bool isHighlighted = false;
 	int sheetID;
 	int spriteID;
+	int keySpriteID;
 	Skill* skill;
 };
 
@@ -21,7 +22,8 @@ public:
 
 	void RenderPanel();
 	void RenderButton(Button* b, vec2f pos);
-	void AddSkill(Skill* name, int sheetID, int spriteID);
+	void AddSkill(Skill* name, int sheetID, int spriteID, int keySpriteID = -1);
 	void SetActive(Skill* skill);
+	void RenderManaBar();
 };
 

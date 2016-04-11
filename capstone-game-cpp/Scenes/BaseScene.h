@@ -45,13 +45,6 @@ protected:
 public:
 	BaseSceneState				mState;
 
-	// Miscelanious
-	bool						mDebugGrid;
-	bool						mDebugColl;
-	bool						mDebugGBuffer;
-	bool						mDebugBVH;
-	bool						mDebugBT;
-
 	Resource::LevelInfo			mLevel;
 	BoxCollider2D				mFloorCollider;
 
