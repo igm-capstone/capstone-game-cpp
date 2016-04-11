@@ -32,26 +32,33 @@ MinionController::MinionController()
 	, mDirectionIndex(0)
 	, mIsTransformDirty(false)
 {
-
-	mBehaviorTree = &TreeBuilder()
-		.Composite<Priority>("(/!\\) Priority Selector")
-			.Composite<Sequence>("(-->) Follow Explorer")
-				.Conditional()
-					.Predicate(&IsExplorerInRange, "(?) Is Explorer in Range")
-					.Composite<Parallel>()
-						.Action(&MoveTowardsExplorer, "(!) Move Towards Explorer")
-						.Action(&LookForward, "(!) Look Forward")
-					.End()
-				.End()
-			.End()
-			.Composite<Sequence>("(-->) Wander Arround")
-				.Action(&Think, "(!) Think")
-				.Action(&UpdateWanderDirection, "(!) Update Wander Direction")
+	Tree& followExplorer = TreeBuilder("(-->) Follow Explorer")
+		.Composite<Sequence>()
+			.Conditional()
+				.Predicate(&IsExplorerInRange, "(?) Is Explorer in Range")
 				.Composite<Parallel>()
-					.Action(&WanderTowardsDirection, "(!) Wander Towards Direction")
+					.Action(&MoveTowardsExplorer, "(!) Move Towards Explorer")
 					.Action(&LookForward, "(!) Look Forward")
 				.End()
 			.End()
+		.End()
+	.End();
+
+	Tree& wanderArround = TreeBuilder("(-->) Wander Arround")
+		.Composite<Sequence>()
+			.Action(&Think, "(!) Think")
+			.Action(&UpdateWanderDirection, "(!) Update Wander Direction")
+			.Composite<Parallel>()
+				.Action(&MoveForward, "(!) Move Forward")
+				.Action(&LookForward, "(!) Look Forward")
+			.End()
+		.End()
+	.End();
+
+	mBehaviorTree = &TreeBuilder()
+		.Composite<Priority>("(/!\\) Priority Selector")
+			.Subtree(followExplorer)
+			.Subtree(wanderArround)
 		.End()
 	.End();
 }
@@ -156,7 +163,7 @@ BehaviorStatus MinionController::Think(Behavior& bh, void* data) {
 	return BehaviorStatus::Running;
 }
 
-BehaviorStatus MinionController::WanderTowardsDirection(Behavior& bh, void* data)
+BehaviorStatus MinionController::MoveForward(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
 

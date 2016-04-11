@@ -137,6 +137,12 @@ namespace BehaviorTree
 				return builder;
 			}
 
+			CompositeBuilder<ParentType, CompositeType> Subtree(Tree& tree, std::string name = "Subtree")
+			{
+				mComposite->Add(tree);
+				return *this;
+			}
+
 			ParentType& End()
 			{
 				return *mParent;
