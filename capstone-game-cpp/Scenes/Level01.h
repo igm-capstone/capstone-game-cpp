@@ -6,8 +6,7 @@
 enum GameState : char
 {
 	GAME_STATE_INITIAL,		// Use to check for players ready
-	GAME_STATE_CAPTURE_0,	// Players capturing tier 0 dom points
-	GAME_STATE_CAPTURE_1,	// Players capturing tier 1 dom point
+	GAME_STATE_CAPTURE,
 	GAME_STATE_FINAL		// All players dead or dom points captured
 };
 
@@ -64,7 +63,8 @@ public:
 	void InitializeAssets();
 	void InitializeGeometry();
 	void InitializeShaderResources();
-	
+	void InitializeGameState();
+
 	void VUpdate(double milliseconds) override;
 	void VFixedUpdate(double milliseconds) override;
 	void UpdateGameState(double milliseconds);
@@ -85,4 +85,5 @@ public:
 
 	void VShutdown() override;
 
+	static bool ActivationPredicate(class Explorer* explorer);
 };

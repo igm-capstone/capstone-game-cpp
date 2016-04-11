@@ -136,6 +136,8 @@ void Level01::VInitialize()
 		}
 	}
 
+	InitializeGameState();
+
 	VOnResize();
 
 	mState = BASE_SCENE_STATE_RUNNING;
@@ -407,6 +409,22 @@ void Level01::InitializeShaderResources()
 		}
 	}
 }
+
+void Level01::InitializeGameState()
+{
+	for (DominationPoint& dp : Factory<DominationPoint>())
+	{
+		if (dp.mTier == 0)
+		{
+			dp.mController->mActivationPredicate = nullptr;
+		}
+		else
+		{
+			dp.mController->mActivationPredicate = Level01::ActivationPredicate;
+		}
+	}
+}
+
 #pragma endregion
 
 #pragma region Update
@@ -535,55 +553,31 @@ void Level01::UpdateGameState(double milliseconds)
 	case GAME_STATE_INITIAL:
 		// Check for ready status
 		break;
-	case GAME_STATE_CAPTURE_0:
+	case GAME_STATE_CAPTURE:
 	{
 		bool checkDomPoints = IsExplorerAlive();
 		if (checkDomPoints)
 		{
 			// Count dom points captured
-			char tiersCaptured[2] = { 0, 0 };
+			char dominationPointsCaptured = 0;
 			for (DominationPoint& dp : Factory<DominationPoint>())
 			{
-				if (dp.mTier == 1)
-				{
-					finalDP = &dp;
-				}
-
-				if (dp.mController->mIsActive && dp.mController->isDominated)
-				{
-					tiersCaptured[dp.mTier]++;
-				}
+				if (dp.mController->isDominated) { dominationPointsCaptured++; }
 			}
 
-			if (tiersCaptured[0] == 3)
+			if (dominationPointsCaptured == 4)
 			{
-				finalDP->mController->mIsActive = true;
-				currentState = GAME_STATE_CAPTURE_1;
-			}
-		}
-		else
-		{
-			currentState = GAME_STATE_FINAL;
-		}
-		
-		break;	
-	}
-	case GAME_STATE_CAPTURE_1:
-	{
-		bool checkDomPoints = IsExplorerAlive();
-		if (checkDomPoints)
-		{
-			if (finalDP->mController->isDominated)
-			{
+				// Explorers Win
 				currentState = GAME_STATE_FINAL;
 			}
 		}
 		else
 		{
+			// Ghost Wins
 			currentState = GAME_STATE_FINAL;
 		}
-
-		break;
+		
+		break;	
 	}
 	case GAME_STATE_FINAL:
 		// Check for RESTART / EXIT.
@@ -697,6 +691,8 @@ void Level01::RenderShadowMaps()
 
 		for (int staticMeshIndex = 0; staticMeshIndex < STATIC_MESH_MODEL_COUNT; staticMeshIndex++)
 		{
+			if (staticMeshIndex == STATIC_MESH_WALL_LANTERN) { continue; }
+
 			// Get Objects for a given mesh
 			std::vector<BaseSceneObject*>* pBaseSceneObjects = mModelManager->RequestAllUsingModel(kStaticMeshModelNames[staticMeshIndex]);
 			
@@ -1249,4 +1245,19 @@ void Level01::ComputeGrid()
 void Level01::VShutdown()
 {
 
+}
+
+bool Level01::ActivationPredicate(class Explorer* explorer)
+{
+	for (DominationPoint& dp : Factory<DominationPoint>())
+	{
+		if (dp.mTier == 1) { continue; }
+		
+		if (dp.mController->isDominated == false)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
