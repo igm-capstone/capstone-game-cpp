@@ -10,54 +10,57 @@
 #include <SceneObjects/Minion.h>
 #include "AnimationController.h"
 #include <BehaviorTree/Parallel.h>
+#include <BehaviorTree/Builder.h>
 
 using namespace BehaviorTree;
 using namespace chrono;
 using namespace cliqCity::graphicsMath;
 
-MinionController::MinionController():
-	mThinkTime(0),
-	mAI(Singleton<AIManager>::SharedInstance()),
-	mTimer(*Singleton<Engine>::SharedInstance().GetTimer())
+// unnormalized direction vectors, going clockwise
+const vec2f MinionController::sDirections[] = {
+	{  1,  0 }, {  1, -1 }, {  0, -1 }, { -1, -1 },
+	{ -1,  0 }, { -1,  1 }, {  0,  1 }, {  1,  1 },
+};
+
+MinionController::MinionController()
+	: mSpeed(0)
+	, mThinkTime(0)
+	, mWanderTime(0)
+	, mAI(Singleton<AIManager>::SharedInstance())
+	, mTimer(*Singleton<Engine>::SharedInstance().GetTimer())
+	, mAngle(0)
+	, mDirectionIndex(0)
+	, mIsTransformDirty(false)
 {
-	mBehaviorTree = new Tree();
+	Tree& followExplorer = TreeBuilder("(-->) Follow Explorer")
+		.Composite<Sequence>()
+			.Conditional()
+				.Predicate(&IsExplorerInRange, "(?) Is Explorer in Range")
+				.Composite<Parallel>()
+					.Action(&MoveTowardsExplorer, "(!) Move Towards Explorer")
+					.Action(&LookForward, "(!) Look Forward")
+				.End()
+			.End()
+		.End()
+	.End();
 
-	auto baseSelector = new Priority(*mBehaviorTree, "(/!\\) Priority Selector");
-	auto followExplorerSequence = new Sequence(*mBehaviorTree, "(-->) Follow Explorer");
-	auto isExplorerInRange = new Predicate(*mBehaviorTree, "(?) Is Explorer in Range");
-	auto moveTowardsExplorer = new Behavior(*mBehaviorTree, "(!) Move Towards Explorer");
-	auto tryToFollowExplorer = new Conditional(*mBehaviorTree, *moveTowardsExplorer, *isExplorerInRange, "(?) Try to Follow Explorer");
-	auto patrolSequence = new Sequence(*mBehaviorTree, "(-->) Patrol");
-	auto findTarget = new Behavior(*mBehaviorTree, "(!) Find Patrol Target");
-	auto think = new Behavior(*mBehaviorTree, "(!) Think");
-	auto followTarget = new Parallel(*mBehaviorTree, "(!!) Follow Target");
-	auto rotateTowardsTarget = new Behavior(*mBehaviorTree, "(!) Rotate Towards Target");
-	auto moveTowardsTarget = new Behavior(*mBehaviorTree, "(!) Move Towards Target");
+	Tree& wanderArround = TreeBuilder("(-->) Wander Arround")
+		.Composite<Sequence>()
+			.Action(&Think, "(!) Think")
+			.Action(&UpdateWanderDirection, "(!) Update Wander Direction")
+			.Composite<Parallel>()
+				.Action(&MoveForward, "(!) Move Forward")
+				.Action(&LookForward, "(!) Look Forward")
+			.End()
+		.End()
+	.End();
 
-
-	isExplorerInRange->SetPredicateCallback(&IsExplorerInRange);
-	moveTowardsExplorer->SetUpdateCallback(&MoveTowardsExplorer);
-	findTarget->SetUpdateCallback(&FindTarget);
-	think->SetUpdateCallback(&Think);
-	moveTowardsTarget->SetUpdateCallback(&MoveTowardsTarget);
-	rotateTowardsTarget->SetUpdateCallback(&RotateTowardsTarget);
-
-	baseSelector->Add(*followExplorerSequence);
-	baseSelector->Add(*patrolSequence);
-
-	followExplorerSequence->Add(*tryToFollowExplorer);
-	//followExplorerSequence->Add(*isExplorerInRange);
-	//followExplorerSequence->Add(*moveTowardsExplorer);
-
-	followTarget->Add(*moveTowardsTarget);
-	followTarget->Add(*rotateTowardsTarget);
-
-	patrolSequence->Add(*findTarget);
-	patrolSequence->Add(*think);
-	patrolSequence->Add(*followTarget);
-
-
-	mBehaviorTree->Start(*baseSelector);
+	mBehaviorTree = &TreeBuilder()
+		.Composite<Priority>("(/!\\) Priority Selector")
+			.Subtree(followExplorer)
+			.Subtree(wanderArround)
+		.End()
+	.End();
 }
 
 
@@ -71,6 +74,7 @@ bool MinionController::Update(double milliseconds)
 {
 	if (!mIsActive) return false;
 	
+	mLastPosition = mPosition;
 	mPosition = mSceneObject->mTransform->GetPosition();
 	//mAngle = mSceneObject->mTransform->GetRollPitchYaw().x;
 
@@ -86,7 +90,7 @@ bool MinionController::Update(double milliseconds)
 
 	if (mIsTransformDirty)
 	{
-		OnMove(mPosition, GetRotation(mAngle));
+		OnMove(mPosition, GetAdjustedRotation(mAngle));
 	}
 
 	if (Singleton<Engine>::SharedInstance().GetInput()->GetKeyDown(KEYCODE_D))
@@ -98,7 +102,7 @@ bool MinionController::Update(double milliseconds)
 }
 
 
-quatf MinionController::GetRotation(float angle) {
+quatf MinionController::GetAdjustedRotation(float angle) {
 	return normalize(quatf::angleAxis(angle, vec3f(0, 0, 1)) * quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0));
 }
 
@@ -149,47 +153,107 @@ BehaviorStatus MinionController::Think(Behavior& bh, void* data) {
 	auto& self = *static_cast<MinionController*>(data);
 
 	if (self.mThinkTime <= 0) {
-		self.mThinkTime = 0.5f + rand() % 3;
+		self.mThinkTime = Mathf::RandomRange(1.5f, 4.5f);
 		return BehaviorStatus::Success;
 	}
 
-	auto dt = static_cast<float>(self.mTimer.GetDeltaTime()) * 0.001f;
-	self.mThinkTime = max(0, self.mThinkTime - dt);
+	self.mThinkTime -= float(self.mTimer.GetDeltaTime()) * 0.001f;
 
 	self.PlayStateAnimation(ANIM_STATE_IDLE);
 	return BehaviorStatus::Running;
 }
 
-BehaviorStatus MinionController::FindTarget(Behavior& bh, void* data)
+BehaviorStatus MinionController::MoveForward(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
-	
-	Node& node = *self.mAI.GetNodeAt(self.mSceneObject->mTransform->GetPosition());
-	Node& target = self.mAI.mGrid(node.x + rand() % 9 - 4, node.y + rand() % 9 - 4);
-	auto nodeState = target.GetState();
 
-	if (nodeState != Node::CLEAN && nodeState != Node::PATH)
+	bool validDirection = false;
+	vec2f direction = sDirections[self.mDirectionIndex];
+	Node& node = *self.mAI.GetNodeAt(self.mPosition);
+	Node& nextNode = self.mAI.mGrid(node.x + int(direction.x), node.y + int(direction.y));
+
+	// check what is ahead and if invalid try to find a valid one (rotating clockwise)
+	for (size_t i = 0; i < 8; i++)
+	{
+		auto nextNodeState = nextNode.GetState();
+		if (nextNodeState != Node::BLOCKED && nextNodeState != Node::UNKNOWN)
+		{
+			// found a valid direction
+			validDirection = true;
+			break;
+		}
+
+		// next direction clockwise
+		self.mDirectionIndex = (self.mDirectionIndex + 1) % 8;
+		direction = sDirections[self.mDirectionIndex];
+		nextNode = self.mAI.mGrid(node.x + int(direction.x), node.y + int(direction.y));
+	}
+
+	// if cant find a valid direction, return failure
+	if (!validDirection)
 	{
 		return BehaviorStatus::Failure;
 	}
 
-	self.mTarget = target.worldPos;
+	auto timer = Singleton<Engine>::SharedInstance().GetTimer();
+	float dt = float(timer->GetDeltaTime()) * 0.001f;
 
-	return BehaviorStatus::Success;
+	// speed per second
+	vec2f targetVelocity = normalize(vec2f(nextNode.worldPos) - vec2f(self.mPosition)) * 10 * dt;
+
+	// delta space for the current frame
+	vec3f ds = targetVelocity;
+
+	// update position
+	self.mPosition += ds;
+	self.mIsTransformDirty = true;
+	self.PlayStateAnimation(ANIM_STATE_WALK);
+
+	self.mWanderTime -= dt;
+	if (self.mWanderTime <= 0)
+	{
+		// TODO: parametrize wander time
+		self.mWanderTime = Mathf::RandomRange(1, 2);
+		return BehaviorStatus::Success;
+	}
+
+	return BehaviorStatus::Running;
 }
 
+BehaviorStatus MinionController::UpdateWanderDirection(Behavior& bh, void* data)
+{
+	auto& self = *static_cast<MinionController*>(data);
 
-BehaviorStatus MinionController::RotateTowardsTarget(Behavior& bh, void* data)
+	Node& node = *self.mAI.GetNodeAt(self.mPosition);
+	self.mDirectionIndex = Mathf::RandomRangeInt(0, 8);
+	
+	// try all directions
+	for (size_t i = 0; i < 8; i++)
+	{
+		vec2f direction = sDirections[self.mDirectionIndex];
+		
+		auto nextNodeState = self.mAI.mGrid(node.x + int(direction.x), node.y + int(direction.y)).GetState();
+		if (nextNodeState != Node::BLOCKED && nextNodeState != Node::UNKNOWN)
+		{
+			// found a valid direction
+			return BehaviorStatus::Success;
+		}
+
+		// next direction clockwise
+		self.mDirectionIndex = (self.mDirectionIndex + 1) % 8;
+	}
+
+	return BehaviorStatus::Running;
+}
+
+BehaviorStatus MinionController::LookForward(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
 	float dt = float(self.mTimer.GetDeltaTime()) * 0.001f;
 
-	vec2f dir = normalize(self.mTarget - vec2f(self.mPosition));
-
-	//TRACE_LINE(lastPos, lastPos + dir * 5, Colors::red);
+	vec2f dir = normalize(vec2f(self.mPosition) - vec2f(self.mLastPosition));
 
 	float targetAngle = atan2f(dir.y, dir.x);
-
 
 	if (abs(self.mAngle - targetAngle) < 0.001f) {
 		return BehaviorStatus::Success;
@@ -200,33 +264,6 @@ BehaviorStatus MinionController::RotateTowardsTarget(Behavior& bh, void* data)
 
 
 	return BehaviorStatus::Success;
-}
-
-BehaviorStatus MinionController::MoveTowardsTarget(Behavior& bh, void* data)
-{
-	auto& self = *static_cast<MinionController*>(data);
-
-	vec2f direction = self.mTarget - vec2f(self.mPosition);
-	float distanceSquared = magnitudeSquared(direction);
-
-	if (distanceSquared < .25)
-	{
-		return BehaviorStatus::Success;
-	}
-
-	auto timer = Singleton<Engine>::SharedInstance().GetTimer();
-
-	// speed per second
-	vec2f targetVelocity = normalize(direction) * 0.01f * static_cast<float>(timer->GetDeltaTime());
-
-	// delta space for the current frame
-	vec3f ds = targetVelocity;
-
-	self.mPosition += ds;
-	self.mIsTransformDirty = true;
-
-	self.PlayStateAnimation(ANIM_STATE_WALK);
-	return BehaviorStatus::Running;
 }
 
 void MinionController::OnMeleeStart(void* obj)

@@ -3,6 +3,7 @@
 
 class BaseComponent {
 	const int __pool_padding = 0xB0B0CACA;
+
 public:
 	BaseSceneObject*	mSceneObject;
 	bool mIsActive;

@@ -9,6 +9,7 @@
 #include "Sequence.h"
 #include "Predicate.h"
 #include "Conditional.h"
+#include "Builder.h"
 
 using namespace BehaviorTree;
 
@@ -419,7 +420,7 @@ TEST(Conditional, Should_Fail_When_PredicateFails)
 	Tree tree;
 	MockPredicate predicate(tree);
 	MockBehavior behavior(tree);
-	Conditional conditional(tree, behavior, predicate);
+	Conditional conditional(tree, &behavior, &predicate);
 
 	tree.Start(conditional);
 
@@ -439,7 +440,7 @@ TEST(Conditional, Should_ForwardActionStatus_When_PredicateSucceeds)
 	Tree tree;
 	MockPredicate predicate(tree);
 	MockBehavior behavior(tree);
-	Conditional conditional(tree, behavior, predicate);
+	Conditional conditional(tree, &behavior, &predicate);
 
 	tree.Start(conditional);
 
@@ -530,3 +531,30 @@ TEST(PrioritySequence, Should_Template)
 // test subtrees...
 
 // test interaction between prioritys and sequences
+
+// builder tests
+
+BehaviorStatus OnUpdate(Behavior& bh, void* data)
+{
+	return BehaviorStatus::Success;
+}
+
+bool OnPredicate(Behavior& bh, void* data)
+{
+	return true;
+}
+
+TEST(Builder, Should_BuildTree)
+{
+	auto tree = TreeBuilder()
+		.Composite<Priority>()
+			.Composite<Sequence>()
+				.Action(&OnUpdate, "Action")
+				.Conditional()
+					.Predicate(&OnPredicate, "aaa")
+					.Action(&OnUpdate, "aaaa")
+				.End()
+			.End()
+		.End()
+	.End();
+}

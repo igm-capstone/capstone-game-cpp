@@ -86,6 +86,11 @@ public:
 	void Watch(std::string label, long long value)    { Watch(label, std::to_string(value)); };
 	void Watch(std::string label, bool value)         { Watch(label, std::to_string(value)); };
 
+	void Watch(std::string label, vec2f v) { std::stringstream s; s << std::fixed << std::setprecision(2) << "vec2f(" << v.x << ", " << v.y << ")"; Watch(label, s.str()); };
+	void Watch(std::string label, vec3f v) { std::stringstream s; s << std::fixed << std::setprecision(2) << "vec3f(" << v.x << ", " << v.y << ", " << v.z << ")"; Watch(label, s.str()); };
+	void Watch(std::string label, vec4f v) { std::stringstream s; s << std::fixed << std::setprecision(2) << "vec4f(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")"; Watch(label, s.str()); };
+	void Watch(std::string label, quatf v) { std::stringstream s; s << std::fixed << std::setprecision(2) << "quatf(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")"; Watch(label, s.str()); };
+
 	Trace &operator << (int value) { ss << value; return *this; }
 	Trace &operator << (unsigned int value) { ss << value; return *this; }
 	Trace &operator << (short value) { ss << value; return *this; }
@@ -101,7 +106,7 @@ public:
 	Trace &operator << (Trace &(*function)(Trace &trace)) { return function(*this); }
 	Trace &operator << (vec2f v) { ss << std::fixed << std::setprecision(2) << "vec2f(" << v.x << ", " << v.y << ")"; return *this; }
 	Trace &operator << (vec3f v) { ss << std::fixed << std::setprecision(2) << "vec3f(" << v.x << ", " << v.y << ", " << v.z << ")"; return *this; }
-	Trace &operator << (vec4f v) { ss << std::fixed << std::setprecision(2) << "vec4f(" << v.x << ", " << v.y << ", " << v.z << ", " << v.z << ")"; return *this; }
+	Trace &operator << (vec4f v) { ss << std::fixed << std::setprecision(2) << "vec4f(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")"; return *this; }
 
 	static Trace &endl(Trace &trace);
 
