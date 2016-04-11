@@ -1,5 +1,6 @@
 #pragma once
 #include <Rig3d/Parametric.h>
+#include <random>
 
 #define clamp(val, _min, _max) max(min((val), (_max)), (_min));
 #define clamp01(val) clamp((val), 0, 1)
@@ -7,7 +8,28 @@
 
 class Mathf
 {
+	inline static std::mt19937& __RandomGenerator()
+	{
+		static std::random_device rd;
+		static std::mt19937 gen(rd());
+		return gen;
+	}
+
 public:
+
+	/// Produces random floating-point values i, uniformly distributed on the interval [a, b)
+	inline static float RandomRange(float min = 0, float max = 1)
+	{
+		std::uniform_real_distribution<float> dis(min, max);
+		return dis(__RandomGenerator());
+	}
+
+	/// Produces random floating-point values i, uniformly distributed on the interval [a, b)
+	inline static int RandomRangeInt(int min = 0, int max = 10)
+	{
+		std::uniform_int_distribution<int> dis(min, max - 1);
+		return dis(__RandomGenerator());
+	}
 
 	inline static float Repeat(float t, float length)
 	{
@@ -53,7 +75,6 @@ public:
 		}
 		return num;
 	}
-
 
 	template<class VectorType>
 	inline static VectorType Lerp(const VectorType& from, const VectorType& to, float t)
