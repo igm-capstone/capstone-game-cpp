@@ -9,6 +9,9 @@ namespace BehaviorTree
 
 	class TreeBuilder
 	{
+		template <class ParentType, class CompositeType>
+		class CompositeBuilder;
+
 	public:
 		template <class ParentType, class BehaviorType>
 		class LeafBuilder
@@ -63,6 +66,14 @@ namespace BehaviorTree
 				auto builder = LeafBuilder<ConditionalBuilder, BehaviorTree::Behavior>(mTree, this, update, name);
 				mConditional->SetChild(builder.mBehavior);
 				return *this;
+			}
+
+			template <class ChildCompositeType>
+			CompositeBuilder<ConditionalBuilder<ParentType>, ChildCompositeType> Composite(std::string name = "Composite")
+			{
+				auto builder = CompositeBuilder<ConditionalBuilder<ParentType>, ChildCompositeType>(mTree, this, name);
+				mConditional->SetChild(builder.mComposite);
+				return builder;
 			}
 
 			ConditionalBuilder<ParentType> Predicate(PredicateCallback predicate, std::string name = "Predicate")
