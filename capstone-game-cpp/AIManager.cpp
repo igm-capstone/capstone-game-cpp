@@ -26,13 +26,13 @@ void AIManager::InitGrid(float left, float top, float width, float height)
 void AIManager::ResetGridData()
 {
 	//Populate nodes
-	for (int x = 0; x < mNumRows; x++) {
-		for (int y = 0; y < mNumCols; y++) {
-			vec3f nodePos = vec3f(mLeft + (mNodeRadius * 2) * y + mNodeRadius, mTop - (mNodeRadius * 2) * x + mNodeRadius, 0);
-			mGrid(x, y).x = x;
-			mGrid(x, y).y = y;
-			mGrid(x, y).weight = -10;
-			mGrid(x, y).worldPos = vec3f(nodePos, 0);
+	for (int i = 0; i < mNumRows; i++) {
+		for (int j = 0; j < mNumCols; j++) {
+			vec3f nodePos = vec3f(mLeft + (mNodeRadius * 2) * j + mNodeRadius, mTop - (mNodeRadius * 2) * i + mNodeRadius, 0);
+			mGrid(i, j).x = i;
+			mGrid(i, j).y = j;
+			mGrid(i, j).weight = -10;
+			mGrid(i, j).worldPos = vec3f(nodePos, 0);
 		}
 	}
 
@@ -46,7 +46,7 @@ Node* AIManager::GetNodeAt(vec3f pos)
 	float i = abs((pos.y - mNodeRadius - mTop) / (mNodeRadius * 2));
 	float j = abs((pos.x - mNodeRadius - mLeft) / (mNodeRadius * 2));
 
-	return &(mGrid((int)round(i), (int)round(j)));
+	return &(mGrid(int(round(i)), int(round(j))));
 }
 
 SearchResult<Node> AIManager::GetPath(vec3f from, vec3f to) {
