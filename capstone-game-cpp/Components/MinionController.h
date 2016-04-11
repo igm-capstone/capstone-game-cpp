@@ -35,12 +35,9 @@ public:
 	static bool IsExplorerInRange(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus MoveTowardsExplorer(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus Think(BehaviorTree::Behavior& bh, void* data);
-	static BehaviorTree::BehaviorStatus WanderTowardsDirection(BehaviorTree::Behavior& bh, void* data);
+	static BehaviorTree::BehaviorStatus MoveForward(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus UpdateWanderDirection(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus LookForward(BehaviorTree::Behavior& bh, void* data);
-	static BehaviorTree::BehaviorStatus UpdateTarget(BehaviorTree::Behavior& bh, void* data);
-	static BehaviorTree::BehaviorStatus RotateTowardsTarget(BehaviorTree::Behavior& bh, void* data);
-	static BehaviorTree::BehaviorStatus MoveTowardsTarget(BehaviorTree::Behavior& bh, void* data);
 
 	void PlayStateAnimation(AnimationControllerState state);
 	void PauseStateAnimation(AnimationControllerState state);
