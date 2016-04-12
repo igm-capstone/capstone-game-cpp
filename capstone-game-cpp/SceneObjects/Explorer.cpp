@@ -108,9 +108,6 @@ void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 		p.AsTransform.Position = newPos;
 		p.AsTransform.Rotation = newRot;
 		e->mNetworkClient->SendData(&p);
-
-		e->mHealth->TakeDamage(1.0f);
-		if (e->mHealth->GetHealth() <= 0) e->mHealth->TakeDamage(-1000.0f);
 	}
 
 	Singleton<AIManager>::SharedInstance().SetGridDirty(true);
@@ -129,7 +126,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 
 	// Giving all explorers same melee collider for now.
 	e->mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
-	e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.5f;
+	e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.0f;
 	e->mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
 	e->mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
 	e->mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
@@ -252,10 +249,11 @@ void Explorer::OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command
 	}
 }
 
-void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal)
+void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal, bool checkAuthority)
 {
 	auto e = static_cast<Explorer*>(obj);
-	if (e->mNetworkID->mHasAuthority) {
+	if (!checkAuthority || e->mNetworkID->mHasAuthority)
+	{
 		Packet p(PacketTypes::SYNC_HEALTH);
 		p.UUID = e->mNetworkID->mUUID;
 		p.AsFloat = newVal;
@@ -382,6 +380,6 @@ void Explorer::OnMeleeHit(BaseSceneObject* self, BaseSceneObject* other)
 	{
 		// Check Friendly Fire
 		auto e = reinterpret_cast<Explorer*>(other);
-		e->mHealth->TakeDamage(100.0f);
+		e->mHealth->TakeDamage(100.0f, false);
 	}
 }

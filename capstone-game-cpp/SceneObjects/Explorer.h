@@ -42,7 +42,7 @@ public:
 	static void OnNetHealthChange(BaseSceneObject* obj, float newVal);
 	static void OnAnimationCommandExecuted(BaseSceneObject* obj, AnimationControllerState state, AnimationControllerCommand command);
 	static void OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command);
-	static void OnHealthChange(BaseSceneObject* obj, float newVal);
+	static void OnHealthChange(BaseSceneObject* obj, float newVal, bool checkAuthority);
 	static void OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other);
 
 	static bool DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
