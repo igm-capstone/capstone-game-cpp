@@ -25,12 +25,12 @@ Minion::Minion()
 	mCollider->mLayer = COLLISION_LAYER_MINION;
 
 	mMeleeColliderComponent = Factory<SphereColliderComponent>::Create();
+	mMeleeColliderComponent->mSceneObject = this;
 	mMeleeColliderComponent->mCollider.radius = 2.5f;
 	mMeleeColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
 	mMeleeColliderComponent->mIsActive = false;
 	mMeleeColliderComponent->mIsDynamic = true;
 	mMeleeColliderComponent->mIsTrigger = true;
-	mMeleeColliderComponent->mSceneObject = this;
 	mMeleeColliderComponent->mLayer = COLLISION_LAYER_MINION_SKILL;
 	mMeleeColliderComponent->RegisterTriggerEnterCallback(&MinionController::OnMeleeHit);
 
@@ -49,10 +49,14 @@ Minion::Minion()
 
 	//mAnimationController->RegisterCommandExecutedCallback(&OnAnimationCommandExecuted);
 
-	//Animation melee = gMinionAnimations[Animations::MINION_ATTACK];
-	//KeyframeOption meleeOptions[] = { { melee.startFrameIndex, OnMeleeStart },{ melee.endFrameIndex, OnMeleeStop } };
-	//SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionAnimations[Animations::MINION_ATTACK], meleeOptions, 2, false);
-	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionAnimations[Animations::MINION_ATTACK], nullptr, 0, false);
+	Animation melee = gMinionAnimations[Animations::MINION_ATTACK];
+	KeyframeOption meleeOptions[] = { 
+		{ melee.startFrameIndex + 10, &MinionController::OnMeleeStart },
+		{ melee.endFrameIndex - 1,    &MinionController::OnMeleeStop },
+	};
+
+	//SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionAnimations[Animations::MINION_ATTACK], nullptr, 0, false);
+	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionAnimations[Animations::MINION_ATTACK], meleeOptions, 2, false);
 	SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gMinionAnimations[Animations::MINION_WALK], nullptr, 0, true);
 	SetStateAnimation(mAnimationController, ANIM_STATE_WALK, &gMinionAnimations[Animations::MINION_WALK], nullptr, 0, true);
 	SetStateAnimation(mAnimationController, ANIM_STATE_RUN, &gMinionAnimations[Animations::MINION_RUN], nullptr, 0, true);

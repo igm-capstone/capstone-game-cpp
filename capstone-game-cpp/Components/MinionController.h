@@ -32,7 +32,10 @@ public:
 	quatf GetAdjustedRotation(float angle);
 
 	// behavior tree code
-	static bool IsExplorerInRange(BehaviorTree::Behavior& bh, void* data);
+	static bool IsExplorerInAttackRange(BehaviorTree::Behavior& bh, void* data);
+	static bool IsAttackInProgress(BehaviorTree::Behavior& bh, void* data);
+	static bool IsExplorerVisible(BehaviorTree::Behavior& bh, void* data);
+	static BehaviorTree::BehaviorStatus StartAttack(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus MoveTowardsExplorer(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus Think(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus MoveForward(BehaviorTree::Behavior& bh, void* data);
