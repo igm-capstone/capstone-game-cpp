@@ -23,11 +23,11 @@ const vec2f MinionController::sDirections[] = {
 };
 
 MinionController::MinionController()
-	: mSpeed(0)
+	: mAI(Singleton<AIManager>::SharedInstance())
+	, mTimer(*Singleton<Engine>::SharedInstance().GetTimer())
+	, mSpeed(0)
 	, mThinkTime(0)
 	, mWanderTime(0)
-	, mAI(Singleton<AIManager>::SharedInstance())
-	, mTimer(*Singleton<Engine>::SharedInstance().GetTimer())
 	, mAngle(0)
 	, mDirectionIndex(0)
 	, mIsTransformDirty(false)
@@ -112,9 +112,16 @@ bool MinionController::IsExplorerInRange(Behavior& bh, void* data)
 	auto& self = *static_cast<MinionController*>(data);
 	
 	auto node = self.mAI.GetNodeAt(self.mSceneObject->mTransform->GetPosition());
-	auto nodeState = node->GetState();
+	auto conn = self.mAI.mGrid.GetBestFitConnection(node);
 
-	return nodeState == Node::PATH;
+	if (conn.to == nullptr)
+	{
+		return false;
+	}
+
+	auto state = conn.to->GetState();
+
+	return state == Node::PATH;
 }
 
 BehaviorStatus MinionController::MoveTowardsExplorer(Behavior& bh, void* data)
