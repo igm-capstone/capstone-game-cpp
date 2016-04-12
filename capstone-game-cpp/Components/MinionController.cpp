@@ -23,11 +23,11 @@ const vec2f MinionController::sDirections[] = {
 };
 
 MinionController::MinionController()
-	: mSpeed(0)
+	: mAI(Singleton<AIManager>::SharedInstance())
+	, mTimer(*Singleton<Engine>::SharedInstance().GetTimer())
+	, mSpeed(0)
 	, mThinkTime(0)
 	, mWanderTime(0)
-	, mAI(Singleton<AIManager>::SharedInstance())
-	, mTimer(*Singleton<Engine>::SharedInstance().GetTimer())
 	, mAngle(0)
 	, mDirectionIndex(0)
 	, mIsTransformDirty(false)

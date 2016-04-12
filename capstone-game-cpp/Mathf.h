@@ -17,14 +17,14 @@ class Mathf
 
 public:
 
-	/// Produces random floating-point values i, uniformly distributed on the interval [a, b)
+	// Produces random floating-point values i, uniformly distributed on the interval [a, b)
 	inline static float RandomRange(float min = 0, float max = 1)
 	{
 		std::uniform_real_distribution<float> dis(min, max);
 		return dis(__RandomGenerator());
 	}
 
-	/// Produces random floating-point values i, uniformly distributed on the interval [a, b)
+	// Produces random floating-point values i, uniformly distributed on the interval [a, b)
 	inline static int RandomRangeInt(int min = 0, int max = 10)
 	{
 		std::uniform_int_distribution<int> dis(min, max - 1);
