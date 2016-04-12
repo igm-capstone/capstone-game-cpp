@@ -80,7 +80,7 @@ namespace GPU {
 	struct Sprite
 	{
 		vec3f pointpos;
-		vec2f scale;
+		vec2f size;
 		vec2f linearFill;
 		float radialFill;
 		int sheetID;

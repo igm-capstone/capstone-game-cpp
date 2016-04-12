@@ -9,12 +9,12 @@ void SpriteManager::Initialize(Rig3D::IMesh* spriteMesh, Rig3D::IShaderResource*
 	mSpriteMesh = spriteMesh;
 }
 
-void SpriteManager::LoadSpriteSheet(const char* filename, int width, int height, int slicesX, int slicesY)
+void SpriteManager::LoadSpriteSheet(const char* filename, int spriteWidth, int spriteHeight, int slicesX, int slicesY)
 {
 	mFilenames[mSheets] = filename;
 
-	mSpriteSheetData[mSheets].sheetWidth = width;
-	mSpriteSheetData[mSheets].sheetHeight = height;
+	mSpriteSheetData[mSheets].sheetWidth = spriteWidth*slicesX;
+	mSpriteSheetData[mSheets].sheetHeight = spriteHeight*slicesY;
 	mSpriteSheetData[mSheets].slicesX = slicesX;
 	mSpriteSheetData[mSheets].slicesY = slicesY;
 	
@@ -26,7 +26,7 @@ void SpriteManager::DrawSprite(int sheetID, int spriteID, vec2f pos, vec2f scale
 	mSpriteInstanceData[mSprites].pointpos = pos;
 	mSpriteInstanceData[mSprites].sheetID = sheetID;
 	mSpriteInstanceData[mSprites].spriteID = spriteID;
-	mSpriteInstanceData[mSprites].scale = scale;
+	mSpriteInstanceData[mSprites].size = scale;
 	mSpriteInstanceData[mSprites].linearFill = linearFill;
 	mSpriteInstanceData[mSprites].radialFill = radialFill;
 	

@@ -22,7 +22,7 @@ struct Sprite
 	float2		uv			: TEXCOORD;
 	//Per Sprite
 	float3		pointpos	: POINTPOS;
-	float2		scale		: SCALE;
+	float2		size		: SIZE;
 	float2		linearFill	: LINFILL;
 	float		radialFill	: RADFILL;
 	uint		sheetID		: SHEETID;
@@ -49,8 +49,8 @@ Pixel main(Sprite input)
 	float2 sprSize = sheetSize / slices;
 
 	float4x4 scale = {
-		sprSize.x / 2 * input.scale.x, 0, 0, 0,
-		0, sprSize.y / 2 * input.scale.y, 0, 0,
+		input.size.x/2, 0, 0, 0,
+		0, input.size.y/2, 0, 0,
 		0, 0, 1, 0,
 		0, 0, 0, 1 };
 	float4x4 translate = {
