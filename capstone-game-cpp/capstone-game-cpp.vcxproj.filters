@@ -73,6 +73,7 @@
     <ClCompile Include="SceneObjects\StatusEffect.cpp" />
     <ClCompile Include="SceneObjects\Trap.cpp" />
     <ClCompile Include="BehaviorTree\Builder.cpp" />
+    <ClCompile Include="BehaviorTree\Mute.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -147,6 +148,13 @@
     <ClInclude Include="BehaviorTree\Decorator.h" />
     <ClInclude Include="UI\SpriteManager.h" />
     <ClInclude Include="UI\SkillBar.h" />
+    <ClInclude Include="BehaviorTree\Builder.h" />
+    <ClInclude Include="BehaviorTree\Parallel.h" />
+    <ClInclude Include="BehaviorTree\Race.h" />
+    <ClInclude Include="SceneObjects\Heal.h" />
+    <ClInclude Include="SceneObjects\StatusEffect.h" />
+    <ClInclude Include="SceneObjects\Trap.h" />
+    <ClInclude Include="BehaviorTree\Mute.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />

@@ -96,6 +96,66 @@ namespace BehaviorTree
 		};
 
 
+		template <class ParentType, class DecoratorType>
+		class DecoratorBuilder
+		{
+			friend class TreeBuilder;
+
+		public:
+			DecoratorBuilder(Tree* tree, ParentType* parent, std::string name)
+				: mTree(tree)
+				, mParent(parent)
+			{
+				mDecorator = new DecoratorType(*mTree, nullptr, name);
+			}
+
+			template <class ChildCompositeType>
+			CompositeBuilder<DecoratorBuilder<ParentType, DecoratorType>, ChildCompositeType> Composite(std::string name = "Composite")
+			{
+				auto builder = CompositeBuilder<DecoratorBuilder<ParentType, DecoratorType>, ChildCompositeType>(mTree, this, name);
+				mDecorator->SetChild(builder.mComposite);
+				return builder;
+			}
+
+			DecoratorBuilder<ParentType, DecoratorType> Action(UpdateCallback update, std::string name = "Action")
+			{
+				auto builder = LeafBuilder<DecoratorBuilder, BehaviorTree::Behavior>(mTree, this, update, name);
+				mDecorator->SetChild(builder.mBehavior);
+				return *this;
+			}
+
+			DecoratorBuilder<ParentType, DecoratorType> Predicate(PredicateCallback predicate, std::string name = "Predicate")
+			{
+				auto builder = LeafBuilder<DecoratorBuilder, BehaviorTree::Predicate>(mTree, this, nullptr, name);
+				builder.Invoke(&Predicate::SetPredicateCallback, predicate);
+				mDecorator->SetChild(builder.mBehavior);
+				return *this;
+			}
+
+			ConditionalBuilder<DecoratorBuilder<ParentType, DecoratorType>> Conditional(std::string name = "Conditional")
+			{
+				auto builder = ConditionalBuilder<DecoratorBuilder>(mTree, this, name);
+				mDecorator->SetChild(builder.mConditional);
+				return builder;
+			}
+
+			DecoratorBuilder<ParentType, DecoratorType> Subtree(Tree& tree, std::string name = "Subtree")
+			{
+				mDecorator->SetChild(tree);
+				return *this;
+			}
+
+			ParentType& End()
+			{
+				return *mParent;
+			}
+
+		private:
+			Tree* mTree;
+			ParentType* mParent;
+			DecoratorType* mDecorator;
+		};
+
 		template <class ParentType, class CompositeType>
 		class CompositeBuilder
 		{
@@ -130,10 +190,26 @@ namespace BehaviorTree
 				return *this;
 			}
 
+			CompositeBuilder<ParentType, CompositeType> Predicate(PredicateCallback predicate, std::string name = "Predicate")
+			{
+				auto builder = LeafBuilder<CompositeBuilder, BehaviorTree::Predicate>(mTree, this, nullptr, name);
+				builder.Invoke(&Predicate::SetPredicateCallback, predicate);
+				mComposite->Add(*builder.mBehavior);
+				return *this;
+			}
+
 			ConditionalBuilder<CompositeBuilder<ParentType, CompositeType>> Conditional(std::string name = "Conditional")
 			{
-				auto builder = ConditionalBuilder<CompositeBuilder<ParentType, CompositeType>>(mTree, this, name);
+				auto builder = ConditionalBuilder<CompositeBuilder>(mTree, this, name);
 				mComposite->Add(*builder.mConditional);
+				return builder;
+			}
+
+			template <class DecoratorType>
+			DecoratorBuilder<CompositeBuilder<ParentType, CompositeType>, DecoratorType> Decorator(std::string name = "Conditional")
+			{
+				auto builder = DecoratorBuilder<CompositeBuilder, DecoratorType>(mTree, this, name);
+				mComposite->Add(*builder.mDecorator);
 				return builder;
 			}
 
