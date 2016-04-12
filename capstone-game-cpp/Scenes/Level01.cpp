@@ -296,11 +296,11 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateShaderResource(&mSpritesShaderResource, &mAllocator);
 
 		// SpriteSheets
-		mSpriteManager->LoadSpriteSheet("Assets/UI/Health.png", 900, 224, 1, 2);
-		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_ghostIcons.png", 1024, 1024, 4, 4);
-		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_playerIcons1024.png", 1024, 1024, 4, 4);
-		mSpriteManager->LoadSpriteSheet("Assets/UI/Panels.png", 1024, 1024, 1, 4);
-		mSpriteManager->LoadSpriteSheet("Assets/UI/Keys.png", 8*96, 2*96, 8, 2);
+		mSpriteManager->LoadSpriteSheet("Assets/UI/Health.png", 900, 112, 1, 3);
+		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_ghostIcons.png", 256, 256, 4, 4);
+		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_playerIcons1024.png", 256, 256, 4, 4);
+		mSpriteManager->LoadSpriteSheet("Assets/UI/Panels.png", 1024, 256, 1, 4);
+		mSpriteManager->LoadSpriteSheet("Assets/UI/Keys.png", 96, 96, 8, 2);
 		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, mSpriteManager->GetFilenames(), 5);
 		mRenderer->VAddShaderLinearSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 
@@ -991,8 +991,8 @@ void Level01::RenderHealthBars()
 	for (Health& h : Factory<Health>())
 	{
 		auto screenPos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, -32);
-		mSpriteManager->DrawSprite(0, 1, screenPos, vec2f(0.1f, 0.1f), vec2f(h.GetHealthPerc(), 1));
-		mSpriteManager->DrawSprite(0, 0, screenPos, vec2f(0.1f, 0.1f));
+		mSpriteManager->DrawSprite(0, 1, screenPos, vec2f(900, 112), vec2f(h.GetHealthPerc(), 1));
+		mSpriteManager->DrawSprite(0, 0, screenPos, vec2f(900, 112));
 	}
 }
 
