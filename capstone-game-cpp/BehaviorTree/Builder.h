@@ -206,7 +206,7 @@ namespace BehaviorTree
 			}
 
 			template <class DecoratorType>
-			DecoratorBuilder<CompositeBuilder<ParentType, CompositeType>, DecoratorType> Decorator(std::string name = "Conditional")
+			DecoratorBuilder<CompositeBuilder<ParentType, CompositeType>, DecoratorType> Decorator(std::string name = "Decorator")
 			{
 				auto builder = DecoratorBuilder<CompositeBuilder, DecoratorType>(mTree, this, name);
 				mComposite->Add(*builder.mDecorator);
