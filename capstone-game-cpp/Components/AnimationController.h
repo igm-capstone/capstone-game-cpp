@@ -44,6 +44,8 @@ class AnimationController :
 	
 	friend class Factory<AnimationController>;
 
+	uint32_t		mPreviousKeyframeIndex;
+	uint32_t		mCurrentKeyframeIndex;
 	int				mCurrentAnimationIndex;
 	uint32_t		mCurrentAnimationStartIndex;
 	uint32_t		mCurrentAnimationEndIndex;
@@ -103,6 +105,7 @@ public:
 
 
 	void Update(double milliseconds);
+	void ExecuteKeyframeCallbacks();
 
 	void UpdateAnimation(SkeletalAnimation* pCurrentAnimation, float milliseconds, float framesPerMS);
 	void SetRestPose();

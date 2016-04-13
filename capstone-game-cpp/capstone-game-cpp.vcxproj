@@ -106,6 +106,7 @@
     <ClCompile Include="BehaviorTree\Builder.cpp" />
     <ClCompile Include="BehaviorTree\Conditional.cpp" />
     <ClCompile Include="BehaviorTree\Decorator.cpp" />
+    <ClCompile Include="BehaviorTree\Mute.cpp" />
     <ClCompile Include="BehaviorTree\Parallel.cpp" />
     <ClCompile Include="BehaviorTree\Predicate.cpp" />
     <ClCompile Include="BehaviorTree\Priority.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="BehaviorTree\Builder.h" />
     <ClInclude Include="BehaviorTree\Conditional.h" />
     <ClInclude Include="BehaviorTree\Decorator.h" />
+    <ClInclude Include="BehaviorTree\Mute.h" />
     <ClInclude Include="BehaviorTree\Parallel.h" />
     <ClInclude Include="BehaviorTree\Predicate.h" />
     <ClInclude Include="BehaviorTree\Priority.h" />
