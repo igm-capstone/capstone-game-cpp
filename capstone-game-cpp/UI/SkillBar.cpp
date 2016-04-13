@@ -20,7 +20,7 @@ void SkillBar::RenderPanel()
 
 	auto startPt = 0.5f - 0.04f * (numBtns - 1);
 
-	mSpriteManager->DrawSpriteAtPerc(3, numBtns - 1, vec2f(0.5f, posYPerc), vec2f(512, 128));
+	mSpriteManager->DrawSpriteAtPerc(SPRITESHEET_PANELS, numBtns - 1, vec2f(0.5f, posYPerc), vec2f(512, 128));
 
 	for (auto i = 0; i < numBtns; i++)
 	{
@@ -33,12 +33,12 @@ void SkillBar::RenderButton(Button* b, vec2f pos)
 {
 	mSpriteManager->DrawSpriteAtPerc(b->sheetID, 8+b->spriteID, pos, vec2f(100, 100));
 	mSpriteManager->DrawSpriteAtPerc(b->sheetID, b->spriteID, pos, vec2f(100, 100), vec3f(1,1), 2*PI * b->skill->Recharged());
-	if (b->keySpriteID != -1) mSpriteManager->DrawSpriteAtPerc(4, b->keySpriteID, pos + vec2f(0.02f, 0.035f), vec2f(28, 28));
+	if (b->keySpriteID != -1) mSpriteManager->DrawSpriteAtPerc(SPRITESHEET_CONTROL_ICONS, b->keySpriteID, pos + vec2f(0.02f, 0.035f), vec2f(28, 28));
 	if (b->isHighlighted) mSpriteManager->DrawSpriteAtPerc(b->sheetID, 15, pos, vec2f(100, 100));
 	
 }
 
-void SkillBar::AddSkill(Skill* skill, int sheetID, int spriteID, int keySpriteID)
+void SkillBar::AddSkill(Skill* skill, SpriteSheetCode sheetID, int spriteID, int keySpriteID)
 {
 	assert(numBtns < 4);
 
@@ -62,7 +62,9 @@ void SkillBar::RenderManaBar()
 {
 	auto posYPerc = 0.95f;
 	for each (Ghost& ghost in Factory<Ghost>()) {
-		mSpriteManager->DrawSpriteAtPerc(0, 2, vec2f(0.5f, posYPerc), vec2f(450, 56), vec2f(ghost.GetManaPerc(), 1));
-		mSpriteManager->DrawSpriteAtPerc(0, 0, vec2f(0.5f, posYPerc), vec2f(450, 56));
+		mSpriteManager->DrawSpriteAtPerc(SPRITESHEET_BARS, 2, vec2f(0.5f, posYPerc), vec2f(450, 56), vec2f(ghost.GetManaPerc(), 1));
+		mSpriteManager->DrawSpriteAtPerc(SPRITESHEET_BARS, 0, vec2f(0.5f, posYPerc), vec2f(450, 56));
 	}
+
+	mSpriteManager->DrawTextSpriteAtPerc(SPRITESHEET_FONT_NORMAL, vec2f(0.5f, 0.5f), vec2f(0.2f, 0.2f), "The quick brown fox jumps");
 }

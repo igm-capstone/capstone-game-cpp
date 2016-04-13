@@ -33,6 +33,7 @@ public:
 	IShader* mVSFwdFullScreenQuad;
 	IShader* mVSFwdSingleColor;
 	IShader* mVSFwdSpotLightVolume;
+	IShader* mVSFwdSpriteGlyphs;
 	IShader* mVSFwdSprites;
 
 	FMOD::Studio::System* mStudio;

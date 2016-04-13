@@ -47,6 +47,7 @@ extern bool gDebugBT;
 
 #define MAX_COLLISIONS 128
 
+#define MAX_GLYPHS 10000
 #define MAX_SPRITES (MAX_EXPLORERS+MAX_MINIONS)
 #define MAX_SPRITESHEETS 10
 

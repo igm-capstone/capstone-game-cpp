@@ -22,6 +22,7 @@
 #include "Shaders/obj/VSFwdLineTrace.h"
 #include "Shaders/obj/VSFwdSingleColor.h"
 #include "Shaders/obj/VSFwdSpotLightVolume.h"
+#include "Shaders/obj/VSFwdSpriteGlyphs.h"
 #include "Shaders/obj/VSFwdSprites.h"
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 
@@ -46,6 +47,7 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mVSDefInstancedColor(nullptr),
 	mVSFwdSingleColor(nullptr),
 	mVSFwdSpotLightVolume(nullptr),
+	mVSFwdSpriteGlyphs(nullptr),
 	mVSFwdSprites(nullptr),
 	mStudio(nullptr),
 	mLoadingScreen(nullptr),
@@ -165,11 +167,26 @@ void ScareTacticsApplication::InitializeShaders()
 		{ "SIZE",		0, 1, 12, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
 		{ "LINFILL",	0, 1, 20, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
 		{ "RADFILL",	0, 1, 28, 1, R_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
-		{ "SHEETID",	0, 1, 29, 1, R_UINT32,  INPUT_CLASS_PER_INSTANCE },
-		{ "SPRITEID",	0, 1, 30, 1, R_UINT32,  INPUT_CLASS_PER_INSTANCE }
+		{ "SHEETID",	0, 1, 32, 1, R_UINT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "SPRITEID",	0, 1, 36, 1, R_UINT32,  INPUT_CLASS_PER_INSTANCE }
 	};
 	renderer->VCreateShader(&mVSFwdSprites, &mGameAllocator);
 	renderer->VLoadVertexShader(mVSFwdSprites, gVSFwdSprites, sizeof(gVSFwdSprites), spriteInputElements, 8);
+
+	// SpriteGlyph
+	InputElement spriteGlyphInputElements[] =
+	{
+		{ "POSITION",	0, 0, 0,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "TEXCOORD",	0, 0, 12, 0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX },
+		{ "POINTPOS",	0, 1, 0,  1, RGB_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "SIZE",		0, 1, 12, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "SCALE",		0, 1, 20, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "MINUV",		0, 1, 28, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "MAXUV",		0, 1, 36, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "SHEETID",	0, 1, 44, 1, R_UINT32,  INPUT_CLASS_PER_INSTANCE }
+	};
+	renderer->VCreateShader(&mVSFwdSpriteGlyphs, &mGameAllocator);
+	renderer->VLoadVertexShader(mVSFwdSpriteGlyphs, gVSFwdSpriteGlyphs, sizeof(gVSFwdSpriteGlyphs), spriteGlyphInputElements, 8);
 
 	// Skinned Vertex
 	InputElement skinnedInputElements[] =
@@ -338,6 +355,7 @@ void ScareTacticsApplication::VShutdown()
 	mVSDefInstancedColor->~IShader();
 	mVSFwdSingleColor->~IShader();
 	mVSFwdSpotLightVolume->~IShader();
+	mVSFwdSpriteGlyphs->~IShader();
 	mVSFwdSprites->~IShader();
 
 	mSceneAllocator.Free();

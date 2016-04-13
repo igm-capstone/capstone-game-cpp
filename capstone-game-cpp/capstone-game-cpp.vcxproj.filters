@@ -21,6 +21,7 @@
     <FxCompile Include="Shaders\VSFwdSingleColor.hlsl" />
     <FxCompile Include="Shaders\VSDefInstancedColor.hlsl" />
     <FxCompile Include="Shaders\PSDefInstancedMaterial.hlsl" />
+    <FxCompile Include="Shaders\VSFwdSpriteGlyphs.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
@@ -147,6 +148,12 @@
     <ClInclude Include="BehaviorTree\Decorator.h" />
     <ClInclude Include="UI\SpriteManager.h" />
     <ClInclude Include="UI\SkillBar.h" />
+    <ClInclude Include="BehaviorTree\Builder.h" />
+    <ClInclude Include="BehaviorTree\Parallel.h" />
+    <ClInclude Include="BehaviorTree\Race.h" />
+    <ClInclude Include="SceneObjects\Heal.h" />
+    <ClInclude Include="SceneObjects\StatusEffect.h" />
+    <ClInclude Include="SceneObjects\Trap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />

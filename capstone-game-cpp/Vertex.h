@@ -87,6 +87,16 @@ namespace GPU {
 		int spriteID;
 	};
 
+	struct Glyph
+	{
+		vec3f pointpos;
+		vec2f size;
+		vec2f scale;
+		vec2f minUV;
+		vec2f maxUV;
+		int sheetID;
+	};
+
 	struct Node
 	{
 		float weight;
