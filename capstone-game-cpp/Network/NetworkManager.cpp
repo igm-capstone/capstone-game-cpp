@@ -142,7 +142,7 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		s->mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
 		break;
 	}
-	case SKILL_TYPE_PLANT_MINION:
+	case SKILL_TYPE_FLYTRAP_MINION:
 	{
 		auto f = Factory<FlyTrap>::Create();
 		f->Spawn(pos, UUID);
@@ -150,8 +150,8 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		f->mNetworkID->OnNetAuthorityChange(true);
 		break;
 	}
-	case SKILL_TYPE_BASIC_MINION:
-	case SKILL_TYPE_BOMBER_MINION: // for now
+	case SKILL_TYPE_IMP_MINION:
+	case SKILL_TYPE_ABOMINATION_MINION: // for now
 	{
 		auto m = Factory<Minion>::Create();
 		m->Spawn(pos, UUID);
@@ -198,14 +198,14 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 		s->mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
 		break;
 	}
-	case SKILL_TYPE_PLANT_MINION:
+	case SKILL_TYPE_FLYTRAP_MINION:
 	{
 		auto f = Factory<FlyTrap>::Create();
 		f->Spawn(pos, UUID);
 		break;
 	}
-	case SKILL_TYPE_BASIC_MINION:
-	case SKILL_TYPE_BOMBER_MINION:
+	case SKILL_TYPE_IMP_MINION:
+	case SKILL_TYPE_ABOMINATION_MINION:
 	{
 		auto m = Factory<Minion>::Create();
 		m->Spawn(pos, UUID);

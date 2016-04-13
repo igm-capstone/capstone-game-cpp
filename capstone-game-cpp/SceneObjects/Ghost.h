@@ -32,9 +32,9 @@ public:
 	float GetManaPerc() { return mMana/mMaxMana; };
 
 	static bool DoMouseClick(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
-	static bool DoSpawnBasicMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
-	static bool DoSpawnBomberMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
-	static bool DoSpawnPlantMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
+	static bool DoSpawnImpMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
+	static bool DoSpawnAbominationMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
+	static bool DoSpawnFlytrapMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
 	static bool DoTransmogrify(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos);
 
 private:
