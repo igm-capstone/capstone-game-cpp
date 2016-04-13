@@ -1,8 +1,7 @@
 #pragma once
-#include "BaseComponent.h"
+#include "MinionController.h"
 
-class FlyTrapController :
-	public BaseComponent
+class FlyTrapController : public MinionController
 {
 public:
 	FlyTrapController();

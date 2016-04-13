@@ -2,7 +2,6 @@
 #include "Factory.h"
 
 #include "SceneObjects\Minion.h"
-#include "SceneObjects\FlyTrap.h"
 #include "SceneObjects\StaticCollider.h"
 #include "SceneObjects\StaticMesh.h"
 #include "SceneObjects\MoveableBlock.h"
@@ -45,9 +44,8 @@ PoolAllocator Factory<##type##>::sAllocator(__g##type##Buffer, __g##type##Buffer
 REGISTER_FACTORY ( Ghost,			1	)
 REGISTER_FACTORY ( Explorer,		MAX_EXPLORERS)
 REGISTER_FACTORY ( Minion,			MAX_MINIONS	)
-REGISTER_FACTORY ( FlyTrap,			MAX_MINIONS)
 REGISTER_FACTORY ( StaticMesh,		MAX_STATIC_MESHES)
-REGISTER_FACTORY ( StaticCollider,	MAX_STATIC_COLLIDERS	)
+REGISTER_FACTORY ( StaticCollider,	MAX_STATIC_COLLIDERS)
 REGISTER_FACTORY ( MoveableBlock,	10	)
 REGISTER_FACTORY ( SpawnPoint,		5	)
 REGISTER_FACTORY ( Pickup,			7	)
