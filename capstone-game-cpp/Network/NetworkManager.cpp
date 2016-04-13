@@ -154,7 +154,7 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 	case SKILL_TYPE_ABOMINATION_MINION: // for now
 	{
 		auto m = Factory<Minion>::Create();
-		m->Spawn(pos, UUID);
+		m->SpawnImp(pos, UUID);
 		m->mNetworkID->mHasAuthority = true;
 		m->mNetworkID->OnNetAuthorityChange(true);
 		break;
@@ -208,7 +208,7 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 	case SKILL_TYPE_ABOMINATION_MINION:
 	{
 		auto m = Factory<Minion>::Create();
-		m->Spawn(pos, UUID);
+		m->SpawnImp(pos, UUID);
 		break;
 	}
 	case SKILL_TYPE_UNKNOWN:

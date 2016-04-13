@@ -128,6 +128,7 @@
     <ClCompile Include="Components\FmodEvent.cpp" />
     <ClCompile Include="Components\FmodEventCollection.cpp" />
     <ClCompile Include="Components\GhostController.cpp" />
+    <ClCompile Include="Components\ImpController.cpp" />
     <ClCompile Include="Components\MinionController.cpp" />
     <ClCompile Include="Components\Skill.cpp" />
     <ClCompile Include="Console.cpp" />
@@ -199,6 +200,7 @@
     <ClInclude Include="Components\FmodEventCollection.h" />
     <ClInclude Include="Components\GhostController.h" />
     <ClInclude Include="Components\Health.h" />
+    <ClInclude Include="Components\ImpController.h" />
     <ClInclude Include="Components\MinionController.h" />
     <ClInclude Include="DebugRender.h" />
     <ClInclude Include="FBXResource.h" />

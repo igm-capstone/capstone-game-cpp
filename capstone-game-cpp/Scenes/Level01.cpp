@@ -433,9 +433,9 @@ void Level01::VUpdate(double milliseconds)
 		ec.Update(milliseconds);
 	}
 
-	for (auto& mc : Factory<MinionController>())
+	for (auto& mc : Factory<Minion>())
 	{
-		mc.Update(milliseconds);
+		mc.mController->Update(milliseconds);
 	}
 
 	for (auto& gc : Factory<GhostController>())

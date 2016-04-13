@@ -5,10 +5,13 @@
 
 class MinionController : public BaseComponent
 {
-	friend class Factory<MinionController>;
+protected:
 
 	MinionController();
 	~MinionController();
+
+	BehaviorTree::Tree& CreateWanderSubtree();
+	BehaviorTree::Tree& CreateChaseSubtree();
 
 public:
 

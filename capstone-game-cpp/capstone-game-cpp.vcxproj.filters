@@ -75,6 +75,7 @@
     <ClCompile Include="SceneObjects\Trap.cpp" />
     <ClCompile Include="BehaviorTree\Builder.cpp" />
     <ClCompile Include="BehaviorTree\Mute.cpp" />
+    <ClCompile Include="Components\ImpController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -156,6 +157,7 @@
     <ClInclude Include="SceneObjects\StatusEffect.h" />
     <ClInclude Include="SceneObjects\Trap.h" />
     <ClInclude Include="BehaviorTree\Mute.h" />
+    <ClInclude Include="Components\ImpController.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />

@@ -9,9 +9,6 @@
 #include <Mathf.h>
 #include <SceneObjects/Minion.h>
 #include "AnimationController.h"
-#include <BehaviorTree/Parallel.h>
-#include <BehaviorTree/Builder.h>
-#include <BehaviorTree/Mute.h>
 
 using namespace BehaviorTree;
 using namespace chrono;
@@ -33,19 +30,32 @@ MinionController::MinionController()
 	, mDirectionIndex(0)
 	, mIsTransformDirty(false)
 {
-	Tree& attackExplorer = TreeBuilder("(-->) Attack")
+
+}
+
+
+MinionController::~MinionController()
+{
+
+}
+
+Tree& MinionController::CreateWanderSubtree()
+{
+	return TreeBuilder("(-->) Wander Arround")
 		.Composite<Sequence>()
-			.Decorator<Mute>()
-				.Conditional()
-					.Predicate(&IsExplorerInAttackRange, "(?) Is Explorer in Attack Range")
-					.Action(&StartAttack, "Start Attack")
-				.End()
+			.Action(&Think, "(!) Think")
+			.Action(&UpdateWanderDirection, "(!) Update Wander Direction")
+			.Composite<Parallel>()
+				.Action(&MoveForward, "(!) Move Forward")
+				.Action(&LookForward, "(!) Look Forward")
 			.End()
-			.Predicate(&IsAttackInProgress, "(?) Is Attack in Progress")
 		.End()
 	.End();
+}
 
-	Tree& followExplorer = TreeBuilder("(-->) Follow Explorer")
+Tree& MinionController::CreateChaseSubtree()
+{
+	return TreeBuilder("(-->) Follow Explorer")
 		.Composite<Sequence>()
 			.Conditional()
 				.Predicate(&IsExplorerVisible, "(?) Is Explorer Visible")
@@ -56,33 +66,7 @@ MinionController::MinionController()
 			.End()
 		.End()
 	.End();
-
-	Tree& wanderArround = TreeBuilder("(-->) Wander Arround")
-		.Composite<Sequence>()
-			.Action(&Think, "(!) Think")
-			.Action(&UpdateWanderDirection, "(!) Update Wander Direction")
-			.Composite<Parallel>()
-				.Action(&MoveForward, "(!) Move Forward")
-				.Action(&LookForward, "(!) Look Forward")
-			.End()
-		.End()
-	.End();
-
-	mBehaviorTree = &TreeBuilder()
-		.Composite<Priority>("(/!\\) Priority Selector")
-			.Subtree(attackExplorer)
-			.Subtree(followExplorer)
-			.Subtree(wanderArround)
-		.End()
-	.End();
 }
-
-
-MinionController::~MinionController()
-{
-
-}
-
 
 bool MinionController::Update(double milliseconds)
 {

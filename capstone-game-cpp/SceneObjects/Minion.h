@@ -6,6 +6,15 @@ class Minion : public BaseSceneObject
 	friend class Factory<Minion>;
 
 public:
+	enum MinionClass
+	{
+		UNKNOWN,
+		IMP,
+		ABOMINATION,
+		FLYTRAP,
+	};
+
+	MinionClass						mClass;
 	class NetworkClient*			mNetworkClient;
 	class NetworkID*				mNetworkID;
 	class MinionController*			mController;
@@ -18,8 +27,14 @@ private:
 	Minion();
 	~Minion();
 
-public:
 	void Spawn(vec3f pos, int UUID);
+public:
+	
+	void SpawnImp(vec3f pos, int UUID);
+	void SpawnAbomination(vec3f pos, int UUID);
+	void SpawnFlytrap(vec3f pos, int UUID);
+
+	MinionClass GetClass() const { return mClass; }
 
 	void UpdateComponents(quatf rotation, vec3f position);
 

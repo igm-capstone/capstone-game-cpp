@@ -98,10 +98,10 @@ void BaseScene::RenderMinionBehaviorTrees()
 	//ImGui::SetNextWindowContentSize(ImVec2(200.0f, 600.0f));
 	ImGui::Begin("Minion Behavior Trees", nullptr, ImGuiWindowFlags_NoCollapse);
 
-	for (MinionController& minion : Factory<MinionController>())
+	for (Minion& minion : Factory<Minion>())
 	{
 		int id = 0;
-		minion.mBehaviorTree->DumpIMGUI(id);
+		minion.mController->mBehaviorTree->DumpIMGUI(id);
 	}
 
 	ImGui::End();
