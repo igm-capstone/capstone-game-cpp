@@ -16,6 +16,10 @@ float4 main(Pixel pixel) : SV_TARGET
 {
 	float4 s = diffuseTexture.Sample(samplerState, pixel.uv);
 
+	//SDF
+	float mask = s.a;
+	s.a = (mask >= 0.5) * smoothstep(0.25, 0.75, mask);
+
 	// Linear fill
 	float alpha = (pixel.uv.x <= pixel.maxUV.x && pixel.uv.y <= pixel.maxUV.y);
 	s.a *= alpha;
@@ -28,6 +32,10 @@ float4 main(Pixel pixel) : SV_TARGET
 
 	alpha = (pixel.maxAngle == -1 || angle < pixel.maxAngle);
 	s.a *= alpha;
+
+	// Tint - future work
+	//s *= float4(1, 0, 0, 1);
+
 
 	return s;
 }
