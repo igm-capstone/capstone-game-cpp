@@ -65,6 +65,4 @@ void SkillBar::RenderManaBar()
 		mSpriteManager->DrawSpriteAtPerc(SPRITESHEET_BARS, 2, vec2f(0.5f, posYPerc), vec2f(450, 56), vec2f(ghost.GetManaPerc(), 1));
 		mSpriteManager->DrawSpriteAtPerc(SPRITESHEET_BARS, 0, vec2f(0.5f, posYPerc), vec2f(450, 56));
 	}
-
-	mSpriteManager->DrawTextSpriteAtPerc(SPRITESHEET_FONT_NORMAL, vec2f(0.5f, 0.5f), vec2f(0.2f, 0.2f), "The quick brown fox jumps");
 }
