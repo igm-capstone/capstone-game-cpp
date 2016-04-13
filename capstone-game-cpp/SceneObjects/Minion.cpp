@@ -52,7 +52,7 @@ Minion::Minion()
 	Animation melee = gMinionAnimations[Animations::MINION_ATTACK];
 	KeyframeOption meleeOptions[] = { 
 		{ melee.startFrameIndex + 10, &MinionController::OnMeleeStart },
-		{ melee.endFrameIndex - 1,    &MinionController::OnMeleeStop },
+		{ melee.endFrameIndex,    &MinionController::OnMeleeStop },
 	};
 
 	//SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionAnimations[Animations::MINION_ATTACK], nullptr, 0, false);
