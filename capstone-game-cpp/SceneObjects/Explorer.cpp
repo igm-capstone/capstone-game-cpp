@@ -381,7 +381,7 @@ void Explorer::OnMeleeHit(BaseSceneObject* self, BaseSceneObject* other)
 	if (other->Is<Minion>())
 	{
 		auto m = reinterpret_cast<Minion*>(other);
-		m->mHealth->TakeDamage(100.0f);
+		m->mHealth->TakeDamage(100.0f, false);
 	}
 	else if (other->Is<Explorer>())
 	{
