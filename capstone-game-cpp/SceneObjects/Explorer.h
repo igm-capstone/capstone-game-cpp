@@ -21,8 +21,10 @@ public:
 	class SphereColliderComponent*		mCollider;
 	class Skill*						mSkills[MAX_EXPLORER_SKILLS];
 	class Health*						mHealth;
+	class Node*							mCurrentNode;
 
 	MeleeColliderComponent				mMeleeColliderComponent;
+
 private:
 	class NetworkClient*				mNetworkClient;
 	class CameraManager*				mCameraManager;

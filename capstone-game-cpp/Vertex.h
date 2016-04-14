@@ -80,11 +80,22 @@ namespace GPU {
 	struct Sprite
 	{
 		vec3f pointpos;
-		vec2f scale;
+		vec2f size;
 		vec2f linearFill;
 		float radialFill;
 		int sheetID;
 		int spriteID;
+	};
+
+	struct Glyph
+	{
+		vec3f pointpos;
+		vec2f size;
+		vec2f scale;
+		vec3f color;
+		vec2f minUV;
+		vec2f maxUV;
+		int sheetID;
 	};
 
 	struct Node

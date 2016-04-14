@@ -106,6 +106,7 @@
     <ClCompile Include="BehaviorTree\Builder.cpp" />
     <ClCompile Include="BehaviorTree\Conditional.cpp" />
     <ClCompile Include="BehaviorTree\Decorator.cpp" />
+    <ClCompile Include="BehaviorTree\Mute.cpp" />
     <ClCompile Include="BehaviorTree\Parallel.cpp" />
     <ClCompile Include="BehaviorTree\Predicate.cpp" />
     <ClCompile Include="BehaviorTree\Priority.cpp" />
@@ -127,6 +128,7 @@
     <ClCompile Include="Components\FmodEvent.cpp" />
     <ClCompile Include="Components\FmodEventCollection.cpp" />
     <ClCompile Include="Components\GhostController.cpp" />
+    <ClCompile Include="Components\ImpController.cpp" />
     <ClCompile Include="Components\MinionController.cpp" />
     <ClCompile Include="Components\Skill.cpp" />
     <ClCompile Include="Console.cpp" />
@@ -134,7 +136,6 @@
     <ClCompile Include="Factory.cpp" />
     <ClCompile Include="Components\FlyTrapController.cpp" />
     <ClCompile Include="SceneObjects\Heal.cpp" />
-    <ClCompile Include="SceneObjects\FlyTrap.cpp" />
     <ClCompile Include="ModelManager.cpp" />
     <ClCompile Include="SceneObjects\Region.cpp" />
     <ClCompile Include="Resource.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="BehaviorTree\Builder.h" />
     <ClInclude Include="BehaviorTree\Conditional.h" />
     <ClInclude Include="BehaviorTree\Decorator.h" />
+    <ClInclude Include="BehaviorTree\Mute.h" />
     <ClInclude Include="BehaviorTree\Parallel.h" />
     <ClInclude Include="BehaviorTree\Predicate.h" />
     <ClInclude Include="BehaviorTree\Priority.h" />
@@ -197,12 +199,12 @@
     <ClInclude Include="Components\FmodEventCollection.h" />
     <ClInclude Include="Components\GhostController.h" />
     <ClInclude Include="Components\Health.h" />
+    <ClInclude Include="Components\ImpController.h" />
     <ClInclude Include="Components\MinionController.h" />
     <ClInclude Include="DebugRender.h" />
     <ClInclude Include="FBXResource.h" />
     <ClInclude Include="Components\FlyTrapController.h" />
     <ClInclude Include="SceneObjects\Heal.h" />
-    <ClInclude Include="SceneObjects\FlyTrap.h" />
     <ClInclude Include="fmodwrap.h" />
     <ClInclude Include="Mathf.h" />
     <ClInclude Include="ModelManager.h" />
@@ -331,6 +333,9 @@
     <FxCompile Include="Shaders\PSFwd2DTexture.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\VSFwdSpriteGlyphs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="Shaders\VSFwdSprites.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>

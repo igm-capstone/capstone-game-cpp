@@ -1,12 +1,13 @@
 #include "stdafx.h"
-#include "FlyTrapController.h"
+#include "ImpController.h"
 #include "BehaviorTree/BehaviorTree.h"
 
 using namespace BehaviorTree;
 
-FlyTrapController::FlyTrapController()
+ImpController::ImpController() 
+	: MinionController()
 {
-		Tree& attackExplorer = TreeBuilder("(-->) Attack")
+	Tree& attackExplorer = TreeBuilder("(-->) Attack")
 		.Composite<Sequence>()
 			.Decorator<Mute>()
 				.Conditional()
@@ -14,19 +15,20 @@ FlyTrapController::FlyTrapController()
 					.Action(&StartAttack, "Start Attack")
 				.End()
 			.End()
-			// look at player ;)
-			//.Predicate(&IsAttackInProgress, "(?) Is Attack in Progress")
+			.Predicate(&IsAttackInProgress, "(?) Is Attack in Progress")
 		.End()
 	.End();
 
 	mBehaviorTree = &TreeBuilder()
 		.Composite<Priority>("(/!\\) Priority Selector")
 			.Subtree(attackExplorer)
+			.Subtree(CreateChaseSubtree())
+			.Subtree(CreateWanderSubtree())
 		.End()
 	.End();
 }
 
 
-FlyTrapController::~FlyTrapController()
+ImpController::~ImpController()
 {
 }

@@ -30,22 +30,22 @@ Ghost::Ghost() : mNetworkID(nullptr)
 
 	auto spawnMinion = Factory<Skill>::Create();
 	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Basic Minion", 10, 0, DoSpawnBasicMinion, 10);
+	spawnMinion->Setup("Imp", 10, 0, DoSpawnImpMinion, 10);
 	mSkills[1] = spawnMinion;
 
 	spawnMinion = Factory<Skill>::Create();
 	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Bomber Minion", 20, 0, DoSpawnBomberMinion, 20);
+	spawnMinion->Setup("Abomination", 20, 0, DoSpawnAbominationMinion, 20);
 	mSkills[2] = spawnMinion;
 
 	spawnMinion = Factory<Skill>::Create();
 	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Plant Minion", 10, 0, DoSpawnPlantMinion, 50);
+	spawnMinion->Setup("Flytrap", 10, 0, DoSpawnFlytrapMinion, 50);
 	mSkills[3] = spawnMinion;
 
 	spawnMinion = Factory<Skill>::Create();
 	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Transmogrify", 40, 20, DoTransmogrify, 0);
+	spawnMinion->Setup("Transmogrify", 40, 20, DoTransmogrify);
 	mSkills[4] = spawnMinion;
 	
 	auto clickInteraction = Factory<Skill>::Create();
@@ -57,7 +57,7 @@ Ghost::Ghost() : mNetworkID(nullptr)
 	mMana = mMaxMana;
 }
 
-void Ghost::Spawn(BaseScene * scene)
+void Ghost::Spawn(BaseScene* scene)
 {
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = -1;
@@ -66,24 +66,24 @@ void Ghost::Spawn(BaseScene * scene)
 	mCameraManager->MoveCamera(level.center, level.center + vec3f(0.0f, 0.0f, -85.5f));
 
 	mSkillBar = &scene->mSkillBar;
-	mSkillBar->AddSkill(mSkills[1], 1, 0, 0);
-	mSkillBar->AddSkill(mSkills[2], 1, 1, 1);
-	mSkillBar->AddSkill(mSkills[3], 1, 5, 2);
-	mSkillBar->AddSkill(mSkills[4], 1, 4, 9);
+	mSkillBar->AddSkill(mSkills[1], SPRITESHEET_GHOST_ICONS, 0, 0);
+	mSkillBar->AddSkill(mSkills[2], SPRITESHEET_GHOST_ICONS, 1, 1);
+	mSkillBar->AddSkill(mSkills[3], SPRITESHEET_GHOST_ICONS, 5, 2);
+	mSkillBar->AddSkill(mSkills[4], SPRITESHEET_GHOST_ICONS, 4, 9);
 	SetActiveSkill(1);
 }
 
-bool Ghost::DoSpawnBasicMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
+bool Ghost::DoSpawnImpMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
-	return DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_BASIC_MINION);
+	return DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_IMP_MINION);
 }
-bool Ghost::DoSpawnBomberMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
+bool Ghost::DoSpawnAbominationMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
-	return DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_BOMBER_MINION);
+	return DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_ABOMINATION_MINION);
 }
-bool Ghost::DoSpawnPlantMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
+bool Ghost::DoSpawnFlytrapMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos)
 {
-	return DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_PLANT_MINION);
+	return DoSpawnMinion(obj, duration, target, pos, SKILL_TYPE_FLYTRAP_MINION);
 }
 
 bool Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f pos, SkillPacketTypes minionType)
@@ -93,7 +93,7 @@ bool Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject*
 	auto ghost = reinterpret_cast<Ghost*>(obj);
 	ghost->mEvents->Play("Spawn");
 
-	TRACE_LOG("Spawning at" << pos);
+	TRACE_LOG("Spawning at " << pos);
 	NetworkCmd::SpawnNewSkill(minionType, pos, duration);
 
 	return true;

@@ -9,8 +9,6 @@
 #include <Mathf.h>
 #include <SceneObjects/Minion.h>
 #include "AnimationController.h"
-#include <BehaviorTree/Parallel.h>
-#include <BehaviorTree/Builder.h>
 
 using namespace BehaviorTree;
 using namespace chrono;
@@ -23,28 +21,27 @@ const vec2f MinionController::sDirections[] = {
 };
 
 MinionController::MinionController()
-	: mSpeed(0)
+	: mAI(Singleton<AIManager>::SharedInstance())
+	, mTimer(*Singleton<Engine>::SharedInstance().GetTimer())
+	, mSpeed(0)
 	, mThinkTime(0)
 	, mWanderTime(0)
-	, mAI(Singleton<AIManager>::SharedInstance())
-	, mTimer(*Singleton<Engine>::SharedInstance().GetTimer())
 	, mAngle(0)
 	, mDirectionIndex(0)
 	, mIsTransformDirty(false)
 {
-	Tree& followExplorer = TreeBuilder("(-->) Follow Explorer")
-		.Composite<Sequence>()
-			.Conditional()
-				.Predicate(&IsExplorerInRange, "(?) Is Explorer in Range")
-				.Composite<Parallel>()
-					.Action(&MoveTowardsExplorer, "(!) Move Towards Explorer")
-					.Action(&LookForward, "(!) Look Forward")
-				.End()
-			.End()
-		.End()
-	.End();
 
-	Tree& wanderArround = TreeBuilder("(-->) Wander Arround")
+}
+
+
+MinionController::~MinionController()
+{
+
+}
+
+Tree& MinionController::CreateWanderSubtree()
+{
+	return TreeBuilder("(-->) Wander Arround")
 		.Composite<Sequence>()
 			.Action(&Think, "(!) Think")
 			.Action(&UpdateWanderDirection, "(!) Update Wander Direction")
@@ -54,21 +51,22 @@ MinionController::MinionController()
 			.End()
 		.End()
 	.End();
+}
 
-	mBehaviorTree = &TreeBuilder()
-		.Composite<Priority>("(/!\\) Priority Selector")
-			.Subtree(followExplorer)
-			.Subtree(wanderArround)
+Tree& MinionController::CreateChaseSubtree()
+{
+	return TreeBuilder("(-->) Follow Explorer")
+		.Composite<Sequence>()
+			.Conditional()
+				.Predicate(&IsExplorerVisible, "(?) Is Explorer Visible")
+				.Composite<Parallel>()
+					.Action(&MoveTowardsExplorer, "(!) Move Towards Explorer")
+					.Action(&LookForward, "(!) Look Forward")
+				.End()
+			.End()
 		.End()
 	.End();
 }
-
-
-MinionController::~MinionController()
-{
-
-}
-
 
 bool MinionController::Update(double milliseconds)
 {
@@ -106,15 +104,68 @@ quatf MinionController::GetAdjustedRotation(float angle) {
 	return normalize(quatf::angleAxis(angle, vec3f(0, 0, 1)) * quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0));
 }
 
+bool MinionController::IsExplorerInAttackRange(Behavior& bh, void* data)
+{
+	auto& self = *static_cast<MinionController*>(data);
 
-bool MinionController::IsExplorerInRange(Behavior& bh, void* data)
+	auto node = self.mAI.GetNodeAt(self.mSceneObject->mTransform->GetPosition());
+	auto conn = self.mAI.mGrid.GetBestFitConnection(node);
+
+	// when no explorer is arround, BestFitConnection will return null
+	if (conn.to == nullptr)
+	{
+		return false;
+	}
+
+	int steps = 3;
+	while (steps-- > 0)
+	{
+		// explorer is at the goal node
+		if (conn.to->GetState() == Node::GOAL)
+		{
+			return true;
+		} 
+ 
+		node = conn.to;
+		conn = self.mAI.mGrid.GetBestFitConnection(node);
+	}
+
+	// explorer is too many steps away
+	return false;
+}
+
+bool MinionController::IsAttackInProgress(Behavior& bh, void* data)
+{
+	auto& self = *static_cast<MinionController*>(data);
+	auto& minion = *static_cast<Minion*>(self.mSceneObject);
+
+	return minion.mAnimationController->GetState() == ANIM_STATE_MELEE;
+}
+
+bool MinionController::IsExplorerVisible(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
 	
 	auto node = self.mAI.GetNodeAt(self.mSceneObject->mTransform->GetPosition());
-	auto nodeState = node->GetState();
+	auto conn = self.mAI.mGrid.GetBestFitConnection(node);
 
-	return nodeState == Node::PATH;
+	if (conn.to == nullptr)
+	{
+		return false;
+	}
+
+	auto state = conn.to->GetState();
+
+	return state == Node::PATH;
+}
+
+BehaviorStatus MinionController::StartAttack(Behavior& bh, void* data)
+{
+	auto& self = *static_cast<MinionController*>(data);
+	
+	self.PlayStateAnimation(ANIM_STATE_MELEE);
+
+	return BehaviorStatus::Success;
 }
 
 BehaviorStatus MinionController::MoveTowardsExplorer(Behavior& bh, void* data)
@@ -126,17 +177,16 @@ BehaviorStatus MinionController::MoveTowardsExplorer(Behavior& bh, void* data)
 	auto targetConn = self.mAI.mGrid.GetBestFitConnection(myNode);
 	vec2f direction = vec2f(targetConn.to->worldPos) - vec2f(self.mPosition);
 	
-	float distanceSquared = magnitudeSquared(direction);
-
-	if (distanceSquared < .25)
-	{
-		return BehaviorStatus::Success;
-	}
-
-	auto timer = Singleton<Engine>::SharedInstance().GetTimer();
+	// fix this? distance should be between closest explorer and minion instead of 
+	// minion to next grid node
+	//float distanceSquared = magnitudeSquared(direction);
+	//if (distanceSquared < 1)
+	//{
+	//	return BehaviorStatus::Success;
+	//}
 
 	// speed per second
-	vec2f targetVelocity = normalize(direction) * 0.01f * static_cast<float>(timer->GetDeltaTime());
+	vec2f targetVelocity = normalize(direction) * 0.01f * static_cast<float>(self.mTimer.GetDeltaTime());
 
 	// delta space for the current frame
 	vec3f ds = targetVelocity;
@@ -144,7 +194,7 @@ BehaviorStatus MinionController::MoveTowardsExplorer(Behavior& bh, void* data)
 	self.mPosition += ds;
 	self.mIsTransformDirty = true;
 
-	self.PlayStateAnimation(ANIM_STATE_WALK);
+	self.PlayStateAnimation(ANIM_STATE_RUN);
 	return BehaviorStatus::Running;
 }
 
@@ -207,7 +257,7 @@ BehaviorStatus MinionController::MoveForward(Behavior& bh, void* data)
 	// update position
 	self.mPosition += ds;
 	self.mIsTransformDirty = true;
-	self.PlayStateAnimation(ANIM_STATE_WALK);
+	self.PlayStateAnimation(ANIM_STATE_RUN);
 
 	self.mWanderTime -= dt;
 	if (self.mWanderTime <= 0)
@@ -276,13 +326,14 @@ void MinionController::OnMeleeStop(void* obj)
 {
 	auto minion = reinterpret_cast<Minion*>(obj);
 	minion->mMeleeColliderComponent->mIsActive = false;
+
+	minion->mController->PlayStateAnimation(ANIM_STATE_IDLE);
 }
 
 void MinionController::OnMeleeHit(BaseSceneObject* minion, BaseSceneObject* other)
 {
 
 }
-
 
 void MinionController::PlayStateAnimation(AnimationControllerState state)
 {

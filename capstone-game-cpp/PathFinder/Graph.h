@@ -66,26 +66,26 @@ namespace PathFinder
 		vector<Connection<T>>* GetNodeConnections(T* node)
 		{
 			bool diagonal = true;
-			auto x = node->x;
-			auto y = node->y;
+			auto i = node->x;
+			auto j = node->y;
 
-			auto notLeftEdge = x > 0;
-			auto notRightEdge = x < mNumCols - 1;
-			auto notBottomEdge = y > 0;
-			auto notTopEdge = y < mNumRows - 1;
+			auto notLeftEdge = i > 0;
+			auto notRightEdge = i < mNumCols - 1;
+			auto notBottomEdge = j > 0;
+			auto notTopEdge = j < mNumRows - 1;
 			auto connections = new vector<Connection<T>>();
 			connections->reserve(8);
 
 
 
-			if (notTopEdge) CreateConnectionIfValid(connections, node, &(*this)(x, y + 1));
-			if (diagonal && notRightEdge && notTopEdge) CreateConnectionIfValid(connections, node, &(*this)(x + 1, y + 1));
-			if (notRightEdge) CreateConnectionIfValid(connections, node, &(*this)(x + 1, y));
-			if (diagonal && notRightEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &(*this)(x + 1, y - 1));
-			if (notBottomEdge) CreateConnectionIfValid(connections, node, &(*this)(x, y - 1));
-			if (diagonal && notLeftEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &(*this)(x - 1, y - 1));
-			if (notLeftEdge) CreateConnectionIfValid(connections, node, &(*this)(x - 1, y));
-			if (diagonal && notLeftEdge && notTopEdge) CreateConnectionIfValid(connections, node, &(*this)(x - 1, y + 1));
+			if (notTopEdge) CreateConnectionIfValid(connections, node, &(*this)(i, j + 1));
+			if (diagonal && notRightEdge && notTopEdge) CreateConnectionIfValid(connections, node, &(*this)(i + 1, j + 1));
+			if (notRightEdge) CreateConnectionIfValid(connections, node, &(*this)(i + 1, j));
+			if (diagonal && notRightEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &(*this)(i + 1, j - 1));
+			if (notBottomEdge) CreateConnectionIfValid(connections, node, &(*this)(i, j - 1));
+			if (diagonal && notLeftEdge && notBottomEdge) CreateConnectionIfValid(connections, node, &(*this)(i - 1, j - 1));
+			if (notLeftEdge) CreateConnectionIfValid(connections, node, &(*this)(i - 1, j));
+			if (diagonal && notLeftEdge && notTopEdge) CreateConnectionIfValid(connections, node, &(*this)(i - 1, j + 1));
 
 			return connections;
 		}
@@ -98,7 +98,7 @@ namespace PathFinder
 			auto connections = GetNodeConnections(node);
 			for (auto& connection : *connections)
 			{
-				if (result.to == nullptr || connection.to->weight < result.to->weight)
+				if (connection.to->weight >= 0 && (result.to == nullptr || connection.to->weight < result.to->weight))
 				{
 					result = connection;
 				}
@@ -121,9 +121,9 @@ namespace PathFinder
 			}
 		}
 
-		T& operator ()(int x, int y)
+		T& operator ()(int i, int j)
 		{
-			return pList[x*mNumCols + y];
+			return pList[i*mNumCols + j];
 		}
 	};
 }

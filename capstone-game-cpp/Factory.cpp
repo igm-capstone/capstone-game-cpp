@@ -2,7 +2,6 @@
 #include "Factory.h"
 
 #include "SceneObjects\Minion.h"
-#include "SceneObjects\FlyTrap.h"
 #include "SceneObjects\StaticCollider.h"
 #include "SceneObjects\StaticMesh.h"
 #include "SceneObjects\MoveableBlock.h"
@@ -22,7 +21,7 @@
 #include "Components\ExplorerController.h"
 #include "Components\GhostController.h"
 #include "Components\FlyTrapController.h"
-#include "Components\MinionController.h"
+#include "Components\ImpController.h"
 #include "Components\DominationPointController.h"
 #include "Components\Skill.h"
 #include "Components\Health.h"
@@ -45,9 +44,8 @@ PoolAllocator Factory<##type##>::sAllocator(__g##type##Buffer, __g##type##Buffer
 REGISTER_FACTORY ( Ghost,			1	)
 REGISTER_FACTORY ( Explorer,		MAX_EXPLORERS)
 REGISTER_FACTORY ( Minion,			MAX_MINIONS	)
-REGISTER_FACTORY ( FlyTrap,			MAX_MINIONS)
 REGISTER_FACTORY ( StaticMesh,		MAX_STATIC_MESHES)
-REGISTER_FACTORY ( StaticCollider,	MAX_STATIC_COLLIDERS	)
+REGISTER_FACTORY ( StaticCollider,	MAX_STATIC_COLLIDERS)
 REGISTER_FACTORY ( MoveableBlock,	10	)
 REGISTER_FACTORY ( SpawnPoint,		5	)
 REGISTER_FACTORY ( Pickup,			7	)
@@ -66,8 +64,8 @@ REGISTER_FACTORY ( OrientedBoxColliderComponent,	MAX_STATIC_COLLIDERS + MAX_STAT
 REGISTER_FACTORY ( SphereColliderComponent,			MAX_EXPLORERS + MAX_MINIONS + MAX_LAMPS)
 REGISTER_FACTORY ( ExplorerController,				MAX_EXPLORERS)
 REGISTER_FACTORY ( GhostController,					1	)
-REGISTER_FACTORY ( MinionController,				MAX_MINIONS)
-REGISTER_FACTORY ( FlyTrapController,				MAX_MINIONS)
+REGISTER_FACTORY ( ImpController,					MAX_IMPS)
+REGISTER_FACTORY ( FlyTrapController,				MAX_FLYTRAPS)
 
 REGISTER_FACTORY ( DominationPointController,		5	)
 REGISTER_FACTORY ( Skill,							MAX_EXPLORERS * MAX_EXPLORER_SKILLS + MAX_GHOST_SKILLS)

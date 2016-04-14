@@ -5,6 +5,8 @@
 #include "limits.h"
 
 AnimationController::AnimationController() : 
+	mPreviousKeyframeIndex(0), 
+	mCurrentKeyframeIndex(0),
 	mCurrentAnimationIndex(-1), 
 	mCurrentAnimationStartIndex(0), 
 	mCurrentAnimationEndIndex(0), 
@@ -85,6 +87,8 @@ void AnimationController::SetState(AnimationControllerState state)
 		mCurrentAnimationSpeed      = pStateAnimation->speed;
 		mIsLooping					= pStateAnimation->shouldLoop;
 		mCurrentAnimationPlayTime	= 0.0f;
+		mCurrentKeyframeIndex       = mCurrentAnimationStartIndex;
+		mPreviousKeyframeIndex      = INT32_MAX;
 	}
 	else
 	{
@@ -159,6 +163,13 @@ void AnimationController::Update(double milliseconds)
 	}
 	else
 	{
+		// execute keyframe callbacks from the previous keyframe index to the end
+		// of the animation
+		mPreviousKeyframeIndex = mCurrentKeyframeIndex;
+		mCurrentKeyframeIndex = mCurrentAnimationEndIndex;
+		
+		ExecuteKeyframeCallbacks();
+
 		if (mIsLooping)
 		{
 			mCurrentAnimationPlayTime -= duration;
@@ -172,21 +183,50 @@ void AnimationController::Update(double milliseconds)
 	}
 }
 
+void AnimationController::ExecuteKeyframeCallbacks()
+{
+
+	StateAnimation* pStateAnimation = &mStateAnimationMap[mState];
+	TRACE_WATCH("Curr anim callback count", pStateAnimation->keyframeCallbackMap.size());
+	
+	auto& callbackMap = pStateAnimation->keyframeCallbackMap;
+	if (mPreviousKeyframeIndex < mCurrentKeyframeIndex)
+	{
+		for (size_t i = mPreviousKeyframeIndex + 1; i <= mCurrentKeyframeIndex; i++)
+		{
+			if (callbackMap.find(i) != callbackMap.end())
+			{
+				auto callback = callbackMap[i];
+				callback(mSceneObject);
+			}
+		}
+	}
+	else if (mPreviousKeyframeIndex > mCurrentKeyframeIndex)
+	{
+		if (callbackMap.find(mCurrentKeyframeIndex) != callbackMap.end())
+		{
+			auto callback = callbackMap[mCurrentKeyframeIndex];
+			callback(mSceneObject);
+		}
+	}
+
+}
+
 void AnimationController::UpdateAnimation(SkeletalAnimation* pCurrentAnimation, float milliseconds, float framesPerMS)
 {
-	static uint32_t prevKeyframeIndex = UINT32_MAX;
+	//static uint32_t mPreviousKeyframeIndex = UINT32_MAX;
 
 	SkeletalHierarchy& skeletalHierarchy = mSkeletalHierarchy;
 
 	float t = mCurrentAnimationStartIndex + mCurrentAnimationPlayTime * framesPerMS;
-	uint32_t keyframeIndex = static_cast<int>(floorf(t));
+	mCurrentKeyframeIndex = static_cast<int>(floorf(t));
 //	TRACE_LOG(keyframeIndex);
 
-	float u = t - keyframeIndex;
+	float u = t - mCurrentKeyframeIndex;
 	for (JointAnimation jointAnimation : pCurrentAnimation->jointAnimations)
 	{
-		Keyframe& current = jointAnimation.keyframes[keyframeIndex];
-		Keyframe& next = jointAnimation.keyframes[min(keyframeIndex + 1, mCurrentAnimationEndIndex)];
+		Keyframe& current = jointAnimation.keyframes[mCurrentKeyframeIndex];
+		Keyframe& next = jointAnimation.keyframes[min(mCurrentKeyframeIndex + 1, mCurrentAnimationEndIndex)];
 
 		quatf rotation = cliqCity::graphicsMath::normalize(cliqCity::graphicsMath::slerp(current.rotation, next.rotation, u));
 		vec3f scale = cliqCity::graphicsMath::lerp(current.scale, next.scale, u);
@@ -197,13 +237,9 @@ void AnimationController::UpdateAnimation(SkeletalAnimation* pCurrentAnimation, 
 
 	mCurrentAnimationPlayTime += static_cast<float>(milliseconds);
 
-	StateAnimation* pStateAnimation = &mStateAnimationMap[mState];
-	if (pStateAnimation->keyframeCallbackMap[keyframeIndex] != nullptr && prevKeyframeIndex != keyframeIndex)
-	{
-		pStateAnimation->keyframeCallbackMap[keyframeIndex](mSceneObject);
-	}
+	ExecuteKeyframeCallbacks();
 
-	prevKeyframeIndex = keyframeIndex;
+	mPreviousKeyframeIndex = mCurrentKeyframeIndex;
 }
 
 void AnimationController::SetRestPose()

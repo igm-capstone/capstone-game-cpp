@@ -36,7 +36,14 @@ extern bool gDebugBT;
 
 #define MAX_GHOST_SKILLS 5
 
-#define MAX_MINIONS 50
+#define GHOST_MANA_MAX 100
+#define GHOST_MANA_REGEN 5
+
+
+#define MAX_IMPS          30
+#define MAX_ABOMINATIONS  10
+#define MAX_FLYTRAPS      10
+#define MAX_MINIONS       MAX_IMPS + MAX_ABOMINATIONS + MAX_FLYTRAPS
 
 #define MAX_STATIC_MESHES 1800
 
@@ -47,6 +54,7 @@ extern bool gDebugBT;
 
 #define MAX_COLLISIONS 128
 
+#define MAX_GLYPHS 10000
 #define MAX_SPRITES (MAX_EXPLORERS+MAX_MINIONS)
 #define MAX_SPRITESHEETS 10
 

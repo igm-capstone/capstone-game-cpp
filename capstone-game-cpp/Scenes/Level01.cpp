@@ -24,12 +24,13 @@
 #include <DebugRender.h>
 #include <SceneObjects/Door.h>
 #include <SceneObjects/SpawnPoint.h>
-#include <SceneObjects/FlyTrap.h>
 #include <SceneObjects/Heal.h>
 #include <SceneObjects/Trap.h>
 #include <SceneObjects/StatusEffect.h>
 #include <SceneObjects/DominationPoint.h>
 #include <Components/DominationPointController.h>
+#include <Components/ImpController.h>
+#include <Components/FlyTrapController.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -113,6 +114,8 @@ void Level01::VInitialize()
 	mAllocator.SetMemory(mStaticMemory, mStaticMemory + mStaticMemorySize);
 	mRenderer->SetDelegate(this);
 
+	mSpriteManager->Initialize(mNDSQuadMesh, mSpritesShaderResource);
+
 	InitializeAssets();
 	InitializeGeometry();
 	InitializeShaderResources();
@@ -120,7 +123,6 @@ void Level01::VInitialize()
 
 	mCollisionManager->Initialize();
 
-	mSpriteManager->Initialize(mNDSQuadMesh, mSpritesShaderResource);
 
 	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
 		Packet p(PacketTypes::INIT_CONNECTION);
@@ -130,7 +132,7 @@ void Level01::VInitialize()
 		Factory<Ghost>::Create()->Spawn(this);
 
 		if (gDebugExplorer) {
-			SpawnPoint& sp = *(Factory<SpawnPoint>().begin());
+			SpawnPoint& sp = *Factory<SpawnPoint>().begin();
 			auto e = Factory<Explorer>::Create();
 			e->DebugSpawn(sp.mTransform->GetPosition(), MyUUID::GenUUID());
 		}
@@ -296,12 +298,7 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateShaderResource(&mSpritesShaderResource, &mAllocator);
 
 		// SpriteSheets
-		mSpriteManager->LoadSpriteSheet("Assets/UI/Health.png", 900, 224, 1, 2);
-		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_ghostIcons.png", 1024, 1024, 4, 4);
-		mSpriteManager->LoadSpriteSheet("Assets/UI/UI_playerIcons1024.png", 1024, 1024, 4, 4);
-		mSpriteManager->LoadSpriteSheet("Assets/UI/Panels.png", 1024, 1024, 1, 4);
-		mSpriteManager->LoadSpriteSheet("Assets/UI/Keys.png", 8*96, 2*96, 8, 2);
-		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, mSpriteManager->GetFilenames(), 5);
+		mRenderer->VCreateShaderTexture2DArray(mSpritesShaderResource, mSpriteManager->GetTextureNames(), mSpriteManager->GetTextureCount());
 		mRenderer->VAddShaderLinearSamplerState(mSpritesShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 
 		void*  cbSpritesData[] = { mCameraManager->GetCBufferPersp(), mSpriteManager->GetCBuffer() };
@@ -310,13 +307,13 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateShaderConstantBuffers(mSpritesShaderResource, cbSpritesData, cbSpritesSizes, 2);
 
 		// Instance buffer data
-		void*	ibSpriteData[] = { mSpriteManager->GetInstanceBuffer() };
-		size_t	ibSpriteSizes[] = { sizeof(GPU::Sprite) * MAX_SPRITES };
-		size_t	ibSpriteStrides[] = { sizeof(GPU::Sprite) };
-		size_t	ibSpriteOffsets[] = { 0 };
+		void*	ibSpriteData[] = { mSpriteManager->GetSpriteInstanceBuffer(), mSpriteManager->GetGlyphInstanceBuffer() };
+		size_t	ibSpriteSizes[] = { sizeof(GPU::Sprite) * MAX_SPRITES, sizeof(GPU::Glyph) * MAX_GLYPHS };
+		size_t	ibSpriteStrides[] = { sizeof(GPU::Sprite), sizeof(GPU::Glyph) };
+		size_t	ibSpriteOffsets[] = { 0, 0 };
 
 		// Create the instance buffer
-		mRenderer->VCreateDynamicShaderInstanceBuffers(mSpritesShaderResource, ibSpriteData, ibSpriteSizes, ibSpriteStrides, ibSpriteOffsets, 1);
+		mRenderer->VCreateDynamicShaderInstanceBuffers(mSpritesShaderResource, ibSpriteData, ibSpriteSizes, ibSpriteStrides, ibSpriteOffsets, 2);
 	}
 
 	// Grid CS
@@ -437,9 +434,9 @@ void Level01::VUpdate(double milliseconds)
 		ec.Update(milliseconds);
 	}
 
-	for (auto& mc : Factory<MinionController>())
+	for (auto& mc : Factory<Minion>())
 	{
-		mc.Update(milliseconds);
+		mc.mController->Update(milliseconds);
 	}
 
 	for (auto& gc : Factory<GhostController>())
@@ -952,8 +949,10 @@ void Level01::RenderMinions()
 	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 0, 0);
 	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
 
-	for (Minion& m : Factory<Minion>())
+	for (MinionController& mc : Factory<ImpController>())
 	{
+		Minion& m = *static_cast<Minion*>(mc.mSceneObject);
+
 		mModel.world = m.mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 
@@ -969,8 +968,10 @@ void Level01::RenderMinions()
 
 	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 1, 0);
 
-	for (FlyTrap& ft : Factory<FlyTrap>())
+	for (MinionController& mc : Factory<FlyTrapController>())
 	{
+		Minion& ft = *static_cast<Minion*>(mc.mSceneObject);
+
 		mModel.world = ft.mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 
@@ -991,8 +992,8 @@ void Level01::RenderHealthBars()
 	for (Health& h : Factory<Health>())
 	{
 		auto screenPos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, -32);
-		mSpriteManager->DrawSprite(0, 1, screenPos, vec2f(0.1f, 0.1f), vec2f(h.GetHealthPerc(), 1));
-		mSpriteManager->DrawSprite(0, 0, screenPos, vec2f(0.1f, 0.1f));
+		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 1, screenPos, vec2f(90, 12), vec2f(h.GetHealthPerc(), 1));
+		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 0, screenPos, vec2f(90, 12));
 	}
 }
 
@@ -1006,14 +1007,21 @@ void Level01::RenderSprites() {
 	mRenderer->VUpdateShaderConstantBuffer(mSpritesShaderResource, mCameraManager->GetCBufferScreenOrto(), 0);
 	mRenderer->VSetVertexShaderConstantBuffers(mSpritesShaderResource);
 
-	mRenderer->VUpdateShaderInstanceBuffer(mSpritesShaderResource, mSpriteManager->GetInstanceBuffer(), sizeof(GPU::Sprite) * mSpriteManager->GetInstanceBufferCount(), 0);
+	mRenderer->VUpdateShaderInstanceBuffer(mSpritesShaderResource, mSpriteManager->GetSpriteInstanceBuffer(), sizeof(GPU::Sprite) * mSpriteManager->GetSpriteInstanceBufferCount(), 0);
+	mRenderer->VUpdateShaderInstanceBuffer(mSpritesShaderResource, mSpriteManager->GetGlyphInstanceBuffer(), sizeof(GPU::Glyph) * mSpriteManager->GetGlyphInstanceBufferCount(), 1);
 
 	mRenderer->VSetPixelShaderResourceView(mSpritesShaderResource, 0, 0);
 	mRenderer->VSetPixelShaderSamplerStates(mSpritesShaderResource);
 
 	mRenderer->VBindMesh(mNDSQuadMesh);
 	mRenderer->VSetVertexShaderInstanceBuffer(mSpritesShaderResource, 0, 1);
-	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), mSpriteManager->GetInstanceBufferCount(), 0, 0, 0);
+	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), mSpriteManager->GetSpriteInstanceBufferCount(), 0, 0, 0);
+
+	mRenderer->VSetInputLayout(mApplication->mVSFwdSpriteGlyphs);
+	mRenderer->VSetVertexShader(mApplication->mVSFwdSpriteGlyphs);
+
+	mRenderer->VSetVertexShaderInstanceBuffer(mSpritesShaderResource, 1, 1);
+	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), mSpriteManager->GetGlyphInstanceBufferCount(), 0, 0, 0);
 }
 
 void Level01::RenderGrid()

@@ -21,6 +21,7 @@
     <FxCompile Include="Shaders\VSFwdSingleColor.hlsl" />
     <FxCompile Include="Shaders\VSDefInstancedColor.hlsl" />
     <FxCompile Include="Shaders\PSDefInstancedMaterial.hlsl" />
+    <FxCompile Include="Shaders\VSFwdSpriteGlyphs.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
@@ -57,8 +58,6 @@
     <ClCompile Include="SceneObjects\Region.cpp" />
     <ClCompile Include="BehaviorTree\Selector.cpp" />
     <ClCompile Include="Components\AnimationUtility.cpp" />
-    <ClCompile Include="SceneObjects\FlyTrap.cpp" />
-    <ClCompile Include="Components\FlyTrapController.cpp" />
     <ClCompile Include="BehaviorTree\BehaviorTreeTests.cpp" />
     <ClCompile Include="BehaviorTree\Predicate.cpp" />
     <ClCompile Include="BehaviorTree\Priority.cpp" />
@@ -73,6 +72,9 @@
     <ClCompile Include="SceneObjects\StatusEffect.cpp" />
     <ClCompile Include="SceneObjects\Trap.cpp" />
     <ClCompile Include="BehaviorTree\Builder.cpp" />
+    <ClCompile Include="BehaviorTree\Mute.cpp" />
+    <ClCompile Include="Components\ImpController.cpp" />
+    <ClCompile Include="Components\FlyTrapController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -136,7 +138,6 @@
     <ClInclude Include="SceneObjects\Door.h" />
     <ClInclude Include="BehaviorTree\Selector.h" />
     <ClInclude Include="Components\AnimationUtility.h" />
-    <ClInclude Include="SceneObjects\FlyTrap.h" />
     <ClInclude Include="Components\FlyTrapController.h" />
     <ClInclude Include="BehaviorTree\BehaviorTree.h" />
     <ClInclude Include="BehaviorTree\BehaviorTreeTests.h" />
@@ -147,6 +148,14 @@
     <ClInclude Include="BehaviorTree\Decorator.h" />
     <ClInclude Include="UI\SpriteManager.h" />
     <ClInclude Include="UI\SkillBar.h" />
+    <ClInclude Include="BehaviorTree\Builder.h" />
+    <ClInclude Include="BehaviorTree\Parallel.h" />
+    <ClInclude Include="BehaviorTree\Race.h" />
+    <ClInclude Include="SceneObjects\Heal.h" />
+    <ClInclude Include="SceneObjects\StatusEffect.h" />
+    <ClInclude Include="SceneObjects\Trap.h" />
+    <ClInclude Include="BehaviorTree\Mute.h" />
+    <ClInclude Include="Components\ImpController.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />

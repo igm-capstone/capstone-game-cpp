@@ -110,7 +110,14 @@ void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 		e->mNetworkClient->SendData(&p);
 	}
 
-	Singleton<AIManager>::SharedInstance().SetGridDirty(true);
+	auto& ai = Singleton<AIManager>::SharedInstance();
+	Node* node = ai.GetNodeAt(newPos);
+
+	if (node != e->mCurrentNode)
+	{
+		e->mCurrentNode = node;
+		ai.SetGridDirty(true);
+	}
 }
 
 void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
@@ -153,8 +160,8 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		e->mSkills[MELEE_SKILL_INDEX] = melee;
 
 		SkillBar* mSkillBar = &Application::SharedInstance().GetCurrentScene()->mSkillBar;
-		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], 2, 5, 8);
-		mSkillBar->AddSkill(e->mSkills[HEAL_SKILL_INDEX], 2, 0, 6);
+		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
+		mSkillBar->AddSkill(e->mSkills[HEAL_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 0, 6);
 
 		break;
 	}
@@ -179,9 +186,9 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		e->mSkills[MELEE_SKILL_INDEX] = melee;
 
 		SkillBar* mSkillBar = &Application::SharedInstance().GetCurrentScene()->mSkillBar;
-		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], 2, 5, 8);
-		mSkillBar->AddSkill(e->mSkills[POISON_SKILL_INDEX], 2, 2, 6);
-		mSkillBar->AddSkill(e->mSkills[SLOW_SKILL_INDEX], 2, 4, 4);
+		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
+		mSkillBar->AddSkill(e->mSkills[POISON_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 2, 6);
+		mSkillBar->AddSkill(e->mSkills[SLOW_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 4, 4);
 
 		break;
 	}
@@ -201,8 +208,8 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		e->mSkills[MELEE_SKILL_INDEX] = melee;
 
 		SkillBar* mSkillBar = &Application::SharedInstance().GetCurrentScene()->mSkillBar;
-		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], 2, 5, 8);
-		mSkillBar->AddSkill(e->mSkills[SPRINT_SKILL_INDEX], 2, 1, 6);
+		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
+		mSkillBar->AddSkill(e->mSkills[SPRINT_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 1, 6);
 
 		break;
 	}
