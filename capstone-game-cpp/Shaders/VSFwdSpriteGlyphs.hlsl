@@ -29,6 +29,7 @@ struct Pixel
 Pixel main(Glyph input)
 {
 	Pixel output;
+	input.position.xy += float2(0.5f, 0.5f);
 
 	float4x4 scale = {
 		input.size.x/2 * input.scale.x, 0, 0, 0,

@@ -1,6 +1,8 @@
 #include <stdafx.h>
 #include "SpriteManager.h"
 #include <Rig3D/Graphics/Interface/IShaderResource.h>
+#include <trace.h>
+#include <Colors.h>
 
 void SpriteManager::Initialize(Rig3D::IMesh* spriteMesh, Rig3D::IShaderResource* spriteShaderResource)
 {
@@ -280,24 +282,17 @@ void SpriteManager::DrawSpriteAtPerc(SpriteSheetCode sheetID, int spriteID, vec2
 	DrawSprite(sheetID, spriteID, pos, scale, linearFill, radialFill);
 }
 
-void SpriteManager::DrawTextSprite(FontCode fontID, vec2f pos, vec2f scale, char* fmt, ...)
+void SpriteManager::DrawTextSprite(FontCode fontID, vec2f pos, vec2f scale, Alignment align, char* fmt, ...)
 {
 	char buf[100];
 	va_list args;
 	va_start(args, fmt);
 	vsnprintf(buf, 100, fmt, args);
 
-	for each(char c in buf)
-	{
-		if (c == '\0') break;
-		Glyph& g = mGlyphsData[fontID][c - 32];
-		DrawGlyph(fontID, g, pos + vec2f(g.xoffset / 1000.0f, -g.yoffset / 1000.0f) * scale, scale);
-		pos += vec2f(g.xadvance / 1000.0f, 0) * scale;
-	}
-
+	DrawGlyphs(fontID, buf, pos, scale, align);
 }
 
-void SpriteManager::DrawTextSpriteAtPerc(FontCode fontID, vec2f screenPerc, vec2f scale, char* fmt, ...)
+void SpriteManager::DrawTextSpriteAtPerc(FontCode fontID, vec2f screenPerc, vec2f scale, Alignment align, char* fmt, ...)
 {
 	char buf[100];
 	va_list args;
@@ -308,12 +303,37 @@ void SpriteManager::DrawTextSpriteAtPerc(FontCode fontID, vec2f screenPerc, vec2
 	pos.x *= mRenderer->GetWindowWidth();
 	pos.y *= mRenderer->GetWindowHeight();
 
-	for each(char c in buf)
+	DrawGlyphs(fontID, buf, pos, scale, align);
+}
+
+void SpriteManager::DrawGlyphs(FontCode fontID, char* phrase, vec2f pos, vec2f scale, Alignment align)
+{
+	char* charPos = phrase;
+
+	if (align != ALIGN_LEFT)
 	{
-		if (c == '\0') break;
-		Glyph& g = mGlyphsData[fontID][c - 32];
+		float width = 0;
+		//Precalculate text size
+		while (*charPos != '\0')
+		{
+			Glyph& g = mGlyphsData[fontID][*charPos - 32];
+			width += (g.xadvance/1000.0f) * scale.x;
+			charPos++;
+		}
+
+		if (align == ALIGN_CENTER)
+			pos.x -= width / 2;
+		else if (align == ALIGN_RIGHT)
+			pos.x -= width;
+	}
+
+	charPos = phrase;
+	while(*charPos != '\0')
+	{
+		Glyph& g = mGlyphsData[fontID][*charPos - 32];
 		DrawGlyph(fontID, g, pos + vec2f(g.xoffset / 1000.0f, -g.yoffset / 1000.0f) * scale, scale);
 		pos += vec2f(g.xadvance / 1000.0f, 0) * scale;
+		charPos++;
 	}
 }
 
