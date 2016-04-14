@@ -33,7 +33,7 @@ Explorer::Explorer()
 	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
 	mNetworkID->RegisterNetSyncAnimationCallback(&OnNetSyncAnimation);
 
-	Application::SharedInstance().GetModelManager()->GetModel(kMinionAnimModelName)->Link(this);
+	Application::SharedInstance().GetModelManager()->GetModel(kSprinterModelName)->Link(this);
 
 	mAnimationController = Factory<AnimationController>::Create();
 	mAnimationController->mSceneObject = this;
@@ -41,18 +41,18 @@ Explorer::Explorer()
 	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
 	mAnimationController->RegisterCommandExecutedCallback(&OnAnimationCommandExecuted);
 
-	Animation melee = gMinionAnimations[Animations::MINION_ATTACK];
-	KeyframeOption meleeOptions[] = { { melee.startFrameIndex, OnMeleeStart }, { melee.endFrameIndex, OnMeleeStop } };
-	SetStateAnimation(mAnimationController, ANIM_STATE_WALK,  &gMinionAnimations[Animations::MINION_WALK], nullptr, 0, true);
-	SetStateAnimation(mAnimationController, ANIM_STATE_RUN,   &gMinionAnimations[Animations::MINION_RUN], nullptr, 0, true);
-	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionAnimations[Animations::MINION_ATTACK], meleeOptions, 2, false);
-	SetRestFrameIndex(mAnimationController, gMinionRestFrameIndex);
+	//Animation melee = gMinionAnimations[Animations::MINION_ATTACK];
+	//KeyframeOption meleeOptions[] = { { melee.startFrameIndex, OnMeleeStart }, { melee.endFrameIndex, OnMeleeStop } };
+	//SetStateAnimation(mAnimationController, ANIM_STATE_WALK,  &gMinionAnimations[Animations::MINION_WALK], nullptr, 0, true);
+	//SetStateAnimation(mAnimationController, ANIM_STATE_RUN,   &gMinionAnimations[Animations::MINION_RUN], nullptr, 0, true);
+	//SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionAnimations[Animations::MINION_ATTACK], meleeOptions, 2, false);
+	//SetRestFrameIndex(mAnimationController, gMinionRestFrameIndex);
 
-	//Animation melee = gSprinterAnimations[Animations::SPRINTER_ATTACK];
-	//KeyframeOption meleeOptions[] = { { melee.startFrameIndex, OnMeleeStart },{ melee.endFrameIndex, OnMeleeStop } };
-	//SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gSprinterAnimations[Animations::SPRINTER_IDLE], nullptr, 0, true);
-	//SetStateAnimation(mAnimationController, ANIM_STATE_RUN, &gSprinterAnimations[Animations::SPRINTER_RUN], nullptr, 0, true);
-	//SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gSprinterAnimations[Animations::SPRINTER_ATTACK], meleeOptions, 2, false);
+	Animation melee = gSprinterAnimations[Animations::SPRINTER_ATTACK];
+	KeyframeOption meleeOptions[] = { { melee.startFrameIndex, OnMeleeStart },{ melee.endFrameIndex, OnMeleeStop } };
+	SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gSprinterAnimations[Animations::SPRINTER_IDLE], nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_RUN, &gSprinterAnimations[Animations::SPRINTER_RUN], nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gSprinterAnimations[Animations::SPRINTER_ATTACK], meleeOptions, 2, false);
 
 	mController = Factory<ExplorerController>::Create();
 	mController->mSceneObject = this;

@@ -153,7 +153,7 @@ void Level01::InitializeAssets()
 		mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[i]);
 	}
 
-	//mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
+	mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kPlantModelName);
 
