@@ -87,7 +87,7 @@ void AnimationController::SetState(AnimationControllerState state)
 		mCurrentAnimationSpeed      = pStateAnimation->speed;
 		mIsLooping					= pStateAnimation->shouldLoop;
 		mCurrentAnimationPlayTime	= 0.0f;
-		mCurrentKeyframeIndex       = mCurrentAnimationIndex;
+		mCurrentKeyframeIndex       = mCurrentAnimationStartIndex;
 		mPreviousKeyframeIndex      = INT32_MAX;
 	}
 	else
@@ -185,23 +185,27 @@ void AnimationController::Update(double milliseconds)
 
 void AnimationController::ExecuteKeyframeCallbacks()
 {
+
 	StateAnimation* pStateAnimation = &mStateAnimationMap[mState];
+	TRACE_WATCH("Curr anim callback count", pStateAnimation->keyframeCallbackMap.size());
+	
+	auto& callbackMap = pStateAnimation->keyframeCallbackMap;
 	if (mPreviousKeyframeIndex < mCurrentKeyframeIndex)
 	{
 		for (size_t i = mPreviousKeyframeIndex + 1; i <= mCurrentKeyframeIndex; i++)
 		{
-			auto callback = pStateAnimation->keyframeCallbackMap[i];
-			if (callback != nullptr)
+			if (callbackMap.find(i) != callbackMap.end())
 			{
+				auto callback = callbackMap[i];
 				callback(mSceneObject);
 			}
 		}
 	}
 	else if (mPreviousKeyframeIndex > mCurrentKeyframeIndex)
 	{
-		auto callback = pStateAnimation->keyframeCallbackMap[mCurrentKeyframeIndex];
-		if (callback != nullptr)
+		if (callbackMap.find(mCurrentKeyframeIndex) != callbackMap.end())
 		{
+			auto callback = callbackMap[mCurrentKeyframeIndex];
 			callback(mSceneObject);
 		}
 	}
