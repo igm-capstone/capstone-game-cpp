@@ -12,5 +12,5 @@ Region::Region() : mColliderComponent(Factory<OrientedBoxColliderComponent>::Cre
 
 Region::~Region()
 {
-
+	Factory<OrientedBoxColliderComponent>::Destroy(mColliderComponent);
 }

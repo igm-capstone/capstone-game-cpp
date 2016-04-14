@@ -40,6 +40,7 @@ private:
 
 	~Lamp()
 	{
+		Factory<OrientedBoxColliderComponent>::Destroy(mTrigger);
 	}
 
 	static void OnTriggerStay(BaseSceneObject* obj, BaseSceneObject* other)

@@ -31,7 +31,7 @@ private:
 
 private:
 	Explorer();
-	~Explorer() {};
+	~Explorer();
 
 public:
 	void Spawn(vec3f pos, int UUID);

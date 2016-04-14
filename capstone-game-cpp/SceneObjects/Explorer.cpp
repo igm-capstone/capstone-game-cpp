@@ -73,6 +73,40 @@ Explorer::Explorer()
 	mHealth->SetMaxHealth(1000.0f);
 	mHealth->RegisterHealthChangeCallback(OnHealthChange);
 }
+Explorer::~Explorer()
+{
+	Factory<NetworkID>::Destroy(mNetworkID);
+	Factory<ExplorerController>::Destroy(mController);
+	Factory<AnimationController>::Destroy(mAnimationController);
+	Factory<SphereColliderComponent>::Destroy(mCollider);
+	Factory<Health>::Destroy(mHealth);
+
+	// Skills
+	Factory<Skill>::Destroy(mSkills[MELEE_SKILL_INDEX]);
+	switch (GetExplorerID(this))
+	{
+	case 0:
+	{
+		Factory<Skill>::Destroy(mSkills[HEAL_SKILL_INDEX]);
+		break;
+	}
+	case 1:
+	{
+		Factory<Skill>::Destroy(mSkills[POISON_SKILL_INDEX]);
+		Factory<Skill>::Destroy(mSkills[SLOW_SKILL_INDEX]);
+		break;
+	}
+	case 2:
+	default:
+	{
+		Factory<Skill>::Destroy(mSkills[SPRINT_SKILL_INDEX]);
+		break;
+	}
+	}
+
+	// This will change once explorers have unique melee attacks / colliders.
+	Factory<SphereColliderComponent>::Destroy(mMeleeColliderComponent.asSphereColliderComponent);
+}
 
 void Explorer::DebugSpawn(vec3f pos, int UUID)
 {

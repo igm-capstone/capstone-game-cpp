@@ -35,6 +35,26 @@ Minion::Minion()
 
 Minion::~Minion()
 {
+	Factory<NetworkID>::Destroy(mNetworkID);
+	Factory<SphereColliderComponent>::Destroy(mCollider);
+	Factory<SphereColliderComponent>::Destroy(mMeleeColliderComponent);
+
+	Factory<Health>::Destroy(mHealth);
+	Factory<AnimationController>::Destroy(mAnimationController);
+
+	switch(mClass)
+	{
+	case IMP:
+		Factory<ImpController>::Destroy(reinterpret_cast<ImpController*>(mController));
+		break;
+	case FLYTRAP:
+		Factory<FlyTrapController>::Destroy(reinterpret_cast<FlyTrapController*>(mController));
+		break;
+	case ABOMINATION:
+		break;
+	default:
+		break;
+	}
 }
 
 void Minion::Spawn(vec3f pos, int UUID)

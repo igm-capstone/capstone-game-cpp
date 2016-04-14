@@ -84,6 +84,16 @@ BVHTree::BVHTree()
 
 BVHTree::~BVHTree()
 {
+	mNodes.clear();
+	mLayerStartIndex.clear();
+
+	if (mNodes.size())
+	{
+		for (int i = 0; i < (PARTITION_X_COUNT * PARTITION_Y_COUNT) + 1; i++)
+		{
+			Factory<OrientedBoxColliderComponent>::Destroy(reinterpret_cast<OrientedBoxColliderComponent*>(mNodes[i].object));
+		}
+	}
 }
 
 void BVHTree::SetRootBoundingVolume(vec3f origin, vec3f extents, int nodeCount)
