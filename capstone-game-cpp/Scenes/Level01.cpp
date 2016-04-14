@@ -471,25 +471,19 @@ void Level01::VUpdate(double milliseconds)
 
 	for (Trap& t: Factory<Trap>())
 	{
-		TRACE_LOG("TRAP UPDATE:");
 		t.mDuration -= seconds;
 		if (t.mDuration <= 0.0f)
 		{
-			TRACE_LOG("TRAP DESTROY:");
-
 			Factory<Trap>::Destroy(&t);
 		}
 	}
 
 	for (StatusEffect& s : Factory<StatusEffect>())
 	{
-		TRACE_LOG("STATUS UPDATE:");
-
 		s.mOnUpdateCallback(&s, seconds);
 		s.mDuration -= seconds;
 		if (s.mDuration <= 0.0f)
 		{
-			TRACE_LOG("STATUS DESTROY:");
 			Factory<StatusEffect>::Destroy(&s);
 		}
 	}
