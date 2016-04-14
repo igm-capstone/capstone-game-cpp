@@ -115,7 +115,7 @@ void Minion::SpawnFlytrap(vec3f pos, int UUID)
 	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
 	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
 
-	Animation melee = gMinionAnimations[Animations::PLANT_BITE];
+	Animation melee = gPlantAnimations[Animations::PLANT_BITE];
 	KeyframeOption meleeOptions[] = {
 		{ melee.startFrameIndex + 10, &MinionController::OnMeleeStart },
 		{ melee.endFrameIndex,        &MinionController::OnMeleeStop },

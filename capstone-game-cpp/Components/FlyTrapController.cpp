@@ -15,7 +15,7 @@ FlyTrapController::FlyTrapController()
 				.End()
 			.End()
 			// look at player ;)
-			.Predicate(&IsAttackInProgress, "(?) Is Attack in Progress")
+			//.Predicate(&IsAttackInProgress, "(?) Is Attack in Progress")
 		.End()
 	.End();
 

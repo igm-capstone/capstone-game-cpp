@@ -132,7 +132,7 @@ void Level01::VInitialize()
 		Factory<Ghost>::Create()->Spawn(this);
 
 		if (gDebugExplorer) {
-			SpawnPoint& sp = *(Factory<SpawnPoint>().begin());
+			SpawnPoint& sp = *Factory<SpawnPoint>().begin();
 			auto e = Factory<Explorer>::Create();
 			e->DebugSpawn(sp.mTransform->GetPosition(), MyUUID::GenUUID());
 		}
