@@ -17,8 +17,8 @@ private:
 	class SkillBar*				mSkillBar;
 	int							mActiveSkill;
 	float						mMana;
-	const float					mMaxMana = 100;
-	const float					mManaRegenPerS = 1;
+	const float					mMaxMana = GHOST_MANA_MAX;
+	const float					mManaRegenPerS = GHOST_MANA_REGEN;
 
 private:
 	Ghost();
