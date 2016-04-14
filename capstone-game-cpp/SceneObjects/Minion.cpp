@@ -19,12 +19,18 @@ Minion::Minion()
 	mNetworkID->mSceneObject = this;
 	mNetworkID->mIsActive = false;
 	mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
+	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
 
 	mCollider = Factory<SphereColliderComponent>::Create();
 	mCollider->mSceneObject = this;
 	mCollider->mIsActive = false;
 	mCollider->mIsDynamic = true;
 	mCollider->mLayer = COLLISION_LAYER_MINION;
+
+	mHealth = Factory<Health>::Create();
+	mHealth->mSceneObject = this;
+	mHealth->SetMaxHealth(1000.0f);
+	mHealth->RegisterHealthChangeCallback(OnHealthChange);
 }
 
 Minion::~Minion()
@@ -142,9 +148,6 @@ void Minion::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 		p.AsTransform.Position = newPos;
 		p.AsTransform.Rotation = newRot;
 		m->mNetworkClient->SendData(&p);
-
-		//m->mHealth->TakeDamage(1.0f);
-		//if (m->mHealth->GetHealth() <= 0) e->mHealth->TakeDamage(-1000.0f);
 	}
 }
 
@@ -159,4 +162,22 @@ void Minion::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 {
 	auto m = static_cast<Minion*>(obj);
 	m->mController->mIsActive = newAuth;
+}
+
+void Minion::OnHealthChange(BaseSceneObject* obj, float newVal, bool shouldCheckAuthority)
+{
+	Minion* m = reinterpret_cast<Minion*>(obj);
+	if (!shouldCheckAuthority || m->mNetworkID->mHasAuthority)
+	{
+		Packet p(PacketTypes::SYNC_HEALTH);
+		p.UUID = m->mNetworkID->mUUID;
+		p.AsFloat = newVal;
+		m->mNetworkClient->SendData(&p);	
+	}
+}
+
+void Minion::OnNetHealthChange(BaseSceneObject* obj, float newVal)
+{
+	auto e = static_cast<Minion*>(obj);
+	e->mHealth->SetHealth(newVal);
 }
