@@ -55,7 +55,7 @@ void CreateColliderMesh(void* allocator)
 	vertices.clear();
 	indices.clear();
 
-	Rig3D::Geometry::Sphere(vertices, indices, 6, 6, 0.5f);
+	Rig3D::Geometry::Sphere(vertices, indices, 6, 6, 1.0f);
 
 	meshLibrary.NewMesh(&gSphereMesh, gRenderer);
 	gRenderer->VSetMeshVertexBuffer(gSphereMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
@@ -160,9 +160,16 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 
 	for (Explorer& s : Factory<Explorer>())
 	{
+		SphereColliderComponent* c = s.mCollider;
+		model->world = (mat4f::scale(c->mCollider.radius) * mat4f::translate(c->mCollider.origin)).transpose();
+		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
+		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
+
+		gRenderer->VDrawIndexed(0, gSphereMesh->GetIndexCount());
+
 		if (s.mMeleeColliderComponent.asSphereColliderComponent)
 		{
-			SphereColliderComponent* c = s.mMeleeColliderComponent.asSphereColliderComponent;
+			c = s.mMeleeColliderComponent.asSphereColliderComponent;
 			model->world = (mat4f::scale(c->mCollider.radius) * mat4f::translate(c->mCollider.origin)).transpose();
 			gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
 			gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);

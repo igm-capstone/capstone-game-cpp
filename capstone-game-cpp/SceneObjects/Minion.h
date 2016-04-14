@@ -40,6 +40,7 @@ public:
 
 	static void OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot);
 	static void OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth);
-
+	static void OnHealthChange(BaseSceneObject* obj, float newVal, bool shouldCheckAuthority);
+	static void OnNetHealthChange(BaseSceneObject* obj, float newVal);
 };
 

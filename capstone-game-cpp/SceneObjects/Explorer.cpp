@@ -8,11 +8,12 @@
 #include <Components/Skill.h>
 #include <Components/AnimationUtility.h>
 
+#define MELEE_SKILL_INDEX	0
 #define SPRINT_SKILL_INDEX	1
 #define HEAL_SKILL_INDEX	1
-#define MELEE_SKILL_INDEX	0
 #define POISON_SKILL_INDEX  1
 #define SLOW_SKILL_INDEX	2
+#include "Minion.h"
 
 int GetExplorerID(Explorer* explorer)
 {
@@ -107,9 +108,6 @@ void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 		p.AsTransform.Position = newPos;
 		p.AsTransform.Rotation = newRot;
 		e->mNetworkClient->SendData(&p);
-
-		e->mHealth->TakeDamage(1.0f);
-		if (e->mHealth->GetHealth() <= 0) e->mHealth->TakeDamage(-1000.0f);
 	}
 
 	auto& ai = Singleton<AIManager>::SharedInstance();
@@ -128,22 +126,27 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	e->mController->mIsActive = newAuth;
 	e->mCameraManager->MoveCamera(e->mTransform->GetPosition(), e->mTransform->GetPosition() + vec3f(0,-7,-15));
 
-	if (!e->mNetworkID->mHasAuthority) return;
+	if (!e->mNetworkID->mHasAuthority) 
+	{
+		return;
+	}
+
+	// Giving all explorers same melee collider for now.
+	e->mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
+	e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.0f;
+	e->mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
+	e->mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
+	e->mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
+	e->mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;
+	e->mMeleeColliderComponent.asSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
+	e->mMeleeColliderComponent.asSphereColliderComponent->RegisterTriggerEnterCallback(&OnMeleeHit);
+	e->mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = e;
+
 	// Add more as we get more classes.
 	switch (GetExplorerID(e))
 	{
 	case 0:
 	{
-		e->mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
-		e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.5f;
-		e->mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
-		e->mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
-		e->mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
-		e->mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;
-		e->mMeleeColliderComponent.asSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
-		e->mMeleeColliderComponent.asSphereColliderComponent->RegisterTriggerEnterCallback(&OnMeleeHit);
-		e->mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = e;
-
 		auto heal = Factory<Skill>::Create();
 		heal->SetBinding(SkillBinding().Set(KEYCODE_A));
 		heal->Setup("Heal", 2, 1, DoHeal);
@@ -164,16 +167,6 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	}
 	case 1:
 	{
-		e->mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
-		e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.5f;
-		e->mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
-		e->mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
-		e->mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
-		e->mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;
-		e->mMeleeColliderComponent.asSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
-		e->mMeleeColliderComponent.asSphereColliderComponent->RegisterTriggerEnterCallback(&OnMeleeHit);
-		e->mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = e;
-
 		auto poison = Factory<Skill>::Create();
 		poison->SetBinding(SkillBinding().Set(KEYCODE_A));
 		poison->Setup("Poison Trap", 2, 1, DoPoison);
@@ -199,18 +192,9 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 
 		break;
 	}
+	case 2:
 	default:
 	{
-		e->mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
-		e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.5f;
-		e->mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
-		e->mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
-		e->mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
-		e->mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;
-		e->mMeleeColliderComponent.asSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
-		e->mMeleeColliderComponent.asSphereColliderComponent->RegisterTriggerEnterCallback(&OnMeleeHit);
-		e->mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = e;
-
 		auto sprint = Factory<Skill>::Create();
 		sprint->SetBinding(SkillBinding().Set(KEYCODE_A));
 		sprint->Setup("Sprint", 2, 1, DoSprint);
@@ -272,10 +256,11 @@ void Explorer::OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command
 	}
 }
 
-void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal)
+void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal, bool checkAuthority)
 {
 	auto e = static_cast<Explorer*>(obj);
-	if (e->mNetworkID->mHasAuthority) {
+	if (!checkAuthority || e->mNetworkID->mHasAuthority)
+	{
 		Packet p(PacketTypes::SYNC_HEALTH);
 		p.UUID = e->mNetworkID->mUUID;
 		p.AsFloat = newVal;
@@ -373,19 +358,35 @@ bool Explorer::DoSlow(BaseSceneObject* obj, float duration, BaseSceneObject* tar
 void Explorer::OnMeleeStart(void* obj)
 {
 	auto e = reinterpret_cast<Explorer*>(obj);
-	e->mMeleeColliderComponent.asBaseColliderComponent->mIsActive = true;
+	if (e->mNetworkID->mHasAuthority)
+	{
+		e->mMeleeColliderComponent.asBaseColliderComponent->mIsActive = true;
+	}
 }
 
 void Explorer::OnMeleeStop(void* obj)
 {
 	auto e = reinterpret_cast<Explorer*>(obj);
-	e->mMeleeColliderComponent.asBaseColliderComponent->mIsActive = false;
 	e->mController->PlayStateAnimation(ANIM_STATE_IDLE);
+	
+	if (e->mNetworkID->mHasAuthority)
+	{
+		e->mMeleeColliderComponent.asBaseColliderComponent->mIsActive = false;
+	}
 }
 
 void Explorer::OnMeleeHit(BaseSceneObject* self, BaseSceneObject* other)
 {	
 	// THis is currently an assumption that this object will have a Health component
-	auto e = reinterpret_cast<Explorer*>(other);
-	e->mHealth->TakeDamage(100.0f);
+	if (other->Is<Minion>())
+	{
+		auto m = reinterpret_cast<Minion*>(other);
+		m->mHealth->TakeDamage(100.0f, false);
+	}
+	else if (other->Is<Explorer>())
+	{
+		// Check Friendly Fire
+		auto e = reinterpret_cast<Explorer*>(other);
+		e->mHealth->TakeDamage(100.0f, false);
+	}
 }
