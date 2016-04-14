@@ -8,7 +8,6 @@
 #include <SceneObjects/Heal.h>
 #include <SceneObjects/Trap.h>
 #include <SceneObjects/StatusEffect.h>
-#include <SceneObjects/FlyTrap.h>
 
 NetworkManager::NetworkManager()
 {
@@ -144,8 +143,8 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 	}
 	case SKILL_TYPE_FLYTRAP_MINION:
 	{
-		auto f = Factory<FlyTrap>::Create();
-		f->Spawn(pos, UUID);
+		auto f = Factory<Minion>::Create();
+		f->SpawnFlytrap(pos, UUID);
 		f->mNetworkID->mHasAuthority = true;
 		f->mNetworkID->OnNetAuthorityChange(true);
 		break;
@@ -200,8 +199,8 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 	}
 	case SKILL_TYPE_FLYTRAP_MINION:
 	{
-		auto f = Factory<FlyTrap>::Create();
-		f->Spawn(pos, UUID);
+		auto f = Factory<Minion>::Create();
+		f->SpawnFlytrap(pos, UUID);
 		break;
 	}
 	case SKILL_TYPE_IMP_MINION:

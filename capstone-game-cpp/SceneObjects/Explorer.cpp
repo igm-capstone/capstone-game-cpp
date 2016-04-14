@@ -112,7 +112,14 @@ void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 		if (e->mHealth->GetHealth() <= 0) e->mHealth->TakeDamage(-1000.0f);
 	}
 
-	Singleton<AIManager>::SharedInstance().SetGridDirty(true);
+	auto& ai = Singleton<AIManager>::SharedInstance();
+	Node* node = ai.GetNodeAt(newPos);
+
+	if (node != e->mCurrentNode)
+	{
+		e->mCurrentNode = node;
+		ai.SetGridDirty(true);
+	}
 }
 
 void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)

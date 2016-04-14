@@ -24,12 +24,13 @@
 #include <DebugRender.h>
 #include <SceneObjects/Door.h>
 #include <SceneObjects/SpawnPoint.h>
-#include <SceneObjects/FlyTrap.h>
 #include <SceneObjects/Heal.h>
 #include <SceneObjects/Trap.h>
 #include <SceneObjects/StatusEffect.h>
 #include <SceneObjects/DominationPoint.h>
 #include <Components/DominationPointController.h>
+#include <Components/ImpController.h>
+#include <Components/FlyTrapController.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -131,7 +132,7 @@ void Level01::VInitialize()
 		Factory<Ghost>::Create()->Spawn(this);
 
 		if (gDebugExplorer) {
-			SpawnPoint& sp = *(Factory<SpawnPoint>().begin());
+			SpawnPoint& sp = *Factory<SpawnPoint>().begin();
 			auto e = Factory<Explorer>::Create();
 			e->DebugSpawn(sp.mTransform->GetPosition(), MyUUID::GenUUID());
 		}
@@ -948,8 +949,10 @@ void Level01::RenderMinions()
 	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 0, 0);
 	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
 
-	for (Minion& m : Factory<Minion>())
+	for (MinionController& mc : Factory<ImpController>())
 	{
+		Minion& m = *static_cast<Minion*>(mc.mSceneObject);
+
 		mModel.world = m.mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 
@@ -965,8 +968,10 @@ void Level01::RenderMinions()
 
 	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 1, 0);
 
-	for (FlyTrap& ft : Factory<FlyTrap>())
+	for (MinionController& mc : Factory<FlyTrapController>())
 	{
+		Minion& ft = *static_cast<Minion*>(mc.mSceneObject);
+
 		mModel.world = ft.mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 

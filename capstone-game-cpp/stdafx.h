@@ -36,6 +36,9 @@ extern bool gDebugBT;
 
 #define MAX_GHOST_SKILLS 5
 
+#define GHOST_MANA_MAX 100
+#define GHOST_MANA_REGEN 5
+
 
 #define MAX_IMPS          30
 #define MAX_ABOMINATIONS  10

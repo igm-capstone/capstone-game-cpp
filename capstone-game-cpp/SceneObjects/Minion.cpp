@@ -9,6 +9,7 @@
 #include <Components/Health.h>
 #include <Network\NetworkClient.h>
 #include <Components/ImpController.h>
+#include <Components/FlyTrapController.h>
 
 Minion::Minion()
 	: mClass(UNKNOWN)
@@ -33,12 +34,16 @@ Minion::~Minion()
 void Minion::Spawn(vec3f pos, int UUID)
 {
 	mTransform->SetPosition(pos);
+	mTransform->SetRotation(mController->GetAdjustedRotation(0));
 
 	mCollider->mIsActive = true;
 	mCollider->mCollider.origin = pos;
 
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
+
+	mAnimationController->SetState(ANIM_STATE_IDLE);
+	mAnimationController->Resume();
 }
 
 void Minion::SpawnImp(vec3f pos, int UUID)
@@ -66,7 +71,6 @@ void Minion::SpawnImp(vec3f pos, int UUID)
 	mAnimationController->mSceneObject = this;
 	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
 	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
-	SetRestFrameIndex(mAnimationController, gMinionRestFrameIndex);
 
 	Animation melee = gMinionAnimations[Animations::MINION_ATTACK];
 	KeyframeOption meleeOptions[] = {
@@ -83,6 +87,46 @@ void Minion::SpawnImp(vec3f pos, int UUID)
 
 	Spawn(pos, UUID);
 }
+
+
+void Minion::SpawnFlytrap(vec3f pos, int UUID)
+{
+	mClass = FLYTRAP;
+
+	mMeleeColliderComponent = Factory<SphereColliderComponent>::Create();
+	mMeleeColliderComponent->mSceneObject = this;
+	mMeleeColliderComponent->mCollider.radius = 2.5f;
+	mMeleeColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
+	mMeleeColliderComponent->mIsActive = false;
+	mMeleeColliderComponent->mIsDynamic = false;
+	mMeleeColliderComponent->mIsTrigger = true;
+	mMeleeColliderComponent->mLayer = COLLISION_LAYER_MINION_SKILL;
+	mMeleeColliderComponent->RegisterTriggerEnterCallback(&MinionController::OnMeleeHit);
+
+	mController = Factory<FlyTrapController>::Create();
+	mController->mSceneObject = this;
+	mController->mIsActive = false;
+	mController->RegisterMoveCallback(&OnMove);
+
+	Application::SharedInstance().GetModelManager()->GetModel(kPlantModelName)->Link(this);
+
+	mAnimationController = Factory<AnimationController>::Create();
+	mAnimationController->mSceneObject = this;
+	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
+	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
+
+	Animation melee = gPlantAnimations[Animations::PLANT_BITE];
+	KeyframeOption meleeOptions[] = {
+		{ melee.startFrameIndex + 10, &MinionController::OnMeleeStart },
+		{ melee.endFrameIndex,        &MinionController::OnMeleeStop },
+	};
+
+	SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gPlantAnimations[Animations::PLANT_IDLE], nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gPlantAnimations[Animations::PLANT_BITE], meleeOptions, 2, false);
+
+	Spawn(pos, UUID);
+}
+
 
 void Minion::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 {
