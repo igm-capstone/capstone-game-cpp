@@ -11,5 +11,6 @@ BaseSceneObject::BaseSceneObject()
 
 BaseSceneObject::~BaseSceneObject()
 {
+	Factory<Transform>::Destroy(mTransform);
 	if (mModel) mModel->Unlink(this);
 }

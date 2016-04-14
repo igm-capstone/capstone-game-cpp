@@ -21,5 +21,8 @@ private:
 		mColliderComponent->mSceneObject	= this;
 	};
 	
-	~StaticCollider() {};
+	~StaticCollider()
+	{
+		Factory<OrientedBoxColliderComponent>::Destroy(mColliderComponent);
+	};
 };
