@@ -273,40 +273,17 @@ void SpriteManager::DrawSprite(SpriteSheetCode sheetID, int spriteID, vec2f pos,
 	mSprites++;
 }
 
-void SpriteManager::DrawSpriteAtPerc(SpriteSheetCode sheetID, int spriteID, vec2f screenPerc, vec2f scale, vec2f linearFill, float radialFill)
-{
-	auto pos = screenPerc;
-	pos.x *= mRenderer->GetWindowWidth();
-	pos.y *= mRenderer->GetWindowHeight();
-
-	DrawSprite(sheetID, spriteID, pos, scale, linearFill, radialFill);
-}
-
-void SpriteManager::DrawTextSprite(FontCode fontID, vec2f pos, vec2f scale, Alignment align, char* fmt, ...)
+void SpriteManager::DrawTextSprite(FontCode fontID, vec2f pos, vec2f scale, vec3f color, Alignment align, char* fmt, ...)
 {
 	char buf[100];
 	va_list args;
 	va_start(args, fmt);
 	vsnprintf(buf, 100, fmt, args);
 
-	DrawGlyphs(fontID, buf, pos, scale, align);
+	DrawGlyphs(fontID, buf, pos, scale, color, align);
 }
 
-void SpriteManager::DrawTextSpriteAtPerc(FontCode fontID, vec2f screenPerc, vec2f scale, Alignment align, char* fmt, ...)
-{
-	char buf[100];
-	va_list args;
-	va_start(args, fmt);
-	vsnprintf(buf, 100, fmt, args);
-
-	auto pos = screenPerc;
-	pos.x *= mRenderer->GetWindowWidth();
-	pos.y *= mRenderer->GetWindowHeight();
-
-	DrawGlyphs(fontID, buf, pos, scale, align);
-}
-
-void SpriteManager::DrawGlyphs(FontCode fontID, char* phrase, vec2f pos, vec2f scale, Alignment align)
+void SpriteManager::DrawGlyphs(FontCode fontID, char* phrase, vec2f pos, vec2f scale, vec3f color, Alignment align)
 {
 	char* charPos = phrase;
 
@@ -331,17 +308,18 @@ void SpriteManager::DrawGlyphs(FontCode fontID, char* phrase, vec2f pos, vec2f s
 	while(*charPos != '\0')
 	{
 		Glyph& g = mGlyphsData[fontID][*charPos - 32];
-		DrawGlyph(fontID, g, pos + vec2f(g.xoffset / 1000.0f, -g.yoffset / 1000.0f) * scale, scale);
+		DrawGlyph(fontID, g, pos + vec2f(g.xoffset / 1000.0f, -g.yoffset / 1000.0f) * scale, scale, color);
 		pos += vec2f(g.xadvance / 1000.0f, 0) * scale;
 		charPos++;
 	}
 }
 
-void SpriteManager::DrawGlyph(FontCode fontID, Glyph& glyph, vec2f pos, vec2f scale)
+void SpriteManager::DrawGlyph(FontCode fontID, Glyph& glyph, vec2f pos, vec2f scale, vec3f color)
 {
 	mGlyphInstanceData[mGlyphs].pointpos = pos;
 	mGlyphInstanceData[mGlyphs].sheetID = fontID;
 	mGlyphInstanceData[mGlyphs].scale = scale;
+	mGlyphInstanceData[mGlyphs].color = color;
 	mGlyphInstanceData[mGlyphs].size = vec2f((float)glyph.width, (float)glyph.height);
 	mGlyphInstanceData[mGlyphs].minUV = vec2f(glyph.x / 1024.0f, glyph.y / 1024.0f);
 	mGlyphInstanceData[mGlyphs].maxUV = vec2f((glyph.x + glyph.width) / 1024.0f, (glyph.y + glyph.height) / 1024.0f);

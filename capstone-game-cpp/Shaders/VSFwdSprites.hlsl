@@ -36,6 +36,7 @@ struct Pixel
 	float2 midUV : TEXCOORD1;
 	float2 maxUV : TEXCOORD2;
 	float maxAngle : TEXCOORD3;
+	float3 tint : COLOR;
 };
 
 Pixel main(Sprite input)
@@ -83,5 +84,6 @@ Pixel main(Sprite input)
 	output.midUV = midUV;
 	output.maxUV = oneUV - ((1 / texScale) / slices) * (1.0f - input.linearFill);
 	output.maxAngle = input.radialFill;
+	output.tint = float3(1, 1, 1);
 	return output;
 }

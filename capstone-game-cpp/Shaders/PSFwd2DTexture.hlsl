@@ -5,6 +5,7 @@ struct Pixel
 	float2 midUV : TEXCOORD1;
 	float2 maxUV : TEXCOORD2;
 	float maxAngle : TEXCOORD3;
+	float3 tint : COLOR;
 };
 
 Texture2DArray diffuseTexture : register(t0);
@@ -33,8 +34,8 @@ float4 main(Pixel pixel) : SV_TARGET
 	alpha = (pixel.maxAngle == -1 || angle < pixel.maxAngle);
 	s.a *= alpha;
 
-	// Tint - future work
-	//s *= float4(1, 0, 0, 1);
+	// Tint
+	s *= float4(pixel.tint, 1);
 
 
 	return s;
