@@ -6,6 +6,7 @@ struct Pixel
 	float2 maxUV : TEXCOORD2;
 	float maxAngle : TEXCOORD3;
 	float3 tint : COLOR;
+	float sdf : TEXCOORD4;
 };
 
 Texture2DArray diffuseTexture : register(t0);
@@ -18,8 +19,8 @@ float4 main(Pixel pixel) : SV_TARGET
 	float4 s = diffuseTexture.Sample(samplerState, pixel.uv);
 
 	//SDF
-	float mask = s.a;
-	s.a = (mask >= 0.5) * smoothstep(0.25, 0.75, mask);
+	float smoothing = 0.25f / (4 * pixel.sdf);
+	s.a = (pixel.sdf != -1.0f) * smoothstep(0.5 - smoothing, 0.5 + smoothing, s.a) + (pixel.sdf == -1.0f) * s.a;
 
 	// Linear fill
 	float alpha = (pixel.uv.x <= pixel.maxUV.x && pixel.uv.y <= pixel.maxUV.y);

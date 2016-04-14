@@ -30,8 +30,8 @@ void SkillBar::RenderButton(Button* b, vec2f pos)
 {
 	mSpriteManager->DrawSprite(b->sheetID, 8+b->spriteID, pos, vec2f(100, 100));
 	mSpriteManager->DrawSprite(b->sheetID, b->spriteID, pos, vec2f(100, 100), vec3f(1,1), 2*PI * b->skill->Recharged());
-	mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, pos + vec2f(0,45), vec2f(0.1f,0.1f), vec3f(1, 1, 1), ALIGN_CENTER, "%s", b->skill->mName);
-	if (b->skill->mCost) mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, pos + vec2f(-25, -23), vec2f(0.15f,0.15f), vec3f(0, 0.61f, 0.88f), ALIGN_CENTER, "%.0f", b->skill->mCost);
+	mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 16, pos + vec2f(0,30), vec3f(1, 1, 1), ALIGN_CENTER, "%s", b->skill->mName);
+	if (b->skill->mCost) mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 25, pos + vec2f(-25, -43), vec3f(0, 0.61f, 0.88f), ALIGN_CENTER, "%.0f", b->skill->mCost);
 	if (b->keySpriteID != -1) mSpriteManager->DrawSprite(SPRITESHEET_CONTROL_ICONS, b->keySpriteID, pos + vec2f(30, -33), vec2f(28, 28));
 	if (b->isHighlighted) mSpriteManager->DrawSprite(b->sheetID, 15, pos, vec2f(100, 100));
 	

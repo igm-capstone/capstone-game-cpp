@@ -26,6 +26,7 @@ struct Pixel
 	float2 maxUV : TEXCOORD2;
 	float maxAngle : TEXCOORD3;
 	float3 tint : COLOR;
+	float sdf : TEXCOORD4;
 };
 
 Pixel main(Glyph input)
@@ -56,6 +57,7 @@ Pixel main(Glyph input)
 	output.maxAngle = -1;
 	output.maxUV = float2(1,1);
 	output.tint = input.color;
+	output.sdf = input.scale.x;
 
 	return output;
 }
