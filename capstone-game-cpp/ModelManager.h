@@ -92,7 +92,8 @@ public:
 		ModelCluster* c = mModelMap[name];
 		if (!c)
 		{
-			c = static_cast<ModelCluster*>(mAllocator->Allocate(sizeof(ModelCluster), alignof(ModelCluster), 0));
+			auto ptr = static_cast<ModelCluster*>(mAllocator->Allocate(sizeof(ModelCluster), alignof(ModelCluster), 0));
+			c = new (ptr) ModelCluster();
 			std::string path = "Assets/Models/" + std::string(name) + ".fbx";
 			FBXMeshResource<Vertex> fbxResource(path.c_str());
 			mMeshLibrary.LoadMesh(&c->mMesh, mRenderer, fbxResource);
