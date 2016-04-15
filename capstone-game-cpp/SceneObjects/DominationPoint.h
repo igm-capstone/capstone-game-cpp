@@ -18,6 +18,7 @@ public:
 	// legacy data
 	float mDominationTime;
 	int mTier;
+	char* mName = "Domination Point";
 
 private:
 	DominationPoint() : 

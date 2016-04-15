@@ -23,6 +23,7 @@ struct Sprite
 	//Per Sprite
 	float3		pointpos	: POINTPOS;
 	float2		size		: SIZE;
+	float4		tint        : TINT;
 	float2		linearFill	: LINFILL;
 	float		radialFill	: RADFILL;
 	uint		sheetID		: SHEETID;
@@ -36,7 +37,7 @@ struct Pixel
 	float2 midUV : TEXCOORD1;
 	float2 maxUV : TEXCOORD2;
 	float maxAngle : TEXCOORD3;
-	float3 tint : COLOR;
+	float4 tint : COLOR;
 	float sdf : TEXCOORD4;
 };
 
@@ -85,7 +86,7 @@ Pixel main(Sprite input)
 	output.midUV = midUV;
 	output.maxUV = oneUV - ((1 / texScale) / slices) * (1.0f - input.linearFill);
 	output.maxAngle = input.radialFill;
-	output.tint = float3(1, 1, 1);
+	output.tint = input.tint;
 	output.sdf = -1;
 
 	return output;

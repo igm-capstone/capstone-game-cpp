@@ -5,7 +5,7 @@ struct Pixel
 	float2 midUV : TEXCOORD1;
 	float2 maxUV : TEXCOORD2;
 	float maxAngle : TEXCOORD3;
-	float3 tint : COLOR;
+	float4 tint : COLOR;
 	float sdf : TEXCOORD4;
 };
 
@@ -20,7 +20,7 @@ float4 main(Pixel pixel) : SV_TARGET
 
 	//SDF
 	float smoothing = 0.25f / (4 * pixel.sdf);
-	s.a = (pixel.sdf != -1.0f) * smoothstep(0.5 - smoothing, 0.5 + smoothing, s.a) + (pixel.sdf == -1.0f) * s.a;
+	s.a = (pixel.sdf != -1.0f) * smoothstep(0.5 - smoothing, 0.5 + smoothing, s.a) * pixel.tint.a + (pixel.sdf == -1.0f) * s.a;
 
 	// Linear fill
 	float alpha = (pixel.uv.x <= pixel.maxUV.x && pixel.uv.y <= pixel.maxUV.y);
@@ -36,7 +36,7 @@ float4 main(Pixel pixel) : SV_TARGET
 	s.a *= alpha;
 
 	// Tint
-	s *= float4(pixel.tint, 1);
+	s *= float4(pixel.tint);
 
 
 	return s;
