@@ -21,8 +21,10 @@ const vec2f MinionController::sDirections[] = {
 };
 
 MinionController::MinionController()
-	: mAI(Singleton<AIManager>::SharedInstance())
+	: mAllocator(10240) // TODO, tweak allocator size
+	, mAI(Singleton<AIManager>::SharedInstance())
 	, mTimer(*Singleton<Engine>::SharedInstance().GetTimer())
+	, mBehaviorTree(nullptr)
 	, mBaseRotation(quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0))
 	, mSpeed(0)
 	, mThinkTime(0)
@@ -37,12 +39,12 @@ MinionController::MinionController()
 
 MinionController::~MinionController()
 {
-
+	mAllocator.Free(); // TODO check average used memory from allocator to decide final allocator size
 }
 
 Tree& MinionController::CreateAttackSubtree()
 {
-	return TreeBuilder("(-->) Attack")
+	return TreeBuilder(mAllocator, "(-->) Attack")
 		.Composite<Parallel>()
 			.Decorator<Mute>()
 				.Conditional()
@@ -61,7 +63,7 @@ Tree& MinionController::CreateAttackSubtree()
 
 Tree& MinionController::CreateWanderSubtree()
 {
-	return TreeBuilder("(-->) Wander Arround")
+	return TreeBuilder(mAllocator, "(-->) Wander Arround")
 		.Composite<Sequence>()
 			.Action(&Think, "(!) Think")
 			.Action(&UpdateWanderDirection, "(!) Update Wander Direction")
@@ -75,7 +77,7 @@ Tree& MinionController::CreateWanderSubtree()
 
 Tree& MinionController::CreateChaseSubtree()
 {
-	return TreeBuilder("(-->) Follow Explorer")
+	return TreeBuilder(mAllocator, "(-->) Follow Explorer")
 		.Composite<Sequence>()
 			.Conditional()
 				.Predicate(&IsExplorerVisible, "(?) Is Explorer Visible")

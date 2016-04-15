@@ -14,7 +14,7 @@ protected:
 	BehaviorTree::Tree& CreateChaseSubtree();
 
 public:
-
+	LinearAllocator mAllocator;
 	class AIManager& mAI;
 	class Rig3D::Timer& mTimer;
 	BehaviorTree::Tree* mBehaviorTree;
