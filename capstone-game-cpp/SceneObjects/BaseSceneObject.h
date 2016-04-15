@@ -21,6 +21,7 @@ public:
 	// Use Application::SharedInstance().GetModelManager()->RequestModel("ModelName")->Link(this);
 	// mModel will be populated.
 	class ModelCluster*	mModel;
+	bool mShouldDestroy;
 
 	template <class T>
 	bool Is() {

@@ -194,6 +194,11 @@ void Minion::OnHealthChange(BaseSceneObject* obj, float newVal, bool shouldCheck
 		p.AsFloat = newVal;
 		m->mNetworkClient->SendData(&p);	
 	}
+
+	if (m->mHealth->GetHealth() <= 0.0f)
+	{
+		m->mShouldDestroy = true;
+	}
 }
 
 void Minion::OnNetHealthChange(BaseSceneObject* obj, float newVal)
