@@ -428,6 +428,9 @@ void Level01::InitializeGameState()
 
 void Level01::VUpdate(double milliseconds)
 {
+	// Handle this first so we can destroy objects later.
+	mCollisionManager->Update(milliseconds);
+
 	// TO DO: Possibly a Components Update method... if we move this code to application level.
 	for (ExplorerController& ec : Factory<ExplorerController>())
 	{
@@ -437,6 +440,11 @@ void Level01::VUpdate(double milliseconds)
 	for (auto& mc : Factory<Minion>())
 	{
 		mc.mController->Update(milliseconds);
+
+		if (mc.mShouldDestroy)
+		{
+			Factory<Minion>::Destroy(&mc);
+		}
 	}
 
 	for (auto& gc : Factory<GhostController>())
@@ -520,7 +528,6 @@ void Level01::VUpdate(double milliseconds)
 	}
 #endif
 
-	mCollisionManager->Update(milliseconds);
 }
 
 void Level01::VFixedUpdate(double milliseconds)
