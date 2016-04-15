@@ -46,11 +46,16 @@ const char* kStaticMeshModelNames[STATIC_MESH_MODEL_COUNT] =
 	"Wardrobe"
 };
 
+void ModelCluster::Unlink(BaseSceneObject* obj)
+{
+	mObjects.erase(std::remove(mObjects.begin(), mObjects.end(), obj), mObjects.end());
+	obj->mModel = nullptr;
+}
+
 ModelManager::ModelManager()
 {
 	mRenderer = Singleton<Engine>::SharedInstance().GetRenderer();
 }
-
 
 ModelManager::~ModelManager()
 {
