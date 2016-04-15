@@ -19,11 +19,11 @@ namespace BehaviorTree
 			friend class TreeBuilder;
 
 		public:
-			LeafBuilder(Tree* tree, ParentType* parent, UpdateCallback update, std::string name)
-				: mTree(tree)
+			LeafBuilder(TreeBuilder* root, ParentType* parent, UpdateCallback update, std::string name)
+				: mRoot(root)
 				, mParent(parent)
 			{
-				mBehavior = new BehaviorType(*mTree, name);
+				mBehavior = mRoot->Create<BehaviorType>(*mRoot->mTree, name);
 
 				if (update)
 				{
@@ -44,7 +44,7 @@ namespace BehaviorTree
 			}
 
 		private:
-			Tree* mTree;
+			TreeBuilder* mRoot;
 			ParentType* mParent;
 			BehaviorType* mBehavior;
 		};
@@ -54,16 +54,16 @@ namespace BehaviorTree
 		{
 
 		public:
-			ConditionalBuilder(Tree* tree, ParentType* parent, std::string name)
-				: mTree(tree)
+			ConditionalBuilder(TreeBuilder* root, ParentType* parent, std::string name)
+				: mRoot(root)
 				, mParent(parent)
 			{
-				mConditional = new Conditional(*mTree, nullptr, nullptr, name);
+				mConditional = mRoot->Create<Conditional>(*mRoot->mTree, nullptr, nullptr, name);
 			}
 
 			ConditionalBuilder<ParentType> Action(UpdateCallback update, std::string name = "Action")
 			{
-				auto builder = LeafBuilder<ConditionalBuilder, BehaviorTree::Behavior>(mTree, this, update, name);
+				auto builder = LeafBuilder<ConditionalBuilder, BehaviorTree::Behavior>(mRoot, this, update, name);
 				mConditional->SetChild(builder.mBehavior);
 				return *this;
 			}
@@ -71,14 +71,14 @@ namespace BehaviorTree
 			template <class ChildCompositeType>
 			CompositeBuilder<ConditionalBuilder<ParentType>, ChildCompositeType> Composite(std::string name = "Composite")
 			{
-				auto builder = CompositeBuilder<ConditionalBuilder<ParentType>, ChildCompositeType>(mTree, this, name);
+				auto builder = CompositeBuilder<ConditionalBuilder<ParentType>, ChildCompositeType>(mRoot, this, name);
 				mConditional->SetChild(builder.mComposite);
 				return builder;
 			}
 
 			ConditionalBuilder<ParentType> Predicate(PredicateCallback predicate, std::string name = "Predicate")
 			{
-				auto builder = LeafBuilder<ConditionalBuilder, BehaviorTree::Predicate>(mTree, this, nullptr, name);
+				auto builder = LeafBuilder<ConditionalBuilder, BehaviorTree::Predicate>(mRoot, this, nullptr, name);
 				builder.Invoke(&Predicate::SetPredicateCallback, predicate);
 				mConditional->SetPredicate(builder.mBehavior);
 				return *this;
@@ -89,7 +89,7 @@ namespace BehaviorTree
 				return *mParent;
 			}
 
-			Tree* mTree;
+			TreeBuilder* mRoot;
 			ParentType* mParent;
 			Conditional* mConditional;
 			std::string mName;
@@ -102,31 +102,31 @@ namespace BehaviorTree
 			friend class TreeBuilder;
 
 		public:
-			DecoratorBuilder(Tree* tree, ParentType* parent, std::string name)
-				: mTree(tree)
+			DecoratorBuilder(TreeBuilder* root, ParentType* parent, std::string name)
+				: mRoot(root)
 				, mParent(parent)
 			{
-				mDecorator = new DecoratorType(*mTree, nullptr, name);
+				mDecorator = mRoot->Create<DecoratorType>(*mRoot->mTree, nullptr, name);
 			}
 
 			template <class ChildCompositeType>
 			CompositeBuilder<DecoratorBuilder<ParentType, DecoratorType>, ChildCompositeType> Composite(std::string name = "Composite")
 			{
-				auto builder = CompositeBuilder<DecoratorBuilder<ParentType, DecoratorType>, ChildCompositeType>(mTree, this, name);
+				auto builder = CompositeBuilder<DecoratorBuilder<ParentType, DecoratorType>, ChildCompositeType>(mRoot, this, name);
 				mDecorator->SetChild(builder.mComposite);
 				return builder;
 			}
 
 			DecoratorBuilder<ParentType, DecoratorType> Action(UpdateCallback update, std::string name = "Action")
 			{
-				auto builder = LeafBuilder<DecoratorBuilder, BehaviorTree::Behavior>(mTree, this, update, name);
+				auto builder = LeafBuilder<DecoratorBuilder, BehaviorTree::Behavior>(mRoot, this, update, name);
 				mDecorator->SetChild(builder.mBehavior);
 				return *this;
 			}
 
 			DecoratorBuilder<ParentType, DecoratorType> Predicate(PredicateCallback predicate, std::string name = "Predicate")
 			{
-				auto builder = LeafBuilder<DecoratorBuilder, BehaviorTree::Predicate>(mTree, this, nullptr, name);
+				auto builder = LeafBuilder<DecoratorBuilder, BehaviorTree::Predicate>(mRoot, this, nullptr, name);
 				builder.Invoke(&Predicate::SetPredicateCallback, predicate);
 				mDecorator->SetChild(builder.mBehavior);
 				return *this;
@@ -134,7 +134,7 @@ namespace BehaviorTree
 
 			ConditionalBuilder<DecoratorBuilder<ParentType, DecoratorType>> Conditional(std::string name = "Conditional")
 			{
-				auto builder = ConditionalBuilder<DecoratorBuilder>(mTree, this, name);
+				auto builder = ConditionalBuilder<DecoratorBuilder>(mRoot, this, name);
 				mDecorator->SetChild(builder.mConditional);
 				return builder;
 			}
@@ -151,7 +151,7 @@ namespace BehaviorTree
 			}
 
 		private:
-			Tree* mTree;
+			TreeBuilder* mRoot;
 			ParentType* mParent;
 			DecoratorType* mDecorator;
 		};
@@ -162,11 +162,11 @@ namespace BehaviorTree
 			friend class TreeBuilder;
 
 		public:
-			CompositeBuilder(Tree* tree, ParentType* parent, std::string name)
-				: mTree(tree)
+			CompositeBuilder(TreeBuilder* root, ParentType* parent, std::string name)
+				: mRoot(root)
 				, mParent(parent)
 			{
-				mComposite = new CompositeType(*mTree, name);
+				mComposite = mRoot->Create<CompositeType>(*mRoot->mTree, name);
 			}
 
 			template <class NodeType, typename... ParamTypes>
@@ -178,21 +178,21 @@ namespace BehaviorTree
 			template <class ChildCompositeType>
 			CompositeBuilder<CompositeBuilder<ParentType, CompositeType>, ChildCompositeType> Composite(std::string name = "Composite")
 			{
-				auto builder = CompositeBuilder<CompositeBuilder<ParentType, CompositeType>, ChildCompositeType>(mTree, this, name);
+				auto builder = CompositeBuilder<CompositeBuilder<ParentType, CompositeType>, ChildCompositeType>(mRoot, this, name);
 				mComposite->Add(*builder.mComposite);
 				return builder;
 			}
 
 			CompositeBuilder<ParentType, CompositeType> Action(UpdateCallback update, std::string name = "Action")
 			{
-				auto builder = LeafBuilder<CompositeBuilder, BehaviorTree::Behavior>(mTree, this, update, name);
+				auto builder = LeafBuilder<CompositeBuilder, BehaviorTree::Behavior>(mRoot, this, update, name);
 				mComposite->Add(*builder.mBehavior);
 				return *this;
 			}
 
 			CompositeBuilder<ParentType, CompositeType> Predicate(PredicateCallback predicate, std::string name = "Predicate")
 			{
-				auto builder = LeafBuilder<CompositeBuilder, BehaviorTree::Predicate>(mTree, this, nullptr, name);
+				auto builder = LeafBuilder<CompositeBuilder, BehaviorTree::Predicate>(mRoot, this, nullptr, name);
 				builder.Invoke(&Predicate::SetPredicateCallback, predicate);
 				mComposite->Add(*builder.mBehavior);
 				return *this;
@@ -200,7 +200,7 @@ namespace BehaviorTree
 
 			ConditionalBuilder<CompositeBuilder<ParentType, CompositeType>> Conditional(std::string name = "Conditional")
 			{
-				auto builder = ConditionalBuilder<CompositeBuilder>(mTree, this, name);
+				auto builder = ConditionalBuilder<CompositeBuilder>(mRoot, this, name);
 				mComposite->Add(*builder.mConditional);
 				return builder;
 			}
@@ -208,7 +208,7 @@ namespace BehaviorTree
 			template <class DecoratorType>
 			DecoratorBuilder<CompositeBuilder<ParentType, CompositeType>, DecoratorType> Decorator(std::string name = "Decorator")
 			{
-				auto builder = DecoratorBuilder<CompositeBuilder, DecoratorType>(mTree, this, name);
+				auto builder = DecoratorBuilder<CompositeBuilder, DecoratorType>(mRoot, this, name);
 				mComposite->Add(*builder.mDecorator);
 				return builder;
 			}
@@ -225,28 +225,37 @@ namespace BehaviorTree
 			}
 
 		private:
-			Tree* mTree;
+			TreeBuilder* mRoot;
 			ParentType* mParent;
 			CompositeType* mComposite;
 		};
 
 
-		TreeBuilder(std::string name = "Tree")
+		TreeBuilder(LinearAllocator& allocator, std::string name = "Tree")
+			: mAllocator(allocator)
 		{
-			mTree = new Tree(name);
+			mTree = Create<Tree>(name);
+			//mTree = new Tree(name);
+		}
+
+		template <class Type, typename... ArgTypes>
+		Type* Create(ArgTypes... args)
+		{
+			void* mem = mAllocator.Allocate(sizeof(Type), alignof(Type), 0);
+			return new (mem) Type(args...);
 		}
 
 		template <class NodeType>
 		LeafBuilder<TreeBuilder, NodeType> Node(std::string name = "Node")
 		{
-			auto builder = LeafBuilder<TreeBuilder, NodeType>(mTree, this, nullptr, name);
+			auto builder = LeafBuilder<TreeBuilder, NodeType>(this, this, nullptr, name);
 			mTree->Start(*builder.mBehavior);
 			return builder;
 		}
 
 		LeafBuilder<TreeBuilder, Behavior> Action(UpdateCallback update, std::string name = "Action")
 		{
-			auto builder = LeafBuilder<TreeBuilder, BehaviorTree::Behavior>(mTree, this, update, name);
+			auto builder = LeafBuilder<TreeBuilder, BehaviorTree::Behavior>(this, this, update, name);
 			mTree->Start(*builder.mBehavior);
 			return builder;
 		}
@@ -255,7 +264,7 @@ namespace BehaviorTree
 		template <class CompositeType>
 		CompositeBuilder<TreeBuilder, CompositeType> Composite(std::string name = "Composite")
 		{
-			auto builder = CompositeBuilder<TreeBuilder, CompositeType>(mTree, this, name);
+			auto builder = CompositeBuilder<TreeBuilder, CompositeType>(this, this, name);
 			mTree->Start(*builder.mComposite);
 			return builder;
 		}
@@ -271,5 +280,6 @@ namespace BehaviorTree
 
 	private:
 		Tree* mTree;
+		LinearAllocator& mAllocator;
 	};
 }

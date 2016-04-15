@@ -185,9 +185,7 @@ void AnimationController::Update(double milliseconds)
 
 void AnimationController::ExecuteKeyframeCallbacks()
 {
-
 	StateAnimation* pStateAnimation = &mStateAnimationMap[mState];
-	TRACE_WATCH("Curr anim callback count", pStateAnimation->keyframeCallbackMap.size());
 	
 	auto& callbackMap = pStateAnimation->keyframeCallbackMap;
 	if (mPreviousKeyframeIndex < mCurrentKeyframeIndex)

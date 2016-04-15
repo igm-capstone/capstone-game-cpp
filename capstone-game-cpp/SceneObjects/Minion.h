@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseSceneObject.h"
+#include <Components/AnimationController.h>
 
 class Minion : public BaseSceneObject
 {
@@ -15,7 +16,7 @@ public:
 	};
 
 	MinionClass						mClass;
-	class NetworkClient*			mNetworkClient;
+	class NetworkServer*			mNetworkServer;
 	class NetworkID*				mNetworkID;
 	class MinionController*			mController;
 	class SphereColliderComponent*	mCollider;
@@ -40,7 +41,11 @@ public:
 
 	static void OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot);
 	static void OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth);
+	static void OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot);
 	static void OnHealthChange(BaseSceneObject* obj, float newVal, bool shouldCheckAuthority);
 	static void OnNetHealthChange(BaseSceneObject* obj, float newVal);
+	static void OnAnimationCommandExecuted(BaseSceneObject* obj, AnimationControllerState state, AnimationControllerCommand command);
+	static void OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command);
+
 };
 

@@ -10,6 +10,7 @@
 #include "Predicate.h"
 #include "Conditional.h"
 #include "Builder.h"
+#include "Memory/Memory/Memory.h"
 
 using namespace BehaviorTree;
 
@@ -546,7 +547,9 @@ bool OnPredicate(Behavior& bh, void* data)
 
 TEST(Builder, Should_BuildTree)
 {
-	auto tree = TreeBuilder()
+	LinearAllocator alloc(1024);
+
+	auto tree = TreeBuilder(alloc)
 		.Composite<Priority>()
 			.Composite<Sequence>()
 				.Action(&OnUpdate, "Action")

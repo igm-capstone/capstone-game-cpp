@@ -144,13 +144,15 @@ void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 		e->mNetworkClient->SendData(&p);
 	}
 
-	auto& ai = Singleton<AIManager>::SharedInstance();
-	Node* node = ai.GetNodeAt(newPos);
+	if (gDebugExplorer) {
+		auto& ai = Singleton<AIManager>::SharedInstance();
+		Node* node = ai.GetNodeAt(newPos);
 
-	if (node != e->mCurrentNode)
-	{
-		e->mCurrentNode = node;
-		ai.SetGridDirty(true);
+		if (node != e->mCurrentNode)
+		{
+			e->mCurrentNode = node;
+			ai.SetGridDirty(true);
+		}
 	}
 }
 
@@ -256,6 +258,19 @@ void Explorer::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newR
 	e->mTransform->SetPosition(newPos);
 	e->mTransform->SetRotation(newRot);
 	e->UpdateComponents(newRot, newPos);
+
+	if (Singleton<NetworkManager>::SharedInstance().mMode == NetworkManager::SERVER)
+	{
+		auto& ai = Singleton<AIManager>::SharedInstance();
+		Node* node = ai.GetNodeAt(newPos);
+
+		if (node != e->mCurrentNode)
+		{
+			e->mCurrentNode = node;
+			ai.SetGridDirty(true);
+		}
+	}
+
 }
 
 void Explorer::OnNetHealthChange(BaseSceneObject* obj, float newVal)
