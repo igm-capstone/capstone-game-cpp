@@ -9,6 +9,8 @@
 
 void GhostController::Update(double milliseconds)
 {
+	if (!mIsActive) return;
+
 	auto ghost = static_cast<Ghost*>(mSceneObject);
 	auto camManager = ghost->mCameraManager;
 

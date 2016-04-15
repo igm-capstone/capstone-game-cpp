@@ -29,5 +29,7 @@ public:
 	void SetActive(Skill* skill);
 	void RenderManaBar();
 	void RenderObjectives(GameState gameState, bool isServer);
+	void RenderEndScreen(bool ghostWins);
+	void BlockGame(bool block);
 };
 

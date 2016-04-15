@@ -574,20 +574,19 @@ void Level01::UpdateGameState(double milliseconds)
 			if (dominationPointsCaptured == 4)
 			{
 				// Explorers Win
-				currentState = GAME_STATE_FINAL;
-				TRACE_LOG("EXPLORERS WIN");
+				currentState = GAME_STATE_FINAL_EXPLORERS_WIN;
 			}
 		}
 		else
 		{
 			// Ghost Wins
-			currentState = GAME_STATE_FINAL;
-			TRACE_LOG("GHOST WIN");
+			currentState = GAME_STATE_FINAL_GHOST_WIN;
 		}
 		
 		break;	
 	}
-	case GAME_STATE_FINAL:
+	case GAME_STATE_FINAL_GHOST_WIN:
+	case GAME_STATE_FINAL_EXPLORERS_WIN:
 		// Check for RESTART / EXIT.
 		break;
 	}
@@ -660,6 +659,8 @@ void Level01::VRender()
 	mSkillBar.RenderPanel();
 	if (mNetworkManager->mMode == NetworkManager::SERVER) mSkillBar.RenderManaBar();
 	mSkillBar.RenderObjectives(mGameState, mNetworkManager->mMode == NetworkManager::SERVER);
+	if (mGameState == GAME_STATE_FINAL_GHOST_WIN) mSkillBar.RenderEndScreen(true);
+	if (mGameState == GAME_STATE_FINAL_EXPLORERS_WIN) mSkillBar.RenderEndScreen(false);
 
 	RenderIMGUI(); 
 	RenderSprites();

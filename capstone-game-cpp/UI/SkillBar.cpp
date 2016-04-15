@@ -1,9 +1,11 @@
 #include "stdafx.h"
 #include "SkillBar.h"
 #include "SpriteManager.h"
-#include <SceneObjects/Ghost.h>
-#include <SceneObjects/DominationPoint.h>
 #include <Scenes/Level01.h>
+#include <SceneObjects/DominationPoint.h>
+#include <SceneObjects/Ghost.h>
+#include <Components/NetworkID.h>
+#include <Components/GhostController.h>
 
 
 SkillBar::SkillBar()
@@ -80,5 +82,28 @@ void SkillBar::RenderObjectives(GameState gameState, bool isServer)
 			mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 13, anchor + vec2f(10, 30.0f * ++i), dp.mController->isDominated ? vec4f(0.7f, 0.7f, 0.7f, 1) : vec4f(1, 1, 1, 1), ALIGN_LEFT, dp.mName);
 			mSpriteManager->DrawSprite(SPRITESHEET_CONTROL_ICONS, dp.mController->isDominated ? 11 : 10, anchor + vec2f(150, 30.0f * i + 6) + vec2f(0, 0), vec2f(16, 16), dp.mController->isDominated ? vec4f(0.7f, 0.7f, 0.7f, 1) : vec4f(1, 1, 1, 1));
 		}
+	}
+}
+
+void SkillBar::RenderEndScreen(bool ghostWins)
+{
+	BlockGame(true);
+
+	mSpriteManager->DrawSprite(SPRITESHEET_CONTROL_ICONS, 15, mSpriteManager->perc2f(0.5f, 0.5f), mSpriteManager->perc2f(1, 1), vec4f(0.7f, 0.7f, 0.7f, 0.5f));
+
+	mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 75, mSpriteManager->perc2f(0.5f, 0.4f), vec4f(0.55f, 0.27f, 0.69f, 1), ALIGN_CENTER, "%s", ghostWins ? "Ghost Wins!" : "Explorers Win!");
+}
+
+void SkillBar::BlockGame(bool block)
+{
+	for each (auto& c in Factory<ExplorerController>())
+	{
+		if ((static_cast<Explorer *>(c.mSceneObject))->mNetworkID->mHasAuthority)
+		c.mIsActive = !block;
+	}
+	for each (auto& c in Factory<GhostController>())
+	{
+		if ((static_cast<Ghost *>(c.mSceneObject))->mNetworkID->mHasAuthority)
+		c.mIsActive = !block;
 	}
 }
