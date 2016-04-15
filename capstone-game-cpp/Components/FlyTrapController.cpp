@@ -6,22 +6,10 @@ using namespace BehaviorTree;
 
 FlyTrapController::FlyTrapController()
 {
-		Tree& attackExplorer = TreeBuilder("(-->) Attack")
-		.Composite<Sequence>()
-			.Decorator<Mute>()
-				.Conditional()
-					.Predicate(&IsExplorerInAttackRange, "(?) Is Explorer in Attack Range")
-					.Action(&StartAttack, "Start Attack")
-				.End()
-			.End()
-			// look at player ;)
-			//.Predicate(&IsAttackInProgress, "(?) Is Attack in Progress")
-		.End()
-	.End();
-
+	mBaseRotation = quatf::rollPitchYaw(PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0);
 	mBehaviorTree = &TreeBuilder()
 		.Composite<Priority>("(/!\\) Priority Selector")
-			.Subtree(attackExplorer)
+			.Subtree(CreateAttackSubtree())
 		.End()
 	.End();
 }

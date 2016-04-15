@@ -23,6 +23,7 @@ const vec2f MinionController::sDirections[] = {
 MinionController::MinionController()
 	: mAI(Singleton<AIManager>::SharedInstance())
 	, mTimer(*Singleton<Engine>::SharedInstance().GetTimer())
+	, mBaseRotation(quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0))
 	, mSpeed(0)
 	, mThinkTime(0)
 	, mWanderTime(0)
@@ -37,6 +38,25 @@ MinionController::MinionController()
 MinionController::~MinionController()
 {
 
+}
+
+Tree& MinionController::CreateAttackSubtree()
+{
+	return TreeBuilder("(-->) Attack")
+		.Composite<Parallel>()
+			.Decorator<Mute>()
+				.Conditional()
+					.Predicate(&IsExplorerInAttackRange, "(?) Is Explorer in Attack Range")
+					.Action(&StartAttack, "(!) Start Attack")
+				.End()
+			.End()
+			.Conditional()
+				.Predicate(&IsAttackInProgress, "(?) Is Attack in Progress")
+				.Action(&TargetClosestExplorer, "(!) Target Explorer")
+				.Action(&LookAtTarget, "(!) Look at Target")
+			.End()
+		.End()
+	.End();
 }
 
 Tree& MinionController::CreateWanderSubtree()
@@ -99,17 +119,10 @@ bool MinionController::Update(double milliseconds)
 	return true;
 }
 
-
-quatf MinionController::GetAdjustedRotation(float angle) {
-	return normalize(quatf::angleAxis(angle, vec3f(0, 0, 1)) * quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0));
-}
-
-bool MinionController::IsExplorerInAttackRange(Behavior& bh, void* data)
+bool MinionController::IsExplorerInRange(int steps, bool setTarget)
 {
-	auto& self = *static_cast<MinionController*>(data);
-
-	auto node = self.mAI.GetNodeAt(self.mSceneObject->mTransform->GetPosition());
-	auto conn = self.mAI.mGrid.GetBestFitConnection(node);
+	auto node = mAI.GetNodeAt(mSceneObject->mTransform->GetPosition());
+	auto conn = mAI.mGrid.GetBestFitConnection(node);
 
 	// when no explorer is arround, BestFitConnection will return null
 	if (conn.to == nullptr)
@@ -117,21 +130,59 @@ bool MinionController::IsExplorerInAttackRange(Behavior& bh, void* data)
 		return false;
 	}
 
-	int steps = 3;
 	while (steps-- > 0)
 	{
 		// explorer is at the goal node
 		if (conn.to->GetState() == Node::GOAL)
 		{
+			if (setTarget)
+			{
+				mTarget = conn.to->worldPos;
+			}
 			return true;
-		} 
- 
+		}
+
 		node = conn.to;
-		conn = self.mAI.mGrid.GetBestFitConnection(node);
+		conn = mAI.mGrid.GetBestFitConnection(node);
 	}
 
 	// explorer is too many steps away
 	return false;
+}
+
+bool MinionController::LookAt(vec2f dir)
+{
+	float dt = float(mTimer.GetDeltaTime()) * 0.001f;
+
+	float targetAngle = atan2f(dir.y, dir.x);
+
+	if (abs(mAngle - targetAngle) < 0.001f) {
+		return true;
+	}
+
+	mAngle = Mathf::LerpAngle(mAngle, targetAngle, 8 * dt);
+	mIsTransformDirty = true;
+
+	return false;
+}
+
+quatf MinionController::GetAdjustedRotation(float angle)
+{
+	return normalize(quatf::angleAxis(angle, vec3f(0, 0, 1)) * mBaseRotation);
+}
+
+bool MinionController::IsExplorerInAttackRange(Behavior& bh, void* data)
+{
+	auto& self = *static_cast<MinionController*>(data);
+
+	return self.IsExplorerInRange(3);
+}
+
+bool MinionController::IsExplorerInLockRange(Behavior& bh, void* data)
+{
+	auto& self = *static_cast<MinionController*>(data);
+
+	return self.IsExplorerInRange(10);
 }
 
 bool MinionController::IsAttackInProgress(Behavior& bh, void* data)
@@ -164,6 +215,14 @@ BehaviorStatus MinionController::StartAttack(Behavior& bh, void* data)
 	auto& self = *static_cast<MinionController*>(data);
 	
 	self.PlayStateAnimation(ANIM_STATE_MELEE);
+
+	return BehaviorStatus::Success;
+}
+
+BehaviorStatus MinionController::TargetClosestExplorer(Behavior& bh, void* data)
+{
+	auto& self = *static_cast<MinionController*>(data);
+	self.IsExplorerInRange(50);
 
 	return BehaviorStatus::Success;
 }
@@ -299,19 +358,20 @@ BehaviorStatus MinionController::UpdateWanderDirection(Behavior& bh, void* data)
 BehaviorStatus MinionController::LookForward(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
-	float dt = float(self.mTimer.GetDeltaTime()) * 0.001f;
 
 	vec2f dir = normalize(vec2f(self.mPosition) - vec2f(self.mLastPosition));
+	self.LookAt(dir);
 
-	float targetAngle = atan2f(dir.y, dir.x);
+	return BehaviorStatus::Success;
+}
 
-	if (abs(self.mAngle - targetAngle) < 0.001f) {
-		return BehaviorStatus::Success;
-	}
 
-	self.mAngle = Mathf::LerpAngle(self.mAngle, targetAngle, 8 * dt);
-	self.mIsTransformDirty = true;
+BehaviorStatus MinionController::LookAtTarget(Behavior& bh, void* data)
+{
+	auto& self = *reinterpret_cast<MinionController*>(data);
 
+	vec2f dir = normalize(vec2f(self.mTarget) - vec2f(self.mPosition));
+	self.LookAt(dir);
 
 	return BehaviorStatus::Success;
 }
