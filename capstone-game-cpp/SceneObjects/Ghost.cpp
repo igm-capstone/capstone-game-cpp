@@ -57,6 +57,18 @@ Ghost::Ghost() : mNetworkID(nullptr)
 	mMana = mMaxMana;
 }
 
+Ghost::~Ghost()
+{
+	Factory<NetworkID>::Destroy(mNetworkID);
+	Factory<GhostController>::Destroy(mController);
+	Factory<FmodEventCollection>::Destroy(mEvents);
+
+	for (int i = 0; i < MAX_GHOST_SKILLS; i++)
+	{
+		Factory<Skill>::Destroy(mSkills[i]);
+	}
+}
+
 void Ghost::Spawn(BaseScene* scene)
 {
 	mNetworkID->mIsActive = true;

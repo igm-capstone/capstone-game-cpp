@@ -128,6 +128,7 @@ public:
 
 	static void Destroy(pointer object)
 	{
+		object->~ObjectType();
 		sAllocator.Free(object);
 		sCount -= 1;
 	}

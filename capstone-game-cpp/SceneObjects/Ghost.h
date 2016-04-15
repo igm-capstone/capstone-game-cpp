@@ -22,7 +22,7 @@ private:
 
 private:
 	Ghost();
-	~Ghost() {};
+	~Ghost();
 
 public:
 	void Spawn(class BaseScene* scene);

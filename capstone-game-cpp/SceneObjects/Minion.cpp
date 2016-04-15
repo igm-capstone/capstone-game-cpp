@@ -40,10 +40,35 @@ Minion::Minion()
 	mAnimationController = Factory<AnimationController>::Create();
 	mAnimationController->mSceneObject = this;
 	mAnimationController->RegisterCommandExecutedCallback(&OnAnimationCommandExecuted);
+
+	mHealth = Factory<Health>::Create();
+	mHealth->mSceneObject = this;
+	mHealth->SetMaxHealth(1000.0f);
+	mHealth->RegisterHealthChangeCallback(OnHealthChange);
 }
 
 Minion::~Minion()
 {
+	Factory<NetworkID>::Destroy(mNetworkID);
+	Factory<SphereColliderComponent>::Destroy(mCollider);
+	Factory<SphereColliderComponent>::Destroy(mMeleeColliderComponent);
+
+	Factory<Health>::Destroy(mHealth);
+	Factory<AnimationController>::Destroy(mAnimationController);
+
+	switch(mClass)
+	{
+	case IMP:
+		Factory<ImpController>::Destroy(reinterpret_cast<ImpController*>(mController));
+		break;
+	case FLYTRAP:
+		Factory<FlyTrapController>::Destroy(reinterpret_cast<FlyTrapController*>(mController));
+		break;
+	case ABOMINATION:
+		break;
+	default:
+		break;
+	}
 }
 
 void Minion::Spawn(vec3f pos, int UUID)
@@ -155,6 +180,19 @@ void Minion::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot
 	e->mTransform->SetRotation(newRot);
 	e->UpdateComponents(newRot, newPos);
 }
+
+void Minion::OnHealthChange(BaseSceneObject* obj, float newVal, bool shouldCheckAuthority)
+{
+	Minion* m = reinterpret_cast<Minion*>(obj);
+	if (!shouldCheckAuthority || m->mNetworkID->mHasAuthority)
+	{
+		Packet p(PacketTypes::SYNC_HEALTH);
+		p.UUID = m->mNetworkID->mUUID;
+		p.AsFloat = newVal;
+		m->mNetworkServer->SendToAll(&p);
+	}
+}
+
 
 void Minion::OnNetHealthChange(BaseSceneObject* obj, float newVal)
 {

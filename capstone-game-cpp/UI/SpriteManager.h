@@ -18,6 +18,13 @@ enum FontCode
 	SPRITESHEET_FONT_BOLD,
 };
 
+enum Alignment
+{
+	ALIGN_LEFT,
+	ALIGN_CENTER,
+	ALIGN_RIGHT
+};
+
 
 struct Glyph
 {
@@ -67,7 +74,8 @@ class SpriteManager
 	GPU::Glyph				mGlyphInstanceData[MAX_GLYPHS];
 	Glyph					mGlyphsData[2][255];
 
-	void DrawGlyph(FontCode fontID, Glyph& glyph, vec2f pos, vec2f scale);
+	void DrawGlyphs(FontCode fontID, vec2f scale, char* phrase, vec2f pos, vec3f color, Alignment align);
+	void DrawGlyph(FontCode fontID, vec2f scale, Glyph& glyph, vec2f pos, vec3f color);
 
 public:
 	SpriteManager(): mRenderer(nullptr), mSpriteMesh(nullptr), mSpritesShaderResource(nullptr) {};
@@ -79,9 +87,9 @@ public:
 	void LoadSpriteSheet(const char* filename, int spriteWidth, int spriteHeight, int slicesX, int slicesY);
 	void LoadFont(const char* filename);
 	void DrawSprite(SpriteSheetCode sheetID, int spriteID, vec2f pos, vec2f size, vec2f linearFill = vec2f(1, 1), float radialFill = -1);
-	void DrawSpriteAtPerc(SpriteSheetCode sheetID, int spriteID, vec2f screenPerc, vec2f size, vec2f linearFill = vec2f(1, 1), float radialFill = -1);
-	void DrawTextSprite(FontCode fontID, vec2f pos, vec2f scale, char* fmt, ...);
-	void DrawTextSpriteAtPerc(FontCode fontID, vec2f screenPerc, vec2f scale, char* fmt, ...);
+	void DrawTextSprite(FontCode fontID, float fontSize, vec2f pos, vec3f color, Alignment align, char* fmt, ...);
+	
+	vec2f perc2f(float x, float y) { return vec2f(x * mRenderer->GetWindowWidth(), y *mRenderer->GetWindowHeight()); };
 
 	const char** GetTextureNames() { return mFilenames; };
 	int GetTextureCount() { return mSheets; };

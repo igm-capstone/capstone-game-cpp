@@ -60,8 +60,8 @@ void CollisionManager::Update(double milliseconds)
 
 void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 {
-	// Explorer / Domination Point
-	
+
+#pragma region Explorer - Domination Point	
 	// The most domination point triggers we can have is 4. An explorer can only be overlapping one domination point at a time.
 	frameCollisions.reserve(MAX_EXPLORERS + MAX_EXPLORER_SKILLS);
 
@@ -79,8 +79,10 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 			}
 		}
 	}
+#pragma endregion 
 
-	// Explorer / Heal
+#pragma region Explorer - Heal	
+
 	for (Explorer& e : Factory<Explorer>())
 	{
 		for (Heal& h : Factory<Heal>())
@@ -96,6 +98,8 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 		}
 	}
 
+#pragma endregion 
+
 	std::vector<uint32_t> explorerIndices;
 	explorerIndices.reserve(MAX_EXPLORERS);
 	mBVHTree.GetNodeIndices(explorerIndices, [](const BVHNode& other)
@@ -103,69 +107,7 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 		return other.object->mLayer == COLLISION_LAYER_EXPLORER;
 	});
 
-	// Explorer / Explorer Skill
-
-	std::vector<uint32_t> skillIndices;
-	skillIndices.reserve(MAX_EXPLORERS + MAX_EXPLORERS * MAX_EXPLORER_SKILLS); // this is  a guess...
-
-	for (uint32_t i : explorerIndices)
-	{
-		BVHNode* pNode = mBVHTree.GetNode(i);
-		int parentIndex = pNode->parentIndex;
-
-		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
-
-		mBVHTree.GetNodeIndices(skillIndices, COLLISION_LAYER_EXPLORER_SKILL, [parentIndex](const BVHNode& other)
-		{
-			return other.parentIndex == parentIndex;
-		});
-
-		for (uint32_t s : skillIndices)
-		{
-			BVHNode* pSkillNode = mBVHTree.GetNode(s);
-
-			if (pSkillNode->object->mOnSphereTest(pSkillNode->object, pSphereComponent))
-			{
-				frameCollisions.push_back(Collision());
-
-				Collision* pTrigger = &frameCollisions.back();
-				pTrigger->colliderA.BaseCollider = pSkillNode->object;
-				pTrigger->colliderB.SphereCollider = pSphereComponent;
-			}
-		}
-	}
-
-	// Explorer / Minion Skills
-
-	std::vector<uint32_t> minionSkills;
-	minionSkills.reserve(MAX_MINIONS);
-
-	for (uint32_t i : explorerIndices)
-	{
-		BVHNode* pNode = mBVHTree.GetNode(i);
-		int parentIndex = pNode->parentIndex;
-
-		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
-
-		mBVHTree.GetNodeIndices(minionSkills, COLLISION_LAYER_MINION_SKILL, [parentIndex](const BVHNode& other)
-		{
-			return other.parentIndex == parentIndex;
-		});
-
-		for (uint32_t ms : minionSkills)
-		{
-			BVHNode* pMinionSkillNode = mBVHTree.GetNode(ms);
-
-			if (pMinionSkillNode->object->mOnSphereTest(pMinionSkillNode->object, pSphereComponent))
-			{
-				frameCollisions.push_back(Collision());
-
-				Collision* pTrigger = &frameCollisions.back();
-				pTrigger->colliderA.BaseCollider = pMinionSkillNode->object;
-				pTrigger->colliderB.SphereCollider = pSphereComponent;
-			}
-		}
-	}
+#pragma region Explorer - Interactable
 
 	// Explorer / Doors&Lamps
 
@@ -198,6 +140,121 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 			}
 		}
 	}
+
+#pragma endregion 
+
+#pragma region Explorer - Minion Skill
+	// Explorer / Minion Skills
+
+	std::vector<uint32_t> minionSkills;
+	minionSkills.reserve(MAX_MINIONS);
+
+	for (uint32_t i : explorerIndices)
+	{
+		BVHNode* pNode = mBVHTree.GetNode(i);
+		int parentIndex = pNode->parentIndex;
+
+		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
+
+		mBVHTree.GetNodeIndices(minionSkills, COLLISION_LAYER_MINION_SKILL, [parentIndex](const BVHNode& other)
+		{
+			return other.parentIndex == parentIndex;
+		});
+
+		for (uint32_t ms : minionSkills)
+		{
+			BVHNode* pMinionSkillNode = mBVHTree.GetNode(ms);
+
+			if (pMinionSkillNode->object->mOnSphereTest(pMinionSkillNode->object, pSphereComponent))
+			{
+				frameCollisions.push_back(Collision());
+
+				Collision* pTrigger = &frameCollisions.back();
+				pTrigger->colliderA.BaseCollider = pMinionSkillNode->object;
+				pTrigger->colliderB.SphereCollider = pSphereComponent;
+			}
+		}
+	}
+
+#pragma endregion 
+
+#pragma region Explorer - Explorer Skill
+	// Explorer / Explorer Skill
+
+	std::vector<uint32_t> skillIndices;
+	skillIndices.reserve(MAX_EXPLORERS + MAX_EXPLORERS * MAX_EXPLORER_SKILLS); // this is  a guess...
+
+	for (uint32_t i : explorerIndices)
+	{
+		BVHNode* pNode = mBVHTree.GetNode(i);
+		int parentIndex = pNode->parentIndex;
+
+		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
+
+		mBVHTree.GetNodeIndices(skillIndices, COLLISION_LAYER_EXPLORER_SKILL, [parentIndex](const BVHNode& other)
+		{
+			return other.parentIndex == parentIndex;
+		});
+
+		for (uint32_t s : skillIndices)
+		{
+			BVHNode* pSkillNode = mBVHTree.GetNode(s);
+
+			if (pSkillNode->object->mOnSphereTest(pSkillNode->object, pSphereComponent))
+			{
+				frameCollisions.push_back(Collision());
+
+				Collision* pTrigger = &frameCollisions.back();
+				pTrigger->colliderA.BaseCollider = pSkillNode->object;
+				pTrigger->colliderB.SphereCollider = pSphereComponent;
+			}
+		}
+
+		skillIndices.clear();
+	}
+
+#pragma endregion 
+
+#pragma region Explorer Skill - Minions
+
+	mBVHTree.GetNodeIndices(skillIndices, [](const BVHNode& other)
+	{
+		return other.object->mLayer == COLLISION_LAYER_EXPLORER_SKILL;
+	});
+
+	std::vector<uint32_t> minionIndices;
+	minionIndices.reserve(MAX_EXPLORER_SKILLS); // Just trying to avoid allocations within the loop.
+
+	for (uint32_t es : skillIndices)
+	{
+		BVHNode* pNode = mBVHTree.GetNode(es);
+		int parentIndex = pNode->parentIndex;
+
+		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
+
+		mBVHTree.GetNodeIndices(minionIndices, COLLISION_LAYER_MINION, [parentIndex](const BVHNode& other)
+		{
+			return other.parentIndex == parentIndex;
+		});
+
+		for (uint32_t m : minionIndices)
+		{
+			BVHNode* pSkillNode = mBVHTree.GetNode(m);
+
+			if (pSkillNode->object->mOnSphereTest(pSkillNode->object, pSphereComponent))
+			{
+				frameCollisions.push_back(Collision());
+
+				Collision* pTrigger = &frameCollisions.back();
+				pTrigger->colliderA.BaseCollider = pSkillNode->object;
+				pTrigger->colliderB.SphereCollider = pSphereComponent;
+			}
+		}
+
+		minionIndices.clear();
+	}
+
+#pragma endregion 
 }
 
 void CollisionManager::DispatchTriggers(std::vector<Collision>& frameCollisions)

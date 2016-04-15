@@ -12,6 +12,7 @@ struct Glyph
 	float3		pointpos	: POINTPOS;
 	float2		size		: SIZE;
 	float2		scale		: SCALE;
+	float3		color		: COLOR;
 	float2		minUV		: MINUV;
 	float2		maxUV		: MAXUV;
 	uint		sheetID		: SHEETID;
@@ -24,11 +25,14 @@ struct Pixel
 	float2 midUV : TEXCOORD1;
 	float2 maxUV : TEXCOORD2;
 	float maxAngle : TEXCOORD3;
+	float3 tint : COLOR;
+	float sdf : TEXCOORD4;
 };
 
 Pixel main(Glyph input)
 {
 	Pixel output;
+	input.position.xy += float2(0.5f, 0.5f);
 
 	float4x4 scale = {
 		input.size.x/2 * input.scale.x, 0, 0, 0,
@@ -52,6 +56,8 @@ Pixel main(Glyph input)
 	output.midUV = float2(0,0);
 	output.maxAngle = -1;
 	output.maxUV = float2(1,1);
+	output.tint = input.color;
+	output.sdf = input.scale.x;
 
 	return output;
 }

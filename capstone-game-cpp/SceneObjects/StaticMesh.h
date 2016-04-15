@@ -15,5 +15,9 @@ private:
 		mColliderComponent->mIsDynamic = false;
 		mColliderComponent->mSceneObject = this;
 	};
-	~StaticMesh() {};
+
+	~StaticMesh()
+	{
+		Factory<OrientedBoxColliderComponent>::Destroy(mColliderComponent);
+	};
 };

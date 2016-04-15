@@ -38,7 +38,11 @@ private:
 		mController->mActivationPredicate = &IsExplorerInteracting;
 	}
 
-	~DominationPoint() {}
+	~DominationPoint()
+	{
+		Factory<SphereColliderComponent>::Destroy(mCollider);
+		Factory<DominationPointController>::Destroy(mController);
+	}
 
 	static void OnTriggerEnter(BaseSceneObject* obj, BaseSceneObject* other)
 	{
