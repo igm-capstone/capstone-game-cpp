@@ -165,13 +165,14 @@ void ScareTacticsApplication::InitializeShaders()
 		{ "TEXCOORD",	0, 0, 12, 0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX },
 		{ "POINTPOS",	0, 1, 0,  1, RGB_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
 		{ "SIZE",		0, 1, 12, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
-		{ "LINFILL",	0, 1, 20, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
-		{ "RADFILL",	0, 1, 28, 1, R_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
-		{ "SHEETID",	0, 1, 32, 1, R_UINT32,  INPUT_CLASS_PER_INSTANCE },
-		{ "SPRITEID",	0, 1, 36, 1, R_UINT32,  INPUT_CLASS_PER_INSTANCE }
+		{ "TINT",		0, 1, 20, 1, RGBA_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "LINFILL",	0, 1, 36, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "RADFILL",	0, 1, 44, 1, R_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "SHEETID",	0, 1, 48, 1, R_UINT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "SPRITEID",	0, 1, 52, 1, R_UINT32,  INPUT_CLASS_PER_INSTANCE }
 	};
 	renderer->VCreateShader(&mVSFwdSprites, &mGameAllocator);
-	renderer->VLoadVertexShader(mVSFwdSprites, gVSFwdSprites, sizeof(gVSFwdSprites), spriteInputElements, 8);
+	renderer->VLoadVertexShader(mVSFwdSprites, gVSFwdSprites, sizeof(gVSFwdSprites), spriteInputElements, 9);
 
 	// SpriteGlyph
 	InputElement spriteGlyphInputElements[] =
@@ -181,10 +182,10 @@ void ScareTacticsApplication::InitializeShaders()
 		{ "POINTPOS",	0, 1, 0,  1, RGB_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
 		{ "SIZE",		0, 1, 12, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
 		{ "SCALE",		0, 1, 20, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
-		{ "COLOR",		0, 1, 28, 1, RGB_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
-		{ "MINUV",		0, 1, 40, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
-		{ "MAXUV",		0, 1, 48, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
-		{ "SHEETID",	0, 1, 56, 1, R_UINT32,  INPUT_CLASS_PER_INSTANCE }
+		{ "TINT",		0, 1, 28, 1, RGBA_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "MINUV",		0, 1, 44, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "MAXUV",		0, 1, 52, 1, RG_FLOAT32,  INPUT_CLASS_PER_INSTANCE },
+		{ "SHEETID",	0, 1, 60, 1, R_UINT32,  INPUT_CLASS_PER_INSTANCE }
 	};
 	renderer->VCreateShader(&mVSFwdSpriteGlyphs, &mGameAllocator);
 	renderer->VLoadVertexShader(mVSFwdSpriteGlyphs, gVSFwdSpriteGlyphs, sizeof(gVSFwdSpriteGlyphs), spriteGlyphInputElements, 9);

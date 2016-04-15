@@ -12,7 +12,7 @@ void SpriteManager::Initialize(Rig3D::IMesh* spriteMesh, Rig3D::IShaderResource*
 
 	LoadFont("Assets/UI/Fonts/ashcanbb_reg.ttf_sdf.png");
 	LoadFont("Assets/UI/Fonts/ashcanbb_bold.ttf_sdf.png");
-	LoadSpriteSheet("Assets/UI/Health.png", 900, 112, 1, 3);
+	LoadSpriteSheet("Assets/UI/Health.png", 900, 112, 1, 4);
 	LoadSpriteSheet("Assets/UI/UI_ghostIcons.png", 256, 256, 4, 4);
 	LoadSpriteSheet("Assets/UI/UI_playerIcons1024.png", 256, 256, 4, 4);
 	LoadSpriteSheet("Assets/UI/Panels.png", 1024, 256, 1, 4);
@@ -242,19 +242,20 @@ void SpriteManager::LoadFont(const char* filename)
 	mSheets++;
 }
 
-void SpriteManager::DrawSprite(SpriteSheetCode sheetID, int spriteID, vec2f pos, vec2f scale, vec2f linearFill, float radialFill)
+void SpriteManager::DrawSprite(SpriteSheetCode sheetID, int spriteID, vec2f pos, vec2f scale, vec4f tint, vec2f linearFill, float radialFill)
 {
 	mSpriteInstanceData[mSprites].pointpos = pos;
 	mSpriteInstanceData[mSprites].sheetID = sheetID;
 	mSpriteInstanceData[mSprites].spriteID = spriteID;
 	mSpriteInstanceData[mSprites].size = scale;
+	mSpriteInstanceData[mSprites].tint = tint;
 	mSpriteInstanceData[mSprites].linearFill = linearFill;
 	mSpriteInstanceData[mSprites].radialFill = radialFill;
 	
 	mSprites++;
 }
 
-void SpriteManager::DrawTextSprite(FontCode fontID, float fontSize, vec2f pos, vec3f color, Alignment align, char* fmt, ...)
+void SpriteManager::DrawTextSprite(FontCode fontID, float fontSize, vec2f pos, vec4f tint, Alignment align, char* fmt, ...)
 {
 	char buf[100];
 	va_list args;
@@ -262,10 +263,10 @@ void SpriteManager::DrawTextSprite(FontCode fontID, float fontSize, vec2f pos, v
 	vsnprintf(buf, 100, fmt, args);
 
 	vec2f scale(fontSize / 32.0f, fontSize / 32.0f);
-	DrawGlyphs(fontID, scale, buf, pos, color, align);
+	DrawGlyphs(fontID, scale, buf, pos, tint, align);
 }
 
-void SpriteManager::DrawGlyphs(FontCode fontID, vec2f scale, char* phrase, vec2f pos, vec3f color, Alignment align)
+void SpriteManager::DrawGlyphs(FontCode fontID, vec2f scale, char* phrase, vec2f pos, vec4f tint, Alignment align)
 {
 	char* charPos = phrase;
 
@@ -291,19 +292,19 @@ void SpriteManager::DrawGlyphs(FontCode fontID, vec2f scale, char* phrase, vec2f
 	{
 		if (*charPos >= 32 || *charPos <= 126) {
 			Glyph& g = mGlyphsData[fontID][*charPos - 32];
-			DrawGlyph(fontID, scale, g, pos + vec2f(g.xoffset / 1.0f, g.yoffset / 1.0f) * scale, color);
+			DrawGlyph(fontID, scale, g, pos + vec2f(g.xoffset / 1.0f, g.yoffset / 1.0f) * scale, tint);
 			pos += vec2f(g.xadvance / 1.0f, 0) * scale;
 		}
 		charPos++;
 	}
 }
 
-void SpriteManager::DrawGlyph(FontCode fontID, vec2f scale, Glyph& glyph, vec2f pos, vec3f color)
+void SpriteManager::DrawGlyph(FontCode fontID, vec2f scale, Glyph& glyph, vec2f pos, vec4f tint)
 {
 	mGlyphInstanceData[mGlyphs].pointpos = pos;
 	mGlyphInstanceData[mGlyphs].sheetID = fontID;
 	mGlyphInstanceData[mGlyphs].scale = scale;
-	mGlyphInstanceData[mGlyphs].color = color;
+	mGlyphInstanceData[mGlyphs].tint = tint;
 	mGlyphInstanceData[mGlyphs].size = vec2f((float)glyph.width, (float)glyph.height);
 	mGlyphInstanceData[mGlyphs].minUV = vec2f(glyph.x / 1024.0f, glyph.y / 1024.0f);
 	mGlyphInstanceData[mGlyphs].maxUV = vec2f((glyph.x + glyph.width) / 1024.0f, (glyph.y + glyph.height) / 1024.0f);

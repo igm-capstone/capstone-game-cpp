@@ -11,6 +11,8 @@ struct Button
 	Skill* skill;
 };
 
+enum GameState : char;
+
 class SkillBar
 {
 	SpriteManager* mSpriteManager;
@@ -26,5 +28,6 @@ public:
 	void AddSkill(Skill* name, SpriteSheetCode sheetID, int spriteID, int keySpriteID = -1);
 	void SetActive(Skill* skill);
 	void RenderManaBar();
+	void RenderObjectives(GameState gameState, bool isServer);
 };
 

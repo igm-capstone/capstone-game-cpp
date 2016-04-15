@@ -550,9 +550,10 @@ void Level01::UpdateGameState(double milliseconds)
 	{
 	case GAME_STATE_INITIAL:
 		// Check for ready status
-		currentState = GAME_STATE_CAPTURE;
+		currentState = GAME_STATE_CAPTURE_0;
 		break;
-	case GAME_STATE_CAPTURE:
+	case GAME_STATE_CAPTURE_0:
+	case GAME_STATE_CAPTURE_1:
 	{
 		bool checkDomPoints = IsExplorerAlive();
 		if (checkDomPoints)
@@ -564,12 +565,17 @@ void Level01::UpdateGameState(double milliseconds)
 				if (dp.mController->isDominated) { dominationPointsCaptured++; }
 			}
 
+			if (dominationPointsCaptured == 3)
+			{
+				// Final domination left
+				currentState = GAME_STATE_CAPTURE_1;
+			}
+
 			if (dominationPointsCaptured == 4)
 			{
 				// Explorers Win
 				currentState = GAME_STATE_FINAL;
 				TRACE_LOG("EXPLORERS WIN");
-
 			}
 		}
 		else
@@ -577,7 +583,6 @@ void Level01::UpdateGameState(double milliseconds)
 			// Ghost Wins
 			currentState = GAME_STATE_FINAL;
 			TRACE_LOG("GHOST WIN");
-
 		}
 		
 		break;	
@@ -653,8 +658,8 @@ void Level01::VRender()
 	mSpriteManager->NewFrame();
 	RenderHealthBars();
 	mSkillBar.RenderPanel();
-	if (mNetworkManager->mMode == NetworkManager::SERVER)
-	mSkillBar.RenderManaBar();
+	if (mNetworkManager->mMode == NetworkManager::SERVER) mSkillBar.RenderManaBar();
+	mSkillBar.RenderObjectives(mGameState, mNetworkManager->mMode == NetworkManager::SERVER);
 
 	RenderIMGUI(); 
 	RenderSprites();
@@ -993,7 +998,7 @@ void Level01::RenderHealthBars()
 	for (Health& h : Factory<Health>())
 	{
 		auto screenPos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, -32);
-		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 1, screenPos, vec2f(90, 12), vec2f(h.GetHealthPerc(), 1));
+		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 1, screenPos, vec2f(90, 12), vec4f(1,1,1,1), vec2f(h.GetHealthPerc(), 1));
 		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 0, screenPos, vec2f(90, 12));
 	}
 }

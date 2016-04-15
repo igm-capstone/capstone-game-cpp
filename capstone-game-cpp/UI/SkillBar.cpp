@@ -2,6 +2,8 @@
 #include "SkillBar.h"
 #include "SpriteManager.h"
 #include <SceneObjects/Ghost.h>
+#include <SceneObjects/DominationPoint.h>
+#include <Scenes/Level01.h>
 
 
 SkillBar::SkillBar()
@@ -29,9 +31,9 @@ void SkillBar::RenderPanel()
 void SkillBar::RenderButton(Button* b, vec2f pos)
 {
 	mSpriteManager->DrawSprite(b->sheetID, 8+b->spriteID, pos, vec2f(100, 100));
-	mSpriteManager->DrawSprite(b->sheetID, b->spriteID, pos, vec2f(100, 100), vec3f(1,1), 2*PI * b->skill->Recharged());
-	mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 16, pos + vec2f(0,30), vec3f(1, 1, 1), ALIGN_CENTER, "%s", b->skill->mName);
-	if (b->skill->mCost) mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 25, pos + vec2f(-25, -43), vec3f(0, 0.61f, 0.88f), ALIGN_CENTER, "%.0f", b->skill->mCost);
+	mSpriteManager->DrawSprite(b->sheetID, b->spriteID, pos, vec2f(100, 100), vec4f(1,1,1,1), vec3f(1,1), 2*PI * b->skill->Recharged());
+	mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 16, pos + vec2f(0,30), vec4f(1, 1, 1, 1), ALIGN_CENTER, "%s", b->skill->mName);
+	if (b->skill->mCost) mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 25, pos + vec2f(-25, -43), vec4f(0, 0.61f, 0.88f, 1), ALIGN_CENTER, "%.0f", b->skill->mCost);
 	if (b->keySpriteID != -1) mSpriteManager->DrawSprite(SPRITESHEET_CONTROL_ICONS, b->keySpriteID, pos + vec2f(30, -33), vec2f(28, 28));
 	if (b->isHighlighted) mSpriteManager->DrawSprite(b->sheetID, 15, pos, vec2f(100, 100));
 	
@@ -61,7 +63,22 @@ void SkillBar::RenderManaBar()
 {
 	auto posYPerc = 0.95f;
 	for each (Ghost& ghost in Factory<Ghost>()) {
-		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 2, mSpriteManager->perc2f(0.5f, posYPerc), vec2f(450, 56), vec2f(ghost.GetManaPerc(), 1));
+		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 2, mSpriteManager->perc2f(0.5f, posYPerc), vec2f(450, 56), vec4f(1, 1, 1, 1), vec2f(ghost.GetManaPerc(), 1));
 		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 0, mSpriteManager->perc2f(0.5f, posYPerc), vec2f(450, 56));
+	}
+}
+
+void SkillBar::RenderObjectives(GameState gameState, bool isServer)
+{
+	auto anchor = mSpriteManager->perc2f(0, 0.85f) + vec2f(10, 0);
+	int i = 0;
+
+	mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 14, anchor + vec2f(10, 0), vec4f(0.5f, 1, 0.5f, 1), ALIGN_LEFT, "%s", isServer ? "Areas Exorcised" : "Objectives");
+	mSpriteManager->DrawSprite(SPRITESHEET_BARS, 3, anchor + vec2f(50, 6), vec2f(-250, 38), vec4f(0.84f, 1, 0.4f, 1));
+	for each (DominationPoint& dp in Factory<DominationPoint>()) {
+		if ((dp.mTier == 0 && gameState <= GAME_STATE_CAPTURE_0) || (dp.mTier == 1 && gameState >= GAME_STATE_CAPTURE_1)) {
+			mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 13, anchor + vec2f(10, 30.0f * ++i), dp.mController->isDominated ? vec4f(0.7f, 0.7f, 0.7f, 1) : vec4f(1, 1, 1, 1), ALIGN_LEFT, dp.mName);
+			mSpriteManager->DrawSprite(SPRITESHEET_CONTROL_ICONS, dp.mController->isDominated ? 11 : 10, anchor + vec2f(150, 30.0f * i + 6) + vec2f(0, 0), vec2f(16, 16), dp.mController->isDominated ? vec4f(0.7f, 0.7f, 0.7f, 1) : vec4f(1, 1, 1, 1));
+		}
 	}
 }

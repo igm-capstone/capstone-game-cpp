@@ -81,6 +81,7 @@ namespace GPU {
 	{
 		vec3f pointpos;
 		vec2f size;
+		vec4f tint;
 		vec2f linearFill;
 		float radialFill;
 		int sheetID;
@@ -92,7 +93,7 @@ namespace GPU {
 		vec3f pointpos;
 		vec2f size;
 		vec2f scale;
-		vec3f color;
+		vec4f tint;
 		vec2f minUV;
 		vec2f maxUV;
 		int sheetID;

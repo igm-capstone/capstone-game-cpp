@@ -6,7 +6,8 @@
 enum GameState : char
 {
 	GAME_STATE_INITIAL,		// Use to check for players ready
-	GAME_STATE_CAPTURE,
+	GAME_STATE_CAPTURE_0,
+	GAME_STATE_CAPTURE_1,
 	GAME_STATE_FINAL		// All players dead or dom points captured
 };
 
