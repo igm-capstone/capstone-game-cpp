@@ -156,6 +156,7 @@
     <ClInclude Include="SceneObjects\Trap.h" />
     <ClInclude Include="BehaviorTree\Mute.h" />
     <ClInclude Include="Components\ImpController.h" />
+    <ClInclude Include="BINResource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />

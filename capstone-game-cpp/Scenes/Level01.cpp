@@ -154,10 +154,10 @@ void Level01::InitializeAssets()
 	}
 
 	//mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
-	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
+	/*mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kPlantModelName);
 
-	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
+	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);*/
 
 	//mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 	mLevel = Resource::LoadLevel("Assets/Level02_Test.json", mAllocator);

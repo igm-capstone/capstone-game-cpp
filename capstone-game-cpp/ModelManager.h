@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "SceneObjects/BaseSceneObject.h"
 #include "FBXResource.h"
+#include "BINResource.h"
 
 enum StaticMeshModel : int
 {
@@ -108,13 +109,36 @@ public:
 			void* ptr = mAllocator->Allocate(sizeof(ModelCluster), alignof(ModelCluster), 0);
 			c = new(ptr) ModelCluster();
 
-			std::string path = "Assets/Models/" + std::string(name) + ".fbx";
-			FBXMeshResource<Vertex> fbxResource(path.c_str());
-			mMeshLibrary.LoadMesh(&c->mMesh, mRenderer, fbxResource);
-			c->mSkeletalHierarchy = fbxResource.mSkeletalHierarchy;
-			c->mSkeletalAnimations = fbxResource.mSkeletalAnimations;
-			c->mName = name;
+			std::string fbxPath = "Assets/Models/" + std::string(name) + ".fbx";
+			std::string binPath = "Assets/Models/" + std::string(name) + std::to_string(typeid(Vertex).hash_code()) + ".bin";
 
+			FILE *file;
+			fopen_s(&file, binPath.c_str(), "r");
+			if (file) {
+				//We got a binary cache of the model
+				BINMeshResource<Vertex> binResource(binPath.c_str());
+				mMeshLibrary.LoadMesh(&c->mMesh, mRenderer, binResource);
+				c->mSkeletalHierarchy = binResource.mSkeletalHierarchy;
+				c->mSkeletalAnimations = binResource.mSkeletalAnimations;
+				fclose(file);
+			}
+			else
+			{
+				//Load FBX
+				FBXMeshResource<Vertex> fbxResource(fbxPath.c_str());
+				mMeshLibrary.LoadMesh(&c->mMesh, mRenderer, fbxResource);
+				c->mSkeletalHierarchy = fbxResource.mSkeletalHierarchy;
+				c->mSkeletalAnimations = fbxResource.mSkeletalAnimations;
+
+				fopen_s(&file, binPath.c_str(), "w");
+				{
+					fwrite((void*)&fbxResource, sizeof(fbxResource), 1, file);
+					fclose(file);
+				}
+			}
+
+			c->mName = name;
+			
 			mModelMap[name] = c;
 		}
 
