@@ -596,24 +596,23 @@ void Level01::UpdateGameState(double milliseconds)
 
 bool Level01::IsExplorerAlive()
 {
-	int explorerCount = 0;
-	bool activeExplorers[4] = { 0, 0, 0, 0 };
 
+	int explorerCount = 0;
 	for (Explorer& e : Factory<Explorer>())
 	{
+		explorerCount++;
 		if (e.mHealth->GetHealth() > 0)
 		{
-			activeExplorers[explorerCount++] = 1;
+			return true;
 		}
 	}
 
-	bool atLeastOneAlive = 1;
-	for (int i = 0; i < explorerCount; i++)
+	if (explorerCount == 0)
 	{
-		atLeastOneAlive &= activeExplorers[i];
+		return true;
 	}
 
-	return atLeastOneAlive;
+	return false;
 }
 
 #pragma endregion

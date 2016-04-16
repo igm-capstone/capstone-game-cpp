@@ -313,7 +313,15 @@ void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal, bool checkAuth
 		Packet p(PacketTypes::SYNC_HEALTH);
 		p.UUID = e->mNetworkID->mUUID;
 		p.AsFloat = newVal;
-		e->mNetworkClient->SendData(&p);
+
+		if (Singleton<NetworkManager>::SharedInstance().mMode == NetworkManager::SERVER)
+		{
+			Singleton<NetworkManager>::SharedInstance().mServer.SendToAll(&p);
+		}
+		else
+		{
+			e->mNetworkClient->SendData(&p);
+		}
 	}
 }
 

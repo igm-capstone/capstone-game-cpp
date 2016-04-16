@@ -189,7 +189,16 @@ void Minion::OnHealthChange(BaseSceneObject* obj, float newVal, bool shouldCheck
 		Packet p(PacketTypes::SYNC_HEALTH);
 		p.UUID = m->mNetworkID->mUUID;
 		p.AsFloat = newVal;
-		m->mNetworkServer->SendToAll(&p);
+
+		if (Singleton<NetworkManager>::SharedInstance().mMode == NetworkManager::CLIENT)
+		{
+			Singleton<NetworkManager>::SharedInstance().mClient.SendData(&p);
+		}
+		else
+		{
+			m->mNetworkServer->SendToAll(&p);
+		}
+
 	}
 
 	if (m->mHealth->GetHealth() <= 0.0f)
