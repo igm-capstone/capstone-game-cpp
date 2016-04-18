@@ -12,6 +12,7 @@
 #include "Shaders/obj/PSFwdColor.h"
 #include "Shaders/obj/PSFwdDeferredOutput.h"
 #include "Shaders/obj/PSFwdSpotLightVolume.h"
+#include "Shaders/obj/PSDefAnimatedMaterial.h"
 #include "Shaders/obj/VSDefInstancedMaterial.h"
 #include "Shaders/obj/VSDefSingleColor.h"
 #include "Shaders/obj/VSDefSingleMaterial.h"
@@ -39,12 +40,13 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mPSFwdDeferredOutput(nullptr),
 	mPSFwdSpotLightVolume(nullptr),
 	mPSDef2DTexture(nullptr),
+	mPSDefAnimatedMaterial(nullptr),
+	mVSDefInstancedColor(nullptr),
 	mVSDefInstancedMaterial(nullptr),
 	mVSDefSingleColor(nullptr),
 	mVSDefSingleMaterial(nullptr),
 	mVSDefSkinnedMaterial(nullptr),
 	mVSFwdFullScreenQuad(nullptr),
-	mVSDefInstancedColor(nullptr),
 	mVSFwdSingleColor(nullptr),
 	mVSFwdSpotLightVolume(nullptr),
 	mVSFwdSpriteGlyphs(nullptr),
@@ -230,6 +232,9 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VCreateShader(&mPSDefInstancedMaterial, &mGameAllocator);
 	renderer->VLoadPixelShader(mPSDefInstancedMaterial, gPSDefInstancedMaterial, sizeof(gPSDefInstancedMaterial));
 
+	renderer->VCreateShader(&mPSDefAnimatedMaterial, &mGameAllocator);
+	renderer->VLoadPixelShader(mPSDefAnimatedMaterial, gPSDefAnimatedMaterial, sizeof(gPSDefAnimatedMaterial));
+
 #pragma endregion
 
 #pragma region Compute Shaders
@@ -341,6 +346,7 @@ void ScareTacticsApplication::VShutdown()
 	mCSGridPass2->~IShader();
 	mPSDefColor->~IShader();
 	mPSDefMaterial->~IShader();
+	mPSDefAnimatedMaterial->~IShader();
 	mPSDefInstancedMaterial->~IShader();
 
 	mPSFwd2DTexture->~IShader();

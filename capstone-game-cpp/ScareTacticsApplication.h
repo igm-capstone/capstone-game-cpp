@@ -24,6 +24,7 @@ public:
 	IShader* mPSFwdDeferredOutput;
 	IShader* mPSFwdSpotLightVolume;
 	IShader* mPSDef2DTexture;
+	IShader* mPSDefAnimatedMaterial;
 
 	IShader* mVSDefInstancedColor;
 	IShader* mVSDefInstancedMaterial;

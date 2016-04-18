@@ -197,6 +197,16 @@ void Level01::InitializeGeometry()
 	vertices.clear();
 	indices.clear();
 
+	// Sphere
+	Rig3D::Geometry::Sphere(vertices, indices, 6, 6, 1.0f);
+
+	meshLibrary.NewMesh(&mSphereMesh, mRenderer);
+	mRenderer->VSetMeshVertexBuffer(mSphereMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
+	mRenderer->VSetMeshIndexBuffer(mSphereMesh, &indices[0], indices.size());
+
+	vertices.clear();
+	indices.clear();
+
 	// Spot Light Volume 
 	std::vector<GPU::Vertex1> coneVertices;
 
@@ -276,8 +286,14 @@ void Level01::InitializeShaderResources()
 
 		mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 4);
 
-		const char* filenames[] = { "Assets/Textures/BascMinionFull.png", "Assets/Textures/flytraptxt.png", "Assets/Textures/StaticMesh/Door.png", "Assets/Textures/Sprinter_D.png" };
-		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 4);
+		const char* filenames[] = { 
+			"Assets/Textures/BascMinionFull.png", 
+			"Assets/Textures/flytraptxt.png", 
+			"Assets/Textures/StaticMesh/Door.png", 
+			"Assets/Textures/Sprinter_D.png", 
+			"Assets/Textures/Heal.png" };
+		
+		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 5);
 		mRenderer->VAddShaderLinearSamplerState(mExplorerShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 	}
 
@@ -285,10 +301,10 @@ void Level01::InitializeShaderResources()
 	{
 		mRenderer->VCreateShaderResource(&mPLVShaderResource, &mAllocator);
 
-		void* cbPVLData[] = { &mLightData, mCameraManager->GetOrigin().pCols };
-		size_t cbPVLSizes[] = { sizeof(CBuffer::Light), sizeof(vec4f) };
+		void* cbPVLData[] = { &mLightData, mCameraManager->GetOrigin().pCols, &mTime };
+		size_t cbPVLSizes[] = { sizeof(CBuffer::Light), sizeof(vec4f), sizeof(CBuffer::Time) };
 
-		mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 2);
+		mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 3);
 		mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_BORDER, const_cast<float*>(Colors::black.pCols));
 		mRenderer->AddAdditiveBlendState(mPLVShaderResource);
 	}
@@ -468,8 +484,11 @@ void Level01::VUpdate(double milliseconds)
 	}
 
 	float seconds = static_cast<float>(milliseconds) / 1000.0f;
+	mTime.delta += seconds;
+
 	for (Heal& h : Factory<Heal>())
 	{
+		h.Update(seconds);
 		h.mDuration -= seconds;
 		if (h.mDuration <= 0.0f)
 		{
@@ -629,13 +648,13 @@ void Level01::VRender()
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, Colors::whiteAlpha.pCols, 0xffffffff);
 
 	RenderStaticMeshes();
-
 #ifdef _DEBUG
 	if (gDebugColl)
 	RenderWallColliders(mExplorerShaderResource, mCameraManager, &mModel);
 #endif
 	
 	RenderDoors();
+	RenderEffects();
 	RenderExplorers();
 	RenderMinions();
 	RenderSpotLightVolumes();
@@ -845,6 +864,32 @@ void Level01::RenderDoors()
 	}
 }
 
+void Level01::RenderEffects()
+{
+	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	mRenderer->VSetPixelShader(mApplication->mPSDefAnimatedMaterial);
+	mRenderer->SetBlendState(mPLVShaderResource, 0, color, 0xffffffff);
+	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 4, 0);
+	mRenderer->VBindMesh(mSphereMesh);
+		
+	mTime.rate = 1.0f;
+	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
+	mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 2, 0);
+
+	for (Heal& heal : Factory<Heal>())
+	{
+		mModel.world = heal.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
+	}
+
+	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
+}
+
+
 void Level01::RenderExplorers()
 {
 	// Shaders
@@ -857,7 +902,7 @@ void Level01::RenderExplorers()
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 
 	// Textures
-	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 0, 3);
+	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 3, 0);
 	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
 
 	for (Explorer& e : Factory<Explorer>())
@@ -992,12 +1037,14 @@ void Level01::RenderMinions()
 	}
 }
 
+
+
 void Level01::RenderHealthBars()
 {
 	UINT sCount = 0;
 	for (Health& h : Factory<Health>())
 	{
-		auto screenPos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, -32);
+		auto screenPos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, -90);
 		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 1, screenPos, vec2f(90, 12), vec4f(1,1,1,1), vec2f(h.GetHealthPerc(), 1));
 		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 0, screenPos, vec2f(90, 12));
 	}
