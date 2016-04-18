@@ -218,7 +218,7 @@ void AnimationController::UpdateAnimation(SkeletalAnimation* pCurrentAnimation, 
 
 	float t = mCurrentAnimationStartIndex + mCurrentAnimationPlayTime * framesPerMS;
 	mCurrentKeyframeIndex = static_cast<int>(floorf(t));
-//	TRACE_LOG(keyframeIndex);
+	TRACE_WATCH("Keyframe", mCurrentKeyframeIndex);
 
 	float u = t - mCurrentKeyframeIndex;
 	for (JointAnimation jointAnimation : pCurrentAnimation->jointAnimations)

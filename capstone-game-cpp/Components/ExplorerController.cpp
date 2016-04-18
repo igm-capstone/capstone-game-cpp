@@ -160,7 +160,10 @@ bool ExplorerController::Update(double milliseconds)
 	}
 	else
 	{
-		PauseStateAnimation(ANIM_STATE_RUN);
+		if (mAnimationController->GetState() != ANIM_STATE_MELEE)
+		{
+			PlayStateAnimation(ANIM_STATE_IDLE);
+		}
 	}
 
 	if (mInput->GetMouseButtonDown(MOUSEBUTTON_RIGHT)) {
