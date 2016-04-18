@@ -366,7 +366,7 @@ bool Explorer::DoHeal(BaseSceneObject* obj, float duration, BaseSceneObject* tar
 	if (explorer->mNetworkID->mHasAuthority)
 	{
 		Packet p(PacketTypes::SPAWN_SKILL);
-		p.AsSkill.Position = explorer->mTransform->GetPosition();
+		p.AsSkill.Position = explorer->mTransform->GetPosition() - vec3f(0.0f, 0.0f, 2.5f);
 		p.AsSkill.Duration = explorer->mSkills[HEAL_SKILL_INDEX]->mDuration;
 		p.AsSkill.Type = SkillPacketTypes::SKILL_TYPE_HEAL;
 		p.UUID = explorer->mNetworkID->mUUID;
