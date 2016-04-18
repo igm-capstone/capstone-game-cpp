@@ -89,16 +89,21 @@ namespace Rig3D
 					v2.Normal = n2;
 					v3.Normal = n3;
 
-					v0.UV = { 0.5f + (atan2(n0.z, n0.x) / (2.0f * pi)), 0.5f - (asin(n0.y) / pi) };
+					/*v0.UV = { 0.5f + (atan2(n0.z, n0.x) / (2.0f * pi)), 0.5f - (asin(n0.y) / pi) };
 					v0.UV = { 0.5f + (atan2(n1.z, n1.x) / (2.0f * pi)), 0.5f - (asin(n1.y) / pi) };
 					v0.UV = { 0.5f + (atan2(n2.z, n2.x) / (2.0f * pi)), 0.5f - (asin(n2.y) / pi) };
-					v0.UV = { 0.5f + (atan2(n3.z, n3.x) / (2.0f * pi)), 0.5f - (asin(n3.y) / pi) };
+					v0.UV = { 0.5f + (atan2(n3.z, n3.x) / (2.0f * pi)), 0.5f - (asin(n3.y) / pi) };*/
 
+					v0.UV = { (asin(n0.x) / pi) + 0.5f, (asin(n0.y) / pi) + 0.5f };
+					v1.UV = { (asin(n1.x) / pi) + 0.5f, (asin(n1.y) / pi) + 0.5f };
+					v2.UV = { (asin(n2.x) / pi) + 0.5f, (asin(n2.y) / pi) + 0.5f };
+					v3.UV = { (asin(n3.x) / pi) + 0.5f, (asin(n3.y) / pi) + 0.5f };
+					
 					if (t == 0)
 					{
 						vertices.push_back(v3);
-						vertices.push_back(v2);
 						vertices.push_back(v0);
+						vertices.push_back(v2);
 
 						indices.push_back(index++);
 						indices.push_back(index++);
@@ -106,8 +111,8 @@ namespace Rig3D
 					}
 					else if (t + 1 == polarSubdivisions)
 					{
-						vertices.push_back(v1);
 						vertices.push_back(v0);
+						vertices.push_back(v1);
 						vertices.push_back(v2);
 
 						indices.push_back(index++);
@@ -117,12 +122,12 @@ namespace Rig3D
 					else
 					{
 						vertices.push_back(v3);
-						vertices.push_back(v1);
 						vertices.push_back(v0);
+						vertices.push_back(v1);
 
 						vertices.push_back(v3);
-						vertices.push_back(v2);
 						vertices.push_back(v1);
+						vertices.push_back(v2);
 
 						indices.push_back(index++);
 						indices.push_back(index++);
