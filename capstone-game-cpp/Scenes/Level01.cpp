@@ -153,7 +153,7 @@ void Level01::InitializeAssets()
 		mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[i]);
 	}
 
-	//mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
+	mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kPlantModelName);
 
@@ -276,8 +276,8 @@ void Level01::InitializeShaderResources()
 
 		mRenderer->VCreateShaderConstantBuffers(mExplorerShaderResource, cbExplorerData, cbExplorerSizes, 4);
 
-		const char* filenames[] = { "Assets/Textures/BascMinionFull.png", "Assets/Textures/flytraptxt.png", "Assets/Textures/StaticMesh/Door.png" };
-		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 3);
+		const char* filenames[] = { "Assets/Textures/BascMinionFull.png", "Assets/Textures/flytraptxt.png", "Assets/Textures/StaticMesh/Door.png", "Assets/Textures/Sprinter_D.png" };
+		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 4);
 		mRenderer->VAddShaderLinearSamplerState(mExplorerShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 	}
 
@@ -857,7 +857,7 @@ void Level01::RenderExplorers()
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 
 	// Textures
-	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 0, 0);
+	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 0, 3);
 	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
 
 	for (Explorer& e : Factory<Explorer>())

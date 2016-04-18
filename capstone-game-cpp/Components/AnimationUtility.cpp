@@ -3,9 +3,9 @@
 #include <Components/AnimationController.h>
 
 Animation gSprinterAnimations[Animations::SPRINTER_ANIMATION_COUNT] = {
-	{ "Take 001", 10, 46, 1 },
-	{ "Take 001", 50, 74, 1 },
-	{ "Take 001", 80, 102, 1 }
+	{ "Sprinter_Mix_Finish", 10, 46, 1 },
+	{ "Sprinter_Mix_Finish", 50, 74, 1 },
+	{ "Sprinter_Mix_Finish", 80, 102, 1 }
 };
 
 Animation gMinionAnimations[Animations::MINION_ANIMATION_COUNT] = {
