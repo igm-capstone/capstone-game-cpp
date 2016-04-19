@@ -272,4 +272,7 @@
   <ItemGroup>
     <Image Include="..\Assets\icon.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
+  </ItemGroup>
 </Project>
