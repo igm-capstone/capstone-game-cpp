@@ -12,7 +12,8 @@
 #include "Shaders/obj/PSFwdColor.h"
 #include "Shaders/obj/PSFwdDeferredOutput.h"
 #include "Shaders/obj/PSFwdSpotLightVolume.h"
-#include "Shaders/obj/PSDefAnimatedMaterial.h"
+#include "Shaders/obj/PSFwdSingleMaterial.h"
+#include "Shaders/obj/VSFwdSingleMaterial.h"
 #include "Shaders/obj/VSDefInstancedMaterial.h"
 #include "Shaders/obj/VSDefSingleColor.h"
 #include "Shaders/obj/VSDefSingleMaterial.h"
@@ -40,7 +41,7 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mPSFwdDeferredOutput(nullptr),
 	mPSFwdSpotLightVolume(nullptr),
 	mPSDef2DTexture(nullptr),
-	mPSDefAnimatedMaterial(nullptr),
+	mPSFwdSingleMaterial(nullptr),
 	mVSDefInstancedColor(nullptr),
 	mVSDefInstancedMaterial(nullptr),
 	mVSDefSingleColor(nullptr),
@@ -51,6 +52,7 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mVSFwdSpotLightVolume(nullptr),
 	mVSFwdSpriteGlyphs(nullptr),
 	mVSFwdSprites(nullptr),
+	mVSFwdSingleMaterial(nullptr),
 	mStudio(nullptr),
 	mLoadingScreen(nullptr),
 	mCurrentScene(nullptr),
@@ -140,12 +142,18 @@ void ScareTacticsApplication::InitializeShaders()
 		{ "NORMAL",		0, 0, 12,  0, RGB_FLOAT32,  INPUT_CLASS_PER_VERTEX },
 		{ "TEXCOORD",	0, 0, 24,  0, RG_FLOAT32,  INPUT_CLASS_PER_VERTEX }
 	};
+
 	renderer->VCreateShader(&mVSDefSingleMaterial, &mGameAllocator);
 	renderer->VLoadVertexShader(mVSDefSingleMaterial, gVSDefSingleMaterial, sizeof(gVSDefSingleMaterial), vertex3Input, 3);
+	
 	renderer->VCreateShader(&mVSDefSingleColor, &mGameAllocator);
 	renderer->VLoadVertexShader(mVSDefSingleColor, gVSDefSingleColor, sizeof(gVSDefSingleColor), vertex3Input, 3);
+	
 	renderer->VCreateShader(&mVSFwdSingleColor, &mGameAllocator);
 	renderer->VLoadVertexShader(mVSFwdSingleColor, gVSFwdSingleColor, sizeof(gVSFwdSingleColor), vertex3Input, 3);
+
+	renderer->VCreateShader(&mVSFwdSingleMaterial, &mGameAllocator);
+	renderer->VLoadVertexShader(mVSFwdSingleMaterial, gVSFwdSingleMaterial, sizeof(gVSFwdSingleMaterial), vertex3Input, 3);
 
 	// Point Light
 	InputElement plvInputElements[] =
@@ -232,8 +240,8 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VCreateShader(&mPSDefInstancedMaterial, &mGameAllocator);
 	renderer->VLoadPixelShader(mPSDefInstancedMaterial, gPSDefInstancedMaterial, sizeof(gPSDefInstancedMaterial));
 
-	renderer->VCreateShader(&mPSDefAnimatedMaterial, &mGameAllocator);
-	renderer->VLoadPixelShader(mPSDefAnimatedMaterial, gPSDefAnimatedMaterial, sizeof(gPSDefAnimatedMaterial));
+	renderer->VCreateShader(&mPSFwdSingleMaterial, &mGameAllocator);
+	renderer->VLoadPixelShader(mPSFwdSingleMaterial, gPSFwdSingleMaterial, sizeof(gPSFwdSingleMaterial));
 
 #pragma endregion
 
@@ -346,7 +354,7 @@ void ScareTacticsApplication::VShutdown()
 	mCSGridPass2->~IShader();
 	mPSDefColor->~IShader();
 	mPSDefMaterial->~IShader();
-	mPSDefAnimatedMaterial->~IShader();
+	mPSFwdSingleMaterial->~IShader();
 	mPSDefInstancedMaterial->~IShader();
 
 	mPSFwd2DTexture->~IShader();
@@ -365,6 +373,7 @@ void ScareTacticsApplication::VShutdown()
 	mVSFwdSpotLightVolume->~IShader();
 	mVSFwdSpriteGlyphs->~IShader();
 	mVSFwdSprites->~IShader();
+	mVSFwdSingleMaterial->~IShader();
 
 	mSceneAllocator.Free();
 	mGameAllocator.Free();

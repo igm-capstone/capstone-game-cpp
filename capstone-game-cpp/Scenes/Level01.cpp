@@ -198,7 +198,7 @@ void Level01::InitializeGeometry()
 	indices.clear();
 
 	// Sphere
-	Rig3D::Geometry::Sphere(vertices, indices, 6, 6, 1.0f);
+	Rig3D::Geometry::Sphere(vertices, indices, 10, 10, 1.0f);
 
 	meshLibrary.NewMesh(&mSphereMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mSphereMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
@@ -873,17 +873,22 @@ void Level01::RenderEffects()
 	
 	mRenderer->VSetContextTargetWithDepth(mGBufferContext, 0);
 
-	mRenderer->VSetInputLayout(mApplication->mVSDefSingleMaterial);
-	mRenderer->VSetVertexShader(mApplication->mVSDefSingleMaterial);
-	mRenderer->VSetPixelShader(mApplication->mPSDefAnimatedMaterial);
+	mRenderer->VSetInputLayout(mApplication->mVSFwdSingleMaterial);
+	mRenderer->VSetVertexShader(mApplication->mVSFwdSingleMaterial);
+	mRenderer->VSetPixelShader(mApplication->mPSFwdSingleMaterial);
 
+	mRenderer->SetBlendState(mPLVShaderResource, 0, color, 0xffffffff);
+	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 2, 0);
+	mRenderer->VBindMesh(mSphereMesh);
+		
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 
-	mRenderer->SetBlendState(mPLVShaderResource, 0, color, 0xffffffff);
-//	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 4, 0);
-	mRenderer->VBindMesh(mSphereMesh);
-		
+	mTime.color = { 0.1f, 0.1f, 0.1f, 1.0f };
+	mTime.cameraPosition = mCameraManager->GetOrigin();
+	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
+	mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 2, 0);
+
 	//mTime.rate = 1.0f;
 	//mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
 	//mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 2, 0);

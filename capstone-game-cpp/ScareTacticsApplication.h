@@ -24,7 +24,7 @@ public:
 	IShader* mPSFwdDeferredOutput;
 	IShader* mPSFwdSpotLightVolume;
 	IShader* mPSDef2DTexture;
-	IShader* mPSDefAnimatedMaterial;
+	IShader* mPSFwdSingleMaterial;
 
 	IShader* mVSDefInstancedColor;
 	IShader* mVSDefInstancedMaterial;
@@ -36,6 +36,7 @@ public:
 	IShader* mVSFwdSpotLightVolume;
 	IShader* mVSFwdSpriteGlyphs;
 	IShader* mVSFwdSprites;
+	IShader* mVSFwdSingleMaterial;
 
 	FMOD::Studio::System* mStudio;
 	vec3f mGroundMousePosition;
