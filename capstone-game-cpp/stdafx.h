@@ -66,3 +66,6 @@ extern bool gDebugBT;
 
 #define MAX_DOORS 50
 #define MAX_LAMPS 50
+
+#define DOOR_BASE_UUID 0xDD000000
+#define LAMP_BASE_UUID 0xAA000000

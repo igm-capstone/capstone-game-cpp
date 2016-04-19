@@ -251,3 +251,12 @@ void NetworkRpc::SyncAnimation(int UUID, byte state, byte command)
 		}
 	}
 }
+
+void NetworkRpc::Interact(int UUID)
+{
+	for each(auto &netID in Factory<NetworkID>()) {
+		if (netID.mUUID == UUID) {
+			netID.OnInteract();
+		}
+	}
+}

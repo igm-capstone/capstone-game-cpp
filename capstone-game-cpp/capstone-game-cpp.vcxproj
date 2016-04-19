@@ -135,8 +135,10 @@
     <ClCompile Include="DebugRender.cpp" />
     <ClCompile Include="Factory.cpp" />
     <ClCompile Include="Components\FlyTrapController.cpp" />
+    <ClCompile Include="SceneObjects\Door.cpp" />
     <ClCompile Include="SceneObjects\Heal.cpp" />
     <ClCompile Include="ModelManager.cpp" />
+    <ClCompile Include="SceneObjects\Lamp.cpp" />
     <ClCompile Include="SceneObjects\Region.cpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="ScareTacticsApplication.cpp" />

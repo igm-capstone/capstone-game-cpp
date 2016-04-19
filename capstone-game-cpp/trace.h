@@ -23,8 +23,6 @@
 #define RENDER_TRACE()                          Trace::GetTrace().Render();
 #define RENDER_TRACE_WATCH()					Trace::GetTrace().RenderWatch();
 
-typedef std::function<void(const float&, const float&, const float&, const float&, const float&, const float&, const vec4f& color)> __TraceFunction;
-
 using namespace Rig3D;
 
 typedef cliqCity::memory::LinearAllocator LinearAllocator;

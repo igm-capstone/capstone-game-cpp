@@ -94,9 +94,12 @@ void loadLamps(jarr_t objs)
 
 	float radians = PI / 180.0f;
 
+	int16_t id = 0;
 	for (auto obj : *objs)
 	{
 		auto lamp = Factory<Lamp>::Create();
+		lamp->SetID(id++);
+
 		parseTransform(obj, lamp->mTransform);
 
 		lamp->mTransform->SetPosition(lamp->mTransform->GetPosition() + vec3f(0.0f, 0.0f, -3.0f));
@@ -264,6 +267,8 @@ void loadStaticColliders(jarr_t objs, CLayer layer, vec3f levelOrigin, vec3f lev
 void loadDoors(jarr_t objs)
 {
 	TRACE_LOG("Loading " << int(objs->size()) << " doors...");
+
+	uint32_t id = 0;
 	for (auto obj : *objs)
 	{
 		auto canOpen = obj["canOpen"].get<bool>();
@@ -275,6 +280,8 @@ void loadDoors(jarr_t objs)
 		auto collHalf = parseVec3f(obj["bounds"]["extents"]);
 
 		auto door = Factory<Door>::Create();
+		door->SetID(id++);
+
 		parseTransform(obj, door->mTransform);
 		Resource::mModelManager->GetModel("Door")->Link(door);
 

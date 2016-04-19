@@ -76,6 +76,8 @@
     <ClCompile Include="BehaviorTree\Mute.cpp" />
     <ClCompile Include="Components\ImpController.cpp" />
     <ClCompile Include="Components\FlyTrapController.cpp" />
+    <ClCompile Include="SceneObjects\Door.cpp" />
+    <ClCompile Include="SceneObjects\Lamp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />

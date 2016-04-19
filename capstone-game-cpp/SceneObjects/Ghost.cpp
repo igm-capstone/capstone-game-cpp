@@ -8,6 +8,7 @@
 #include "Door.h"
 #include "Region.h"
 #include "Lamp.h"
+#include "Explorer.h"
 
 //#include <CameraManager.h>
 
@@ -129,11 +130,11 @@ bool Ghost::DoMouseClick(BaseSceneObject* obj, float duration, BaseSceneObject* 
 
 	if (target->Is<Door>()) {
 		auto door = reinterpret_cast<Door*>(target);
-		door->ToogleDoor();
+		door->Interact();
 	}
 	if (target->Is<Lamp>()) {
 		auto lamp = reinterpret_cast<Lamp*>(target);
-		lamp->ToggleLamp();
+		lamp->Interact();
 	}
 	else {
 		//Spawn X or transmogrify

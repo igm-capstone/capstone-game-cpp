@@ -208,6 +208,10 @@ void NetworkServer::ReceiveFromClients()
 				case SPAWN_SKILL:
 					NetworkCmd::SpawnNewSkill(packet.AsSkill.Type, packet.AsSkill.Position, packet.AsSkill.Duration);
 					break;
+				case INTERACT:
+					Retransmit(client.first, &packet);
+					NetworkRpc::Interact(packet.UUID);
+					break;
 				default:
 					printf("error in packet types\n");
 					break;
