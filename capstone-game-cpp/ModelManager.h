@@ -4,6 +4,7 @@
 #include "SceneObjects/BaseSceneObject.h"
 #include "FBXResource.h"
 #include "BINResource.h"
+#include "json.h"
 
 enum StaticMeshModel : int
 {
@@ -130,11 +131,7 @@ public:
 				c->mSkeletalHierarchy = fbxResource.mSkeletalHierarchy;
 				c->mSkeletalAnimations = fbxResource.mSkeletalAnimations;
 
-				fopen_s(&file, binPath.c_str(), "w");
-				{
-					fwrite((void*)&fbxResource, sizeof(fbxResource), 1, file);
-					fclose(file);
-				}
+				fbxResource.SaveToBin();
 			}
 
 			c->mName = name;
