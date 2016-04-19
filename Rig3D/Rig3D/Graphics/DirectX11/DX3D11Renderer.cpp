@@ -1848,6 +1848,13 @@ void DX3D11Renderer::VSetContextTargetWithDepth()
 	mDeviceContext->OMSetRenderTargets(1, &mRenderTargetView, mDepthStencilView);
 }
 
+void DX3D11Renderer::VSetContextTargetWithDepth(IRenderContext* renderContext, const uint32_t DSVIndex)
+{
+	DX11RenderContext* dx11RenderContext = reinterpret_cast<DX11RenderContext*>(renderContext);
+	ID3D11DepthStencilView** DSVs = dx11RenderContext->GetDepthStencilViews();
+	mDeviceContext->OMSetRenderTargets(1, &mRenderTargetView, DSVs[DSVIndex]);
+}
+
 void DX3D11Renderer::VSetRenderContextTargets(IRenderContext* renderContext)
 {
 	DX11RenderContext* dx11RenderContext = reinterpret_cast<DX11RenderContext*>(renderContext);

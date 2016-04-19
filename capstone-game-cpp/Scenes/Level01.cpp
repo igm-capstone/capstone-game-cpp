@@ -654,7 +654,6 @@ void Level01::VRender()
 #endif
 	
 	RenderDoors();
-	RenderEffects();
 	RenderExplorers();
 	RenderMinions();
 	RenderSpotLightVolumes();
@@ -671,7 +670,10 @@ void Level01::VRender()
 #else
 	RenderFullScreenQuad();
 #endif
+	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, mNullSRV);
 
+	RenderEffects();
+	
 	mSpriteManager->NewFrame();
 	RenderHealthBars();
 	mSkillBar.RenderPanel();
@@ -683,7 +685,6 @@ void Level01::VRender()
 	RenderIMGUI(); 
 	RenderSprites();
 
-	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, mNullSRV);
 
 #ifdef _DEBUG
 	if (gDebugGrid) RenderGrid();
@@ -868,14 +869,24 @@ void Level01::RenderEffects()
 {
 	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
+	// Use the default context with depth buffer from the g-buffer pass.
+	
+	mRenderer->VSetContextTargetWithDepth(mGBufferContext, 0);
+
+	mRenderer->VSetInputLayout(mApplication->mVSDefSingleMaterial);
+	mRenderer->VSetVertexShader(mApplication->mVSDefSingleMaterial);
 	mRenderer->VSetPixelShader(mApplication->mPSDefAnimatedMaterial);
+
+	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
+	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+
 	mRenderer->SetBlendState(mPLVShaderResource, 0, color, 0xffffffff);
-	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 4, 0);
+//	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 4, 0);
 	mRenderer->VBindMesh(mSphereMesh);
 		
-	mTime.rate = 1.0f;
-	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
-	mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 2, 0);
+	//mTime.rate = 1.0f;
+	//mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
+	//mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 2, 0);
 
 	for (Heal& heal : Factory<Heal>())
 	{
