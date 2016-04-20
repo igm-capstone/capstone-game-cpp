@@ -125,8 +125,13 @@ void Minion::SpawnFlytrap(vec3f pos, int UUID)
 	mController = Factory<FlyTrapController>::Create();
 	Spawn(pos, UUID);
 
-	mMeleeColliderComponent->mCollider.radius = 2.5f;
-	mMeleeColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
+	mTransform->SetScale(0.35f);
+	mCollider->mOffset = { 0.0f, 0.75f, 0.0f };
+	mCollider->mCollider.radius = 2.0f;
+	mCollider->mIsDynamic = false;
+
+	mMeleeColliderComponent->mCollider.radius = 1.0f;
+	mMeleeColliderComponent->mOffset = { 0.0f, 0.65f, mCollider->mCollider.radius + mMeleeColliderComponent->mCollider.radius + 0.01f };
 	mMeleeColliderComponent->mIsDynamic = false;
 
 	Application::SharedInstance().GetModelManager()->GetModel(kPlantModelName)->Link(this);
