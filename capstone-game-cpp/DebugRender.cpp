@@ -8,11 +8,11 @@
 #include "SceneObjects/StaticCollider.h"
 #include  <ScareTacticsApplication.h>
 #include "SceneObjects/Region.h"
-#include "Components/Skill.h"
 #include "SceneObjects/Explorer.h"
 #include "SceneObjects/Door.h"
 #include "SceneObjects/Lamp.h"
 #include "SceneObjects/StaticMesh.h"
+#include "SceneObjects/Minion.h"
 
 namespace
 {
@@ -170,6 +170,26 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 		if (s.mMeleeColliderComponent.asSphereColliderComponent)
 		{
 			c = s.mMeleeColliderComponent.asSphereColliderComponent;
+			model->world = (mat4f::scale(c->mCollider.radius) * mat4f::translate(c->mCollider.origin)).transpose();
+			gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
+			gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
+
+			gRenderer->VDrawIndexed(0, gSphereMesh->GetIndexCount());
+		}
+	}
+
+	for (Minion& m : Factory<Minion>())
+	{
+		SphereColliderComponent* c = m.mCollider;
+		model->world = (mat4f::scale(c->mCollider.radius) * mat4f::translate(c->mCollider.origin)).transpose();
+		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
+		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
+
+		gRenderer->VDrawIndexed(0, gSphereMesh->GetIndexCount());
+
+		if (m.mMeleeColliderComponent)
+		{
+			c = m.mMeleeColliderComponent;
 			model->world = (mat4f::scale(c->mCollider.radius) * mat4f::translate(c->mCollider.origin)).transpose();
 			gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
 			gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
