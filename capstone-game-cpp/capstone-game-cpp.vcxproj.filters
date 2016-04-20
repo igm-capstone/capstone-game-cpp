@@ -22,7 +22,8 @@
     <FxCompile Include="Shaders\VSDefInstancedColor.hlsl" />
     <FxCompile Include="Shaders\PSDefInstancedMaterial.hlsl" />
     <FxCompile Include="Shaders\VSFwdSpriteGlyphs.hlsl" />
-    <FxCompile Include="Shaders\PSDefAnimatedMaterial.hlsl" />
+    <FxCompile Include="Shaders\VSFwdSingleMaterial.hlsl" />
+    <FxCompile Include="Shaders\PSFwdSingleMaterial.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />

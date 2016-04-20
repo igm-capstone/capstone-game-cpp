@@ -158,6 +158,7 @@ void Level01::InitializeAssets()
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kPlantModelName);
 
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
+	mModelManager->LoadModel<GPU::Vertex3>(kTrapModelName);
 
 	//mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 	mLevel = Resource::LoadLevel("Assets/Level02_Test.json", mAllocator);
@@ -198,7 +199,7 @@ void Level01::InitializeGeometry()
 	indices.clear();
 
 	// Sphere
-	Rig3D::Geometry::Sphere(vertices, indices, 6, 6, 1.0f);
+	Rig3D::Geometry::Sphere(vertices, indices, 10, 10, 1.0f);
 
 	meshLibrary.NewMesh(&mSphereMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mSphereMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
@@ -291,9 +292,10 @@ void Level01::InitializeShaderResources()
 			"Assets/Textures/flytraptxt.png", 
 			"Assets/Textures/StaticMesh/Door.png", 
 			"Assets/Textures/Sprinter_D.png", 
-			"Assets/Textures/Heal.png" };
+			"Assets/Textures/Heal.png",
+			"Assets/Textures/Trap.png"};
 		
-		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 5);
+		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 6);
 		mRenderer->VAddShaderLinearSamplerState(mExplorerShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 	}
 
@@ -302,7 +304,7 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateShaderResource(&mPLVShaderResource, &mAllocator);
 
 		void* cbPVLData[] = { &mLightData, mCameraManager->GetOrigin().pCols, &mTime };
-		size_t cbPVLSizes[] = { sizeof(CBuffer::Light), sizeof(vec4f), sizeof(CBuffer::Time) };
+		size_t cbPVLSizes[] = { sizeof(CBuffer::Light), sizeof(vec4f), sizeof(CBuffer::Effect) };
 
 		mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 3);
 		mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_BORDER, const_cast<float*>(Colors::black.pCols));
@@ -498,8 +500,8 @@ void Level01::VUpdate(double milliseconds)
 
 	for (Trap& t: Factory<Trap>())
 	{
-		t.mDuration -= seconds;
-		if (t.mDuration <= 0.0f)
+		t.Update(seconds);
+		if (t.mShouldDestroy)
 		{
 			Factory<Trap>::Destroy(&t);
 		}
@@ -507,9 +509,14 @@ void Level01::VUpdate(double milliseconds)
 
 	for (StatusEffect& s : Factory<StatusEffect>())
 	{
-		s.mOnUpdateCallback(&s, seconds);
-		s.mDuration -= seconds;
-		if (s.mDuration <= 0.0f)
+		if (!s.mIsActive)
+		{
+			continue;
+		}
+
+		s.Update(seconds);
+
+		if (s.mShouldDestroy)
 		{
 			Factory<StatusEffect>::Destroy(&s);
 		}
@@ -654,7 +661,6 @@ void Level01::VRender()
 #endif
 	
 	RenderDoors();
-	RenderEffects();
 	RenderExplorers();
 	RenderMinions();
 	RenderSpotLightVolumes();
@@ -671,7 +677,10 @@ void Level01::VRender()
 #else
 	RenderFullScreenQuad();
 #endif
+	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, mNullSRV);
 
+	RenderEffects();
+	
 	mSpriteManager->NewFrame();
 	RenderHealthBars();
 	mSkillBar.RenderPanel();
@@ -683,7 +692,6 @@ void Level01::VRender()
 	RenderIMGUI(); 
 	RenderSprites();
 
-	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, mNullSRV);
 
 #ifdef _DEBUG
 	if (gDebugGrid) RenderGrid();
@@ -862,20 +870,54 @@ void Level01::RenderDoors()
 
 		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
 	}
+
+	IMesh* pTrapMesh = mModelManager->GetModel(kTrapModelName)->mMesh;
+	mRenderer->VBindMesh(pTrapMesh);
+	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 5, 0);
+
+	for (Trap& trap : Factory<Trap>())
+	{
+		mModel.world = trap.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
+
+		//trap.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatrices);
+		//mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
+		//mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
+
+		mRenderer->VDrawIndexed(0, pTrapMesh->GetIndexCount());
+	}
 }
 
 void Level01::RenderEffects()
 {
-	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	float color[4] = { 1.0f, 1.0f, 1.0f, 0.7f };
 
-	mRenderer->VSetPixelShader(mApplication->mPSDefAnimatedMaterial);
+	// Use the default context with depth buffer from the g-buffer pass.
+	
+	mRenderer->VSetContextTargetWithDepth(mGBufferContext, 0);
+
+	mRenderer->VSetInputLayout(mApplication->mVSFwdSingleMaterial);
+	mRenderer->VSetVertexShader(mApplication->mVSFwdSingleMaterial);
+	mRenderer->VSetPixelShader(mApplication->mPSFwdSingleMaterial);
+
 	mRenderer->SetBlendState(mPLVShaderResource, 0, color, 0xffffffff);
-	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 4, 0);
+	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 2, 0);
 	mRenderer->VBindMesh(mSphereMesh);
 		
-	mTime.rate = 1.0f;
+	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
+	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+
+	mTime.color = { 0.1f, 0.1f, 0.1f, 1.0f };
+	mTime.cameraPosition = mCameraManager->GetOrigin();
 	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
 	mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 2, 0);
+
+	//mTime.rate = 1.0f;
+	//mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
+	//mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 2, 0);
 
 	for (Heal& heal : Factory<Heal>())
 	{
@@ -886,9 +928,27 @@ void Level01::RenderEffects()
 		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
 	}
 
+	mTime.color = { 1.0f, 0.1f, 1.0f, 1.0f };
+
+	for (Trap& trap : Factory<Trap>())
+	{
+		if (!trap.mEffect->mIsActive)
+		{
+			continue;
+		}
+
+		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
+		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 2, 0);
+
+		mModel.world = trap.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
+	}
+
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
 }
-
 
 void Level01::RenderExplorers()
 {
@@ -918,6 +978,26 @@ void Level01::RenderExplorers()
 		mRenderer->VBindMesh(e.mModel->mMesh);
 		mRenderer->VDrawIndexed(0, e.mModel->mMesh->GetIndexCount());
 	}
+
+	/* Leaving this here for when the trap skeleton gets fixed.
+
+	IMesh* pTrapMesh = mModelManager->GetModel(kTrapModelName)->mMesh;
+	mRenderer->VBindMesh(pTrapMesh);
+	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 5, 0);
+
+	for (Trap& trap: Factory<Trap>())
+	{
+		mModel.world = trap.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		trap.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatrices);
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
+
+		mRenderer->VDrawIndexed(0, pTrapMesh->GetIndexCount());
+	}
+	*/
 }
 
 void Level01::RenderSpotLightVolumes()

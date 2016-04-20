@@ -38,7 +38,7 @@ void Heal::Update(float seconds)
 {
 	static float growthRate = 2.0f * seconds;
 	vec3f scale = mTransform->GetScale();
-	TRACE_WATCH("HEAL", scale);
+
 	if (scale.x <= mSphereColliderComponent->mCollider.radius)
 	{
 		vec3f s = vec3f(cliqCity::graphicsMath::lerp(1.0f, mSphereColliderComponent->mCollider.radius, 1.0f - mDuration));

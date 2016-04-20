@@ -14,9 +14,12 @@ public:
 	std::map<class Explorer*, float> mExplorers;
 	std::map<class Minion*, float> mMinions;
 
-	float mDuration;
-	StatusUpdateCallback mOnUpdateCallback;
+	float	mDuration;
+	bool	mIsActive;
+	bool	mShouldDestroy;
 
+	StatusUpdateCallback mOnUpdateCallback;
+	void Update(float seconds);
 	static void OnPoisonUpdate(StatusEffect* self, float seconds);
 	static void OnSlowUpdate(StatusEffect* self, float seconds);
 

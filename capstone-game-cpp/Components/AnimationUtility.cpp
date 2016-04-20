@@ -20,6 +20,11 @@ Animation gPlantAnimations[Animations::PLANT_ANIMATION_COUNT] = {
 	{ "Flytrap_Export_Version", 230,	310,	1 },
 };
 
+Animation gTrapAnimations[Animations::TRAP_ANIMATION_COUNT] = {
+	{ "Take 001",	1,	1, 1 },
+	{ "Take 001",	2,	149, 2 },
+};
+
 uint32_t gMinionRestFrameIndex = 5;
 
 void SetRestFrameIndex(AnimationController* animationController, uint32_t index)

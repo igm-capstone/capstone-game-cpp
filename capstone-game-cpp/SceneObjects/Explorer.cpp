@@ -176,7 +176,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	// Add more as we get more classes.
 	switch (GetExplorerID(e))
 	{
-	case 0:
+	case 1:
 	{
 		auto heal = Factory<Skill>::Create();
 		heal->SetBinding(SkillBinding().Set(KEYCODE_A));
@@ -196,11 +196,11 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 
 		break;
 	}
-	case 1:
+	case 0:
 	{
 		auto poison = Factory<Skill>::Create();
 		poison->SetBinding(SkillBinding().Set(KEYCODE_A));
-		poison->Setup("Poison Trap", 2, 1, DoPoison);
+		poison->Setup("Poison Trap", 2.0f, 5.0f, DoPoison);
 		poison->mSceneObject = e;
 		e->mSkills[POISON_SKILL_INDEX] = poison;
 
