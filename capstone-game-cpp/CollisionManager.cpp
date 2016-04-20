@@ -505,7 +505,6 @@ void CollisionManager::DetectCollisions()
 				
 				position.z = poi.z - pSphereComponent->mCollider.radius;
 				pSphereComponent->mSceneObject->mTransform->SetPosition(position);
-				pSphereComponent->mCollider.origin = position;
 				pNode->object->OnCollisionExit(pRegion);
 			}
 		}

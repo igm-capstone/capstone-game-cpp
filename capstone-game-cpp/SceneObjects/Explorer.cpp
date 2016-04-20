@@ -55,10 +55,12 @@ Explorer::Explorer()
 	mController->mAnimationController = mAnimationController;	// Be careful if you move this code. AnimationController should exist before here.
 
 	mCollider = Factory<SphereColliderComponent>::Create();
+	mCollider->mCollider.radius = 1.4f;
 	mCollider->mIsDynamic = true;
 	mCollider->mSceneObject = this;
 	mCollider->mIsActive = false;
 	mCollider->mLayer = COLLISION_LAYER_EXPLORER;
+	mCollider->mOffset = { 0.0f, 2.5f, 0.0f };
 	mCollider->RegisterCollisionExitCallback(&OnCollisionExit);
 
 	mHealth = Factory<Health>::Create();
@@ -113,7 +115,7 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	mTransform->SetPosition(pos);		
 
 	mCollider->mIsActive = true;
-	mCollider->mCollider.origin = pos;
+	mCollider->mCollider.origin = pos + (mTransform->GetRotation() * mCollider->mOffset);
 
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
@@ -162,7 +164,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 
 	// Giving all explorers same melee collider for now.
 	e->mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
-	e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.0f;
+	e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 1.0f;
 	e->mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
 	e->mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
 	e->mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
@@ -329,7 +331,7 @@ void Explorer::OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other)
 
 void Explorer::UpdateComponents(quatf rotation, vec3f position)
 {
-	mCollider->mCollider.origin = position;
+	mCollider->mCollider.origin = position + (rotation * mCollider->mOffset);
 	
 	// Add more cases as we add explorer types
 	switch (GetExplorerID(this))
