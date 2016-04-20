@@ -153,7 +153,10 @@ void BVHTree::Update()
 
 	for (Trap& trap : Factory<Trap>())
 	{
-		AddNodeRecursively(trap.mSphereColliderComponent, EXPLORER_PARENT_LAYER_INDEX, 1, 0, 0);
+		if (trap.mSphereColliderComponent->mIsActive)
+		{
+			AddNodeRecursively(trap.mSphereColliderComponent, EXPLORER_PARENT_LAYER_INDEX, 1, 0, 0);
+		}
 	}
 }
 
