@@ -5,7 +5,7 @@
 #include "Minion.h"
 #include "Components/Health.h"
 
-StatusEffect::StatusEffect() : mDuration(5.0f), mOnUpdateCallback(nullptr)
+StatusEffect::StatusEffect() : mDuration(0.25f), mIsActive(false), mShouldDestroy(false), mOnUpdateCallback(nullptr)
 {
 	
 }
@@ -14,6 +14,16 @@ StatusEffect::~StatusEffect()
 {
 	mExplorers.clear();
 	mMinions.clear();
+}
+
+void StatusEffect::Update(float seconds)
+{
+	mOnUpdateCallback(this, seconds);
+	mDuration -= seconds;
+	if (mDuration <= 0.0f)
+	{
+		mShouldDestroy = true;
+	}
 }
 
 void StatusEffect::OnPoisonUpdate(StatusEffect* self, float seconds)

@@ -498,8 +498,8 @@ void Level01::VUpdate(double milliseconds)
 
 	for (Trap& t: Factory<Trap>())
 	{
-		t.mDuration -= seconds;
-		if (t.mDuration <= 0.0f)
+		t.Update(seconds);
+		if (t.mShouldDestroy)
 		{
 			Factory<Trap>::Destroy(&t);
 		}
@@ -507,9 +507,14 @@ void Level01::VUpdate(double milliseconds)
 
 	for (StatusEffect& s : Factory<StatusEffect>())
 	{
-		s.mOnUpdateCallback(&s, seconds);
-		s.mDuration -= seconds;
-		if (s.mDuration <= 0.0f)
+		if (!s.mIsActive)
+		{
+			continue;
+		}
+
+		s.Update(seconds);
+
+		if (s.mShouldDestroy)
 		{
 			Factory<StatusEffect>::Destroy(&s);
 		}
@@ -896,6 +901,24 @@ void Level01::RenderEffects()
 	for (Heal& heal : Factory<Heal>())
 	{
 		mModel.world = heal.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
+	}
+
+	for (Trap& trap : Factory<Trap>())
+	{
+		if (!trap.mEffect->mIsActive)
+		{
+			mTime.color = { 1.0f, 0.1f, 0.1f, 1.0f };
+		}
+		else
+		{
+			mTime.color = { 1.0f, 0.1f, 1.0f, 1.0f };
+		}
+
+		mModel.world = trap.mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 

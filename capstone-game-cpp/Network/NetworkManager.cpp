@@ -126,19 +126,17 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 	case SKILL_TYPE_POISON:
 	{
 		auto p = Factory<Trap>::Create();
-		p->Spawn(UUID, pos, duration);
+		p->SpawnPoison(UUID, pos, duration);
 		p->mNetworkID->mHasAuthority = true;
 		p->mNetworkID->OnNetAuthorityChange(true);
-		p->mEffect->mOnUpdateCallback = StatusEffect::OnPoisonUpdate;
 		break;
 	}
 	case SKILL_TYPE_SLOW:
 	{
 		auto s = Factory<Trap>::Create();
-		s->Spawn(UUID, pos, duration);
+		s->SpawnSlow(UUID, pos, duration);
 		s->mNetworkID->mHasAuthority = true;
 		s->mNetworkID->OnNetAuthorityChange(true);
-		s->mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
 		break;
 	}
 	case SKILL_TYPE_FLYTRAP_MINION:
@@ -186,15 +184,13 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 	case SKILL_TYPE_POISON:
 	{
 		auto p = Factory<Trap>::Create();
-		p->Spawn(UUID, pos, duration);
-		p->mEffect->mOnUpdateCallback = StatusEffect::OnPoisonUpdate;
+		p->SpawnPoison(UUID, pos, duration);
 		break;
 	}
 	case SKILL_TYPE_SLOW:
 	{
 		auto s = Factory<Trap>::Create();
-		s->Spawn(UUID, pos, duration);
-		s->mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
+		s->SpawnSlow(UUID, pos, duration);
 		break;
 	}
 	case SKILL_TYPE_FLYTRAP_MINION:
