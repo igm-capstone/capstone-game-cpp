@@ -27,6 +27,13 @@ namespace Animations
 		PLANT_SHOOT,
 		PLANT_ANIMATION_COUNT
 	};
+
+	enum TrapAnimiations : int
+	{
+		TRAP_IDLE,
+		TRAP_OPEN,
+		TRAP_ANIMATION_COUNT
+	};
 }
 
 struct Animation
@@ -43,6 +50,7 @@ struct KeyframeOption;
 extern Animation gSprinterAnimations[Animations::SPRINTER_ANIMATION_COUNT];
 extern Animation gMinionAnimations[Animations::MINION_ANIMATION_COUNT];
 extern Animation gPlantAnimations[Animations::PLANT_ANIMATION_COUNT];
+extern Animation gTrapAnimations[Animations::TRAP_ANIMATION_COUNT];
 
 extern uint32_t gMinionRestFrameIndex;
 

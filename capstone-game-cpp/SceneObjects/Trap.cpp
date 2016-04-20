@@ -5,16 +5,23 @@
 #include "Components/NetworkID.h"
 #include "StatusEffect.h"
 #include <trace.h>
+#include <ModelManager.h>
+#include <Components/AnimationController.h>
+#include <ScareTacticsApplication.h>
+#include <Components/AnimationUtility.h>
 
 Trap::Trap() :
 	mSphereColliderComponent(Factory<SphereColliderComponent>::Create()),
+//	mAnimationController(Factory<AnimationController>::Create()),
 	mNetworkID(Factory<NetworkID>::Create()),
 	mEffect(Factory<StatusEffect>::Create()),
 	mDuration(5.0f),
 	mEffectDuration(5.0f),
-	mDelay(2.5f),
+	mDelay(2.0f),
 	mShouldDestroy(false)
 {
+	mTransform->SetRotation(-PI * 0.5f, 0.0f, 0.0f);
+
 	mSphereColliderComponent->mCollider.radius = 5.0f;
 	mSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
 	mSphereColliderComponent->mIsTrigger = true;
@@ -26,6 +33,22 @@ Trap::Trap() :
 
 	mNetworkID->mIsActive = false;
 	mNetworkID->mSceneObject = this;
+
+	Application::SharedInstance().GetModelManager()->GetModel(kTrapModelName)->Link(this);
+
+	//mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
+	//mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
+	//mAnimationController->mSceneObject = this;
+
+	//Animation open = gTrapAnimations[Animations::TRAP_OPEN];
+	//KeyframeOption openOptions[] = {
+	//	{ open.endFrameIndex,   &OnTrapOpenStop },
+	//};
+
+	//SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gTrapAnimations[Animations::TRAP_IDLE], nullptr, 0, true);
+	//SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gTrapAnimations[Animations::TRAP_OPEN], openOptions, 1, false);
+	//mAnimationController->SetState(ANIM_STATE_IDLE);
+	//mAnimationController->Resume();
 }
 
 Trap::~Trap()
@@ -58,11 +81,6 @@ void Trap::SpawnSlow(int UUID, vec3f position, float duration)
 
 void Trap::Update(float seconds)
 {
-	TRACE_WATCH("Delay",	mDelay);
-	TRACE_WATCH("Duration", mDuration);
-	TRACE_WATCH("Collider",	mSphereColliderComponent->mIsActive);
-	TRACE_WATCH("Triggered", mEffect->mIsActive);
-
 	// Check delay
 	if (mDelay > 0.0f)
 	{
@@ -93,6 +111,8 @@ void Trap::OnTriggerEnter(BaseSceneObject* self, BaseSceneObject* other)
 	if (!pTrap->mEffect->mIsActive)
 	{
 		pTrap->mEffect->mIsActive = true;
+		//pTrap->mAnimationController->SetState(ANIM_STATE_MELEE);
+		//pTrap->mAnimationController->Resume();
 	}
 }
 
@@ -120,4 +140,15 @@ void Trap::OnTriggerStay(BaseSceneObject* self, BaseSceneObject* other)
 			pTrap->mEffect->mMinions[pMinion] = pTrap->mEffect->mDuration;
 		}
 	}
+}
+
+void Trap::OnTrapOpenStart(void* obj)
+{
+	
+}
+
+void Trap::OnTrapOpenStop(void* obj)
+{
+	Trap* pTrap = reinterpret_cast<Trap*>(obj);
+	pTrap->mEffect->mIsActive = true;
 }

@@ -51,7 +51,7 @@ namespace CBuffer {
 		vec4f color;
 	};
 
-	struct Time
+	struct Effect
 	{
 		vec4f color;
 		vec3f cameraPosition;

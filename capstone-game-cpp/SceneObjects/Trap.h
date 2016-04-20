@@ -7,6 +7,7 @@ class Trap : public BaseSceneObject
 
 public:
 	class SphereColliderComponent*	mSphereColliderComponent;
+	class AnimationController*		mAnimationController;
 	class NetworkID*				mNetworkID;
 	class StatusEffect*				mEffect;
 
@@ -22,6 +23,9 @@ public:
 	void Update(float seconds);
 	static void OnTriggerEnter(BaseSceneObject* self, BaseSceneObject* other);
 	static void OnTriggerStay(BaseSceneObject* self, BaseSceneObject* other);
+
+	static void OnTrapOpenStart(void* obj);
+	static void OnTrapOpenStop(void* obj);
 
 private:
 	Trap();

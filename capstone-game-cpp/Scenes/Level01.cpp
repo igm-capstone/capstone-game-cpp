@@ -158,6 +158,7 @@ void Level01::InitializeAssets()
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kPlantModelName);
 
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
+	mModelManager->LoadModel<GPU::Vertex3>(kTrapModelName);
 
 	//mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 	mLevel = Resource::LoadLevel("Assets/Level02_Test.json", mAllocator);
@@ -291,9 +292,10 @@ void Level01::InitializeShaderResources()
 			"Assets/Textures/flytraptxt.png", 
 			"Assets/Textures/StaticMesh/Door.png", 
 			"Assets/Textures/Sprinter_D.png", 
-			"Assets/Textures/Heal.png" };
+			"Assets/Textures/Heal.png",
+			"Assets/Textures/Trap.png"};
 		
-		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 5);
+		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 6);
 		mRenderer->VAddShaderLinearSamplerState(mExplorerShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 	}
 
@@ -302,7 +304,7 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateShaderResource(&mPLVShaderResource, &mAllocator);
 
 		void* cbPVLData[] = { &mLightData, mCameraManager->GetOrigin().pCols, &mTime };
-		size_t cbPVLSizes[] = { sizeof(CBuffer::Light), sizeof(vec4f), sizeof(CBuffer::Time) };
+		size_t cbPVLSizes[] = { sizeof(CBuffer::Light), sizeof(vec4f), sizeof(CBuffer::Effect) };
 
 		mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 3);
 		mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_BORDER, const_cast<float*>(Colors::black.pCols));
@@ -868,11 +870,30 @@ void Level01::RenderDoors()
 
 		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
 	}
+
+	IMesh* pTrapMesh = mModelManager->GetModel(kTrapModelName)->mMesh;
+	mRenderer->VBindMesh(pTrapMesh);
+	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 5, 0);
+
+	for (Trap& trap : Factory<Trap>())
+	{
+		mModel.world = trap.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
+
+		//trap.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatrices);
+		//mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
+		//mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
+
+		mRenderer->VDrawIndexed(0, pTrapMesh->GetIndexCount());
+	}
 }
 
 void Level01::RenderEffects()
 {
-	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	float color[4] = { 1.0f, 1.0f, 1.0f, 0.7f };
 
 	// Use the default context with depth buffer from the g-buffer pass.
 	
@@ -907,15 +928,13 @@ void Level01::RenderEffects()
 		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
 	}
 
+	mTime.color = { 1.0f, 0.1f, 1.0f, 1.0f };
+
 	for (Trap& trap : Factory<Trap>())
 	{
 		if (!trap.mEffect->mIsActive)
 		{
-			mTime.color = { 1.0f, 0.1f, 0.1f, 1.0f };
-		}
-		else
-		{
-			mTime.color = { 1.0f, 0.1f, 1.0f, 1.0f };
+			continue;
 		}
 
 		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
@@ -930,7 +949,6 @@ void Level01::RenderEffects()
 
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
 }
-
 
 void Level01::RenderExplorers()
 {
@@ -960,6 +978,26 @@ void Level01::RenderExplorers()
 		mRenderer->VBindMesh(e.mModel->mMesh);
 		mRenderer->VDrawIndexed(0, e.mModel->mMesh->GetIndexCount());
 	}
+
+	/* Leaving this here for when the trap skeleton gets fixed.
+
+	IMesh* pTrapMesh = mModelManager->GetModel(kTrapModelName)->mMesh;
+	mRenderer->VBindMesh(pTrapMesh);
+	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 5, 0);
+
+	for (Trap& trap: Factory<Trap>())
+	{
+		mModel.world = trap.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		trap.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatrices);
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
+
+		mRenderer->VDrawIndexed(0, pTrapMesh->GetIndexCount());
+	}
+	*/
 }
 
 void Level01::RenderSpotLightVolumes()
