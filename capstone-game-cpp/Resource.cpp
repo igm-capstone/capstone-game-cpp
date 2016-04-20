@@ -289,11 +289,12 @@ void loadDoors(jarr_t objs)
 		door->mTransform->SetRotation(rotation);
 		door->mTransform->SetScale(scale);
 
-		door->mColliderComponent->mCollider.origin = collOrigin;
-		door->mColliderComponent->mCollider.halfSize = collHalf;
 		door->mColliderComponent->mCollider.axis[0] = vec3f(1, 0, 0);
 		door->mColliderComponent->mCollider.axis[1] = vec3f(0, 1, 0);
 		door->mColliderComponent->mCollider.axis[2] = vec3f(0, 0, 1);
+		door->mColliderComponent->mCollider.origin = collOrigin;
+		door->mColliderComponent->mCollider.halfSize = collHalf;
+		door->mColliderComponent->mCollider.halfSize.z = 7.0f;
 		door->mColliderComponent->mLayer = COLLISION_LAYER_WALL;
 
 		door->mTrigger->mCollider.axis[0] = vec3f(1, 0, 0);
