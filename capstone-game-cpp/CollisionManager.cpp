@@ -511,7 +511,6 @@ void CollisionManager::DetectCollisions()
 
 		colliderIndices.clear();
 	}
-
 }
 
 void CollisionManager::ResolveCollisions()
@@ -529,22 +528,16 @@ void CollisionManager::ResolveCollisions()
 
 			collisions[i].colliderA.SphereCollider->mSceneObject->mTransform->SetPosition(posA);
 			collisions[i].colliderB.SphereCollider->mSceneObject->mTransform->SetPosition(posB);
-
-			collisions[i].colliderA.SphereCollider->mCollider.origin = posA;
-			collisions[i].colliderB.SphereCollider->mCollider.origin = posB;
 		}
 		else if (collisions[i].colliderA.SphereCollider->mIsDynamic && !collisions[i].colliderB.SphereCollider->mIsDynamic)
 		{
 			vec3f posA = collisions[i].colliderA.SphereCollider->mSceneObject->mTransform->GetPosition() + collisions[i].minimumOverlap;
 			collisions[i].colliderA.SphereCollider->mSceneObject->mTransform->SetPosition(posA);
-			collisions[i].colliderA.SphereCollider->mCollider.origin = posA;
-
 		}
 		else if (!collisions[i].colliderA.SphereCollider->mIsDynamic && collisions[i].colliderB.SphereCollider->mIsDynamic)
 		{
 			vec3f posB = collisions[i].colliderB.SphereCollider->mSceneObject->mTransform->GetPosition() - collisions[i].minimumOverlap;
 			collisions[i].colliderB.SphereCollider->mSceneObject->mTransform->SetPosition(posB);
-			collisions[i].colliderB.SphereCollider->mCollider.origin = posB;
 		}
 
 		collisions[i].colliderA.BaseCollider->OnCollisionExit(collisions[i].colliderB.BaseCollider->mSceneObject);
