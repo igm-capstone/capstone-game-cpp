@@ -165,7 +165,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	// Giving all explorers same melee collider for now.
 	e->mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
 	e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 1.0f;
-	e->mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
+	e->mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 2.5f, e->mCollider->mCollider.radius + e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius + 0.01f };
 	e->mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
 	e->mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
 	e->mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;

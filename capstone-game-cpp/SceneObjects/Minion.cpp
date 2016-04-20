@@ -92,8 +92,12 @@ void Minion::SpawnImp(vec3f pos, int UUID)
 	mController = Factory<ImpController>::Create();
 	Spawn(pos, UUID);
 
-	mMeleeColliderComponent->mCollider.radius = 2.5f;
-	mMeleeColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
+	mTransform->SetScale(0.3f);
+	mCollider->mOffset = { 0.0f, 0.65f, 0.0f };
+	mCollider->mCollider.radius = 1.45f;
+
+	mMeleeColliderComponent->mCollider.radius = 1.0f;
+	mMeleeColliderComponent->mOffset = { 0.0f, 0.65f, mCollider->mCollider.radius + mMeleeColliderComponent->mCollider.radius + 0.01f };
 
 	mController->mSceneObject = this;
 
@@ -162,7 +166,7 @@ void Minion::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 
 void Minion::UpdateComponents(quatf rotation, vec3f position)
 {
-	mCollider->mCollider.origin = position;
+	mCollider->mCollider.origin = position + (rotation * mCollider->mOffset);
 	mMeleeColliderComponent->mCollider.origin = position + (rotation * mMeleeColliderComponent->mOffset);
 }
 
