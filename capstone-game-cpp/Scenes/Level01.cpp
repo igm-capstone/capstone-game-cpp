@@ -156,9 +156,9 @@ void Level01::InitializeAssets()
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kPlantModelName);
+	mModelManager->LoadModel<GPU::SkinnedVertex>(kTrapModelName);
 
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
-	mModelManager->LoadModel<GPU::Vertex3>(kTrapModelName);
 
 	//mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 	mLevel = Resource::LoadLevel("Assets/Level02_Test.json", mAllocator);
@@ -870,25 +870,6 @@ void Level01::RenderDoors()
 
 		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
 	}
-
-	IMesh* pTrapMesh = mModelManager->GetModel(kTrapModelName)->mMesh;
-	mRenderer->VBindMesh(pTrapMesh);
-	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 5, 0);
-
-	for (Trap& trap : Factory<Trap>())
-	{
-		mModel.world = trap.mTransform->GetWorldMatrix().transpose();
-		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
-
-		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
-
-		//trap.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatrices);
-		//mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
-		//mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
-
-		mRenderer->VDrawIndexed(0, pTrapMesh->GetIndexCount());
-	}
 }
 
 void Level01::RenderEffects()
@@ -979,8 +960,6 @@ void Level01::RenderExplorers()
 		mRenderer->VDrawIndexed(0, e.mModel->mMesh->GetIndexCount());
 	}
 
-	/* Leaving this here for when the trap skeleton gets fixed.
-
 	IMesh* pTrapMesh = mModelManager->GetModel(kTrapModelName)->mMesh;
 	mRenderer->VBindMesh(pTrapMesh);
 	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 5, 0);
@@ -997,7 +976,6 @@ void Level01::RenderExplorers()
 
 		mRenderer->VDrawIndexed(0, pTrapMesh->GetIndexCount());
 	}
-	*/
 }
 
 void Level01::RenderSpotLightVolumes()

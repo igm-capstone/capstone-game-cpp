@@ -12,7 +12,7 @@
 
 Trap::Trap() :
 	mSphereColliderComponent(Factory<SphereColliderComponent>::Create()),
-//	mAnimationController(Factory<AnimationController>::Create()),
+	mAnimationController(Factory<AnimationController>::Create()),
 	mNetworkID(Factory<NetworkID>::Create()),
 	mEffect(Factory<StatusEffect>::Create()),
 	mDuration(5.0f),
@@ -36,19 +36,19 @@ Trap::Trap() :
 
 	Application::SharedInstance().GetModelManager()->GetModel(kTrapModelName)->Link(this);
 
-	//mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
-	//mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
-	//mAnimationController->mSceneObject = this;
+	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
+	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
+	mAnimationController->mSceneObject = this;
 
-	//Animation open = gTrapAnimations[Animations::TRAP_OPEN];
-	//KeyframeOption openOptions[] = {
-	//	{ open.endFrameIndex,   &OnTrapOpenStop },
-	//};
+	Animation open = gTrapAnimations[Animations::TRAP_OPEN];
+	KeyframeOption openOptions[] = {
+		{ open.endFrameIndex,   &OnTrapOpenStop },
+	};
 
-	//SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gTrapAnimations[Animations::TRAP_IDLE], nullptr, 0, true);
-	//SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gTrapAnimations[Animations::TRAP_OPEN], openOptions, 1, false);
-	//mAnimationController->SetState(ANIM_STATE_IDLE);
-	//mAnimationController->Resume();
+	SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gTrapAnimations[Animations::TRAP_IDLE], nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gTrapAnimations[Animations::TRAP_OPEN], openOptions, 1, false);
+	mAnimationController->SetState(ANIM_STATE_IDLE);
+	mAnimationController->Resume();
 }
 
 Trap::~Trap()
@@ -81,6 +81,10 @@ void Trap::SpawnSlow(int UUID, vec3f position, float duration)
 
 void Trap::Update(float seconds)
 {
+	TRACE_WATCH("TRAP", mDuration);
+	TRACE_WATCH("STATUS", mEffect->mDuration);
+
+
 	// Check delay
 	if (mDelay > 0.0f)
 	{
@@ -110,9 +114,9 @@ void Trap::OnTriggerEnter(BaseSceneObject* self, BaseSceneObject* other)
 	Trap* pTrap = reinterpret_cast<Trap*>(self);
 	if (!pTrap->mEffect->mIsActive)
 	{
-		pTrap->mEffect->mIsActive = true;
-		//pTrap->mAnimationController->SetState(ANIM_STATE_MELEE);
-		//pTrap->mAnimationController->Resume();
+		//pTrap->mEffect->mIsActive = true;
+		pTrap->mAnimationController->SetState(ANIM_STATE_MELEE);
+		pTrap->mAnimationController->Resume();
 	}
 }
 
