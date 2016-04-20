@@ -918,6 +918,9 @@ void Level01::RenderEffects()
 			mTime.color = { 1.0f, 0.1f, 1.0f, 1.0f };
 		}
 
+		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
+		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 2, 0);
+
 		mModel.world = trap.mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);

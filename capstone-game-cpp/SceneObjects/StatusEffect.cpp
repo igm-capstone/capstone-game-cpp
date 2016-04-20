@@ -32,7 +32,7 @@ void StatusEffect::OnPoisonUpdate(StatusEffect* self, float seconds)
 	{
 		if (iter->second > 0)
 		{
-			iter->first->mHealth->SetHealth(iter->first->mHealth->GetHealth() - 25.0f);
+			iter->first->mHealth->TakeDamage(25.0f * seconds);
 			iter->second -= seconds;
 		}
 	}
@@ -41,8 +41,8 @@ void StatusEffect::OnPoisonUpdate(StatusEffect* self, float seconds)
 	{
 		if (iter->second > 0)
 		{
-			iter->first->mHealth->SetHealth(iter->first->mHealth->GetHealth() - 25.0f);
-			iter->second -= seconds;			
+			iter->first->mHealth->TakeDamage(25.0f * seconds);
+			iter->second -= seconds;
 		}
 	}
 }
