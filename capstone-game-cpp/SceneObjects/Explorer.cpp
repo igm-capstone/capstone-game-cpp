@@ -15,11 +15,6 @@
 #define SLOW_SKILL_INDEX	2
 #include "Minion.h"
 
-int GetExplorerID(Explorer* explorer)
-{
-	return explorer->mNetworkID->mUUID - 1;
-}
-
 Explorer::Explorer()
 {
 	mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
@@ -78,7 +73,7 @@ Explorer::~Explorer()
 
 	// Skills
 	Factory<Skill>::Destroy(mSkills[MELEE_SKILL_INDEX]);
-	switch (GetExplorerID(this))
+	switch (GetExplorerID())
 	{
 	case 0:
 	{
@@ -174,7 +169,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	e->mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = e;
 
 	// Add more as we get more classes.
-	switch (GetExplorerID(e))
+	switch (e->GetExplorerID())
 	{
 	case 1:
 	{
@@ -190,9 +185,9 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		melee->mSceneObject = e;
 		e->mSkills[MELEE_SKILL_INDEX] = melee;
 
-		SkillBar* mSkillBar = &Application::SharedInstance().GetCurrentScene()->mSkillBar;
-		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
-		mSkillBar->AddSkill(e->mSkills[HEAL_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 0, 6);
+		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
+		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
+		mUIManager->AddSkill(e->mSkills[HEAL_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 0, 6);
 
 		break;
 	}
@@ -216,10 +211,10 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		melee->mSceneObject = e;
 		e->mSkills[MELEE_SKILL_INDEX] = melee;
 
-		SkillBar* mSkillBar = &Application::SharedInstance().GetCurrentScene()->mSkillBar;
-		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
-		mSkillBar->AddSkill(e->mSkills[POISON_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 2, 6);
-		mSkillBar->AddSkill(e->mSkills[SLOW_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 4, 4);
+		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
+		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
+		mUIManager->AddSkill(e->mSkills[POISON_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 2, 6);
+		mUIManager->AddSkill(e->mSkills[SLOW_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 4, 4);
 
 		break;
 	}
@@ -238,9 +233,9 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		melee->mSceneObject = e;
 		e->mSkills[MELEE_SKILL_INDEX] = melee;
 
-		SkillBar* mSkillBar = &Application::SharedInstance().GetCurrentScene()->mSkillBar;
-		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
-		mSkillBar->AddSkill(e->mSkills[SPRINT_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 1, 6);
+		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
+		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
+		mUIManager->AddSkill(e->mSkills[SPRINT_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 1, 6);
 
 		break;
 	}
@@ -334,7 +329,7 @@ void Explorer::UpdateComponents(quatf rotation, vec3f position)
 	mCollider->mCollider.origin = position + (rotation * mCollider->mOffset);
 	
 	// Add more cases as we add explorer types
-	switch (GetExplorerID(this))
+	switch (GetExplorerID())
 	{
 	case 0:
 	default:

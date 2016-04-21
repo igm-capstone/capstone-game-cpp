@@ -122,6 +122,9 @@ void NetworkClient::Update()
 			case INTERACT:
 				NetworkRpc::Interact(packet.UUID);
 				break;
+			case READY:
+				NetworkRpc::Ready(packet.ClientID, packet.AsBool);
+				break;
 			default:
 				printf("error in packet types\n");
 				break;

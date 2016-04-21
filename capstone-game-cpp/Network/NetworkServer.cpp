@@ -88,10 +88,15 @@ void NetworkServer::CheckForNewClients()
 	char value = 1; //disable nagle on the client's socket
 	setsockopt(mClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
 	
-	mClientList[mClientID] = mClientSocket;
-	mClientID++;
+	auto i = 1;
+	while (true) {
+		if (mClientList.count(i) == 0) break;
+		i++;
+	}
 
-	printf("client %d connected\n", mClientID);
+	mClientList[i] = mClientSocket;
+
+	printf("client %d connected\n", i);
 }
 
 int NetworkServer::ReceiveData(unsigned int clientID, char* recvBuf)
@@ -211,6 +216,10 @@ void NetworkServer::ReceiveFromClients()
 				case INTERACT:
 					Retransmit(client.first, &packet);
 					NetworkRpc::Interact(packet.UUID);
+					break;
+				case READY:
+					Retransmit(client.first, &packet);
+					NetworkRpc::Ready(packet.ClientID, packet.AsBool);
 					break;
 				default:
 					printf("error in packet types\n");

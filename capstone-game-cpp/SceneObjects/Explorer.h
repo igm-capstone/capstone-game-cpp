@@ -2,8 +2,6 @@
 #include "SceneObjects\BaseSceneObject.h"
 #include <Components/AnimationController.h>
 
-int GetExplorerID(class Explorer* explorer);
-
 class Explorer : public BaseSceneObject
 {
 	friend class Factory<Explorer>;
@@ -32,6 +30,8 @@ private:
 private:
 	Explorer();
 	~Explorer();
+
+	int GetExplorerID() { return static_cast<int>(mNetworkClient->mID); }
 
 public:
 	void Spawn(vec3f pos, int UUID);

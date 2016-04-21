@@ -566,6 +566,22 @@ void Level01::VFixedUpdate(double milliseconds)
 	UpdateGameState(milliseconds);
 }
 
+void Level01::SetReady(int clientID)
+{
+	Packet p(READY);
+	p.ClientID = clientID;
+	p.AsBool = !mUIManager.GetReadyState(p.ClientID);
+
+	mUIManager.SetReadyState(p.ClientID, p.AsBool);
+
+	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
+		mNetworkManager->mClient.SendData(&p);
+	}
+	else if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
+		mNetworkManager->mServer.SendToAll(&p);
+	}
+}
+
 void Level01::UpdateGameState(double milliseconds)
 {
 	GameState currentState = mGameState;
@@ -575,8 +591,23 @@ void Level01::UpdateGameState(double milliseconds)
 	switch (currentState)
 	{
 	case GAME_STATE_INITIAL:
-		// Check for ready status
-		currentState = GAME_STATE_CAPTURE_0;
+#ifdef _DEBUG
+		if (mInput->GetKeyDown(KEYCODE_F9))
+		{
+			for (int i = 0; i < MAX_PLAYERS; i++) {
+				SetReady(i);
+			}
+		}
+#endif
+		if (mInput->GetKeyDown(KEYCODE_SPACE))
+		{
+			SetReady(mNetworkManager->ID());
+		}
+
+		if (mUIManager.IsEveryoneReady()) {
+			currentState = GAME_STATE_CAPTURE_0;
+			mUIManager.BlockGame(false);
+		}
 		break;
 	case GAME_STATE_CAPTURE_0:
 	case GAME_STATE_CAPTURE_1:
@@ -683,19 +714,34 @@ void Level01::VRender()
 	
 	mSpriteManager->NewFrame();
 	RenderHealthBars();
-	mSkillBar.RenderPanel();
-	if (mNetworkManager->mMode == NetworkManager::SERVER) mSkillBar.RenderManaBar();
-	mSkillBar.RenderObjectives(mGameState, mNetworkManager->mMode == NetworkManager::SERVER);
-	if (mGameState == GAME_STATE_FINAL_GHOST_WIN) mSkillBar.RenderEndScreen(true);
-	if (mGameState == GAME_STATE_FINAL_EXPLORERS_WIN) mSkillBar.RenderEndScreen(false);
+	mUIManager.RenderPanel();
+	if (mNetworkManager->mMode == NetworkManager::SERVER) mUIManager.RenderManaBar();
+	mUIManager.RenderObjectives(mGameState, mNetworkManager->mMode == NetworkManager::SERVER);
+	
+	switch (mGameState)
+	{
+	case GAME_STATE_FINAL_GHOST_WIN:
+		mUIManager.RenderEndScreen(true);
+		break;
+	case GAME_STATE_FINAL_EXPLORERS_WIN:
+		mUIManager.RenderEndScreen(false);
+		break;
+	case GAME_STATE_INITIAL:
+		mUIManager.RenderReadyScreen(mNetworkManager->ID());
+		break;
+	default:
+		break;
+	}
 
-	RenderIMGUI(); 
+	RenderIMGUI();
 	RenderSprites();
 
 
 #ifdef _DEBUG
 	if (gDebugGrid) RenderGrid();
 	RENDER_TRACE();
+	TRACE_WATCH("Mode", mNetworkManager->mMode);
+	TRACE_WATCH("ID", mNetworkManager->ID());
 #endif
 
 	mRenderer->VSwapBuffers();

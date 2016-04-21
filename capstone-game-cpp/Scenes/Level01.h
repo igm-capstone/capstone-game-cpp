@@ -73,6 +73,7 @@ public:
 	void VFixedUpdate(double milliseconds) override;
 	void UpdateGameState(double milliseconds);
 	bool IsExplorerAlive();
+	void SetReady(int clientID);
 
 	void VRender() override;
 	void RenderShadowMaps();	// Not called per frame
