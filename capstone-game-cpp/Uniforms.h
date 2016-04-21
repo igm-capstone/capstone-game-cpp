@@ -51,10 +51,10 @@ namespace CBuffer {
 		vec4f color;
 	};
 
-	struct Time
+	struct Effect
 	{
+		vec4f color;
+		vec3f cameraPosition;
 		float delta = 0.0f;
-		float rate	= 1.0f;
-		float padding[2];
 	};
 }

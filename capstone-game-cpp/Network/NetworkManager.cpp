@@ -8,6 +8,7 @@
 #include <SceneObjects/Heal.h>
 #include <SceneObjects/Trap.h>
 #include <SceneObjects/StatusEffect.h>
+#include <ScareTacticsApplication.h>
 
 NetworkManager::NetworkManager()
 {
@@ -99,6 +100,15 @@ void NetworkCmd::SpawnNewExplorer(int clientID) {
 		p.AsTransform.Position = exp.mTransform->GetPosition();
 		mNetworkManager->mServer.Send(clientID, &p);
 	}
+
+	auto ui = &Application::SharedInstance().GetCurrentScene()->mUIManager;
+	for (int i = 0; i < MAX_PLAYERS; i++)
+	{
+		Packet p3(READY);
+		p3.ClientID = i;
+		p3.AsBool = ui->GetReadyState(i);
+		mNetworkManager->mServer.Send(clientID, &p3);
+	}
 }
 
 void NetworkRpc::SpawnExistingExplorer(int UUID, vec3f pos) {
@@ -126,19 +136,17 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 	case SKILL_TYPE_POISON:
 	{
 		auto p = Factory<Trap>::Create();
-		p->Spawn(UUID, pos, duration);
+		p->SpawnPoison(UUID, pos, duration);
 		p->mNetworkID->mHasAuthority = true;
 		p->mNetworkID->OnNetAuthorityChange(true);
-		p->mEffect->mOnUpdateCallback = StatusEffect::OnPoisonUpdate;
 		break;
 	}
 	case SKILL_TYPE_SLOW:
 	{
 		auto s = Factory<Trap>::Create();
-		s->Spawn(UUID, pos, duration);
+		s->SpawnSlow(UUID, pos, duration);
 		s->mNetworkID->mHasAuthority = true;
 		s->mNetworkID->OnNetAuthorityChange(true);
-		s->mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
 		break;
 	}
 	case SKILL_TYPE_FLYTRAP_MINION:
@@ -186,15 +194,13 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 	case SKILL_TYPE_POISON:
 	{
 		auto p = Factory<Trap>::Create();
-		p->Spawn(UUID, pos, duration);
-		p->mEffect->mOnUpdateCallback = StatusEffect::OnPoisonUpdate;
+		p->SpawnPoison(UUID, pos, duration);
 		break;
 	}
 	case SKILL_TYPE_SLOW:
 	{
 		auto s = Factory<Trap>::Create();
-		s->Spawn(UUID, pos, duration);
-		s->mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
+		s->SpawnSlow(UUID, pos, duration);
 		break;
 	}
 	case SKILL_TYPE_FLYTRAP_MINION:
@@ -259,4 +265,9 @@ void NetworkRpc::Interact(int UUID)
 			netID.OnInteract();
 		}
 	}
+}
+
+void NetworkRpc::Ready(unsigned clientID, bool isReady)
+{
+	Application::SharedInstance().GetCurrentScene()->mUIManager.SetReadyState(clientID, isReady);
 }

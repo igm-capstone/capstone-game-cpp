@@ -13,23 +13,29 @@ struct Button
 
 enum GameState : char;
 
-class SkillBar
+class UIManager
 {
 	SpriteManager* mSpriteManager;
 	Button mButtons[4];
 	int numBtns = 0;
 
+	bool mReadyState[MAX_PLAYERS];
+
 public:
-	SkillBar();
-	~SkillBar();
+	UIManager();
+	~UIManager();
 
 	void RenderPanel();
 	void RenderButton(Button* b, vec2f pos);
 	void AddSkill(Skill* name, SpriteSheetCode sheetID, int spriteID, int keySpriteID = -1);
-	void SetActive(Skill* skill);
+	void SetActiveSkill(Skill* skill);
+	void SetReadyState(int playerID, bool isReady);
+	bool GetReadyState(int playerID) { return mReadyState[playerID]; };
+	bool IsEveryoneReady();
 	void RenderManaBar();
 	void RenderObjectives(GameState gameState, bool isServer);
 	void RenderEndScreen(bool ghostWins);
+	void RenderReadyScreen(int playerID);
 	void BlockGame(bool block);
 };
 

@@ -15,7 +15,7 @@ public:
 
 private:
 	class CameraManager*		mCameraManager;
-	class SkillBar*				mSkillBar;
+	class UIManager*			mUIManager;
 	int							mActiveSkill;
 	float						mMana;
 	float						mMaxMana;

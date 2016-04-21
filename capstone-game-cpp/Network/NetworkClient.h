@@ -20,11 +20,11 @@ private:
 	char mNetworkData[MAX_DATA_SIZE];
 	char mPacketData[sizeof(Packet)];
 
-	int mID;
 public:
 	NetworkClient(void) {};
 	~NetworkClient(void) {};
 
+	int mID;
 	PCSTR mIPAddress;
 	int SendData(Packet* p);
 

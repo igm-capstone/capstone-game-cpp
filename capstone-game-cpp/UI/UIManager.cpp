@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "SkillBar.h"
+#include "UIManager.h"
 #include "SpriteManager.h"
 #include <Scenes/Level01.h>
 #include <SceneObjects/DominationPoint.h>
@@ -8,17 +8,19 @@
 #include <Components/GhostController.h>
 
 
-SkillBar::SkillBar()
+UIManager::UIManager()
 {
 	mSpriteManager = &Rig3D::Singleton<SpriteManager>::SharedInstance();
+
+	for (int i = 0; i < sizeof(mReadyState); i++) mReadyState[i] = false;
 }
 
 
-SkillBar::~SkillBar()
+UIManager::~UIManager()
 {
 }
 
-void SkillBar::RenderPanel()
+void UIManager::RenderPanel()
 {
 	auto posYPerc = 0.07f;
 
@@ -30,7 +32,7 @@ void SkillBar::RenderPanel()
 	}
 }
 
-void SkillBar::RenderButton(Button* b, vec2f pos)
+void UIManager::RenderButton(Button* b, vec2f pos)
 {
 	mSpriteManager->DrawSprite(b->sheetID, 8+b->spriteID, pos, vec2f(100, 100));
 	mSpriteManager->DrawSprite(b->sheetID, b->spriteID, pos, vec2f(100, 100), vec4f(1,1,1,1), vec3f(1,1), 2*PI * b->skill->Recharged());
@@ -41,7 +43,7 @@ void SkillBar::RenderButton(Button* b, vec2f pos)
 	
 }
 
-void SkillBar::AddSkill(Skill* skill, SpriteSheetCode sheetID, int spriteID, int keySpriteID)
+void UIManager::AddSkill(Skill* skill, SpriteSheetCode sheetID, int spriteID, int keySpriteID)
 {
 	assert(numBtns < 4);
 
@@ -53,7 +55,7 @@ void SkillBar::AddSkill(Skill* skill, SpriteSheetCode sheetID, int spriteID, int
 	numBtns++;
 }
 
-void SkillBar::SetActive(Skill* skill)
+void UIManager::SetActiveSkill(Skill* skill)
 {
 	for (auto i = 0; i < numBtns; i++)
 	{
@@ -61,7 +63,20 @@ void SkillBar::SetActive(Skill* skill)
 	}
 }
 
-void SkillBar::RenderManaBar()
+void UIManager::SetReadyState(int playerID, bool isReady)
+{
+	mReadyState[playerID] = isReady;
+}
+
+bool UIManager::IsEveryoneReady()
+{	
+	bool ret = true;
+	for (int i = 0; i < sizeof(mReadyState); i++) ret &= mReadyState[i];
+
+	return ret;
+}
+
+void UIManager::RenderManaBar()
 {
 	auto posYPerc = 0.95f;
 	for each (Ghost& ghost in Factory<Ghost>()) {
@@ -70,7 +85,7 @@ void SkillBar::RenderManaBar()
 	}
 }
 
-void SkillBar::RenderObjectives(GameState gameState, bool isServer)
+void UIManager::RenderObjectives(GameState gameState, bool isServer)
 {
 	auto anchor = mSpriteManager->perc2f(0, 0.85f) + vec2f(10, 0);
 	int i = 0;
@@ -85,7 +100,7 @@ void SkillBar::RenderObjectives(GameState gameState, bool isServer)
 	}
 }
 
-void SkillBar::RenderEndScreen(bool ghostWins)
+void UIManager::RenderEndScreen(bool ghostWins)
 {
 	BlockGame(true);
 
@@ -94,16 +109,40 @@ void SkillBar::RenderEndScreen(bool ghostWins)
 	mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 75, mSpriteManager->perc2f(0.5f, 0.4f), vec4f(0.55f, 0.27f, 0.69f, 1), ALIGN_CENTER, "%s", ghostWins ? "Ghost Wins!" : "Explorers Win!");
 }
 
-void SkillBar::BlockGame(bool block)
+void UIManager::RenderReadyScreen(int playerID)
+{
+	BlockGame(true);
+
+	mSpriteManager->DrawSprite(SPRITESHEET_CONTROL_ICONS, 15, mSpriteManager->perc2f(0.5f, 0.5f), mSpriteManager->perc2f(1, 1), vec4f(0.7f, 0.7f, 0.7f, 0.5f));
+
+	TRACE_WATCH("0",mReadyState[0]);
+	TRACE_WATCH("1",mReadyState[1]);
+	TRACE_WATCH("2",mReadyState[2]);
+	TRACE_WATCH("3",mReadyState[3]);
+}
+
+void UIManager::BlockGame(bool block)
 {
 	for each (auto& c in Factory<ExplorerController>())
 	{
-		if ((static_cast<Explorer *>(c.mSceneObject))->mNetworkID->mHasAuthority)
-		c.mIsActive = !block;
+		Explorer* e = static_cast<Explorer *>(c.mSceneObject);
+		if (e->mNetworkID->mHasAuthority) {
+			c.mIsActive = !block;
+			for (auto& skill : e->mSkills)
+			{
+				if (skill) skill->mIsActive = !block;
+			}
+		}
 	}
 	for each (auto& c in Factory<GhostController>())
 	{
-		if ((static_cast<Ghost *>(c.mSceneObject))->mNetworkID->mHasAuthority)
-		c.mIsActive = !block;
+		Ghost* g = static_cast<Ghost *>(c.mSceneObject);
+		if (g->mNetworkID->mHasAuthority) {
+			c.mIsActive = !block;
+			for (auto& skill : g->mSkills)
+			{
+				if (skill) skill->mIsActive = !block;
+			}
+		}
 	}
 }

@@ -486,10 +486,12 @@ void CollisionManager::DetectCollisions()
 			return other.parentIndex == parentIndex;
 		});
 	
+		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
 		vec3f position = pNode->object->mSceneObject->mTransform->GetPosition();
 		
 		Ray<vec3f> ray;
 		ray.origin = position;
+		ray.origin.z -= pSphereComponent->mCollider.radius;
 		ray.normal = { 0.0f, 0.0f, 1.0f };
 
 		for (uint32_t nIdx : colliderIndices)
@@ -501,18 +503,15 @@ void CollisionManager::DetectCollisions()
 
 			if (IntersectRayOBB(ray, pRegion->mColliderComponent->mCollider, poi, t))
 			{
-				SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
 				
-				position.z = poi.z - pSphereComponent->mCollider.radius;
+				position.z = poi.z;
 				pSphereComponent->mSceneObject->mTransform->SetPosition(position);
-				pSphereComponent->mCollider.origin = position;
 				pNode->object->OnCollisionExit(pRegion);
 			}
 		}
 
 		colliderIndices.clear();
 	}
-
 }
 
 void CollisionManager::ResolveCollisions()
@@ -530,22 +529,16 @@ void CollisionManager::ResolveCollisions()
 
 			collisions[i].colliderA.SphereCollider->mSceneObject->mTransform->SetPosition(posA);
 			collisions[i].colliderB.SphereCollider->mSceneObject->mTransform->SetPosition(posB);
-
-			collisions[i].colliderA.SphereCollider->mCollider.origin = posA;
-			collisions[i].colliderB.SphereCollider->mCollider.origin = posB;
 		}
 		else if (collisions[i].colliderA.SphereCollider->mIsDynamic && !collisions[i].colliderB.SphereCollider->mIsDynamic)
 		{
 			vec3f posA = collisions[i].colliderA.SphereCollider->mSceneObject->mTransform->GetPosition() + collisions[i].minimumOverlap;
 			collisions[i].colliderA.SphereCollider->mSceneObject->mTransform->SetPosition(posA);
-			collisions[i].colliderA.SphereCollider->mCollider.origin = posA;
-
 		}
 		else if (!collisions[i].colliderA.SphereCollider->mIsDynamic && collisions[i].colliderB.SphereCollider->mIsDynamic)
 		{
 			vec3f posB = collisions[i].colliderB.SphereCollider->mSceneObject->mTransform->GetPosition() - collisions[i].minimumOverlap;
 			collisions[i].colliderB.SphereCollider->mSceneObject->mTransform->SetPosition(posB);
-			collisions[i].colliderB.SphereCollider->mCollider.origin = posB;
 		}
 
 		collisions[i].colliderA.BaseCollider->OnCollisionExit(collisions[i].colliderB.BaseCollider->mSceneObject);

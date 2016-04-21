@@ -207,7 +207,6 @@ void AnimationController::ExecuteKeyframeCallbacks()
 			callback(mSceneObject);
 		}
 	}
-
 }
 
 void AnimationController::UpdateAnimation(SkeletalAnimation* pCurrentAnimation, float milliseconds, float framesPerMS)

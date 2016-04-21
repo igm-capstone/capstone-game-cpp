@@ -156,6 +156,7 @@ void Level01::InitializeAssets()
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kPlantModelName);
+	mModelManager->LoadModel<GPU::SkinnedVertex>(kTrapModelName);
 
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
 
@@ -198,7 +199,7 @@ void Level01::InitializeGeometry()
 	indices.clear();
 
 	// Sphere
-	Rig3D::Geometry::Sphere(vertices, indices, 6, 6, 1.0f);
+	Rig3D::Geometry::Sphere(vertices, indices, 10, 10, 1.0f);
 
 	meshLibrary.NewMesh(&mSphereMesh, mRenderer);
 	mRenderer->VSetMeshVertexBuffer(mSphereMesh, &vertices[0], sizeof(GPU::Vertex3) * vertices.size(), sizeof(GPU::Vertex3));
@@ -291,9 +292,10 @@ void Level01::InitializeShaderResources()
 			"Assets/Textures/flytraptxt.png", 
 			"Assets/Textures/StaticMesh/Door.png", 
 			"Assets/Textures/Sprinter_D.png", 
-			"Assets/Textures/Heal.png" };
+			"Assets/Textures/Heal.png",
+			"Assets/Textures/Trap.png"};
 		
-		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 5);
+		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 6);
 		mRenderer->VAddShaderLinearSamplerState(mExplorerShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 	}
 
@@ -302,7 +304,7 @@ void Level01::InitializeShaderResources()
 		mRenderer->VCreateShaderResource(&mPLVShaderResource, &mAllocator);
 
 		void* cbPVLData[] = { &mLightData, mCameraManager->GetOrigin().pCols, &mTime };
-		size_t cbPVLSizes[] = { sizeof(CBuffer::Light), sizeof(vec4f), sizeof(CBuffer::Time) };
+		size_t cbPVLSizes[] = { sizeof(CBuffer::Light), sizeof(vec4f), sizeof(CBuffer::Effect) };
 
 		mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 3);
 		mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_BORDER, const_cast<float*>(Colors::black.pCols));
@@ -498,8 +500,8 @@ void Level01::VUpdate(double milliseconds)
 
 	for (Trap& t: Factory<Trap>())
 	{
-		t.mDuration -= seconds;
-		if (t.mDuration <= 0.0f)
+		t.Update(seconds);
+		if (t.mShouldDestroy)
 		{
 			Factory<Trap>::Destroy(&t);
 		}
@@ -507,9 +509,14 @@ void Level01::VUpdate(double milliseconds)
 
 	for (StatusEffect& s : Factory<StatusEffect>())
 	{
-		s.mOnUpdateCallback(&s, seconds);
-		s.mDuration -= seconds;
-		if (s.mDuration <= 0.0f)
+		if (!s.mIsActive)
+		{
+			continue;
+		}
+
+		s.Update(seconds);
+
+		if (s.mShouldDestroy)
 		{
 			Factory<StatusEffect>::Destroy(&s);
 		}
@@ -559,6 +566,22 @@ void Level01::VFixedUpdate(double milliseconds)
 	UpdateGameState(milliseconds);
 }
 
+void Level01::SetReady(int clientID)
+{
+	Packet p(READY);
+	p.ClientID = clientID;
+	p.AsBool = !mUIManager.GetReadyState(p.ClientID);
+
+	mUIManager.SetReadyState(p.ClientID, p.AsBool);
+
+	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
+		mNetworkManager->mClient.SendData(&p);
+	}
+	else if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
+		mNetworkManager->mServer.SendToAll(&p);
+	}
+}
+
 void Level01::UpdateGameState(double milliseconds)
 {
 	GameState currentState = mGameState;
@@ -568,8 +591,23 @@ void Level01::UpdateGameState(double milliseconds)
 	switch (currentState)
 	{
 	case GAME_STATE_INITIAL:
-		// Check for ready status
-		currentState = GAME_STATE_CAPTURE_0;
+#ifdef _DEBUG
+		if (mInput->GetKeyDown(KEYCODE_F9))
+		{
+			for (int i = 0; i < MAX_PLAYERS; i++) {
+				SetReady(i);
+			}
+		}
+#endif
+		if (mInput->GetKeyDown(KEYCODE_SPACE))
+		{
+			SetReady(mNetworkManager->ID());
+		}
+
+		if (mUIManager.IsEveryoneReady()) {
+			currentState = GAME_STATE_CAPTURE_0;
+			mUIManager.BlockGame(false);
+		}
 		break;
 	case GAME_STATE_CAPTURE_0:
 	case GAME_STATE_CAPTURE_1:
@@ -654,7 +692,6 @@ void Level01::VRender()
 #endif
 	
 	RenderDoors();
-	RenderEffects();
 	RenderExplorers();
 	RenderMinions();
 	RenderSpotLightVolumes();
@@ -671,23 +708,40 @@ void Level01::VRender()
 #else
 	RenderFullScreenQuad();
 #endif
+	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, mNullSRV);
 
+	RenderEffects();
+	
 	mSpriteManager->NewFrame();
 	RenderHealthBars();
-	mSkillBar.RenderPanel();
-	if (mNetworkManager->mMode == NetworkManager::SERVER) mSkillBar.RenderManaBar();
-	mSkillBar.RenderObjectives(mGameState, mNetworkManager->mMode == NetworkManager::SERVER);
-	if (mGameState == GAME_STATE_FINAL_GHOST_WIN) mSkillBar.RenderEndScreen(true);
-	if (mGameState == GAME_STATE_FINAL_EXPLORERS_WIN) mSkillBar.RenderEndScreen(false);
+	mUIManager.RenderPanel();
+	if (mNetworkManager->mMode == NetworkManager::SERVER) mUIManager.RenderManaBar();
+	mUIManager.RenderObjectives(mGameState, mNetworkManager->mMode == NetworkManager::SERVER);
+	
+	switch (mGameState)
+	{
+	case GAME_STATE_FINAL_GHOST_WIN:
+		mUIManager.RenderEndScreen(true);
+		break;
+	case GAME_STATE_FINAL_EXPLORERS_WIN:
+		mUIManager.RenderEndScreen(false);
+		break;
+	case GAME_STATE_INITIAL:
+		mUIManager.RenderReadyScreen(mNetworkManager->ID());
+		break;
+	default:
+		break;
+	}
 
-	RenderIMGUI(); 
+	RenderIMGUI();
 	RenderSprites();
 
-	mRenderer->GetDeviceContext()->PSSetShaderResources(0, 4, mNullSRV);
 
 #ifdef _DEBUG
 	if (gDebugGrid) RenderGrid();
 	RENDER_TRACE();
+	TRACE_WATCH("Mode", mNetworkManager->mMode);
+	TRACE_WATCH("ID", mNetworkManager->ID());
 #endif
 
 	mRenderer->VSwapBuffers();
@@ -866,16 +920,31 @@ void Level01::RenderDoors()
 
 void Level01::RenderEffects()
 {
-	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	float color[4] = { 1.0f, 1.0f, 1.0f, 0.7f };
 
-	mRenderer->VSetPixelShader(mApplication->mPSDefAnimatedMaterial);
+	// Use the default context with depth buffer from the g-buffer pass.
+	
+	mRenderer->VSetContextTargetWithDepth(mGBufferContext, 0);
+
+	mRenderer->VSetInputLayout(mApplication->mVSFwdSingleMaterial);
+	mRenderer->VSetVertexShader(mApplication->mVSFwdSingleMaterial);
+	mRenderer->VSetPixelShader(mApplication->mPSFwdSingleMaterial);
+
 	mRenderer->SetBlendState(mPLVShaderResource, 0, color, 0xffffffff);
-	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 4, 0);
+	mRenderer->VSetPixelShaderResourceView(mGBufferContext, 2, 0);
 	mRenderer->VBindMesh(mSphereMesh);
 		
-	mTime.rate = 1.0f;
+	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
+	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+
+	mTime.color = { 0.1f, 0.1f, 0.1f, 1.0f };
+	mTime.cameraPosition = mCameraManager->GetOrigin();
 	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
 	mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 2, 0);
+
+	//mTime.rate = 1.0f;
+	//mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
+	//mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 2, 0);
 
 	for (Heal& heal : Factory<Heal>())
 	{
@@ -886,9 +955,27 @@ void Level01::RenderEffects()
 		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
 	}
 
+	mTime.color = { 1.0f, 0.1f, 1.0f, 1.0f };
+
+	for (Trap& trap : Factory<Trap>())
+	{
+		if (!trap.mEffect->mIsActive)
+		{
+			continue;
+		}
+
+		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
+		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 2, 0);
+
+		mModel.world = trap.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
+	}
+
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
 }
-
 
 void Level01::RenderExplorers()
 {
@@ -917,6 +1004,23 @@ void Level01::RenderExplorers()
 		
 		mRenderer->VBindMesh(e.mModel->mMesh);
 		mRenderer->VDrawIndexed(0, e.mModel->mMesh->GetIndexCount());
+	}
+
+	IMesh* pTrapMesh = mModelManager->GetModel(kTrapModelName)->mMesh;
+	mRenderer->VBindMesh(pTrapMesh);
+	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 5, 0);
+
+	for (Trap& trap: Factory<Trap>())
+	{
+		mModel.world = trap.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		trap.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatrices);
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
+
+		mRenderer->VDrawIndexed(0, pTrapMesh->GetIndexCount());
 	}
 }
 
