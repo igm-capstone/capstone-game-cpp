@@ -211,6 +211,7 @@ void loadStaticMeshes(jarr_t objs, std::string model, vector<string>& textureNam
 					continue;
 				}
 
+				staticMesh->mColliderComponent->mCollider.halfSize.z = 7.5f; // Extending half extents so they behave more like walls. If not players get push on top of them.
 			}
 		}
 
