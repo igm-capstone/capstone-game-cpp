@@ -73,16 +73,17 @@ Ghost::~Ghost()
 void Ghost::Spawn(BaseScene* scene)
 {
 	mNetworkID->mIsActive = true;
+	mNetworkID->mHasAuthority = true;
 	mNetworkID->mUUID = -1;
 
 	auto level = scene->mLevel;
 	mCameraManager->MoveCamera(level.center, level.center + vec3f(0.0f, 0.0f, -85.5f));
 
-	mSkillBar = &scene->mSkillBar;
-	mSkillBar->AddSkill(mSkills[1], SPRITESHEET_GHOST_ICONS, 0, 0);
-	mSkillBar->AddSkill(mSkills[2], SPRITESHEET_GHOST_ICONS, 1, 1);
-	mSkillBar->AddSkill(mSkills[3], SPRITESHEET_GHOST_ICONS, 5, 2);
-	mSkillBar->AddSkill(mSkills[4], SPRITESHEET_GHOST_ICONS, 4, 9);
+	mUIManager = &scene->mUIManager;
+	mUIManager->AddSkill(mSkills[1], SPRITESHEET_GHOST_ICONS, 0, 0);
+	mUIManager->AddSkill(mSkills[2], SPRITESHEET_GHOST_ICONS, 1, 1);
+	mUIManager->AddSkill(mSkills[3], SPRITESHEET_GHOST_ICONS, 5, 2);
+	mUIManager->AddSkill(mSkills[4], SPRITESHEET_GHOST_ICONS, 4, 9);
 	SetActiveSkill(1);
 }
 
@@ -155,7 +156,7 @@ bool Ghost::DoMouseClick(BaseSceneObject* obj, float duration, BaseSceneObject* 
 void Ghost::SetActiveSkill(int skillNum)
 {
 	mActiveSkill = skillNum;
-	mSkillBar->SetActive(mSkills[mActiveSkill]);
+	mUIManager->SetActiveSkill(mSkills[mActiveSkill]);
 }
 
 void Ghost::TickMana(float milliseconds)

@@ -2,7 +2,12 @@
 #include "SceneObjects\BaseSceneObject.h"
 #include <Components/AnimationController.h>
 
-int GetExplorerID(class Explorer* explorer);
+enum ExplorerType //Spawn Order
+{
+	TRAPMASTER = 1,
+	HEALER,
+	SPRINTER
+};
 
 class Explorer : public BaseSceneObject
 {
@@ -33,6 +38,8 @@ private:
 private:
 	Explorer();
 	~Explorer();
+
+	ExplorerType GetExplorerID() { return static_cast<ExplorerType>(mNetworkClient->mID); }
 
 public:
 	void Spawn(vec3f pos, int UUID);

@@ -8,6 +8,7 @@
 #include <SceneObjects/Heal.h>
 #include <SceneObjects/Trap.h>
 #include <SceneObjects/StatusEffect.h>
+#include <ScareTacticsApplication.h>
 
 NetworkManager::NetworkManager()
 {
@@ -98,6 +99,15 @@ void NetworkCmd::SpawnNewExplorer(int clientID) {
 		p.UUID = exp.mNetworkID->mUUID;
 		p.AsTransform.Position = exp.mTransform->GetPosition();
 		mNetworkManager->mServer.Send(clientID, &p);
+	}
+
+	auto ui = &Application::SharedInstance().GetCurrentScene()->mUIManager;
+	for (int i = 0; i < MAX_PLAYERS; i++)
+	{
+		Packet p3(READY);
+		p3.ClientID = i;
+		p3.AsBool = ui->GetReadyState(i);
+		mNetworkManager->mServer.Send(clientID, &p3);
 	}
 }
 
@@ -255,4 +265,9 @@ void NetworkRpc::Interact(int UUID)
 			netID.OnInteract();
 		}
 	}
+}
+
+void NetworkRpc::Ready(unsigned clientID, bool isReady)
+{
+	Application::SharedInstance().GetCurrentScene()->mUIManager.SetReadyState(clientID, isReady);
 }

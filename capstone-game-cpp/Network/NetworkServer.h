@@ -19,7 +19,6 @@ private:
 	char mNetworkData[MAX_DATA_SIZE];
 	char mPacketData[sizeof(Packet)];
 
-	unsigned int mClientID = 0;
 	std::map<unsigned int, SOCKET> mClientList;
 
 public:

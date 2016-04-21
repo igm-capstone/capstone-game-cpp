@@ -15,11 +15,6 @@
 #define SLOW_SKILL_INDEX	2
 #include "Minion.h"
 
-int GetExplorerID(Explorer* explorer)
-{
-	return explorer->mNetworkID->mUUID - 1;
-}
-
 Explorer::Explorer()
 {
 	mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
@@ -94,20 +89,20 @@ Explorer::~Explorer()
 
 	// Skills
 	Factory<Skill>::Destroy(mSkills[MELEE_SKILL_INDEX]);
-	switch (GetExplorerID(this))
+	switch (GetExplorerID())
 	{
-	case 0:
+	case HEALER:
 	{
 		Factory<Skill>::Destroy(mSkills[HEAL_SKILL_INDEX]);
 		break;
 	}
-	case 1:
+	case TRAPMASTER:
 	{
 		Factory<Skill>::Destroy(mSkills[POISON_SKILL_INDEX]);
 		Factory<Skill>::Destroy(mSkills[SLOW_SKILL_INDEX]);
 		break;
 	}
-	case 2:
+	case SPRINTER:
 	default:
 	{
 		Factory<Skill>::Destroy(mSkills[SPRINT_SKILL_INDEX]);
@@ -190,9 +185,9 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	e->mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = e;
 
 	// Add more as we get more classes.
-	switch (GetExplorerID(e))
+	switch (e->GetExplorerID())
 	{
-	case 1:
+	case HEALER:
 	{
 		auto heal = Factory<Skill>::Create();
 		heal->SetBinding(SkillBinding().Set(KEYCODE_Q));
@@ -206,13 +201,13 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		melee->mSceneObject = e;
 		e->mSkills[MELEE_SKILL_INDEX] = melee;
 
-		SkillBar* mSkillBar = &Application::SharedInstance().GetCurrentScene()->mSkillBar;
-		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
-		mSkillBar->AddSkill(e->mSkills[HEAL_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 0, 6);
+		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
+		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
+		mUIManager->AddSkill(e->mSkills[HEAL_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 0, 6);
 
 		break;
 	}
-	case 0:
+	case TRAPMASTER:
 	{
 		auto poison = Factory<Skill>::Create();
 		poison->SetBinding(SkillBinding().Set(KEYCODE_Q));
@@ -232,14 +227,14 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		melee->mSceneObject = e;
 		e->mSkills[MELEE_SKILL_INDEX] = melee;
 
-		SkillBar* mSkillBar = &Application::SharedInstance().GetCurrentScene()->mSkillBar;
-		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
-		mSkillBar->AddSkill(e->mSkills[POISON_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 2, 6);
-		mSkillBar->AddSkill(e->mSkills[SLOW_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 4, 4);
+		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
+		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
+		mUIManager->AddSkill(e->mSkills[POISON_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 2, 6);
+		mUIManager->AddSkill(e->mSkills[SLOW_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 4, 4);
 
 		break;
 	}
-	case 2:
+	case SPRINTER:
 	default:
 	{
 		auto sprint = Factory<Skill>::Create();
@@ -254,9 +249,9 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		melee->mSceneObject = e;
 		e->mSkills[MELEE_SKILL_INDEX] = melee;
 
-		SkillBar* mSkillBar = &Application::SharedInstance().GetCurrentScene()->mSkillBar;
-		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
-		mSkillBar->AddSkill(e->mSkills[SPRINT_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 1, 6);
+		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
+		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
+		mUIManager->AddSkill(e->mSkills[SPRINT_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 1, 6);
 
 		break;
 	}
@@ -387,10 +382,11 @@ void Explorer::UpdateComponents(quatf rotation, vec3f position)
 	mInteractionCollider->mCollider.origin = mCollider->mCollider.origin;
 	
 	// Add more cases as we add explorer types
-	switch (GetExplorerID(this))
+	switch (GetExplorerID())
 	{
-	case 0:
-	default:
+	case TRAPMASTER:
+	case HEALER:
+	case SPRINTER:
 	{
 		if (mMeleeColliderComponent.asBaseColliderComponent)
 		{

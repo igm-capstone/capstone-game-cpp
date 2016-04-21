@@ -14,7 +14,7 @@ public:
 
 private:
 	class CameraManager*		mCameraManager;
-	class SkillBar*				mSkillBar;
+	class UIManager*			mUIManager;
 	int							mActiveSkill;
 	float						mMana;
 	const float					mMaxMana = GHOST_MANA_MAX;

@@ -162,7 +162,7 @@
     <ClCompile Include="Scenes\MainMenuScene.cpp" />
     <ClCompile Include="SkeletalHierarchy.cpp" />
     <ClCompile Include="SceneObjects\Trap.cpp" />
-    <ClCompile Include="UI\SkillBar.cpp" />
+    <ClCompile Include="UI\UIManager.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -255,7 +255,7 @@
     <ClInclude Include="Scenes\MainMenuScene.h" />
     <ClInclude Include="SkeletalHierarchy.h" />
     <ClInclude Include="SceneObjects\Trap.h" />
-    <ClInclude Include="UI\SkillBar.h" />
+    <ClInclude Include="UI\UIManager.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TargetFollower.h" />
     <ClInclude Include="trace.h" />

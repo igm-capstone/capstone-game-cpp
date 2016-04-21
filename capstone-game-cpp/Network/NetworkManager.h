@@ -53,6 +53,7 @@ public:
 	static void SyncHealth(int UUID, float val);
 	static void SyncAnimation(int UUID, byte state, byte command);
 	static void Interact(int UUID);
+	static void Ready(unsigned clientID, bool isReady);
 };
 
 
