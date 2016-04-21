@@ -167,6 +167,13 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 
 		gRenderer->VDrawIndexed(0, gSphereMesh->GetIndexCount());
 
+		c = s.mInteractionCollider;
+		model->world = (mat4f::scale(c->mCollider.radius) * mat4f::translate(c->mCollider.origin)).transpose();
+		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
+		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
+
+		gRenderer->VDrawIndexed(0, gSphereMesh->GetIndexCount());
+
 		if (s.mMeleeColliderComponent.asSphereColliderComponent)
 		{
 			c = s.mMeleeColliderComponent.asSphereColliderComponent;

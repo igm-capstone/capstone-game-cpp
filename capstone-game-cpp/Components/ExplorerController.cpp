@@ -4,6 +4,7 @@
 #include <Colors.h>
 #include <SceneObjects/Explorer.h>
 #include <Components/AnimationUtility.h>
+#include "Health.h"
 
 using namespace cliqCity::graphicsMath;
 
@@ -41,8 +42,8 @@ bool ExplorerController::Move(float dt, vec3f& pos)
 	}
 
 	// vertical and horizontal speed components
-	float hSpeed = (mInput->GetKey(KEYCODE_LEFT) ? -1.0f : 0.0f) + (mInput->GetKey(KEYCODE_RIGHT) ? 1.0f : 0.0f);
-	float vSpeed = (mInput->GetKey(KEYCODE_DOWN) ? -1.0f : 0.0f) + (mInput->GetKey(KEYCODE_UP) ? 1.0f : 0.0f);
+	float hSpeed = (mInput->GetKey(KEYCODE_A) ? -1.0f : 0.0f) + (mInput->GetKey(KEYCODE_D) ? 1.0f : 0.0f);
+	float vSpeed = (mInput->GetKey(KEYCODE_S) ? -1.0f : 0.0f) + (mInput->GetKey(KEYCODE_W) ? 1.0f : 0.0f);
 
 	bool wantToMove = hSpeed || vSpeed;
 
@@ -114,11 +115,11 @@ bool ExplorerController::UpdateRotation(float angle, quatf& rot) {
 
 void ExplorerController::UpdateInteractWill()
 {
-	if (mInput->GetKeyDown(KEYCODE_E) || mInput->GetKeyDown(KEYCODE_OEM_PERIOD))
+	if (mInput->GetKeyDown(KEYCODE_SPACE) || mInput->GetKeyDown(KEYCODE_OEM_PERIOD))
 	{
 		mIsInteracting = true;
 	}
-	else if (mInput->GetKeyUp(KEYCODE_E) || mInput->GetKeyUp(KEYCODE_OEM_PERIOD))
+	else if (mInput->GetKeyUp(KEYCODE_SPACE) || mInput->GetKeyUp(KEYCODE_OEM_PERIOD))
 	{
 		mIsInteracting = false;
 	}
@@ -133,6 +134,12 @@ void ExplorerController::ConsumeInteractWill()
 bool ExplorerController::Update(double milliseconds)
 {
 	if (!mIsActive) return false;
+
+	Explorer* pExplorer = reinterpret_cast<Explorer*>(mSceneObject);
+	if (pExplorer->mHealth->GetHealth() <= 0)
+	{
+		return false;
+	}
 
 	// delta time in seconds
 	float dt = float(milliseconds) * 0.001f;

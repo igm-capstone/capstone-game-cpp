@@ -35,12 +35,17 @@ Explorer::Explorer()
 	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
 	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
 	mAnimationController->RegisterCommandExecutedCallback(&OnAnimationCommandExecuted);
+	
+	SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gSprinterAnimations[Animations::SPRINTER_IDLE], nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_RUN, &gSprinterAnimations[Animations::SPRINTER_RUN], nullptr, 0, true);
 
 	Animation melee = gSprinterAnimations[Animations::SPRINTER_ATTACK];
 	KeyframeOption meleeOptions[] = { { melee.startFrameIndex, OnMeleeStart },{ melee.endFrameIndex, OnMeleeStop } };
-	SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gSprinterAnimations[Animations::SPRINTER_IDLE], nullptr, 0, true);
-	SetStateAnimation(mAnimationController, ANIM_STATE_RUN, &gSprinterAnimations[Animations::SPRINTER_RUN], nullptr, 0, true);
 	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gSprinterAnimations[Animations::SPRINTER_ATTACK], meleeOptions, 2, false);
+
+	/*Animation revive = gSprinterAnimations[Animations::SPRINTER_REVIVE];
+	KeyframeOption reviveOptions[] = { { revive.startFrameIndex, OnMeleeStart },{ revive.endFrameIndex, OnMeleeStop } };
+	SetStateAnimation(mAnimationController, ANIM_STATE_REVIVE, &gSprinterAnimations[Animations::SPRINTER_REVIVE], reviveOptions, 2, false);*/
 
 	mController = Factory<ExplorerController>::Create();
 	mController->mSceneObject = this;
@@ -57,11 +62,22 @@ Explorer::Explorer()
 	mCollider->mLayer = COLLISION_LAYER_EXPLORER;
 	mCollider->mOffset = { 0.0f, 2.5f, 0.0f };
 	mCollider->RegisterCollisionExitCallback(&OnCollisionExit);
+	
+	mInteractionCollider = Factory<SphereColliderComponent>::Create();
+	mInteractionCollider->mCollider.radius = 2.0f;
+	mInteractionCollider->mIsDynamic = true;
+	mInteractionCollider->mSceneObject = this;
+	mInteractionCollider->mIsActive = false;
+	mInteractionCollider->mIsTrigger = true;
+	mInteractionCollider->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
+	mInteractionCollider->RegisterTriggerStayCallback(&OnTriggerStay);
 
 	mHealth = Factory<Health>::Create();
 	mHealth->mSceneObject = this;
 	mHealth->SetMaxHealth(1000.0f);
 	mHealth->RegisterHealthChangeCallback(OnHealthChange);
+	mHealth->RegisterHealthToZeroCallback(OnDeath);
+	mHealth->RegisterHealthFromZeroCallback(OnRevive);
 }
 Explorer::~Explorer()
 {
@@ -174,7 +190,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	case HEALER:
 	{
 		auto heal = Factory<Skill>::Create();
-		heal->SetBinding(SkillBinding().Set(KEYCODE_A));
+		heal->SetBinding(SkillBinding().Set(KEYCODE_Q));
 		heal->Setup("Heal", 2, 1, DoHeal);
 		heal->mSceneObject = e;
 		e->mSkills[HEAL_SKILL_INDEX] = heal;
@@ -194,13 +210,13 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	case TRAPMASTER:
 	{
 		auto poison = Factory<Skill>::Create();
-		poison->SetBinding(SkillBinding().Set(KEYCODE_A));
+		poison->SetBinding(SkillBinding().Set(KEYCODE_Q));
 		poison->Setup("Poison Trap", 2.0f, 5.0f, DoPoison);
 		poison->mSceneObject = e;
 		e->mSkills[POISON_SKILL_INDEX] = poison;
 
 		auto slow = Factory<Skill>::Create();
-		slow->SetBinding(SkillBinding().Set(KEYCODE_D));
+		slow->SetBinding(SkillBinding().Set(KEYCODE_E));
 		slow->Setup("Glue Trap", 2, 1, DoSlow);
 		slow->mSceneObject = e;
 		e->mSkills[SLOW_SKILL_INDEX] = slow;
@@ -222,7 +238,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	default:
 	{
 		auto sprint = Factory<Skill>::Create();
-		sprint->SetBinding(SkillBinding().Set(KEYCODE_A));
+		sprint->SetBinding(SkillBinding().Set(KEYCODE_Q));
 		sprint->Setup("Sprint", 2, 1, DoSprint);
 		sprint->mSceneObject = e;
 		e->mSkills[SPRINT_SKILL_INDEX] = sprint;
@@ -260,7 +276,6 @@ void Explorer::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newR
 			ai.SetGridDirty(true);
 		}
 	}
-
 }
 
 void Explorer::OnNetHealthChange(BaseSceneObject* obj, float newVal)
@@ -315,6 +330,23 @@ void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal, bool checkAuth
 	}
 }
 
+void Explorer::OnDeath(BaseSceneObject* obj)
+{
+	TRACE_LOG("DIED");
+	Explorer* pExplorer = reinterpret_cast<Explorer*>(obj);
+	pExplorer->mInteractionCollider->mIsActive = true;
+	pExplorer->mCollider->mIsDynamic = false;
+}
+
+void Explorer::OnRevive(BaseSceneObject* obj)
+{
+	TRACE_LOG("REVIVED");
+	Explorer* pExplorer = reinterpret_cast<Explorer*>(obj);
+	pExplorer->mInteractionCollider->mIsActive = false;
+	pExplorer->mCollider->mIsDynamic = true;
+
+}
+
 void Explorer::OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other)
 {
 	other->Is<Explorer>();
@@ -324,9 +356,30 @@ void Explorer::OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other)
 	}
 }
 
+void Explorer::OnTriggerStay(BaseSceneObject* obj, BaseSceneObject* other)
+{
+	// We don't want to receive this msg for our base collider.
+	if (obj == other) 
+	{
+		return;
+	}
+
+	if (other->Is<Explorer>())
+	{
+		Explorer* pOtherExplorer = reinterpret_cast<Explorer*>(other);
+		if (pOtherExplorer->mController->mIsInteracting)
+		{
+			Explorer* pThisExplorer = reinterpret_cast<Explorer*>(obj);
+			pThisExplorer->mHealth->SetHealth(pThisExplorer->mHealth->GetMaxHealth() * 0.3f, false);
+			pOtherExplorer->mController->ConsumeInteractWill();
+		}
+	}
+}
+
 void Explorer::UpdateComponents(quatf rotation, vec3f position)
 {
 	mCollider->mCollider.origin = position + (rotation * mCollider->mOffset);
+	mInteractionCollider->mCollider.origin = mCollider->mCollider.origin;
 	
 	// Add more cases as we add explorer types
 	switch (GetExplorerID())
@@ -433,8 +486,9 @@ void Explorer::OnMeleeHit(BaseSceneObject* self, BaseSceneObject* other)
 	}
 	else if (other->Is<Explorer>())
 	{
-		// Check Friendly Fire
-		auto e = reinterpret_cast<Explorer*>(other);
-		e->mHealth->TakeDamage(100.0f, false);
+
+		// Check Friendly Fire or haunt state of explorer.
+		//	auto e = reinterpret_cast<Explorer*>(other);
+		//	e->mHealth->TakeDamage(100.0f, false);
 	}
 }
