@@ -65,7 +65,7 @@ void SkillBar::RenderManaBar()
 {
 	auto posYPerc = 0.95f;
 	for each (Ghost& ghost in Factory<Ghost>()) {
-		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 2, mSpriteManager->perc2f(0.5f, posYPerc), vec2f(450, 56), vec4f(1, 1, 1, 1), vec2f(ghost.GetManaPerc(), 1));
+		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 2, mSpriteManager->perc2f(0.5f, posYPerc), vec2f(410, 56), vec4f(1, 1, 1, 1), vec2f(ghost.GetManaPerc(), 1));
 		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 0, mSpriteManager->perc2f(0.5f, posYPerc), vec2f(450, 56));
 	}
 }
