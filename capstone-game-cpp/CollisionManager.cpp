@@ -486,10 +486,12 @@ void CollisionManager::DetectCollisions()
 			return other.parentIndex == parentIndex;
 		});
 	
+		SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
 		vec3f position = pNode->object->mSceneObject->mTransform->GetPosition();
 		
 		Ray<vec3f> ray;
 		ray.origin = position;
+		ray.origin.z -= pSphereComponent->mCollider.radius;
 		ray.normal = { 0.0f, 0.0f, 1.0f };
 
 		for (uint32_t nIdx : colliderIndices)
@@ -501,7 +503,6 @@ void CollisionManager::DetectCollisions()
 
 			if (IntersectRayOBB(ray, pRegion->mColliderComponent->mCollider, poi, t))
 			{
-				SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
 				
 				position.z = poi.z;
 				pSphereComponent->mSceneObject->mTransform->SetPosition(position);

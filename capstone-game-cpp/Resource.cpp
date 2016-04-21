@@ -206,6 +206,11 @@ void loadStaticMeshes(jarr_t objs, std::string model, vector<string>& textureNam
 			if (!extents.empty())
 			{
 				staticMesh->mColliderComponent->mCollider.halfSize = parseVec3f(extents);
+				if (staticMesh->mModel->mName == kStaticMeshModelNames[STATIC_MESH_WALL_LANTERN])
+				{
+					continue;
+				}
+
 			}
 		}
 
