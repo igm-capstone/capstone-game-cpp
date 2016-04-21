@@ -503,7 +503,7 @@ void CollisionManager::DetectCollisions()
 			{
 				SphereColliderComponent* pSphereComponent = reinterpret_cast<SphereColliderComponent*>(pNode->object);
 				
-				position.z = poi.z - pSphereComponent->mCollider.radius;
+				position.z = poi.z;
 				pSphereComponent->mSceneObject->mTransform->SetPosition(position);
 				pNode->object->OnCollisionExit(pRegion);
 			}
