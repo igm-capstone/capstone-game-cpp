@@ -75,18 +75,18 @@ Explorer::~Explorer()
 	Factory<Skill>::Destroy(mSkills[MELEE_SKILL_INDEX]);
 	switch (GetExplorerID())
 	{
-	case 0:
+	case HEALER:
 	{
 		Factory<Skill>::Destroy(mSkills[HEAL_SKILL_INDEX]);
 		break;
 	}
-	case 1:
+	case TRAPMASTER:
 	{
 		Factory<Skill>::Destroy(mSkills[POISON_SKILL_INDEX]);
 		Factory<Skill>::Destroy(mSkills[SLOW_SKILL_INDEX]);
 		break;
 	}
-	case 2:
+	case SPRINTER:
 	default:
 	{
 		Factory<Skill>::Destroy(mSkills[SPRINT_SKILL_INDEX]);
@@ -171,7 +171,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	// Add more as we get more classes.
 	switch (e->GetExplorerID())
 	{
-	case 1:
+	case HEALER:
 	{
 		auto heal = Factory<Skill>::Create();
 		heal->SetBinding(SkillBinding().Set(KEYCODE_A));
@@ -191,7 +191,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 
 		break;
 	}
-	case 0:
+	case TRAPMASTER:
 	{
 		auto poison = Factory<Skill>::Create();
 		poison->SetBinding(SkillBinding().Set(KEYCODE_A));
@@ -218,7 +218,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 
 		break;
 	}
-	case 2:
+	case SPRINTER:
 	default:
 	{
 		auto sprint = Factory<Skill>::Create();
@@ -331,8 +331,9 @@ void Explorer::UpdateComponents(quatf rotation, vec3f position)
 	// Add more cases as we add explorer types
 	switch (GetExplorerID())
 	{
-	case 0:
-	default:
+	case TRAPMASTER:
+	case HEALER:
+	case SPRINTER:
 	{
 		if (mMeleeColliderComponent.asBaseColliderComponent)
 		{
