@@ -138,6 +138,11 @@ void BVHTree::Update()
 		{
 			AddNodeRecursively(explorer.mMeleeColliderComponent.asBaseColliderComponent, SKILL_PARENT_LAYER_INDEX, 1, 0, 0);
 		}
+
+		if (explorer.mInteractionCollider->mIsActive)
+		{
+			AddNodeRecursively(explorer.mInteractionCollider, SKILL_PARENT_LAYER_INDEX, 1, 0, 0);
+		}
 	}
 
 	// Add Minion and minion skills.

@@ -19,6 +19,7 @@ public:
 	class ExplorerController*			mController;
 	class AnimationController*			mAnimationController;
 	class SphereColliderComponent*		mCollider;
+	class SphereColliderComponent*		mInteractionCollider;
 	class Skill*						mSkills[MAX_EXPLORER_SKILLS];
 	class Health*						mHealth;
 	class Node*							mCurrentNode;
@@ -48,6 +49,7 @@ public:
 	static void OnDeath(BaseSceneObject* obj);
 	static void OnRevive(BaseSceneObject* obj);
 	static void OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other);
+	static void OnTriggerStay(BaseSceneObject* obj, BaseSceneObject* other);
 
 	static bool DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
 	static bool DoMelee(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
