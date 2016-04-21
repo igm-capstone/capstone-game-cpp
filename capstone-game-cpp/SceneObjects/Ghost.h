@@ -1,5 +1,6 @@
 #pragma once
 #include "SceneObjects\BaseSceneObject.h"
+#include <json.h>
 
 class Ghost : public BaseSceneObject
 {
@@ -17,8 +18,10 @@ private:
 	class SkillBar*				mSkillBar;
 	int							mActiveSkill;
 	float						mMana;
-	const float					mMaxMana = GHOST_MANA_MAX;
-	const float					mManaRegenPerS = GHOST_MANA_REGEN;
+	float						mMaxMana;
+	float						mManaRegen[4];
+	float						mManaRegenFrequency;
+	int							mManaRegenLevel;
 
 private:
 	Ghost();

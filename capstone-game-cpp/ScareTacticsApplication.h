@@ -6,6 +6,7 @@
 #include <Rig3D/Graphics/Interface/IShader.h>
 #include "fmodwrap.h"
 #include "ModelManager.h"
+#include "json.h"
 
 using namespace Rig3D;
 
@@ -53,6 +54,7 @@ public:
 
 	void InitializeShaders();
 	void InitializeFMOD();
+	void LoadConfigFile();
 
 	template<class TScene>
 	void LoadScene()
@@ -73,8 +75,9 @@ public:
 	}
 
 	void UnloadScene();
-	BaseScene*	GetCurrentScene() const { return mCurrentScene; }
+	BaseScene*	    GetCurrentScene() const { return mCurrentScene; }
 	ModelManager*	GetModelManager() { return &mModelManager; }
+	nlohmann::json& GetConfigJson() { return mConfigJson; }
 
 private:
 	BaseScene*		mLoadingScreen;
@@ -88,6 +91,7 @@ private:
 	size_t			mStaticMemorySize;
 
 	ModelManager	mModelManager;
+	nlohmann::json  mConfigJson;
 
 	double mAcumTimer;
 };

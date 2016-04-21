@@ -28,6 +28,7 @@
 #include <Rig3D/Graphics/DirectX11/imgui/imgui.h>
 
 using namespace Rig3D;
+using namespace nlohmann;
 
 ScareTacticsApplication::ScareTacticsApplication() :
 	mCSGridPass1(nullptr),
@@ -67,7 +68,7 @@ ScareTacticsApplication::ScareTacticsApplication() :
 
 ScareTacticsApplication::~ScareTacticsApplication()
 {
-
+	
 }
 
 void ScareTacticsApplication::SetLoadingScreen(BaseScene* loading)
@@ -260,10 +261,18 @@ void ScareTacticsApplication::InitializeFMOD()
 	FMOD_CHECK(mStudio->loadBankFile("Assets/FMOD/Desktop/Minions.bank", FMOD_STUDIO_LOAD_BANK_NORMAL, &bank));
 }
 
+void ScareTacticsApplication::LoadConfigFile()
+{
+	ifstream file("Assets/config.json");
+	mConfigJson << file;
+	file.close();
+}
+
 void ScareTacticsApplication::VInitialize()
 {
 	InitializeShaders();
 	InitializeFMOD();
+	LoadConfigFile();
 
 	mLoadingScreen->VInitialize();
 }

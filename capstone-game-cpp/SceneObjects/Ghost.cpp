@@ -12,6 +12,32 @@
 
 //#include <CameraManager.h>
 
+using namespace nlohmann;
+using jarr_t = json::array_t;
+
+json findByName(jarr_t& array, string name)
+{
+	for (json& child : array)
+	{
+		if (child["name"] == name) {
+			return child;
+		}
+	}
+
+	return json();
+}
+
+Skill* createSkill(string skillName, Skill::UseCallback callback, json& skillConfig)
+{
+	auto cooldown = skillConfig["cooldown"].get<float>();
+	auto cost = skillConfig["cost"].get<float>();
+	
+	auto skill = Factory<Skill>::Create();
+	skill->Setup("Imp", cooldown, 0, callback, cost);
+
+	return skill;
+}
+
 Ghost::Ghost() : mNetworkID(nullptr)
 {
 	mNetworkID = Factory<NetworkID>::Create();
@@ -29,25 +55,25 @@ Ghost::Ghost() : mNetworkID(nullptr)
 
 	memset(mSkills, 0, sizeof(mSkills));
 
-	auto spawnMinion = Factory<Skill>::Create();
-	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Imp", 10, 0, DoSpawnImpMinion, 10);
-	mSkills[1] = spawnMinion;
+	json& config = Application::SharedInstance().GetConfigJson()["ghost"];
+	jarr_t skills = config["skills"].get<jarr_t>();
 
-	spawnMinion = Factory<Skill>::Create();
-	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Abomination", 20, 0, DoSpawnAbominationMinion, 20);
-	mSkills[2] = spawnMinion;
+	json impConfig = findByName(skills, "Basic Minion");
+	mSkills[1] = createSkill("Imp", DoSpawnImpMinion, impConfig);
+	mSkills[1]->mSceneObject = this;
 
-	spawnMinion = Factory<Skill>::Create();
-	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Flytrap", 10, 0, DoSpawnFlytrapMinion, 50);
-	mSkills[3] = spawnMinion;
+	json abominationConfig = findByName(skills, "AOE Bomber");
+	mSkills[2] = createSkill("Abomination", DoSpawnAbominationMinion, abominationConfig);
+	mSkills[2]->mSceneObject = this;
 
-	spawnMinion = Factory<Skill>::Create();
-	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Transmogrify", 40, 20, DoTransmogrify);
-	mSkills[4] = spawnMinion;
+	json flytrapConfig = findByName(skills, "Flytrap");
+	mSkills[3] = createSkill("Flytrap", DoSpawnFlytrapMinion, flytrapConfig);
+	mSkills[3]->mSceneObject = this;
+
+	json transmogrifyConfig = findByName(skills, "Haunt Explorer To Minion");
+	mSkills[4] = createSkill("Transmogrify", DoTransmogrify, transmogrifyConfig);
+	mSkills[4]->mSceneObject = this;
+	mSkills[4]->mDuration = transmogrifyConfig["duration"].get<float>();
 	
 	auto clickInteraction = Factory<Skill>::Create();
 	clickInteraction->mSceneObject = this;
@@ -55,6 +81,15 @@ Ghost::Ghost() : mNetworkID(nullptr)
 	clickInteraction->Setup("Left Click", 0, 0, DoMouseClick);
 	mSkills[0] = clickInteraction;
 
+	mMaxMana = config["baseEnergy"].get<float>();
+	mManaRegenFrequency = 1 / config["regenEnergyTick"].get<float>();
+	auto manaRegenArray = config["regenEnergy"].get<jarr_t>();
+	for (size_t i = 0; i < 4; i++)
+	{
+		mManaRegen[i] = manaRegenArray[i].get<float>();
+	}
+
+	mManaRegenLevel = 0;
 	mMana = mMaxMana;
 }
 
@@ -160,7 +195,7 @@ void Ghost::SetActiveSkill(int skillNum)
 
 void Ghost::TickMana(float milliseconds)
 {
-	mMana += mManaRegenPerS * (milliseconds / 1000);
+	mMana += mManaRegen[mManaRegenLevel] * mManaRegenFrequency * milliseconds * 0.001f;
 	if (mMana > mMaxMana) mMana = mMaxMana;
 	if (mMana < 0) mMana = 0;
 }
