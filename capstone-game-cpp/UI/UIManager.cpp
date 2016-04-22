@@ -114,6 +114,20 @@ void UIManager::RenderReadyScreen(int playerID)
 	BlockGame(true);
 
 	mSpriteManager->DrawSprite(SPRITESHEET_CONTROL_ICONS, 15, mSpriteManager->perc2f(0.5f, 0.5f), mSpriteManager->perc2f(1, 1), vec4f(0.7f, 0.7f, 0.7f, 0.5f));
+	
+	mSpriteManager->DrawSprite(SpriteSheetCode(SPRITESHEET_START_0+playerID), 0, mSpriteManager->perc2f(0.5f, 0.5f), mSpriteManager->perc2f(0.5f, 0.5f) * vec2f(1, 16.0f/11.0f));
+
+	mSpriteManager->DrawSprite(SPRITESHEET_GENERAL_ICONS, 0, mSpriteManager->perc2f(0.5f, 0.91f) + vec2f(-135, 0), vec2f(70, 70));
+	mSpriteManager->DrawSprite(SPRITESHEET_GENERAL_ICONS, 1, mSpriteManager->perc2f(0.5f, 0.91f) + vec2f(-45, 0), vec2f(70, 70));
+	mSpriteManager->DrawSprite(SPRITESHEET_GENERAL_ICONS, 2, mSpriteManager->perc2f(0.5f, 0.91f) + vec2f(+45, 0), vec2f(70, 70));
+	mSpriteManager->DrawSprite(SPRITESHEET_GENERAL_ICONS, 3, mSpriteManager->perc2f(0.5f, 0.91f) + vec2f(+135, 0), vec2f(70, 70));
+
+	mSpriteManager->DrawSprite(SPRITESHEET_GENERAL_ICONS, mReadyState[0] ? 4:5, mSpriteManager->perc2f(0.5f, 0.91f) + vec2f(-135, 0), vec2f(72, 72));
+	mSpriteManager->DrawSprite(SPRITESHEET_GENERAL_ICONS, mReadyState[1] ? 4:5, mSpriteManager->perc2f(0.5f, 0.91f) + vec2f( -45, 0), vec2f(72, 72));
+	mSpriteManager->DrawSprite(SPRITESHEET_GENERAL_ICONS, mReadyState[2] ? 4:5, mSpriteManager->perc2f(0.5f, 0.91f) + vec2f( +45, 0), vec2f(72, 72));
+	mSpriteManager->DrawSprite(SPRITESHEET_GENERAL_ICONS, mReadyState[3] ? 4:5, mSpriteManager->perc2f(0.5f, 0.91f) + vec2f(+135, 0), vec2f(72, 72));
+
+	mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 20, mSpriteManager->perc2f(0.5f, 0.84f), vec4f(0.1f, 0.1f, 0.1f, 1), ALIGN_CENTER, "Press SPACE when you are READY!");
 
 	TRACE_WATCH("0",mReadyState[0]);
 	TRACE_WATCH("1",mReadyState[1]);

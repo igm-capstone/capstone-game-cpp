@@ -17,6 +17,11 @@ void SpriteManager::Initialize(Rig3D::IMesh* spriteMesh, Rig3D::IShaderResource*
 	LoadSpriteSheet("Assets/UI/UI_playerIcons1024.png", 256, 256, 4, 4);
 	LoadSpriteSheet("Assets/UI/Panels.png", 1024, 256, 1, 4);
 	LoadSpriteSheet("Assets/UI/Keys.png", 96, 96, 8, 2);
+	LoadSpriteSheet("Assets/UI/Icons.png", 256, 256, 4, 4);
+	LoadSpriteSheet("Assets/UI/Start0.png", 1024, 1024, 1, 1);
+	LoadSpriteSheet("Assets/UI/Start1.png", 1024, 1024, 1, 1);
+	LoadSpriteSheet("Assets/UI/Start2.png", 1024, 1024, 1, 1);
+	LoadSpriteSheet("Assets/UI/Start3.png", 1024, 1024, 1, 1);
 }
 
 void SpriteManager::LoadSpriteSheet(const char* filename, int spriteWidth, int spriteHeight, int slicesX, int slicesY)

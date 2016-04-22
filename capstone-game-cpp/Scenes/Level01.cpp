@@ -554,6 +554,7 @@ void Level01::VUpdate(double milliseconds)
 	}
 #endif
 
+	UpdateGameState(milliseconds); //Input
 }
 
 void Level01::VFixedUpdate(double milliseconds)
@@ -562,8 +563,6 @@ void Level01::VFixedUpdate(double milliseconds)
 	mAIManager->Update();
 
 	mNetworkManager->Update();
-
-	UpdateGameState(milliseconds);
 }
 
 void Level01::SetReady(int clientID)
