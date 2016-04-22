@@ -739,8 +739,6 @@ void Level01::VRender()
 #ifdef _DEBUG
 	if (gDebugGrid) RenderGrid();
 	RENDER_TRACE();
-	TRACE_WATCH("Mode", mNetworkManager->mMode);
-	TRACE_WATCH("ID", mNetworkManager->ID());
 #endif
 
 	mRenderer->VSwapBuffers();

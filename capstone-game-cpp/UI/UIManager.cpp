@@ -128,11 +128,6 @@ void UIManager::RenderReadyScreen(int playerID)
 	mSpriteManager->DrawSprite(SPRITESHEET_GENERAL_ICONS, mReadyState[3] ? 4:5, mSpriteManager->perc2f(0.5f, 0.91f) + vec2f(+135, 0), vec2f(72, 72));
 
 	mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 20, mSpriteManager->perc2f(0.5f, 0.84f), vec4f(0.1f, 0.1f, 0.1f, 1), ALIGN_CENTER, "Press SPACE when you are READY!");
-
-	TRACE_WATCH("0",mReadyState[0]);
-	TRACE_WATCH("1",mReadyState[1]);
-	TRACE_WATCH("2",mReadyState[2]);
-	TRACE_WATCH("3",mReadyState[3]);
 }
 
 void UIManager::BlockGame(bool block)
