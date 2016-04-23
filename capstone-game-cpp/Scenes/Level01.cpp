@@ -31,6 +31,7 @@
 #include <Components/DominationPointController.h>
 #include <Components/ImpController.h>
 #include <Components/FlyTrapController.h>
+#include <Rig3D/TaskDispatch/TaskDispatcher.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -145,12 +146,30 @@ void Level01::VInitialize()
 	mState = BASE_SCENE_STATE_RUNNING;
 }
 
+std::mutex mutex;
+
+void PerformModelLoadTask(const cliqCity::multicore::TaskData& data)
+{
+	ModelManager* modelManager = reinterpret_cast<ModelManager*>(data.mStream.in[0]);
+	modelManager->LoadModel<GPU::Vertex3>(reinterpret_cast<char*>(data.mKernelData));
+}
+
 void Level01::InitializeAssets()
 {
+	uint8_t taskMemory[2048];
+	
+	cliqCity::multicore::Thread threads[4];
+	cliqCity::multicore::TaskData taskData[STATIC_MESH_MODEL_COUNT];
+	cliqCity::multicore::TaskDispatcher taskDispatcher(threads, 4, taskMemory, 2048);
+	taskDispatcher.Start();
+
 	// Pre-load models
 	for (int i = 0; i < STATIC_MESH_MODEL_COUNT; i++)
 	{
-		mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[i]);
+	//	mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[i]);
+		taskData[i].mKernelData = &kStaticMeshModelNames[i];
+		taskData[i].mStream.in[0] = mModelManager;
+		taskDispatcher.AddTask(taskData[i], PerformModelLoadTask);
 	}
 
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);

@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include <mutex>
 
 namespace Rig3D
 {
@@ -367,6 +368,9 @@ namespace Rig3D
 
 		template<template<typename> class BaseRenderer, class API, template<typename> class Resource, class Vertex>
 		void LoadMesh(IMesh** mesh, BaseRenderer<API>* renderer, Resource<Vertex>& resource);
+
+		template<template<typename> class BaseRenderer, class API, template<typename> class Resource, class Vertex>
+		void LoadMesh(IMesh** mesh, BaseRenderer<API>* renderer, Resource<Vertex>& resource, std::mutex& mutex);
 	};
 
 	template<class Allocator>
@@ -422,6 +426,19 @@ namespace Rig3D
 	void MeshLibrary<Allocator>::LoadMesh(IMesh** mesh, BaseRenderer<API>* renderer, Resource<Vertex>& resource)
 	{
 		resource.Load();
+
+		(renderer->GetGraphicsAPI() == GRAPHICS_API_DIRECTX11) ? RIG_NEW(DX11Mesh, mAllocator, *mesh)() : RIG_NEW(DX11Mesh, mAllocator, *mesh)();
+		renderer->VSetStaticMeshVertexBuffer(*mesh, &resource.mVertices[0], sizeof(Vertex) * resource.mVertices.size(), sizeof(Vertex));
+		renderer->VSetStaticMeshIndexBuffer(*mesh, &resource.mIndices[0], resource.mIndices.size());
+	}
+
+	template<class Allocator>
+	template<template<typename> class BaseRenderer, class API, template<typename> class Resource, class Vertex>
+	void MeshLibrary<Allocator>::LoadMesh(IMesh** mesh, BaseRenderer<API>* renderer, Resource<Vertex>& resource, std::mutex& mutex)
+	{
+		resource.Load();
+
+		std::lock_guard<std::mutex> lock(mutex);
 
 		(renderer->GetGraphicsAPI() == GRAPHICS_API_DIRECTX11) ? RIG_NEW(DX11Mesh, mAllocator, *mesh)() : RIG_NEW(DX11Mesh, mAllocator, *mesh)();
 		renderer->VSetStaticMeshVertexBuffer(*mesh, &resource.mVertices[0], sizeof(Vertex) * resource.mVertices.size(), sizeof(Vertex));
