@@ -102,7 +102,6 @@
     <ClInclude Include="Culler.h" />
     <ClInclude Include="SceneObjects\DominationPoint.h" />
     <ClInclude Include="SceneObjects\Minion.h" />
-    <ClInclude Include="SceneObjects\Pickup.h" />
     <ClInclude Include="Components\ExplorerController.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="Components\NetworkID.h" />
@@ -111,7 +110,6 @@
     <ClInclude Include="SceneObjects\SpawnPoint.h" />
     <ClInclude Include="SceneObjects\LegacySceneObject.h" />
     <ClInclude Include="SceneObjects\Explorer.h" />
-    <ClInclude Include="SceneObjects\MoveableBlock.h" />
     <ClInclude Include="SceneObjects\Lamp.h" />
     <ClInclude Include="Scenes\BaseScene.h" />
     <ClInclude Include="Colors.h" />

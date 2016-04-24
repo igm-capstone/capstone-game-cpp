@@ -128,6 +128,7 @@ public:
 
 	static void Destroy(pointer object)
 	{
+		if (!object) return;
 		object->~ObjectType();
 		sAllocator.Free(object);
 		sCount -= 1;
@@ -168,3 +169,4 @@ public:
 	iterator end() { return Factory::EndIterator(); }
 };
 
+#define CLEAR_FACTORY(type) for each (auto& o in Factory<##type##>()) { Factory<##type##>::Destroy(&o); }
