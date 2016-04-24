@@ -449,6 +449,9 @@ void Level01::VUpdate(double milliseconds)
 	// Handle this first so we can destroy objects later.
 	mCollisionManager->Update(milliseconds);
 
+	// Handle this first so it can consume mouse events.
+	mUIManager.Update(milliseconds);
+
 	// TO DO: Possibly a Components Update method... if we move this code to application level.
 	for (ExplorerController& ec : Factory<ExplorerController>())
 	{
@@ -711,7 +714,6 @@ void Level01::VRender()
 
 	RenderEffects();
 	
-	mSpriteManager->NewFrame();
 	RenderHealthBars();
 	mUIManager.RenderPanel();
 	if (mNetworkManager->mMode == NetworkManager::SERVER) mUIManager.RenderManaBar();
@@ -1176,6 +1178,8 @@ void Level01::RenderSprites() {
 
 	mRenderer->VSetVertexShaderInstanceBuffer(mSpritesShaderResource, 1, 1);
 	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), mSpriteManager->GetGlyphInstanceBufferCount(), 0, 0, 0);
+
+	mSpriteManager->EndFrame();
 }
 
 void Level01::RenderGrid()
