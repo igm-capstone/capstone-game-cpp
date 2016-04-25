@@ -139,6 +139,7 @@
     <ClCompile Include="DebugRender.cpp" />
     <ClCompile Include="Factory.cpp" />
     <ClCompile Include="Components\FlyTrapController.cpp" />
+    <ClCompile Include="jsonUtils.cpp" />
     <ClCompile Include="SceneObjects\Door.cpp" />
     <ClCompile Include="SceneObjects\Heal.cpp" />
     <ClCompile Include="ModelManager.cpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="DebugRender.h" />
     <ClInclude Include="FBXResource.h" />
     <ClInclude Include="Components\FlyTrapController.h" />
+    <ClInclude Include="jsonUtils.h" />
     <ClInclude Include="SceneObjects\Heal.h" />
     <ClInclude Include="fmodwrap.h" />
     <ClInclude Include="Mathf.h" />
