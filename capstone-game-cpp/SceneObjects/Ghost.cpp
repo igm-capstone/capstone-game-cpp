@@ -9,25 +9,9 @@
 #include "Region.h"
 #include "Lamp.h"
 #include "Explorer.h"
+#include "jsonUtils.h"
 
-//#include <CameraManager.h>
-
-using namespace nlohmann;
-using jarr_t = json::array_t;
-
-json findByName(jarr_t& array, string name)
-{
-	for (json& child : array)
-	{
-		if (child["name"] == name) {
-			return child;
-		}
-	}
-
-	return json();
-}
-
-Skill* createSkill(const char* skillName, Skill::UseCallback callback, json& skillConfig)
+Skill* createGhostSkill(const char* skillName, Skill::UseCallback callback, json& skillConfig)
 {
 	auto cooldown = skillConfig["cooldown"].get<float>();
 	auto cost = skillConfig["cost"].get<float>();
@@ -59,25 +43,25 @@ Ghost::Ghost() : mNetworkID(nullptr)
 	jarr_t skills = config["skills"].get<jarr_t>();
 
 	json impConfig = findByName(skills, "Basic Minion");
-	mSkills[1] = createSkill("Imp", DoSpawnImpMinion, impConfig);
+	mSkills[1] = createGhostSkill("Imp", DoSpawnImpMinion, impConfig);
 	mSkills[1]->mSceneObject = this;
 
 	json abominationConfig = findByName(skills, "AOE Bomber");
-	mSkills[2] = createSkill("Abomination", DoSpawnAbominationMinion, abominationConfig);
+	mSkills[2] = createGhostSkill("Abomination", DoSpawnAbominationMinion, abominationConfig);
 	mSkills[2]->mSceneObject = this;
 
 	json flytrapConfig = findByName(skills, "Flytrap");
-	mSkills[3] = createSkill("Flytrap", DoSpawnFlytrapMinion, flytrapConfig);
+	mSkills[3] = createGhostSkill("Flytrap", DoSpawnFlytrapMinion, flytrapConfig);
 	mSkills[3]->mSceneObject = this;
 
 	json transmogrifyConfig = findByName(skills, "Haunt Explorer To Minion");
-	mSkills[4] = createSkill("Transmogrify", DoTransmogrify, transmogrifyConfig);
+	mSkills[4] = createGhostSkill("Transmogrify", DoTransmogrify, transmogrifyConfig);
 	mSkills[4]->mSceneObject = this;
 	mSkills[4]->mDuration = transmogrifyConfig["duration"].get<float>();
 	
 	auto clickInteraction = Factory<Skill>::Create();
 	clickInteraction->mSceneObject = this;
-	clickInteraction->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
+	clickInteraction->SetBinding(MOUSEBUTTON_LEFT);
 	clickInteraction->Setup("Left Click", 0, 0, DoMouseClick);
 	mSkills[0] = clickInteraction;
 

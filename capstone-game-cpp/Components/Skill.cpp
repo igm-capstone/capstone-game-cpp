@@ -6,6 +6,34 @@
 #include <RayCast.h>
 #include <Colors.h>
 
+SkillBinding::SkillBinding()
+{
+}
+
+SkillBinding::SkillBinding(SkillBinding& binding)
+{
+	mouseButton = binding.mouseButton;
+	bindingType = binding.bindingType;
+	gamepadButton = binding.gamepadButton;
+	keyCode = binding.keyCode;
+}
+
+
+SkillBinding::SkillBinding(MouseButton value)
+{
+	Set(value);
+}
+
+SkillBinding::SkillBinding(GamepadButton value)
+{
+	Set(value);
+}
+
+SkillBinding::SkillBinding(KeyCode value)
+{
+	Set(value);
+}
+
 SkillBinding& SkillBinding::Set(MouseButton value)
 {
 	bindingType = bindingType | MOUSE_BUTTON;
@@ -42,7 +70,7 @@ Skill::~Skill()
 {
 }
 
-void Skill::SetBinding(SkillBinding& binding)
+void Skill::SetBinding(SkillBinding binding)
 {
 	mBinding = binding;
 }

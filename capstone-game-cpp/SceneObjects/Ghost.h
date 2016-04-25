@@ -1,6 +1,5 @@
 #pragma once
 #include "SceneObjects\BaseSceneObject.h"
-#include <json.h>
 
 class Ghost : public BaseSceneObject
 {
