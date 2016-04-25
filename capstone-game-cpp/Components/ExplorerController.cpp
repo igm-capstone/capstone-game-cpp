@@ -8,6 +8,15 @@
 
 using namespace cliqCity::graphicsMath;
 
+#pragma region util
+
+inline quatf CalculateExplorerRotation(float angle)
+{
+	return normalize(quatf::angleAxis(angle, vec3f(0, 0, 1)) * quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0));
+}
+
+#pragma endregion 
+
 ExplorerController::ExplorerController() :
 	mInput((&Singleton<Engine>::SharedInstance())->GetInput()),
 	mApplication(&Application::SharedInstance()),
@@ -102,7 +111,7 @@ bool ExplorerController::RotateTowardsMousePosition(float dt, vec3f& pos, quatf&
 }
 
 bool ExplorerController::UpdateRotation(float angle, quatf& rot) {
-	quatf newRot = normalize(quatf::angleAxis(angle, vec3f(0, 0, 1)) * quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0));
+	quatf newRot = CalculateExplorerRotation(angle);
 
 	auto hasRotated = rot != newRot;
 	if (hasRotated && CanMove())
@@ -191,6 +200,18 @@ void ExplorerController::Sprint(float duration)
 
 void ExplorerController::Melee()
 {
+	vec3f position = mSceneObject->mTransform->GetPosition();
+	auto mousePosition = mCameraManager->Screen2WorldAt(mInput->mousePosition, position.z);
+	auto lastPos = mSceneObject->mTransform->GetPosition();
+	auto dir = normalize(mousePosition - lastPos);
+
+	if (magnitude(dir) > 0.001f) 
+	{
+		float targetAngle = atan2(dir.y, dir.x);
+		quatf rotation = CalculateExplorerRotation(targetAngle);
+		mSceneObject->mTransform->SetRotation(rotation);
+	}
+
 	PlayStateAnimation(ANIM_STATE_MELEE);
 }
 
