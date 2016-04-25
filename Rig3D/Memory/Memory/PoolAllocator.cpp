@@ -46,9 +46,15 @@ void PoolAllocator::SetMemory(void* start, void* end, size_t elementSize, size_t
 }
 
 void* PoolAllocator::Allocate()
-{
+{	
+	if (!mNext)
+	{
+		return nullptr;
+	}
+	
 	Node* head	= mNext;
-	mNext		= head->mNext;
+	mNext = head->mNext;
+	
 	return head;
 }
 

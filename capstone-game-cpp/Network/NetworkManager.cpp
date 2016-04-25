@@ -128,42 +128,57 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 	case SKILL_TYPE_HEAL:
 	{
 		auto h = Factory<Heal>::Create();
-		h->Spawn(pos, UUID, duration);
-		h->mNetworkID->mHasAuthority = true;
-		h->mNetworkID->OnNetAuthorityChange(true);
+		if (h)
+		{
+			h->Spawn(pos, UUID, duration);
+			h->mNetworkID->mHasAuthority = true;
+			h->mNetworkID->OnNetAuthorityChange(true);
+		}
 		break;
 	}
 	case SKILL_TYPE_POISON:
 	{
 		auto p = Factory<Trap>::Create();
-		p->SpawnPoison(UUID, pos, duration);
-		p->mNetworkID->mHasAuthority = true;
-		p->mNetworkID->OnNetAuthorityChange(true);
+		if (p)
+		{
+			p->SpawnPoison(UUID, pos, duration);
+			p->mNetworkID->mHasAuthority = true;
+			p->mNetworkID->OnNetAuthorityChange(true);
+		}
 		break;
 	}
 	case SKILL_TYPE_SLOW:
 	{
 		auto s = Factory<Trap>::Create();
-		s->SpawnSlow(UUID, pos, duration);
-		s->mNetworkID->mHasAuthority = true;
-		s->mNetworkID->OnNetAuthorityChange(true);
+		if (s)
+		{
+			s->SpawnSlow(UUID, pos, duration);
+			s->mNetworkID->mHasAuthority = true;
+			s->mNetworkID->OnNetAuthorityChange(true);
+		}
 		break;
 	}
 	case SKILL_TYPE_FLYTRAP_MINION:
 	{
 		auto f = Factory<Minion>::Create();
-		f->SpawnFlytrap(pos, UUID);
-		f->mNetworkID->mHasAuthority = true;
-		f->mNetworkID->OnNetAuthorityChange(true);
+		if (f)
+		{
+			f->SpawnFlytrap(pos, UUID);
+			f->mNetworkID->mHasAuthority = true;
+			f->mNetworkID->OnNetAuthorityChange(true);
+		}
 		break;
 	}
 	case SKILL_TYPE_IMP_MINION:
 	case SKILL_TYPE_ABOMINATION_MINION: // for now
 	{
 		auto m = Factory<Minion>::Create();
-		m->SpawnImp(pos, UUID);
-		m->mNetworkID->mHasAuthority = true;
-		m->mNetworkID->OnNetAuthorityChange(true);
+		if (m)
+		{
+			m->SpawnImp(pos, UUID);
+			m->mNetworkID->mHasAuthority = true;
+			m->mNetworkID->OnNetAuthorityChange(true);	
+		}
 		break;
 	}
 	case SKILL_TYPE_UNKNOWN:
@@ -188,32 +203,47 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 	case SKILL_TYPE_HEAL:
 	{
 		auto h = Factory<Heal>::Create();
-		h->Spawn(pos, UUID, duration);
+		if (h)
+		{
+			h->Spawn(pos, UUID, duration);
+		}
 		break;
 	}
 	case SKILL_TYPE_POISON:
 	{
 		auto p = Factory<Trap>::Create();
-		p->SpawnPoison(UUID, pos, duration);
+		if (p)
+		{
+			p->SpawnPoison(UUID, pos, duration);
+		}
 		break;
 	}
 	case SKILL_TYPE_SLOW:
 	{
 		auto s = Factory<Trap>::Create();
-		s->SpawnSlow(UUID, pos, duration);
+		if (s)
+		{
+			s->SpawnSlow(UUID, pos, duration);
+		}
 		break;
 	}
 	case SKILL_TYPE_FLYTRAP_MINION:
 	{
 		auto f = Factory<Minion>::Create();
-		f->SpawnFlytrap(pos, UUID);
+		if (f)
+		{
+			f->SpawnFlytrap(pos, UUID);
+		}
 		break;
 	}
 	case SKILL_TYPE_IMP_MINION:
 	case SKILL_TYPE_ABOMINATION_MINION:
 	{
 		auto m = Factory<Minion>::Create();
-		m->SpawnImp(pos, UUID);
+		if (m)
+		{
+			m->SpawnImp(pos, UUID);
+		}
 		break;
 	}
 	case SKILL_TYPE_UNKNOWN:

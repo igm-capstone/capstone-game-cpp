@@ -114,6 +114,11 @@ public:
 	static pointer Create()
 	{
 		auto ptr = reinterpret_cast<pointer>(sAllocator.Allocate());
+		if (!ptr)
+		{
+			return ptr;
+		}
+
 		sCount += 1;
 		auto ret = new (ptr) value_type();
 
