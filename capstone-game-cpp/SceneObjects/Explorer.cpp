@@ -7,17 +7,25 @@
 #include <Components/Health.h>
 #include <Components/Skill.h>
 #include <Components/AnimationUtility.h>
+#include "jsonUtils.h"
+#include "Minion.h"
 
 #define MELEE_SKILL_INDEX	0
 #define SPRINT_SKILL_INDEX	1
 #define HEAL_SKILL_INDEX	1
 #define POISON_SKILL_INDEX  1
 #define SLOW_SKILL_INDEX	2
-#include "Minion.h"
 
-int GetExplorerID(Explorer* explorer)
+Skill* createExplorerSkill(const char* skillName, Skill::UseCallback callback, SkillBinding binding, json& skillConfig)
 {
-	return explorer->mNetworkID->mUUID - 1;
+	auto cooldown = skillConfig["cooldown"].get<float>();
+	auto cost = skillConfig["cost"].get<float>();
+
+	auto skill = Factory<Skill>::Create();
+	skill->Setup(skillName, cooldown, 0, callback, cost);
+	skill->SetBinding(binding);
+
+	return skill;
 }
 
 Explorer::Explorer()
@@ -33,26 +41,24 @@ Explorer::Explorer()
 	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
 	mNetworkID->RegisterNetSyncAnimationCallback(&OnNetSyncAnimation);
 
-	Application::SharedInstance().GetModelManager()->GetModel(kMinionAnimModelName)->Link(this);
+	Application::SharedInstance().GetModelManager()->GetModel(kSprinterModelName)->Link(this);
 
 	mAnimationController = Factory<AnimationController>::Create();
 	mAnimationController->mSceneObject = this;
 	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
 	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
 	mAnimationController->RegisterCommandExecutedCallback(&OnAnimationCommandExecuted);
+	
+	SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gSprinterAnimations[Animations::SPRINTER_IDLE], nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_RUN, &gSprinterAnimations[Animations::SPRINTER_RUN], nullptr, 0, true);
 
-	Animation melee = gMinionAnimations[Animations::MINION_ATTACK];
-	KeyframeOption meleeOptions[] = { { melee.startFrameIndex, OnMeleeStart }, { melee.endFrameIndex, OnMeleeStop } };
-	SetStateAnimation(mAnimationController, ANIM_STATE_WALK,  &gMinionAnimations[Animations::MINION_WALK], nullptr, 0, true);
-	SetStateAnimation(mAnimationController, ANIM_STATE_RUN,   &gMinionAnimations[Animations::MINION_RUN], nullptr, 0, true);
-	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionAnimations[Animations::MINION_ATTACK], meleeOptions, 2, false);
-	SetRestFrameIndex(mAnimationController, gMinionRestFrameIndex);
+	Animation melee = gSprinterAnimations[Animations::SPRINTER_ATTACK];
+	KeyframeOption meleeOptions[] = { { melee.startFrameIndex, OnMeleeStart },{ melee.endFrameIndex, OnMeleeStop } };
+	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gSprinterAnimations[Animations::SPRINTER_ATTACK], meleeOptions, 2, false);
 
-	//Animation melee = gSprinterAnimations[Animations::SPRINTER_ATTACK];
-	//KeyframeOption meleeOptions[] = { { melee.startFrameIndex, OnMeleeStart },{ melee.endFrameIndex, OnMeleeStop } };
-	//SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gSprinterAnimations[Animations::SPRINTER_IDLE], nullptr, 0, true);
-	//SetStateAnimation(mAnimationController, ANIM_STATE_RUN, &gSprinterAnimations[Animations::SPRINTER_RUN], nullptr, 0, true);
-	//SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gSprinterAnimations[Animations::SPRINTER_ATTACK], meleeOptions, 2, false);
+	/*Animation revive = gSprinterAnimations[Animations::SPRINTER_REVIVE];
+	KeyframeOption reviveOptions[] = { { revive.startFrameIndex, OnMeleeStart },{ revive.endFrameIndex, OnMeleeStop } };
+	SetStateAnimation(mAnimationController, ANIM_STATE_REVIVE, &gSprinterAnimations[Animations::SPRINTER_REVIVE], reviveOptions, 2, false);*/
 
 	mController = Factory<ExplorerController>::Create();
 	mController->mSceneObject = this;
@@ -62,16 +68,29 @@ Explorer::Explorer()
 	mController->mAnimationController = mAnimationController;	// Be careful if you move this code. AnimationController should exist before here.
 
 	mCollider = Factory<SphereColliderComponent>::Create();
+	mCollider->mCollider.radius = 1.4f;
 	mCollider->mIsDynamic = true;
 	mCollider->mSceneObject = this;
 	mCollider->mIsActive = false;
 	mCollider->mLayer = COLLISION_LAYER_EXPLORER;
+	mCollider->mOffset = { 0.0f, 2.5f, 0.0f };
 	mCollider->RegisterCollisionExitCallback(&OnCollisionExit);
+	
+	mInteractionCollider = Factory<SphereColliderComponent>::Create();
+	mInteractionCollider->mCollider.radius = 2.0f;
+	mInteractionCollider->mIsDynamic = true;
+	mInteractionCollider->mSceneObject = this;
+	mInteractionCollider->mIsActive = false;
+	mInteractionCollider->mIsTrigger = true;
+	mInteractionCollider->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
+	mInteractionCollider->RegisterTriggerStayCallback(&OnTriggerStay);
 
 	mHealth = Factory<Health>::Create();
 	mHealth->mSceneObject = this;
 	mHealth->SetMaxHealth(1000.0f);
 	mHealth->RegisterHealthChangeCallback(OnHealthChange);
+	mHealth->RegisterHealthToZeroCallback(OnDeath);
+	mHealth->RegisterHealthFromZeroCallback(OnRevive);
 }
 Explorer::~Explorer()
 {
@@ -83,20 +102,20 @@ Explorer::~Explorer()
 
 	// Skills
 	Factory<Skill>::Destroy(mSkills[MELEE_SKILL_INDEX]);
-	switch (GetExplorerID(this))
+	switch (GetExplorerID())
 	{
-	case 0:
+	case HEALER:
 	{
 		Factory<Skill>::Destroy(mSkills[HEAL_SKILL_INDEX]);
 		break;
 	}
-	case 1:
+	case TRAPMASTER:
 	{
 		Factory<Skill>::Destroy(mSkills[POISON_SKILL_INDEX]);
 		Factory<Skill>::Destroy(mSkills[SLOW_SKILL_INDEX]);
 		break;
 	}
-	case 2:
+	case SPRINTER:
 	default:
 	{
 		Factory<Skill>::Destroy(mSkills[SPRINT_SKILL_INDEX]);
@@ -120,7 +139,7 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	mTransform->SetPosition(pos);		
 
 	mCollider->mIsActive = true;
-	mCollider->mCollider.origin = pos;
+	mCollider->mCollider.origin = pos + (mTransform->GetRotation() * mCollider->mOffset);
 
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
@@ -169,8 +188,8 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 
 	// Giving all explorers same melee collider for now.
 	e->mMeleeColliderComponent.asSphereColliderComponent = Factory<SphereColliderComponent>::Create();
-	e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 2.0f;
-	e->mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 0.0f, 2.75f };
+	e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius = 1.0f;
+	e->mMeleeColliderComponent.asSphereColliderComponent->mOffset = { 0.0f, 2.5f, e->mCollider->mCollider.radius + e->mMeleeColliderComponent.asSphereColliderComponent->mCollider.radius + 0.01f };
 	e->mMeleeColliderComponent.asSphereColliderComponent->mIsActive = false;
 	e->mMeleeColliderComponent.asSphereColliderComponent->mIsTrigger = true;
 	e->mMeleeColliderComponent.asSphereColliderComponent->mIsDynamic = false;
@@ -178,78 +197,83 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	e->mMeleeColliderComponent.asSphereColliderComponent->RegisterTriggerEnterCallback(&OnMeleeHit);
 	e->mMeleeColliderComponent.asBaseColliderComponent->mSceneObject = e;
 
+	jarr_t explorers = Application::SharedInstance().GetConfigJson()["explorers"].get<jarr_t>();
+
+	json config;
+	jarr_t skills;
+
 	// Add more as we get more classes.
-	switch (GetExplorerID(e))
+	switch (e->GetExplorerID())
 	{
-	case 0:
+	case HEALER:
 	{
-		auto heal = Factory<Skill>::Create();
-		heal->SetBinding(SkillBinding().Set(KEYCODE_A));
-		heal->Setup("Heal", 2, 1, DoHeal);
-		heal->mSceneObject = e;
-		e->mSkills[HEAL_SKILL_INDEX] = heal;
+		config = findByName(explorers, "LongAttackSupport");
+		skills = config["skills"].get<jarr_t>();
 
-		auto melee = Factory<Skill>::Create();
-		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
-		melee->Setup("Melee", 2, 1, DoMelee);
-		melee->mSceneObject = e;
-		e->mSkills[MELEE_SKILL_INDEX] = melee;
+		auto healConfig = findByName(skills, "Heal");
+		e->mSkills[HEAL_SKILL_INDEX] = createExplorerSkill("Heal", DoHeal, KEYCODE_Q, healConfig);
+		e->mSkills[HEAL_SKILL_INDEX]->mSceneObject = e;
 
-		SkillBar* mSkillBar = &Application::SharedInstance().GetCurrentScene()->mSkillBar;
-		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
-		mSkillBar->AddSkill(e->mSkills[HEAL_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 0, 6);
+		auto meleeConfig = findByName(skills, "LongAttack");
+		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill("Melee", DoMelee, MOUSEBUTTON_LEFT, meleeConfig);
+		e->mSkills[MELEE_SKILL_INDEX]->mSceneObject = e;
+
+		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
+		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
+		mUIManager->AddSkill(e->mSkills[HEAL_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 0, 6);
 
 		break;
 	}
-	case 1:
+	case TRAPMASTER:
 	{
+		config = findByName(explorers, "GrenadeTrapper");
+		skills = config["skills"].get<jarr_t>();
+
 		auto poison = Factory<Skill>::Create();
-		poison->SetBinding(SkillBinding().Set(KEYCODE_A));
-		poison->Setup("Poison Trap", 2, 1, DoPoison);
+		poison->SetBinding(SkillBinding().Set(KEYCODE_Q));
+		poison->Setup("Poison Trap", 2.0f, 5.0f, DoPoison);
 		poison->mSceneObject = e;
 		e->mSkills[POISON_SKILL_INDEX] = poison;
 
-		auto slow = Factory<Skill>::Create();
-		slow->SetBinding(SkillBinding().Set(KEYCODE_D));
-		slow->Setup("Glue Trap", 2, 1, DoSlow);
-		slow->mSceneObject = e;
-		e->mSkills[SLOW_SKILL_INDEX] = slow;
+		auto glueConfig = findByName(skills, "SetTrapGlue");
+		e->mSkills[SLOW_SKILL_INDEX] = createExplorerSkill("Glue Trap", DoSlow, KEYCODE_E, glueConfig);
+		e->mSkills[SLOW_SKILL_INDEX]->mSceneObject = e;
 
-		auto melee = Factory<Skill>::Create();
-		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
-		melee->Setup("Melee", 2, 1, DoMelee);
-		melee->mSceneObject = e;
-		e->mSkills[MELEE_SKILL_INDEX] = melee;
+		auto tossConfig = findByName(skills, "GrenadeToss");
+		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill("Grenade", DoMelee, MOUSEBUTTON_LEFT, tossConfig);
+		e->mSkills[MELEE_SKILL_INDEX]->mSceneObject = e;
 
-		SkillBar* mSkillBar = &Application::SharedInstance().GetCurrentScene()->mSkillBar;
-		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
-		mSkillBar->AddSkill(e->mSkills[POISON_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 2, 6);
-		mSkillBar->AddSkill(e->mSkills[SLOW_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 4, 4);
+		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
+		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
+		mUIManager->AddSkill(e->mSkills[POISON_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 2, 6);
+		mUIManager->AddSkill(e->mSkills[SLOW_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 4, 4);
 
 		break;
 	}
-	case 2:
+	case SPRINTER:
 	default:
 	{
-		auto sprint = Factory<Skill>::Create();
-		sprint->SetBinding(SkillBinding().Set(KEYCODE_A));
-		sprint->Setup("Sprint", 2, 1, DoSprint);
-		sprint->mSceneObject = e;
-		e->mSkills[SPRINT_SKILL_INDEX] = sprint;
+		config = findByName(explorers, "ConeSprinter");
+		skills = config["skills"].get<jarr_t>();
 
-		auto melee = Factory<Skill>::Create();
-		melee->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
-		melee->Setup("Melee", 2, 1, DoMelee);
-		melee->mSceneObject = e;
-		e->mSkills[MELEE_SKILL_INDEX] = melee;
+		auto sprintConfig = findByName(skills, "Sprint");
+		e->mSkills[SPRINT_SKILL_INDEX] = createExplorerSkill("Sprint", DoSprint, KEYCODE_Q, sprintConfig);
+		e->mSkills[SPRINT_SKILL_INDEX]->mSceneObject = e;
 
-		SkillBar* mSkillBar = &Application::SharedInstance().GetCurrentScene()->mSkillBar;
-		mSkillBar->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
-		mSkillBar->AddSkill(e->mSkills[SPRINT_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 1, 6);
+		auto meleeConfig = findByName(skills, "ConeAttack");
+		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill("Melee", DoMelee, MOUSEBUTTON_LEFT, meleeConfig);
+		e->mSkills[MELEE_SKILL_INDEX]->mSceneObject = e;
+
+		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
+		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
+		mUIManager->AddSkill(e->mSkills[SPRINT_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 1, 6);
 
 		break;
 	}
 	}
+
+	//e->mController->mSpeed = config["moveSpeed"].get<float>();
+	e->mHealth->SetMaxHealth(config["baseHealth"].get<float>());
 }
 
 void Explorer::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot)
@@ -270,7 +294,6 @@ void Explorer::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newR
 			ai.SetGridDirty(true);
 		}
 	}
-
 }
 
 void Explorer::OnNetHealthChange(BaseSceneObject* obj, float newVal)
@@ -313,8 +336,33 @@ void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal, bool checkAuth
 		Packet p(PacketTypes::SYNC_HEALTH);
 		p.UUID = e->mNetworkID->mUUID;
 		p.AsFloat = newVal;
-		e->mNetworkClient->SendData(&p);
+
+		if (Singleton<NetworkManager>::SharedInstance().mMode == NetworkManager::SERVER)
+		{
+			Singleton<NetworkManager>::SharedInstance().mServer.SendToAll(&p);
+		}
+		else
+		{
+			e->mNetworkClient->SendData(&p);
+		}
 	}
+}
+
+void Explorer::OnDeath(BaseSceneObject* obj)
+{
+	TRACE_LOG("DIED");
+	Explorer* pExplorer = reinterpret_cast<Explorer*>(obj);
+	pExplorer->mInteractionCollider->mIsActive = true;
+	pExplorer->mCollider->mIsDynamic = false;
+}
+
+void Explorer::OnRevive(BaseSceneObject* obj)
+{
+	TRACE_LOG("REVIVED");
+	Explorer* pExplorer = reinterpret_cast<Explorer*>(obj);
+	pExplorer->mInteractionCollider->mIsActive = false;
+	pExplorer->mCollider->mIsDynamic = true;
+
 }
 
 void Explorer::OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other)
@@ -326,15 +374,37 @@ void Explorer::OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other)
 	}
 }
 
+void Explorer::OnTriggerStay(BaseSceneObject* obj, BaseSceneObject* other)
+{
+	// We don't want to receive this msg for our base collider.
+	if (obj == other) 
+	{
+		return;
+	}
+
+	if (other->Is<Explorer>())
+	{
+		Explorer* pOtherExplorer = reinterpret_cast<Explorer*>(other);
+		if (pOtherExplorer->mController->mIsInteracting)
+		{
+			Explorer* pThisExplorer = reinterpret_cast<Explorer*>(obj);
+			pThisExplorer->mHealth->SetHealth(pThisExplorer->mHealth->GetMaxHealth() * 0.3f, false);
+			pOtherExplorer->mController->ConsumeInteractWill();
+		}
+	}
+}
+
 void Explorer::UpdateComponents(quatf rotation, vec3f position)
 {
-	mCollider->mCollider.origin = position;
+	mCollider->mCollider.origin = position + (rotation * mCollider->mOffset);
+	mInteractionCollider->mCollider.origin = mCollider->mCollider.origin;
 	
 	// Add more cases as we add explorer types
-	switch (GetExplorerID(this))
+	switch (GetExplorerID())
 	{
-	case 0:
-	default:
+	case TRAPMASTER:
+	case HEALER:
+	case SPRINTER:
 	{
 		if (mMeleeColliderComponent.asBaseColliderComponent)
 		{
@@ -365,7 +435,7 @@ bool Explorer::DoHeal(BaseSceneObject* obj, float duration, BaseSceneObject* tar
 	if (explorer->mNetworkID->mHasAuthority)
 	{
 		Packet p(PacketTypes::SPAWN_SKILL);
-		p.AsSkill.Position = explorer->mTransform->GetPosition();
+		p.AsSkill.Position = explorer->mTransform->GetPosition() - vec3f(0.0f, 0.0f, 2.5f);
 		p.AsSkill.Duration = explorer->mSkills[HEAL_SKILL_INDEX]->mDuration;
 		p.AsSkill.Type = SkillPacketTypes::SKILL_TYPE_HEAL;
 		p.UUID = explorer->mNetworkID->mUUID;
@@ -434,8 +504,9 @@ void Explorer::OnMeleeHit(BaseSceneObject* self, BaseSceneObject* other)
 	}
 	else if (other->Is<Explorer>())
 	{
-		// Check Friendly Fire
-		auto e = reinterpret_cast<Explorer*>(other);
-		e->mHealth->TakeDamage(100.0f, false);
+
+		// Check Friendly Fire or haunt state of explorer.
+		//	auto e = reinterpret_cast<Explorer*>(other);
+		//	e->mHealth->TakeDamage(100.0f, false);
 	}
 }

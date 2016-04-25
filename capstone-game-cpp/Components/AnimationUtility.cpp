@@ -3,9 +3,10 @@
 #include <Components/AnimationController.h>
 
 Animation gSprinterAnimations[Animations::SPRINTER_ANIMATION_COUNT] = {
-	{ "Take 001", 10, 46, 1 },
-	{ "Take 001", 50, 74, 1 },
-	{ "Take 001", 80, 102, 1 }
+	{ "Sprinter_Mix_Finish", 1, 70, 1 },
+	{ "Sprinter_Mix_Finish", 80, 96, 1 },
+	{ "Sprinter_Mix_Finish", 175, 214, 1 },
+	{ "Sprinter_Mix_Finish", 144, 175, 1 }
 };
 
 Animation gMinionAnimations[Animations::MINION_ANIMATION_COUNT] = {
@@ -18,6 +19,11 @@ Animation gPlantAnimations[Animations::PLANT_ANIMATION_COUNT] = {
 	{ "Flytrap_Export_Version", 5,		120,	1 },
 	{ "Flytrap_Export_Version", 120,	200,	1 },
 	{ "Flytrap_Export_Version", 230,	310,	1 },
+};
+
+Animation gTrapAnimations[Animations::TRAP_ANIMATION_COUNT] = {
+	{ "Take 001",	1,	1, 1 },
+	{ "Take 001",	2,	49, 2 },
 };
 
 uint32_t gMinionRestFrameIndex = 5;

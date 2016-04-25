@@ -94,9 +94,12 @@ void loadLamps(jarr_t objs)
 
 	float radians = PI / 180.0f;
 
+	int16_t id = 0;
 	for (auto obj : *objs)
 	{
 		auto lamp = Factory<Lamp>::Create();
+		lamp->SetID(id++);
+
 		parseTransform(obj, lamp->mTransform);
 
 		lamp->mTransform->SetPosition(lamp->mTransform->GetPosition() + vec3f(0.0f, 0.0f, -3.0f));
@@ -133,7 +136,7 @@ void loadDomPoints(jarr_t objs)
 }
 
 
-void loadPickups(jarr_t objs)
+/*void loadPickups(jarr_t objs)
 {
 	TRACE_LOG("Loading " << int(objs->size()) << " pickups...");
 	for (auto obj : *objs)
@@ -143,7 +146,7 @@ void loadPickups(jarr_t objs)
 
 		pickup->mSkill = obj["skillName"].get<string>();
 	}
-}
+}*/
 
 
 void loadSpawnPoints(jarr_t objs)
@@ -203,6 +206,12 @@ void loadStaticMeshes(jarr_t objs, std::string model, vector<string>& textureNam
 			if (!extents.empty())
 			{
 				staticMesh->mColliderComponent->mCollider.halfSize = parseVec3f(extents);
+				if (staticMesh->mModel->mName == kStaticMeshModelNames[STATIC_MESH_WALL_LANTERN])
+				{
+					continue;
+				}
+
+				staticMesh->mColliderComponent->mCollider.halfSize.z = 7.5f; // Extending half extents so they behave more like walls. If not players get push on top of them.
 			}
 		}
 
@@ -264,6 +273,8 @@ void loadStaticColliders(jarr_t objs, CLayer layer, vec3f levelOrigin, vec3f lev
 void loadDoors(jarr_t objs)
 {
 	TRACE_LOG("Loading " << int(objs->size()) << " doors...");
+
+	uint32_t id = 0;
 	for (auto obj : *objs)
 	{
 		auto canOpen = obj["canOpen"].get<bool>();
@@ -275,6 +286,8 @@ void loadDoors(jarr_t objs)
 		auto collHalf = parseVec3f(obj["bounds"]["extents"]);
 
 		auto door = Factory<Door>::Create();
+		door->SetID(id++);
+
 		parseTransform(obj, door->mTransform);
 		Resource::mModelManager->GetModel("Door")->Link(door);
 
@@ -282,11 +295,12 @@ void loadDoors(jarr_t objs)
 		door->mTransform->SetRotation(rotation);
 		door->mTransform->SetScale(scale);
 
-		door->mColliderComponent->mCollider.origin = collOrigin;
-		door->mColliderComponent->mCollider.halfSize = collHalf;
 		door->mColliderComponent->mCollider.axis[0] = vec3f(1, 0, 0);
 		door->mColliderComponent->mCollider.axis[1] = vec3f(0, 1, 0);
 		door->mColliderComponent->mCollider.axis[2] = vec3f(0, 0, 1);
+		door->mColliderComponent->mCollider.origin = collOrigin;
+		door->mColliderComponent->mCollider.halfSize = collHalf;
+		door->mColliderComponent->mCollider.halfSize.z = 7.0f;
 		door->mColliderComponent->mLayer = COLLISION_LAYER_WALL;
 
 		door->mTrigger->mCollider.axis[0] = vec3f(1, 0, 0);
@@ -358,11 +372,11 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		loadDomPoints(domination);
 	}
 
-	auto pickups = obj["pickups"].get_ptr<jarr_t>();
+	/*auto pickups = obj["pickups"].get_ptr<jarr_t>();
 	if (pickups != nullptr)
 	{
 		loadPickups(pickups);
-	}
+	}*/
 
 	auto spawnPoints = obj["spawnPoints"].get_ptr<jarr_t>();
 	if (spawnPoints != nullptr)

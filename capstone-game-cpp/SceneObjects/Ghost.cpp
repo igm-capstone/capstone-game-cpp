@@ -8,8 +8,19 @@
 #include "Door.h"
 #include "Region.h"
 #include "Lamp.h"
+#include "Explorer.h"
+#include "jsonUtils.h"
 
-//#include <CameraManager.h>
+Skill* createGhostSkill(const char* skillName, Skill::UseCallback callback, json& skillConfig)
+{
+	auto cooldown = skillConfig["cooldown"].get<float>();
+	auto cost = skillConfig["cost"].get<float>();
+	
+	auto skill = Factory<Skill>::Create();
+	skill->Setup(skillName, cooldown, 0, callback, cost);
+
+	return skill;
+}
 
 Ghost::Ghost() : mNetworkID(nullptr)
 {
@@ -28,32 +39,41 @@ Ghost::Ghost() : mNetworkID(nullptr)
 
 	memset(mSkills, 0, sizeof(mSkills));
 
-	auto spawnMinion = Factory<Skill>::Create();
-	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Imp", 10, 0, DoSpawnImpMinion, 10);
-	mSkills[1] = spawnMinion;
+	json& config = Application::SharedInstance().GetConfigJson()["ghost"];
+	jarr_t skills = config["skills"].get<jarr_t>();
 
-	spawnMinion = Factory<Skill>::Create();
-	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Abomination", 20, 0, DoSpawnAbominationMinion, 20);
-	mSkills[2] = spawnMinion;
+	json impConfig = findByName(skills, "Basic Minion");
+	mSkills[1] = createGhostSkill("Imp", DoSpawnImpMinion, impConfig);
+	mSkills[1]->mSceneObject = this;
 
-	spawnMinion = Factory<Skill>::Create();
-	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Flytrap", 10, 0, DoSpawnFlytrapMinion, 50);
-	mSkills[3] = spawnMinion;
+	json abominationConfig = findByName(skills, "AOE Bomber");
+	mSkills[2] = createGhostSkill("Abomination", DoSpawnAbominationMinion, abominationConfig);
+	mSkills[2]->mSceneObject = this;
 
-	spawnMinion = Factory<Skill>::Create();
-	spawnMinion->mSceneObject = this;
-	spawnMinion->Setup("Transmogrify", 40, 20, DoTransmogrify);
-	mSkills[4] = spawnMinion;
+	json flytrapConfig = findByName(skills, "Flytrap");
+	mSkills[3] = createGhostSkill("Flytrap", DoSpawnFlytrapMinion, flytrapConfig);
+	mSkills[3]->mSceneObject = this;
+
+	json transmogrifyConfig = findByName(skills, "Haunt Explorer To Minion");
+	mSkills[4] = createGhostSkill("Transmogrify", DoTransmogrify, transmogrifyConfig);
+	mSkills[4]->mSceneObject = this;
+	mSkills[4]->mDuration = transmogrifyConfig["duration"].get<float>();
 	
 	auto clickInteraction = Factory<Skill>::Create();
 	clickInteraction->mSceneObject = this;
-	clickInteraction->SetBinding(SkillBinding().Set(MOUSEBUTTON_LEFT));
+	clickInteraction->SetBinding(MOUSEBUTTON_LEFT);
 	clickInteraction->Setup("Left Click", 0, 0, DoMouseClick);
 	mSkills[0] = clickInteraction;
 
+	mMaxMana = config["baseEnergy"].get<float>();
+	mManaRegenFrequency = 1 / config["regenEnergyTick"].get<float>();
+	auto manaRegenArray = config["regenEnergy"].get<jarr_t>();
+	for (size_t i = 0; i < 4; i++)
+	{
+		mManaRegen[i] = manaRegenArray[i].get<float>();
+	}
+
+	mManaRegenLevel = 0;
 	mMana = mMaxMana;
 }
 
@@ -72,16 +92,17 @@ Ghost::~Ghost()
 void Ghost::Spawn(BaseScene* scene)
 {
 	mNetworkID->mIsActive = true;
+	mNetworkID->mHasAuthority = true;
 	mNetworkID->mUUID = -1;
 
 	auto level = scene->mLevel;
 	mCameraManager->MoveCamera(level.center, level.center + vec3f(0.0f, 0.0f, -85.5f));
 
-	mSkillBar = &scene->mSkillBar;
-	mSkillBar->AddSkill(mSkills[1], SPRITESHEET_GHOST_ICONS, 0, 0);
-	mSkillBar->AddSkill(mSkills[2], SPRITESHEET_GHOST_ICONS, 1, 1);
-	mSkillBar->AddSkill(mSkills[3], SPRITESHEET_GHOST_ICONS, 5, 2);
-	mSkillBar->AddSkill(mSkills[4], SPRITESHEET_GHOST_ICONS, 4, 9);
+	mUIManager = &scene->mUIManager;
+	mUIManager->AddSkill(mSkills[1], SPRITESHEET_GHOST_ICONS, 0, 0, 0, true);
+	mUIManager->AddSkill(mSkills[2], SPRITESHEET_GHOST_ICONS, 1, 1, 1, true);
+	mUIManager->AddSkill(mSkills[3], SPRITESHEET_GHOST_ICONS, 5, 2, 2, true);
+	mUIManager->AddSkill(mSkills[4], SPRITESHEET_GHOST_ICONS, 4, 9, 3, true);
 	SetActiveSkill(1);
 }
 
@@ -129,11 +150,11 @@ bool Ghost::DoMouseClick(BaseSceneObject* obj, float duration, BaseSceneObject* 
 
 	if (target->Is<Door>()) {
 		auto door = reinterpret_cast<Door*>(target);
-		door->ToogleDoor();
+		door->Interact();
 	}
 	if (target->Is<Lamp>()) {
 		auto lamp = reinterpret_cast<Lamp*>(target);
-		lamp->ToggleLamp();
+		lamp->Interact();
 	}
 	else {
 		//Spawn X or transmogrify
@@ -154,12 +175,12 @@ bool Ghost::DoMouseClick(BaseSceneObject* obj, float duration, BaseSceneObject* 
 void Ghost::SetActiveSkill(int skillNum)
 {
 	mActiveSkill = skillNum;
-	mSkillBar->SetActive(mSkills[mActiveSkill]);
+	mUIManager->SetActiveSkill(mSkills[mActiveSkill]);
 }
 
 void Ghost::TickMana(float milliseconds)
 {
-	mMana += mManaRegenPerS * (milliseconds / 1000);
+	mMana += mManaRegen[mManaRegenLevel] * mManaRegenFrequency * milliseconds * 0.001f;
 	if (mMana > mMaxMana) mMana = mMaxMana;
 	if (mMana < 0) mMana = 0;
 }

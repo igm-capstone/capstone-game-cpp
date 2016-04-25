@@ -22,6 +22,8 @@
     <FxCompile Include="Shaders\VSDefInstancedColor.hlsl" />
     <FxCompile Include="Shaders\PSDefInstancedMaterial.hlsl" />
     <FxCompile Include="Shaders\VSFwdSpriteGlyphs.hlsl" />
+    <FxCompile Include="Shaders\VSFwdSingleMaterial.hlsl" />
+    <FxCompile Include="Shaders\PSFwdSingleMaterial.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
@@ -68,13 +70,16 @@
     <ClCompile Include="BehaviorTree\Parallel.cpp" />
     <ClCompile Include="SceneObjects\Heal.cpp" />
     <ClCompile Include="UI\SpriteManager.cpp" />
-    <ClCompile Include="UI\SkillBar.cpp" />
     <ClCompile Include="SceneObjects\StatusEffect.cpp" />
     <ClCompile Include="SceneObjects\Trap.cpp" />
     <ClCompile Include="BehaviorTree\Builder.cpp" />
     <ClCompile Include="BehaviorTree\Mute.cpp" />
     <ClCompile Include="Components\ImpController.cpp" />
     <ClCompile Include="Components\FlyTrapController.cpp" />
+    <ClCompile Include="SceneObjects\Door.cpp" />
+    <ClCompile Include="SceneObjects\Lamp.cpp" />
+    <ClCompile Include="UI\UIManager.cpp" />
+    <ClCompile Include="jsonUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -98,7 +103,6 @@
     <ClInclude Include="Culler.h" />
     <ClInclude Include="SceneObjects\DominationPoint.h" />
     <ClInclude Include="SceneObjects\Minion.h" />
-    <ClInclude Include="SceneObjects\Pickup.h" />
     <ClInclude Include="Components\ExplorerController.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="Components\NetworkID.h" />
@@ -107,7 +111,6 @@
     <ClInclude Include="SceneObjects\SpawnPoint.h" />
     <ClInclude Include="SceneObjects\LegacySceneObject.h" />
     <ClInclude Include="SceneObjects\Explorer.h" />
-    <ClInclude Include="SceneObjects\MoveableBlock.h" />
     <ClInclude Include="SceneObjects\Lamp.h" />
     <ClInclude Include="Scenes\BaseScene.h" />
     <ClInclude Include="Colors.h" />
@@ -147,7 +150,6 @@
     <ClInclude Include="BehaviorTree\Conditional.h" />
     <ClInclude Include="BehaviorTree\Decorator.h" />
     <ClInclude Include="UI\SpriteManager.h" />
-    <ClInclude Include="UI\SkillBar.h" />
     <ClInclude Include="BehaviorTree\Builder.h" />
     <ClInclude Include="BehaviorTree\Parallel.h" />
     <ClInclude Include="BehaviorTree\Race.h" />
@@ -156,6 +158,8 @@
     <ClInclude Include="SceneObjects\Trap.h" />
     <ClInclude Include="BehaviorTree\Mute.h" />
     <ClInclude Include="Components\ImpController.h" />
+    <ClInclude Include="UI\UIManager.h" />
+    <ClInclude Include="jsonUtils.h" />
     <ClInclude Include="BINResource.h" />
   </ItemGroup>
   <ItemGroup>
@@ -219,7 +223,6 @@
     <ClInclude Include="Culler.h" />
     <ClInclude Include="SceneObjects\DominationPoint.h" />
     <ClInclude Include="SceneObjects\Minion.h" />
-    <ClInclude Include="SceneObjects\Pickup.h" />
     <ClInclude Include="Components\ExplorerController.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="Components\NetworkID.h" />
@@ -228,7 +231,6 @@
     <ClInclude Include="SceneObjects\SpawnPoint.h" />
     <ClInclude Include="SceneObjects\LegacySceneObject.h" />
     <ClInclude Include="SceneObjects\Explorer.h" />
-    <ClInclude Include="SceneObjects\MoveableBlock.h" />
     <ClInclude Include="SceneObjects\Lamp.h" />
     <ClInclude Include="Scenes\BaseScene.h" />
     <ClInclude Include="Colors.h" />
@@ -271,5 +273,8 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Assets\icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

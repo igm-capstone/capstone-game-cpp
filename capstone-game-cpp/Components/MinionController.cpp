@@ -9,6 +9,8 @@
 #include <Mathf.h>
 #include <SceneObjects/Minion.h>
 #include "AnimationController.h"
+#include <SceneObjects/Explorer.h>
+#include "Health.h"
 
 using namespace BehaviorTree;
 using namespace chrono;
@@ -394,7 +396,11 @@ void MinionController::OnMeleeStop(void* obj)
 
 void MinionController::OnMeleeHit(BaseSceneObject* minion, BaseSceneObject* other)
 {
-
+	if (other->Is<Explorer>())
+	{
+		Explorer* explorer = reinterpret_cast<Explorer*>(other);
+		explorer->mHealth->TakeDamage(100.0f, false);
+	}
 }
 
 void MinionController::PlayStateAnimation(AnimationControllerState state)

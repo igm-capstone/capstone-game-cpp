@@ -15,6 +15,12 @@ struct SkillBinding
 	GamepadButton gamepadButton = GamepadButton(0);
 	KeyCode       keyCode       = KeyCode(0);
 
+	SkillBinding();
+	SkillBinding(SkillBinding&);
+	SkillBinding(MouseButton value);
+	SkillBinding(GamepadButton value);
+	SkillBinding(KeyCode value);
+
 	SkillBinding& Set(MouseButton value);
 	SkillBinding& Set(GamepadButton value);
 	SkillBinding& Set(KeyCode value);
@@ -45,7 +51,7 @@ private:
 
 
 public:
-	void SetBinding(SkillBinding& binding);
+	void SetBinding(SkillBinding binding);
 	void Setup(const char* name, float cooldown, float duration, UseCallback callback, float cost = 0);
 	void Update();
 	bool UseSkill(BaseSceneObject* target = nullptr, vec3f skillPos = vec3f(0,0,0));

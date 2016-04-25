@@ -1,0 +1,459 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="AIManager" Collapsed="true">
+    <Position X="38" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgQAAiBACoAAgAAAgAAAAABAIBACAAEAAIAgAAAAEAA=</HashCode>
+      <FileName>AIManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AnimationController" Collapsed="true">
+    <Position X="1.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACQhBmAYCAAAwAQAQEAICAAAhAKgAAEEAAAsAAgAYQA=</HashCode>
+      <FileName>Components\AnimationController.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BaseColliderComponent" Collapsed="true">
+    <Position X="10.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAFAAAAAAAAgAAAAAgAAAIAgAAAAAA=</HashCode>
+      <FileName>Components\ColliderComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BaseComponent" Collapsed="true">
+    <Position X="18.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAAAAAAAIAAABSAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Components\BaseComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BaseScene" Collapsed="true">
+    <Position X="2.75" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAIAIAkAGgAAEARAAAAAAgAQoABEAAAQAQAAKBAAwQA=</HashCode>
+      <FileName>Scenes\BaseScene.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BaseSceneObject" Collapsed="true">
+    <Position X="18.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAIAAAAoAAAAAAAAAQAAgBAAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>SceneObjects\BaseSceneObject.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BINMeshResource&lt;Vertex&gt;" Collapsed="true">
+    <Position X="39.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAggAEAAAAAgAAAAAAAAAAAAAAIAAgAAAAABQAQAA=</HashCode>
+      <FileName>BINResource.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BoxColliderComponent" Collapsed="true">
+    <Position X="15.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAEAAIAQAAAAAAAAAAAAAAAAAAAAIAA=</HashCode>
+      <FileName>Components\ColliderComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BVHTree" Collapsed="true">
+    <Position X="35.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQBAAAAQAAAAQAkIAAAAAAAEAFAAAAAABAEABAIBAA=</HashCode>
+      <FileName>BVHTree.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CameraManager" Collapsed="true">
+    <Position X="41.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACQjCCJgQEEAAAhIQIQCEAIIAKEEQACAAAIDKABhGAA=</HashCode>
+      <FileName>CameraManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CollisionManager" Collapsed="true">
+    <Position X="43.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQIAAAIAIAAQQAABAAAQQAAAAAAAAAgAAIBAACAgAA=</HashCode>
+      <FileName>CollisionManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="colWrapper" Collapsed="true">
+    <Position X="45" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAA=</HashCode>
+      <FileName>Components\Skill.cpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Console" Collapsed="true">
+    <Position X="38" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgSBAAAAACAAMlQAMAIAQAAAAAAEAJQAAAAQAABAAAA=</HashCode>
+      <FileName>Console.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DominationPoint" Collapsed="true">
+    <Position X="15.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAYABAAAAAAAAQAAAAAAIAFQAhAAAAAIAA=</HashCode>
+      <FileName>SceneObjects\DominationPoint.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DominationPointController" Collapsed="true">
+    <Position X="22" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQABAAAAAASAAAAAAAAAgIABBAAEABAAAIAgAAgAAA=</HashCode>
+      <FileName>Components\DominationPointController.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Door" Collapsed="true">
+    <Position X="19.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAAgIBAAAAAIAQAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SceneObjects\Door.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Explorer" Collapsed="true">
+    <Position X="26.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAYAYAEAgAAgAQgAYAEEBAYAEEAAADKFAAIAAQAAIIA=</HashCode>
+      <FileName>SceneObjects\Explorer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ExplorerController" Collapsed="true">
+    <Position X="28.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQQQSFTAYAggAAACAAAAEABMEBgAABDAEAAAAAAAQA=</HashCode>
+      <FileName>Components\ExplorerController.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Factory&lt;ObjectType&gt;" Collapsed="true">
+    <Position X="39.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAABACIAAAEAAAAAAAAAAQAABAAEAAAAAAAAAAARI=</HashCode>
+      <FileName>Factory.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FBXMeshResource&lt;Vertex&gt;" Collapsed="true">
+    <Position X="41.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAg0AEAAAACgEgACAAAQAgAAAAKgAgAEAEABAgQAA=</HashCode>
+      <FileName>FBXResource.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FlyTrapController" Collapsed="true">
+    <Position X="35.5" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA=</HashCode>
+      <FileName>Components\FlyTrapController.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FmodEvent" Collapsed="true">
+    <Position X="17.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EBAggACQAAABAAAAAAAAABAABAAAAAAAoAAiAAgAAAA=</HashCode>
+      <FileName>Components\FmodEvent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FmodEventCollection" Collapsed="true">
+    <Position X="19.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAgAAAAAAEAAIgAAAIAAEBAQAAoAAAAAAAABA=</HashCode>
+      <FileName>Components\FmodEventCollection.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Ghost" Collapsed="true">
+    <Position X="17.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAEIAEACAAQJgAAAAEAAAAEAAAIABBBAQAEAABUQAg=</HashCode>
+      <FileName>SceneObjects\Ghost.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GhostController" Collapsed="true">
+    <Position X="24.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAAIAAAgAAAAAAAIAAAAQA=</HashCode>
+      <FileName>Components\GhostController.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Heal" Collapsed="true">
+    <Position X="28.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAoAAABAAAAACAAAEAQAAAAAAAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>SceneObjects\Heal.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Health" Collapsed="true">
+    <Position X="31" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAABAAAAAAAIAAAAEAgAAAAAAAAAAAAAAgiAAAAA=</HashCode>
+      <FileName>Components\Health.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ImpController" Collapsed="true">
+    <Position X="33.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Components\ImpController.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Lamp" Collapsed="true">
+    <Position X="1.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAgAAAAQABAAAAAACQAACAAAAAAAACAAAACAEAA=</HashCode>
+      <FileName>SceneObjects\Lamp.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LegacySceneObject" Collapsed="true">
+    <Position X="6.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAIAAAACAAAgA=</HashCode>
+      <FileName>SceneObjects\LegacySceneObject.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Level01" Collapsed="true">
+    <Position X="0.5" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAA4UxCAQKCYCAICAoAgAEAggDDBMYAAESCYQgoBBg=</HashCode>
+      <FileName>Scenes\Level01.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LoadingScreen" Collapsed="true">
+    <Position X="2.75" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQACAAAAAAAAAgACBAAQAAAQCAAAAAAA=</HashCode>
+      <FileName>Scenes\LoadingScreen.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MainMenuScene" Collapsed="true">
+    <Position X="5" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIgCAUAggAAAAAAAAgACAAAUACAQCQAAAQAA=</HashCode>
+      <FileName>Scenes\MainMenuScene.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Mathf" Collapsed="true">
+    <Position X="43.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIBABAAABCAAACCAAAAAABAAAAAgZIAAAAAAAA=</HashCode>
+      <FileName>Mathf.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Minion" Collapsed="true">
+    <Position X="31" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAIAAAAAAAQQgAQAEEBAMAGEAAACEBAoAEAAAAIIA=</HashCode>
+      <FileName>SceneObjects\Minion.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MinionController" Collapsed="true">
+    <Position X="34.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>kIRQEgBCkHAYAECBDBAAAAAAoBMAAAAgAUIAIBIAAlI=</HashCode>
+      <FileName>Components\MinionController.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ModelCluster" Collapsed="true">
+    <Position X="45" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQgAAAAAAAAAAAAAAAAgAAAAAAAEAIAgEQAAAQAA=</HashCode>
+      <FileName>ModelManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ModelManager" Collapsed="true">
+    <Position X="38" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAACAAQAgABAIAIAAACAEAAAAAAAgAAAAEAA=</HashCode>
+      <FileName>ModelManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MoveableBlock" Collapsed="true">
+    <Position X="8.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAAAAAACAAAAAAAAAAAAAAAAABAAAAAAAAA=</HashCode>
+      <FileName>SceneObjects\MoveableBlock.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MyUUID" Collapsed="true">
+    <Position X="39.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Network\NetworkManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NetworkClient" Collapsed="true">
+    <Position X="41.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgSAEAAAAoAAAgBAAAAAAQAAAAAAAAAAAAACAABAAAQ=</HashCode>
+      <FileName>Network\NetworkClient.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NetworkCmd" Collapsed="true">
+    <Position X="43.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAAAAAAAEAAAAAAAABAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Network\NetworkManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NetworkID" Collapsed="true">
+    <Position X="26.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAACCAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Components\NetworkID.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NetworkManager" Collapsed="true">
+    <Position X="45" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAA4AAgAAACAAAAQAAQAAABAAAAQAAAAAI=</HashCode>
+      <FileName>Network\NetworkManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NetworkRpc" Collapsed="true">
+    <Position X="38" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAQAAAAEAAIAAAEIAAAAAAAAAAAAACQAAAAAAA=</HashCode>
+      <FileName>Network\NetworkManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NetworkServer" Collapsed="true">
+    <Position X="39.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgQBCAAAAAAAAKBAAEAAAwAACCAAAAAAAAiCAABAAAA=</HashCode>
+      <FileName>Network\NetworkServer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Node" Collapsed="true">
+    <Position X="41.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAEA=</HashCode>
+      <FileName>Node.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="OrientedBoxColliderComponent" Collapsed="true">
+    <Position X="6.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACCAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAEAAAAIAA=</HashCode>
+      <FileName>Components\ColliderComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Pickup" Collapsed="true">
+    <Position X="10.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAABAAAAAACAAAAAIAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SceneObjects\Pickup.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlaneColliderComponent" Collapsed="true">
+    <Position X="8.5" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAIAA=</HashCode>
+      <FileName>Components\ColliderComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="QuadColliderComponent" Collapsed="true">
+    <Position X="13" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAIAA=</HashCode>
+      <FileName>Components\ColliderComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Region" Collapsed="true">
+    <Position X="22" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAgAAgAAABAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SceneObjects\Region.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Resource" Collapsed="true">
+    <Position X="43.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAAAAAAAAAAAAAEAAACAAAAAAAgAAAAgAA=</HashCode>
+      <FileName>Resource.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScareTacticsApplication" Collapsed="true">
+    <Position X="45" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>6BADAAAAAiIAQBxgEAkACBoYQISEAoIAAAQiAAAI2EA=</HashCode>
+      <FileName>ScareTacticsApplication.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SkeletalHierarchy" Collapsed="true">
+    <Position X="38" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAAAAAAAAAAAAAAABBAAAABgAIgAAAAAAA=</HashCode>
+      <FileName>SkeletalHierarchy.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Skill" Collapsed="true">
+    <Position X="4" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAQAAAAACAIAQBAAAAAAUAAAoAAAEAAAAQgAAAAAAAA=</HashCode>
+      <FileName>Components\Skill.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SkillBar" Collapsed="true">
+    <Position X="39.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAgAAAIABAAAAAUAAAAAAgEAAAAIAgAAAAAAAIAIAAA=</HashCode>
+      <FileName>UI\SkillBar.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SpawnPoint" Collapsed="true">
+    <Position X="13" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAEAAAAAAAAAAA=</HashCode>
+      <FileName>SceneObjects\SpawnPoint.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SphereColliderComponent" Collapsed="true">
+    <Position X="10.75" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAIAAABIAAAAAAAAAAAAAAAAIAA=</HashCode>
+      <FileName>Components\ColliderComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SpriteManager" Collapsed="true">
+    <Position X="41.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAACJAAAmAAAQwCAJIEEAgASQGEAAAgAABAEAgAgAk=</HashCode>
+      <FileName>UI\SpriteManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="StaticCollider" Collapsed="true">
+    <Position X="24.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAgAAACAAAAABAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SceneObjects\StaticCollider.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="StaticMesh" Collapsed="true">
+    <Position X="33.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAgAAAAACAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SceneObjects\StaticMesh.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="StatusEffect" Collapsed="true">
+    <Position X="43.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAARAAAAAAAAAAAAAAAQASABAIAAAAIAAAAAABAAAA=</HashCode>
+      <FileName>SceneObjects\StatusEffect.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Trace" Collapsed="true">
+    <Position X="45" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAiCAigECAARhpAAADEwAEBAAAEABISgBgAJAIBDBA=</HashCode>
+      <FileName>trace.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Trap" Collapsed="true">
+    <Position X="4" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAFAAAABAAAgEAQAAACAAAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>SceneObjects\Trap.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -238,6 +238,7 @@ namespace Rig3D
 
 		void	VSetContextTarget();
 		void	VSetContextTargetWithDepth();
+		void	VSetContextTargetWithDepth(IRenderContext* render, const uint32_t DSVIndex);
 		void	VSetRenderContextTargets(IRenderContext* renderContext);
 		void	VSetRenderContextTargetsWithDepth(IRenderContext* renderContext, const uint32_t DSVIndex);
 

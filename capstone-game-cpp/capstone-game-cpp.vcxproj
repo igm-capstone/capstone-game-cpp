@@ -139,8 +139,11 @@
     <ClCompile Include="DebugRender.cpp" />
     <ClCompile Include="Factory.cpp" />
     <ClCompile Include="Components\FlyTrapController.cpp" />
+    <ClCompile Include="jsonUtils.cpp" />
+    <ClCompile Include="SceneObjects\Door.cpp" />
     <ClCompile Include="SceneObjects\Heal.cpp" />
     <ClCompile Include="ModelManager.cpp" />
+    <ClCompile Include="SceneObjects\Lamp.cpp" />
     <ClCompile Include="SceneObjects\Region.cpp" />
     <ClCompile Include="Resource.cpp" />
     <ClCompile Include="ScareTacticsApplication.cpp" />
@@ -160,7 +163,7 @@
     <ClCompile Include="Scenes\MainMenuScene.cpp" />
     <ClCompile Include="SkeletalHierarchy.cpp" />
     <ClCompile Include="SceneObjects\Trap.cpp" />
-    <ClCompile Include="UI\SkillBar.cpp" />
+    <ClCompile Include="UI\UIManager.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -209,6 +212,7 @@
     <ClInclude Include="DebugRender.h" />
     <ClInclude Include="FBXResource.h" />
     <ClInclude Include="Components\FlyTrapController.h" />
+    <ClInclude Include="jsonUtils.h" />
     <ClInclude Include="SceneObjects\Heal.h" />
     <ClInclude Include="fmodwrap.h" />
     <ClInclude Include="Mathf.h" />
@@ -222,7 +226,6 @@
     <ClInclude Include="Culler.h" />
     <ClInclude Include="SceneObjects\DominationPoint.h" />
     <ClInclude Include="SceneObjects\Minion.h" />
-    <ClInclude Include="SceneObjects\Pickup.h" />
     <ClInclude Include="Components\ExplorerController.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="Components\NetworkID.h" />
@@ -231,7 +234,6 @@
     <ClInclude Include="SceneObjects\SpawnPoint.h" />
     <ClInclude Include="SceneObjects\LegacySceneObject.h" />
     <ClInclude Include="SceneObjects\Explorer.h" />
-    <ClInclude Include="SceneObjects\MoveableBlock.h" />
     <ClInclude Include="SceneObjects\Lamp.h" />
     <ClInclude Include="SceneObjects\StaticCollider.h" />
     <ClInclude Include="SceneObjects\StaticMesh.h" />
@@ -254,7 +256,7 @@
     <ClInclude Include="Scenes\MainMenuScene.h" />
     <ClInclude Include="SkeletalHierarchy.h" />
     <ClInclude Include="SceneObjects\Trap.h" />
-    <ClInclude Include="UI\SkillBar.h" />
+    <ClInclude Include="UI\UIManager.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TargetFollower.h" />
     <ClInclude Include="trace.h" />
@@ -264,6 +266,10 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\PSDef2DTexture.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\PSFwdSingleMaterial.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
     </FxCompile>
@@ -316,6 +322,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shaders\VSDefInstancedColor.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\VSFwdSingleMaterial.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
     </FxCompile>

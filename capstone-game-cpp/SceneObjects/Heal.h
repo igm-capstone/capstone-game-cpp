@@ -13,6 +13,7 @@ public:
 	float mDuration;
 
 	void Spawn(vec3f pos, int UUID, float duration);
+	void Update(float seconds);
 	static void OnTriggerEnter(BaseSceneObject* self, BaseSceneObject* other);
 
 private:

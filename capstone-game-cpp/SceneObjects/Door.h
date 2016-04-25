@@ -1,56 +1,27 @@
 ﻿#include "SceneObjects/BaseSceneObject.h"
-#include "Explorer.h"
-#include "Components/ExplorerController.h"
-#include <trace.h>
+
 
 class Door : public BaseSceneObject
 {
 	friend class Factory<Door>;
 
 public:
-	OrientedBoxColliderComponent* mColliderComponent;
-	OrientedBoxColliderComponent* mTrigger;
+	class OrientedBoxColliderComponent* mColliderComponent;
+	class OrientedBoxColliderComponent* mTrigger;
+	class NetworkID*      mNetworkID;
+	class NetworkManager* mNetworkManager;
+
+	void SetID(uint16_t id);
 
 private:
 
-	Door() : mColliderComponent(Factory<OrientedBoxColliderComponent>::Create()), mTrigger(Factory<OrientedBoxColliderComponent>::Create())
-	{
-		mColliderComponent->mIsTrigger = false;
-		mColliderComponent->mIsDynamic = false;
-		mColliderComponent->mIsActive = true;
-		mColliderComponent->mSceneObject = this;
+	Door();
+	~Door();
 
-		mTrigger->mIsTrigger = true;
-		mTrigger->mIsDynamic = false;
-		mTrigger->mIsActive = true;
-		mTrigger->mSceneObject = this;
-
-		mTrigger->RegisterTriggerStayCallback(OnTriggerStay);
-	}
-
-	~Door()
-	{
-		Factory<OrientedBoxColliderComponent>::Destroy(mColliderComponent);
-		Factory<OrientedBoxColliderComponent>::Destroy(mTrigger);
-	}
-
-	static void OnTriggerStay(BaseSceneObject* obj, BaseSceneObject* other)
-	{
-		Door* door = static_cast<Door*>(obj);
-		if (other->Is<Explorer>())
-		{
-			Explorer* e = static_cast<Explorer*>(other);
-			if (e->mController->mIsInteracting) {
-				e->mController->ConsumeInteractWill();
-				door->ToogleDoor();
-			}
-		}
-	}
-
+	static void OnTriggerStay(BaseSceneObject* obj, BaseSceneObject* other);
+	static void OnInteract(BaseSceneObject* obj);
 public:
-	void ToogleDoor()
-	{
-		mColliderComponent->mIsActive ? mTransform->RotateRoll(0.5f*PI) : mTransform->RotateRoll(-0.5f*PI);
-		mColliderComponent->mIsActive = !mColliderComponent->mIsActive;
-	}
+	void Interact();
+
+	void ToggleDoor();
 };

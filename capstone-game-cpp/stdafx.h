@@ -31,14 +31,11 @@ extern bool gDebugBT;
 #define STATIC_SCENE_MEMORY		2000000
 #define SCENE_ALIGNMENT_PADDING 6
 
-#define MAX_EXPLORERS 4
+#define MAX_PLAYERS 4
+#define MAX_EXPLORERS 3
 #define MAX_EXPLORER_SKILLS  5
 
 #define MAX_GHOST_SKILLS 5
-
-#define GHOST_MANA_MAX 100
-#define GHOST_MANA_REGEN 5
-
 
 #define MAX_IMPS          30
 #define MAX_ABOMINATIONS  10
@@ -56,7 +53,8 @@ extern bool gDebugBT;
 
 #define MAX_GLYPHS 10000
 #define MAX_SPRITES (MAX_EXPLORERS+MAX_MINIONS)
-#define MAX_SPRITESHEETS 10
+#define MAX_SPRITESHEETS 16
+#define MAX_INTERACTIBLE_AREAS 20
 
 #define MAX_SKELETON_JOINTS 64
 
@@ -66,3 +64,6 @@ extern bool gDebugBT;
 
 #define MAX_DOORS 50
 #define MAX_LAMPS 50
+
+#define DOOR_BASE_UUID 0xDD000000
+#define LAMP_BASE_UUID 0xAA000000

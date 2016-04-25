@@ -119,6 +119,12 @@ void NetworkClient::Update()
 			case SYNC_ANIMATION:
 				NetworkRpc::SyncAnimation(packet.UUID, packet.AsAnimation.State, packet.AsAnimation.Command);
 				break;
+			case INTERACT:
+				NetworkRpc::Interact(packet.UUID);
+				break;
+			case READY:
+				NetworkRpc::Ready(packet.ClientID, packet.AsBool);
+				break;
 			default:
 				printf("error in packet types\n");
 				break;

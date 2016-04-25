@@ -2,7 +2,12 @@
 #include "SceneObjects\BaseSceneObject.h"
 #include <Components/AnimationController.h>
 
-int GetExplorerID(class Explorer* explorer);
+enum ExplorerType //Spawn Order
+{
+	TRAPMASTER = 1,
+	HEALER,
+	SPRINTER
+};
 
 class Explorer : public BaseSceneObject
 {
@@ -19,6 +24,7 @@ public:
 	class ExplorerController*			mController;
 	class AnimationController*			mAnimationController;
 	class SphereColliderComponent*		mCollider;
+	class SphereColliderComponent*		mInteractionCollider;
 	class Skill*						mSkills[MAX_EXPLORER_SKILLS];
 	class Health*						mHealth;
 	class Node*							mCurrentNode;
@@ -33,6 +39,8 @@ private:
 	Explorer();
 	~Explorer();
 
+	ExplorerType GetExplorerID() { return static_cast<ExplorerType>(mNetworkClient->mID); }
+
 public:
 	void Spawn(vec3f pos, int UUID);
 	void DebugSpawn(vec3f pos, int UUID);
@@ -45,7 +53,10 @@ public:
 	static void OnAnimationCommandExecuted(BaseSceneObject* obj, AnimationControllerState state, AnimationControllerCommand command);
 	static void OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command);
 	static void OnHealthChange(BaseSceneObject* obj, float newVal, bool checkAuthority);
+	static void OnDeath(BaseSceneObject* obj);
+	static void OnRevive(BaseSceneObject* obj);
 	static void OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other);
+	static void OnTriggerStay(BaseSceneObject* obj, BaseSceneObject* other);
 
 	static bool DoSprint(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
 	static bool DoMelee(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);

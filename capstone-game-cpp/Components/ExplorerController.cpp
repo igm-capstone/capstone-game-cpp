@@ -4,8 +4,18 @@
 #include <Colors.h>
 #include <SceneObjects/Explorer.h>
 #include <Components/AnimationUtility.h>
+#include "Health.h"
 
 using namespace cliqCity::graphicsMath;
+
+#pragma region util
+
+inline quatf CalculateExplorerRotation(float angle)
+{
+	return normalize(quatf::angleAxis(angle, vec3f(0, 0, 1)) * quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0));
+}
+
+#pragma endregion 
 
 ExplorerController::ExplorerController() :
 	mInput((&Singleton<Engine>::SharedInstance())->GetInput()),
@@ -41,8 +51,8 @@ bool ExplorerController::Move(float dt, vec3f& pos)
 	}
 
 	// vertical and horizontal speed components
-	float hSpeed = (mInput->GetKey(KEYCODE_LEFT) ? -1.0f : 0.0f) + (mInput->GetKey(KEYCODE_RIGHT) ? 1.0f : 0.0f);
-	float vSpeed = (mInput->GetKey(KEYCODE_DOWN) ? -1.0f : 0.0f) + (mInput->GetKey(KEYCODE_UP) ? 1.0f : 0.0f);
+	float hSpeed = (mInput->GetKey(KEYCODE_A) ? -1.0f : 0.0f) + (mInput->GetKey(KEYCODE_D) ? 1.0f : 0.0f);
+	float vSpeed = (mInput->GetKey(KEYCODE_S) ? -1.0f : 0.0f) + (mInput->GetKey(KEYCODE_W) ? 1.0f : 0.0f);
 
 	bool wantToMove = hSpeed || vSpeed;
 
@@ -101,7 +111,7 @@ bool ExplorerController::RotateTowardsMousePosition(float dt, vec3f& pos, quatf&
 }
 
 bool ExplorerController::UpdateRotation(float angle, quatf& rot) {
-	quatf newRot = normalize(quatf::angleAxis(angle, vec3f(0, 0, 1)) * quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0));
+	quatf newRot = CalculateExplorerRotation(angle);
 
 	auto hasRotated = rot != newRot;
 	if (hasRotated && CanMove())
@@ -114,11 +124,11 @@ bool ExplorerController::UpdateRotation(float angle, quatf& rot) {
 
 void ExplorerController::UpdateInteractWill()
 {
-	if (mInput->GetKeyDown(KEYCODE_E) || mInput->GetKeyDown(KEYCODE_OEM_PERIOD))
+	if (mInput->GetKeyDown(KEYCODE_SPACE) || mInput->GetKeyDown(KEYCODE_OEM_PERIOD))
 	{
 		mIsInteracting = true;
 	}
-	else if (mInput->GetKeyUp(KEYCODE_E) || mInput->GetKeyUp(KEYCODE_OEM_PERIOD))
+	else if (mInput->GetKeyUp(KEYCODE_SPACE) || mInput->GetKeyUp(KEYCODE_OEM_PERIOD))
 	{
 		mIsInteracting = false;
 	}
@@ -133,6 +143,12 @@ void ExplorerController::ConsumeInteractWill()
 bool ExplorerController::Update(double milliseconds)
 {
 	if (!mIsActive) return false;
+
+	Explorer* pExplorer = reinterpret_cast<Explorer*>(mSceneObject);
+	if (pExplorer->mHealth->GetHealth() <= 0)
+	{
+		return false;
+	}
 
 	// delta time in seconds
 	float dt = float(milliseconds) * 0.001f;
@@ -160,7 +176,10 @@ bool ExplorerController::Update(double milliseconds)
 	}
 	else
 	{
-		PauseStateAnimation(ANIM_STATE_RUN);
+		if (mAnimationController->GetState() != ANIM_STATE_MELEE)
+		{
+			PlayStateAnimation(ANIM_STATE_IDLE);
+		}
 	}
 
 	if (mInput->GetMouseButtonDown(MOUSEBUTTON_RIGHT)) {
@@ -181,6 +200,18 @@ void ExplorerController::Sprint(float duration)
 
 void ExplorerController::Melee()
 {
+	vec3f position = mSceneObject->mTransform->GetPosition();
+	auto mousePosition = mCameraManager->Screen2WorldAt(mInput->mousePosition, position.z);
+	auto lastPos = mSceneObject->mTransform->GetPosition();
+	auto dir = normalize(mousePosition - lastPos);
+
+	if (magnitude(dir) > 0.001f) 
+	{
+		float targetAngle = atan2(dir.y, dir.x);
+		quatf rotation = CalculateExplorerRotation(targetAngle);
+		mSceneObject->mTransform->SetRotation(rotation);
+	}
+
 	PlayStateAnimation(ANIM_STATE_MELEE);
 }
 

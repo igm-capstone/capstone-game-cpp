@@ -13,6 +13,8 @@ enum PacketTypes {
 	SYNC_TRANSFORM	= 'T',
 	SYNC_HEALTH		= 'H',
 	SYNC_ANIMATION	= 'N',
+	INTERACT		= 'I',
+	READY			= 'R',
 	UNKNOWN
 };
 
@@ -58,8 +60,9 @@ struct Packet {
 			float Duration = 0;
 			SkillPacketTypes Type = SKILL_TYPE_UNKNOWN;
 		} AsSkill;
-		
+
 		float AsFloat;
+		bool AsBool;
 	}; // Package Specific Data
 
 	Packet() : Type(UNKNOWN) {};
