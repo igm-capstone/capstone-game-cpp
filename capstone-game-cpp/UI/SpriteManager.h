@@ -73,7 +73,7 @@ public:
 
 	void Initialize(Rig3D::IMesh* spriteMesh, Rig3D::IShaderResource* spriteShaderResource);
 
-	void NewFrame() { mSprites = 0; mGlyphs = 0; }
+	void EndFrame() { mSprites = 0; mGlyphs = 0; }
 	void LoadSpriteSheet(const char* filename, int spriteWidth, int spriteHeight, int slicesX, int slicesY);
 	void LoadFont(const char* filename);
 	void DrawSprite(SpriteSheetCode sheetID, int spriteID, vec2f pos, vec2f size, vec4f tint = vec4f(1,1,1,1), vec2f linearFill = vec2f(1, 1), float radialFill = -1);

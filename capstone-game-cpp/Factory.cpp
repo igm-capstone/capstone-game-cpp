@@ -4,9 +4,7 @@
 #include "SceneObjects\Minion.h"
 #include "SceneObjects\StaticCollider.h"
 #include "SceneObjects\StaticMesh.h"
-#include "SceneObjects\MoveableBlock.h"
 #include "SceneObjects\SpawnPoint.h"
-#include "SceneObjects\Pickup.h"
 #include "SceneObjects\DominationPoint.h"
 #include "SceneObjects\Lamp.h"
 #include "SceneObjects\Ghost.h"
@@ -40,22 +38,20 @@ PoolAllocator Factory<##type##>::sAllocator(__g##type##Buffer, __g##type##Buffer
 
 #pragma endregion
 
-// register scene object factories
+// register transform factory
+REGISTER_FACTORY ( Transform,	100 + MAX_STATIC_MESHES + MAX_EXPLORERS + MAX_MINIONS + MAX_STATIC_COLLIDERS)
+
+// register SCENE OBJECTS factories
 REGISTER_FACTORY ( Ghost,			1	)
 REGISTER_FACTORY ( Explorer,		MAX_EXPLORERS)
 REGISTER_FACTORY ( Minion,			MAX_MINIONS	)
 REGISTER_FACTORY ( StaticMesh,		MAX_STATIC_MESHES)
 REGISTER_FACTORY ( StaticCollider,	MAX_STATIC_COLLIDERS)
-REGISTER_FACTORY ( MoveableBlock,	10	)
 REGISTER_FACTORY ( SpawnPoint,		5	)
-REGISTER_FACTORY ( Pickup,			7	)
 REGISTER_FACTORY ( DominationPoint,	6	)
 REGISTER_FACTORY ( Lamp,			MAX_LAMPS)
 REGISTER_FACTORY ( Region,			100)
-
-
-// register transform factory
-REGISTER_FACTORY ( Transform,	100 + MAX_STATIC_MESHES + MAX_EXPLORERS + MAX_MINIONS + MAX_STATIC_COLLIDERS)
+REGISTER_FACTORY ( Door,			MAX_DOORS)
 
 // register component factories
 REGISTER_FACTORY ( NetworkID,						1 + MAX_EXPLORERS + MAX_MINIONS + MAX_LAMPS + MAX_DOORS)
@@ -74,7 +70,6 @@ REGISTER_FACTORY ( FmodEvent,						100	)
 REGISTER_FACTORY ( FmodEventCollection,				10	)
 REGISTER_FACTORY ( AnimationController,				MAX_EXPLORERS + MAX_MINIONS)
 REGISTER_FACTORY ( PlaneColliderComponent,			100)
-REGISTER_FACTORY ( Door,							MAX_DOORS)
 
 REGISTER_FACTORY ( Heal, 5)
 REGISTER_FACTORY ( Trap, 5)

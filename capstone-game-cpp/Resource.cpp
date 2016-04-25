@@ -136,7 +136,7 @@ void loadDomPoints(jarr_t objs)
 }
 
 
-void loadPickups(jarr_t objs)
+/*void loadPickups(jarr_t objs)
 {
 	TRACE_LOG("Loading " << int(objs->size()) << " pickups...");
 	for (auto obj : *objs)
@@ -146,7 +146,7 @@ void loadPickups(jarr_t objs)
 
 		pickup->mSkill = obj["skillName"].get<string>();
 	}
-}
+}*/
 
 
 void loadSpawnPoints(jarr_t objs)
@@ -372,11 +372,11 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		loadDomPoints(domination);
 	}
 
-	auto pickups = obj["pickups"].get_ptr<jarr_t>();
+	/*auto pickups = obj["pickups"].get_ptr<jarr_t>();
 	if (pickups != nullptr)
 	{
 		loadPickups(pickups);
-	}
+	}*/
 
 	auto spawnPoints = obj["spawnPoints"].get_ptr<jarr_t>();
 	if (spawnPoints != nullptr)

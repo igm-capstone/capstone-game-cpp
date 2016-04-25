@@ -11,6 +11,7 @@
 UIManager::UIManager()
 {
 	mSpriteManager = &Rig3D::Singleton<SpriteManager>::SharedInstance();
+	mInput = Singleton<Engine>::SharedInstance().GetInput();
 
 	for (int i = 0; i < sizeof(mReadyState); i++) mReadyState[i] = false;
 }
@@ -22,13 +23,11 @@ UIManager::~UIManager()
 
 void UIManager::RenderPanel()
 {
-	auto posYPerc = 0.07f;
-
-	mSpriteManager->DrawSprite(SPRITESHEET_PANELS, numBtns - 1, mSpriteManager->perc2f(0.5f, posYPerc), vec2f(512, 128));
+	mSpriteManager->DrawSprite(SPRITESHEET_PANELS, numBtns - 1, mSpriteManager->perc2f(0.5f, 0) + vec2f(0,64), vec2f(512, 128));
 
 	for (auto i = 0; i < numBtns; i++)
 	{
-		RenderButton(&mButtons[i], mSpriteManager->perc2f(0.5f, posYPerc) + vec2f(-64.0f * (numBtns-1) + 128.0f * i, 0));
+		RenderButton(&mButtons[i], mSpriteManager->perc2f(0.5f, 0) + vec2f(-64.0f * (numBtns-1) + 128.0f * i, 64));
 	}
 }
 
@@ -41,9 +40,23 @@ void UIManager::RenderButton(Button* b, vec2f pos)
 	if (b->keySpriteID != -1) mSpriteManager->DrawSprite(SPRITESHEET_CONTROL_ICONS, b->keySpriteID, pos + vec2f(30, -33), vec2f(28, 28));
 	if (b->isHighlighted) mSpriteManager->DrawSprite(b->sheetID, 15, pos, vec2f(100, 100));
 	
+	if (b->toolTipID != -1) {
+		AddInteractableArea(pos - vec2f(50, 50), pos + vec2f(50, 50), [this, b]() { RenderToolTip(b); return true; }, false);
+	}
+	if (b->onClick != nullptr) {
+		AddInteractableArea(pos - vec2f(50, 50), pos + vec2f(50, 50), b->onClick, true);
+	}
 }
 
-void UIManager::AddSkill(Skill* skill, SpriteSheetCode sheetID, int spriteID, int keySpriteID)
+void UIManager::RenderToolTip(Button* b)
+{
+	vec2f pos = mSpriteManager->perc2f(0.5f, 0) + vec2f(0, 128+64*0.6f);
+
+	mSpriteManager->DrawSprite(SPRITESHEET_PANELS, 1, pos, vec2f(512*0.6f, 128 * 0.6f));
+	mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 16, pos + vec2f(0, 0), vec4f(1, 1, 1, 1), ALIGN_CENTER, "Description %d", b->toolTipID);
+}
+
+void UIManager::AddSkill(Skill* skill, SpriteSheetCode sheetID, int spriteID, int keySpriteID, int toolTipID, bool canClickToSetActive)
 {
 	assert(numBtns < 4);
 
@@ -51,8 +64,23 @@ void UIManager::AddSkill(Skill* skill, SpriteSheetCode sheetID, int spriteID, in
 	mButtons[numBtns].spriteID = spriteID;
 	mButtons[numBtns].skill = skill;
 	mButtons[numBtns].keySpriteID = keySpriteID;
+	mButtons[numBtns].toolTipID = toolTipID;
+	if (canClickToSetActive)
+		mButtons[numBtns].onClick = [this, skill]() { SetActiveSkill(skill); return true; };
 
 	numBtns++;
+}
+
+void UIManager::AddInteractableArea(vec2f topLeft, vec2f bottonRight, OnInteractArea function, bool isClick)
+{
+	assert(numAreas < MAX_INTERACTIBLE_AREAS);
+
+	mInteractibleAreas[numAreas].topLeft = topLeft;
+	mInteractibleAreas[numAreas].bottonRight = bottonRight;
+	mInteractibleAreas[numAreas].mFunction = function;
+	mInteractibleAreas[numAreas].isClick = isClick;
+
+	numAreas++;
 }
 
 void UIManager::SetActiveSkill(Skill* skill)
@@ -154,4 +182,38 @@ void UIManager::BlockGame(bool block)
 			}
 		}
 	}
+}
+
+void UIManager::Update(double ms)
+{
+	static double hoveringTime;
+	bool didHover = false;
+	
+	mInput->SetMouseActive(true);
+	auto mousePos = mInput->mousePosition;
+
+	for (int i = 0; i < numAreas; i++)
+	{
+		auto area = mInteractibleAreas[i];
+		if (mousePos.x >= area.topLeft.x &&
+			mousePos.x <= area.bottonRight.x &&
+			mousePos.y >= area.topLeft.y &&
+			mousePos.y <= area.bottonRight.y &&
+			area.mFunction)
+		{
+			if (area.isClick && mInput->GetMouseButtonDown(MOUSEBUTTON_LEFT)) {
+				area.mFunction();
+				mInput->SetMouseActive(false);
+			}
+			else if (!area.isClick && hoveringTime > 500) // 500 ms before hover function gets called
+				area.mFunction();
+			//Hover delay
+			if (!area.isClick && !didHover) {
+				hoveringTime += ms;
+				didHover = true;
+			}
+		}
+	}
+	if (!didHover) hoveringTime = 0;
+	numAreas = 0;
 }

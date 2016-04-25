@@ -10,6 +10,7 @@
 #include <Rig3D/Graphics/Interface/IRenderContext.h>
 #include <Culler.h>
 #include <SceneObjects/Lamp.h>
+#include <SceneObjects/Region.h>
 #include <SceneObjects/Minion.h>
 #include <trace.h>
 #include <Components/DominationPointController.h>
@@ -449,6 +450,9 @@ void Level01::VUpdate(double milliseconds)
 	// Handle this first so we can destroy objects later.
 	mCollisionManager->Update(milliseconds);
 
+	// Handle this first so it can consume mouse events.
+	mUIManager.Update(milliseconds);
+
 	// TO DO: Possibly a Components Update method... if we move this code to application level.
 	for (ExplorerController& ec : Factory<ExplorerController>())
 	{
@@ -551,6 +555,11 @@ void Level01::VUpdate(double milliseconds)
 	if (mInput->GetKeyDown(KEYCODE_F8))
 	{
 		gDebugBT = !gDebugBT;
+	}
+	//Do not use F9, already used else-where
+	if (mInput->GetKeyDown(KEYCODE_F10))
+	{
+		Application::SharedInstance().LoadScene<Level01>();
 	}
 #endif
 
@@ -711,7 +720,6 @@ void Level01::VRender()
 
 	RenderEffects();
 	
-	mSpriteManager->NewFrame();
 	RenderHealthBars();
 	mUIManager.RenderPanel();
 	if (mNetworkManager->mMode == NetworkManager::SERVER) mUIManager.RenderManaBar();
@@ -1176,6 +1184,8 @@ void Level01::RenderSprites() {
 
 	mRenderer->VSetVertexShaderInstanceBuffer(mSpritesShaderResource, 1, 1);
 	mRenderer->GetDeviceContext()->DrawIndexedInstanced(mNDSQuadMesh->GetIndexCount(), mSpriteManager->GetGlyphInstanceBufferCount(), 0, 0, 0);
+
+	mSpriteManager->EndFrame();
 }
 
 void Level01::RenderGrid()
@@ -1411,7 +1421,16 @@ void Level01::ComputeGrid()
 
 void Level01::VShutdown()
 {
-
+	CLEAR_FACTORY(Ghost)
+	CLEAR_FACTORY(Explorer)
+	CLEAR_FACTORY(Minion)
+	CLEAR_FACTORY(StaticMesh)
+	CLEAR_FACTORY(StaticCollider)
+	CLEAR_FACTORY(SpawnPoint)
+	CLEAR_FACTORY(DominationPoint)
+	CLEAR_FACTORY(Lamp)
+	CLEAR_FACTORY(Region)
+	CLEAR_FACTORY(Door)
 }
 
 bool Level01::ActivationPredicate(class Explorer* explorer)

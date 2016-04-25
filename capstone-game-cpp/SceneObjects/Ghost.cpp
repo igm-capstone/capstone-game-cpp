@@ -27,13 +27,13 @@ json findByName(jarr_t& array, string name)
 	return json();
 }
 
-Skill* createSkill(string skillName, Skill::UseCallback callback, json& skillConfig)
+Skill* createSkill(const char* skillName, Skill::UseCallback callback, json& skillConfig)
 {
 	auto cooldown = skillConfig["cooldown"].get<float>();
 	auto cost = skillConfig["cost"].get<float>();
 	
 	auto skill = Factory<Skill>::Create();
-	skill->Setup("Imp", cooldown, 0, callback, cost);
+	skill->Setup(skillName, cooldown, 0, callback, cost);
 
 	return skill;
 }
@@ -115,10 +115,10 @@ void Ghost::Spawn(BaseScene* scene)
 	mCameraManager->MoveCamera(level.center, level.center + vec3f(0.0f, 0.0f, -85.5f));
 
 	mUIManager = &scene->mUIManager;
-	mUIManager->AddSkill(mSkills[1], SPRITESHEET_GHOST_ICONS, 0, 0);
-	mUIManager->AddSkill(mSkills[2], SPRITESHEET_GHOST_ICONS, 1, 1);
-	mUIManager->AddSkill(mSkills[3], SPRITESHEET_GHOST_ICONS, 5, 2);
-	mUIManager->AddSkill(mSkills[4], SPRITESHEET_GHOST_ICONS, 4, 9);
+	mUIManager->AddSkill(mSkills[1], SPRITESHEET_GHOST_ICONS, 0, 0, 0, true);
+	mUIManager->AddSkill(mSkills[2], SPRITESHEET_GHOST_ICONS, 1, 1, 1, true);
+	mUIManager->AddSkill(mSkills[3], SPRITESHEET_GHOST_ICONS, 5, 2, 2, true);
+	mUIManager->AddSkill(mSkills[4], SPRITESHEET_GHOST_ICONS, 4, 9, 3, true);
 	SetActiveSkill(1);
 }
 
