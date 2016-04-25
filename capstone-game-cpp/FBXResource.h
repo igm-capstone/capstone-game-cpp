@@ -569,10 +569,29 @@ public:
 	}
 #pragma endregion
 
+	struct BinHeader
+	{
+		// timestamp??
+		int32_t mIndexCount;
+		int32_t mVertexCount;
+	};
+
 	int SaveToBin()
 	{
-		FILE* file;
 		std::string filename = std::string(mFilename);
+		ofstream out(filename.replace(filename.end() - 3, filename.end(), "bin").c_str(), ofstream::binary);
+		
+		BinHeader header;
+		header.mIndexCount  = mIndices.size();
+		header.mVertexCount = mVertices.size();
+		
+		out.write(reinterpret_cast<char*>(&header), sizeof(BinHeader));
+		
+		out.close();
+		return 1; 
+		
+		/*
+		FILE* file;
 		fopen_s(&file, filename.replace(filename.end() - 3, filename.end(), "bin").c_str(), "w");
 		
 		using namespace nlohmann;
@@ -600,7 +619,7 @@ public:
 			i++;
 		}
 
-		/*std::unordered_map<int, nlohmann::json> jAuxCP;
+		std::unordered_map<int, nlohmann::json> jAuxCP;
 		for each (auto v in mControlPointJointBlendMap)
 		{
 			std::vector<std::string> aux;
@@ -622,7 +641,7 @@ public:
 		jstr.push_back(nlohmann::json(base64_encode((byte*)&mSkeletalHierarchy, sizeof(mSkeletalHierarchy))));
 		jstr.push_back(jS);
 
-		nlohmann::json j(jstr);*/
+		nlohmann::json j(jstr);
 
 		auto str = j.dump(4);
 
@@ -630,5 +649,6 @@ public:
 		fclose(file);
 
 		return 1;
+		*/
 	}
 };

@@ -112,17 +112,17 @@ public:
 			c = new(ptr) ModelCluster();
 
 			std::string fbxPath = "Assets/Models/" + std::string(name) + ".fbx";
-			std::string binPath = "Assets/Models/" + std::string(name) + std::to_string(typeid(Vertex).hash_code()) + ".bin";
+			std::string binPath = "Assets/Models/" + std::string(name) + ".bin";
 
 			FILE *file;
 			fopen_s(&file, binPath.c_str(), "r");
 			if (file) {
+				fclose(file);
 				//We got a binary cache of the model
 				BINMeshResource<Vertex> binResource(binPath.c_str());
 				mMeshLibrary.LoadMesh(&c->mMesh, mRenderer, binResource);
 				c->mSkeletalHierarchy = binResource.mSkeletalHierarchy;
 				c->mSkeletalAnimations = binResource.mSkeletalAnimations;
-				fclose(file);
 			}
 			else
 			{

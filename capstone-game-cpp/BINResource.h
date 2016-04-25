@@ -35,8 +35,37 @@ public:
 		mSkeletalAnimations.clear();
 	}
 
+
+	struct BinHeader1
+	{
+		// timestamp??
+		int32_t mIndexCount;
+		int32_t mVertexCount;
+	};
+
 	int Load()
 	{
+		ifstream ifs(mFilename, ifstream::in | ifstream::binary);
+		if (!ifs.is_open())
+		{
+			TRACE_ERROR("Error opening file " << mFilename);
+		};
+		// get size of file
+		//infile.seekg(0, infile.end);
+		//long size = infile.tellg();
+		//infile.seekg(0);
+
+		//BinHeader1 header;
+		char* buffer = new char[1];
+		if (!ifs.read(buffer, 1))
+		{
+			TRACE_ERROR("file error");
+		};
+
+		ifs.close();
+		delete buffer;
+		return 1;
+
 		FILE* file;
 		fopen_s(&file, mFilename, "r");
 		fread((void*)this, sizeof(*this), 1, file);
