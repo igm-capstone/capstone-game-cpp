@@ -20,6 +20,6 @@ float4 main(Pixel pixel) : SV_TARGET
 	//float4 diffuse = diffuseMap.Sample(samplerState, pixel.uv);
 	//int depth = (int)(depthMap.Sample(samplerState, pixel.uv).r);
 	float4 clearColor = { 0.3, 0.3f, 0.3f, 1.0f };
-	float4 ambientLightColor = { 0.5, 0.5f, 0.5f, 1.0f };
+	float4 ambientLightColor = { 0.8, 0.8f, 0.8f, 1.0f };
 	return (clearColor * depth) + (ambientLightColor * !depth * diffuse) + (albedo * diffuse);
 }
