@@ -237,14 +237,14 @@ void SpriteManager::LoadFont(const char* filename)
 	};
 
 	mFilenames[mSheets] = filename;
-	memcpy(&mGlyphsData[mFonts], sdf_spacing0, sizeof(sdf_spacing0));
-
-	mFonts++;
-	memcpy(&mGlyphsData[mFonts], sdf_spacing1, sizeof(sdf_spacing1));
-
-
-	mFonts++;
 	mSheets++;
+
+	if (mFonts == 0) {
+		memcpy(&mGlyphsData[mFonts], sdf_spacing0, sizeof(sdf_spacing0));
+		mFonts++;
+		memcpy(&mGlyphsData[mFonts], sdf_spacing1, sizeof(sdf_spacing1));
+		mFonts++;
+	}
 }
 
 void SpriteManager::DrawSprite(SpriteSheetCode sheetID, int spriteID, vec2f pos, vec2f scale, vec4f tint, vec2f linearFill, float radialFill)

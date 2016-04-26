@@ -160,6 +160,7 @@
     <ClInclude Include="Components\ImpController.h" />
     <ClInclude Include="UI\UIManager.h" />
     <ClInclude Include="jsonUtils.h" />
+    <ClInclude Include="BINResource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />

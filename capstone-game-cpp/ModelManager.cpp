@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ModelManager.h"
 #include "Vertex.h"
+#include <algorithm>
 
 const uint32_t kStaticMeshModelTextureCount = 18;
 
