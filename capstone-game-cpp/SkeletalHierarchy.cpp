@@ -46,7 +46,7 @@ Joint* SkeletalHierarchy::GetJointByName(const char* name)
 
 	for (uint32_t i = 0; i < mJoints.size(); i++)
 	{
-		if (strcmp(name, joints[i].name) == 0)
+		if (joints[i].name == std::string(name))
 		{
 			return &joints[i];
 		}
@@ -59,7 +59,7 @@ int SkeletalHierarchy::GetJointIndexByName(const char* name)
 {
 	for (uint32_t i = 0; i < mJoints.size(); i++)
 	{
-		if (strcmp(name, mJoints[i].name) == 0)
+		if (mJoints[i].name == std::string(name))
 		{
 			return static_cast<int>(i);
 		}

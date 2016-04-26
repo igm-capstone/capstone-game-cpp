@@ -14,13 +14,13 @@ struct Joint
 	mat4f		inverseBindPoseMatrix;  // Transforms from model space bind pose to joint space bind pose
 	mat4f		animPoseMatrix;			// Transforms from joint space bind pose to model space animated pose
 	int			parentIndex;			// -1 indicates root 
-	const char* name;
+	std::string name;
 
 	void Serialize(std::ostream& os)
 	{
-		uint32_t nameSize = strlen(name);
+		uint32_t nameSize = name.size();
 		os.write(reinterpret_cast<char*>(&nameSize), sizeof(uint32_t));
-		os.write(name, sizeof(char*) * nameSize);
+		os.write(name.c_str(), sizeof(char*) * nameSize);
 		os.write(reinterpret_cast<char*>(&inverseBindPoseMatrix), sizeof(mat4f));
 		os.write(reinterpret_cast<char*>(&animPoseMatrix), sizeof(mat4f));
 		os.write(reinterpret_cast<char*>(&parentIndex), sizeof(int));
@@ -31,8 +31,11 @@ struct Joint
 		uint32_t nameSize;
 		is.read(reinterpret_cast<char*>(&nameSize), sizeof(uint32_t));
 		
-		//char* str = 
-		//is.read(name, sizeof(char) * nameSize);
+		char buff[100];
+		is.read(buff, nameSize);
+		buff[nameSize] = 0;
+		name = std::string(buff);
+
 		is.read(reinterpret_cast<char*>(&inverseBindPoseMatrix), sizeof(mat4f));
 		is.read(reinterpret_cast<char*>(&animPoseMatrix), sizeof(mat4f));
 		is.read(reinterpret_cast<char*>(&parentIndex), sizeof(int));
@@ -107,6 +110,7 @@ struct SkeletalAnimation
 
 		char buff[100];
 		is.read(buff, nameSize);
+		buff[nameSize] = 0;
 		name = std::string(buff);
 
 		size_t size;

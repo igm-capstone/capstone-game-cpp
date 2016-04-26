@@ -89,7 +89,8 @@ public:
 
 			char buff[100];
 			ifs.read(buff, nameSize);
-			joints[i].name = string(buff).c_str();
+			buff[nameSize] = 0;
+			joints[i].name = string(buff);
 
 			ifs.read(reinterpret_cast<char*>(&joints[i].inverseBindPoseMatrix), sizeof(mat4f));
 			ifs.read(reinterpret_cast<char*>(&joints[i].animPoseMatrix), sizeof(mat4f));

@@ -516,9 +516,9 @@ public:
 		ofs.write(reinterpret_cast<char*>(&skeletalSize), sizeof(size_t));
 		for (auto& joint : mSkeletalHierarchy.mJoints)
 		{
-			size_t nameSize = strlen(joint.name);
+			size_t nameSize = joint.name.size();
 			ofs.write(reinterpret_cast<char*>(&nameSize), sizeof(size_t));
-			ofs.write(joint.name, nameSize);
+			ofs.write(joint.name.c_str(), nameSize);
 			ofs.write(reinterpret_cast<char*>(&joint.inverseBindPoseMatrix), sizeof(mat4f));
 			ofs.write(reinterpret_cast<char*>(&joint.animPoseMatrix), sizeof(mat4f));
 			ofs.write(reinterpret_cast<char*>(&joint.parentIndex), sizeof(int));
