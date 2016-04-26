@@ -190,6 +190,7 @@
     <ClInclude Include="BehaviorTree\Race.h" />
     <ClInclude Include="BehaviorTree\Selector.h" />
     <ClInclude Include="BehaviorTree\Tree.h" />
+    <ClInclude Include="BINResource.h" />
     <ClInclude Include="BVHTree.h" />
     <ClInclude Include="BehaviorTree\Behavior.h" />
     <ClInclude Include="BehaviorTree\Composite.h" />

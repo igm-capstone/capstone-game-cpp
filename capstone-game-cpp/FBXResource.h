@@ -10,6 +10,7 @@ http://www.gamedev.net/page/resources/_/technical/graphics-programming-and-theor
 #include <fbxsdk.h>
 #include <SkeletalHierarchy.h>
 #include <trace.h>
+#include <Windows.h>
 
 #define GET_FLOAT(f) static_cast<float>(f)
 
@@ -255,14 +256,18 @@ public:
 
 					// Blend info
 
-					std::vector<JointBlendWeight>& controlPointInfluenceJoints = mControlPointJointBlendMap[controlPointIndex];
-					uint32_t controlPointInfluenceJointCount = min(controlPointInfluenceJoints.size(), 4);
-					uint32_t diff = abs(static_cast<int>(4 - controlPointInfluenceJoints.size()));
-
-					for (uint32_t i = 0; i < controlPointInfluenceJointCount; i++)
+					uint32_t controlPointInfluenceJointCount = 0;
+					if (mControlPointJointBlendMap.find(controlPointIndex) != mControlPointJointBlendMap.end())
 					{
-						vertex.SetBlendIndices(i, controlPointInfluenceJoints[i].jointIndex);
-						vertex.SetBlendWeights(i, controlPointInfluenceJoints[i].jointWeight);
+						std::vector<JointBlendWeight>& controlPointInfluenceJoints = mControlPointJointBlendMap[controlPointIndex];
+						controlPointInfluenceJointCount = min(controlPointInfluenceJoints.size(), 4);
+						uint32_t diff = abs(static_cast<int>(4 - controlPointInfluenceJoints.size()));
+
+						for (uint32_t i = 0; i < controlPointInfluenceJointCount; i++)
+						{
+							vertex.SetBlendIndices(i, controlPointInfluenceJoints[i].jointIndex);
+							vertex.SetBlendWeights(i, controlPointInfluenceJoints[i].jointWeight);
+						}
 					}
 
 					// Set remaining indices to zero.
@@ -471,5 +476,64 @@ public:
 		{
 			LoadSkeletalAnimationsRecursively(pNode->GetChild(i));
 		}
+	}
+
+	int SaveToBin(FILETIME fbxTimestamp)
+	{
+		std::string filename = string(mFilename);
+		filename = filename.replace(filename.end() - 3, filename.end(), "bin");
+		ofstream ofs(filename.c_str(), ofstream::binary);
+		
+		ofs.write(reinterpret_cast<char*>(&fbxTimestamp), sizeof(FILETIME));
+
+		size_t indexCount  = mIndices.size();
+		ofs.write(reinterpret_cast<char*>(&indexCount), sizeof(size_t));
+		ofs.write(reinterpret_cast<char*>(&mIndices[0]), sizeof(uint16_t) * indexCount);
+
+		size_t vertexCount = mVertices.size();
+		ofs.write(reinterpret_cast<char*>(&vertexCount), sizeof(size_t));
+		ofs.write(reinterpret_cast<char*>(&mVertices[0]), sizeof(Vertex) * vertexCount);
+
+		size_t mapSize = mControlPointJointBlendMap.size();
+		ofs.write(reinterpret_cast<char*>(&mapSize), sizeof(size_t));
+		
+		if (!mapSize)
+		{
+			ofs.close();
+			return 1;
+		}
+
+		for (auto& pair : mControlPointJointBlendMap)
+		{
+			size_t index = pair.first;
+			size_t count = pair.second.size();
+			ofs.write(reinterpret_cast<char*>(&index), sizeof(size_t));
+			ofs.write(reinterpret_cast<char*>(&count), sizeof(size_t));
+			ofs.write(reinterpret_cast<char*>(&pair.second[0]), sizeof(JointBlendWeight) * count);
+		}
+
+		size_t skeletalSize = mSkeletalHierarchy.mJoints.size();
+		ofs.write(reinterpret_cast<char*>(&skeletalSize), sizeof(size_t));
+		for (auto& joint : mSkeletalHierarchy.mJoints)
+		{
+			size_t nameSize = joint.name.size();
+			ofs.write(reinterpret_cast<char*>(&nameSize), sizeof(size_t));
+			ofs.write(joint.name.c_str(), nameSize);
+			ofs.write(reinterpret_cast<char*>(&joint.inverseBindPoseMatrix), sizeof(mat4f));
+			ofs.write(reinterpret_cast<char*>(&joint.animPoseMatrix), sizeof(mat4f));
+			ofs.write(reinterpret_cast<char*>(&joint.parentIndex), sizeof(int));
+		}
+		
+		size_t skeletalAnimSize = mSkeletalAnimations.size();
+		ofs.write(reinterpret_cast<char*>(&skeletalAnimSize), sizeof(size_t));
+
+		for (auto& anim : mSkeletalAnimations)
+		{
+			anim.Serialize(ofs);
+		}
+
+		ofs.close();
+
+		return 1;
 	}
 };
