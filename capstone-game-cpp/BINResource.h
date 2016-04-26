@@ -35,42 +35,77 @@ public:
 		mSkeletalAnimations.clear();
 	}
 
-
-	struct BinHeader1
-	{
-		// timestamp??
-		int32_t mIndexCount;
-		int32_t mVertexCount;
-	};
-
 	int Load()
 	{
-		ifstream ifs(mFilename, ifstream::in | ifstream::binary);
+		ifstream ifs(mFilename, ifstream::binary);
 		if (!ifs.is_open())
 		{
+			return 1;
 			TRACE_ERROR("Error opening file " << mFilename);
 		};
-		// get size of file
-		//infile.seekg(0, infile.end);
-		//long size = infile.tellg();
-		//infile.seekg(0);
 
-		//BinHeader1 header;
-		char* buffer = new char[1];
-		if (!ifs.read(buffer, 1))
+		FILETIME lastWriteTime;
+		ifs.read(reinterpret_cast<char*>(&lastWriteTime), sizeof(FILETIME));
+
+		size_t indexCount, vertexCount;
+
+		ifs.read(reinterpret_cast<char*>(&indexCount), sizeof(size_t));
+		mIndices.resize(indexCount);
+		ifs.read(reinterpret_cast<char*>(&mIndices[0]), sizeof(uint16_t) * indexCount);
+
+		ifs.read(reinterpret_cast<char*>(&vertexCount), sizeof(size_t));
+		mVertices.resize(vertexCount);
+		ifs.read(reinterpret_cast<char*>(&mVertices[0]), sizeof(Vertex) * vertexCount);
+
+		size_t mapSize, index, count;
+		ifs.read(reinterpret_cast<char*>(&mapSize), sizeof(size_t));
+
+		if (!mapSize)
 		{
-			TRACE_ERROR("file error");
-		};
+			ifs.close();
+			return 1;
+		}
+
+		for (size_t i = 0; i < mapSize; i++)
+		{
+			ifs.read(reinterpret_cast<char*>(&index), sizeof(size_t));
+			ifs.read(reinterpret_cast<char*>(&count), sizeof(size_t));
+
+			auto& v = mControlPointJointBlendMap[index];
+			v.resize(count);
+			ifs.read(reinterpret_cast<char*>(&v[0]), sizeof(JointBlendWeight) * count);
+		}
+
+		size_t skeletalSize;
+		ifs.read(reinterpret_cast<char*>(&skeletalSize), sizeof(size_t));
+
+		auto& joints = mSkeletalHierarchy.mJoints;
+		joints.resize(skeletalSize);
+
+		for (size_t i = 0; i < skeletalSize; i++)
+		{
+			size_t nameSize;
+			ifs.read(reinterpret_cast<char*>(&nameSize), sizeof(size_t));
+
+			char buff[100];
+			ifs.read(buff, nameSize);
+			joints[i].name = string(buff).c_str();
+
+			ifs.read(reinterpret_cast<char*>(&joints[i].inverseBindPoseMatrix), sizeof(mat4f));
+			ifs.read(reinterpret_cast<char*>(&joints[i].animPoseMatrix), sizeof(mat4f));
+			ifs.read(reinterpret_cast<char*>(&joints[i].parentIndex), sizeof(int));
+		}
+
+		size_t skeletalAnimSize;
+		ifs.read(reinterpret_cast<char*>(&skeletalAnimSize), sizeof(size_t));
+
+		mSkeletalAnimations.resize(skeletalAnimSize);
+		for (size_t i = 0; i < skeletalAnimSize; i++)
+		{
+			mSkeletalAnimations[i].Deserialize(ifs);
+		}
 
 		ifs.close();
-		delete buffer;
-		return 1;
-
-		FILE* file;
-		fopen_s(&file, mFilename, "r");
-		fread((void*)this, sizeof(*this), 1, file);
-		fclose(file);
-
 		return 1;
 	}
 

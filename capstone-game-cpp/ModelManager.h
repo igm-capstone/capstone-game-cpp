@@ -1,10 +1,9 @@
 #pragma once
 #include "SkeletalHierarchy.h"
-#include <algorithm>
 #include "SceneObjects/BaseSceneObject.h"
 #include "FBXResource.h"
 #include "BINResource.h"
-#include "json.h"
+#include "Windows.h"
 
 enum StaticMeshModel : int
 {
@@ -92,6 +91,51 @@ class ModelManager
 
 	std::unordered_map<std::string, ModelCluster*> mModelMap;
 
+	FILETIME GetFileTimestamp(std::string filename)
+	{
+		HANDLE file;
+		//file = CreateFile(LPCWSTR(filename.c_str()),
+		file = CreateFile(std::wstring(filename.begin(), filename.end()).c_str(),
+			GENERIC_READ, FILE_SHARE_READ, NULL, 
+			OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+		if (file == INVALID_HANDLE_VALUE)
+		{
+			return{ 0L, 0L };
+		}
+
+		FILETIME lastWriteTime;
+		if (!GetFileTime(file, nullptr, nullptr, &lastWriteTime))
+		{
+			return{ 0L, 0L };
+		}
+
+		CloseHandle(file);
+
+		return lastWriteTime;
+	}
+
+	FILETIME GetBinFileTimestamp(std::string filename)
+	{
+		std::ifstream ifs(filename, std::ifstream::binary);
+		if (!ifs.is_open())
+		{
+			return{ 0L, 0L };
+		}
+
+		FILETIME lastWriteTime;
+		ifs.read(reinterpret_cast<char*>(&lastWriteTime), sizeof(FILETIME));
+
+		ifs.close();
+
+		return lastWriteTime;
+	}
+
+	bool CompareFilestamps(FILETIME lhs, FILETIME rhs)
+	{
+		return lhs.dwHighDateTime == rhs.dwHighDateTime && lhs.dwLowDateTime == rhs.dwLowDateTime;
+	}
+
 public:
 	ModelManager();
 	ModelManager(ModelManager const&) = delete;
@@ -106,39 +150,42 @@ public:
 	ModelCluster* LoadModel(const char* name)
 	{
 		ModelCluster* c = mModelMap[name];
-		if (!c)
+		if (c)
 		{
-			void* ptr = mAllocator->Allocate(sizeof(ModelCluster), alignof(ModelCluster), 0);
-			c = new(ptr) ModelCluster();
-
-			std::string fbxPath = "Assets/Models/" + std::string(name) + ".fbx";
-			std::string binPath = "Assets/Models/" + std::string(name) + ".bin";
-
-			FILE *file;
-			fopen_s(&file, binPath.c_str(), "r");
-			if (file) {
-				fclose(file);
-				//We got a binary cache of the model
-				BINMeshResource<Vertex> binResource(binPath.c_str());
-				mMeshLibrary.LoadMesh(&c->mMesh, mRenderer, binResource);
-				c->mSkeletalHierarchy = binResource.mSkeletalHierarchy;
-				c->mSkeletalAnimations = binResource.mSkeletalAnimations;
-			}
-			else
-			{
-				//Load FBX
-				FBXMeshResource<Vertex> fbxResource(fbxPath.c_str());
-				mMeshLibrary.LoadMesh(&c->mMesh, mRenderer, fbxResource);
-				c->mSkeletalHierarchy = fbxResource.mSkeletalHierarchy;
-				c->mSkeletalAnimations = fbxResource.mSkeletalAnimations;
-
-				fbxResource.SaveToBin();
-			}
-
-			c->mName = name;
-			
-			mModelMap[name] = c;
+			return c;
 		}
+
+		void* ptr = mAllocator->Allocate(sizeof(ModelCluster), alignof(ModelCluster), 0);
+		c = new(ptr) ModelCluster();
+
+		std::string filePath = "Assets/Models/" + std::string(name);
+		std::string fbxPath = filePath + ".fbx";
+		std::string binPath = filePath + ".bin";
+
+		FILETIME fbxTimestamp = GetFileTimestamp(fbxPath);
+		FILETIME binTimestamp = GetBinFileTimestamp(binPath);
+
+		if (CompareFilestamps(fbxTimestamp, binTimestamp)) {
+			//We got a binary cache of the model
+			BINMeshResource<Vertex> binResource(binPath.c_str());
+			mMeshLibrary.LoadMesh(&c->mMesh, mRenderer, binResource);
+			c->mSkeletalHierarchy = binResource.mSkeletalHierarchy;
+			c->mSkeletalAnimations = binResource.mSkeletalAnimations;
+		}
+		else
+		{
+			//Load FBX
+			FBXMeshResource<Vertex> fbxResource(fbxPath.c_str());
+			mMeshLibrary.LoadMesh(&c->mMesh, mRenderer, fbxResource);
+			c->mSkeletalHierarchy = fbxResource.mSkeletalHierarchy;
+			c->mSkeletalAnimations = fbxResource.mSkeletalAnimations;
+
+			fbxResource.SaveToBin(fbxTimestamp);
+		}
+
+		c->mName = name;
+			
+		mModelMap[name] = c;
 
 		return c;
 	}
