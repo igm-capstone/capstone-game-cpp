@@ -16,13 +16,14 @@
 #define POISON_SKILL_INDEX  1
 #define SLOW_SKILL_INDEX	2
 
-Skill* createExplorerSkill(const char* skillName, Skill::UseCallback callback, SkillBinding binding, json& skillConfig)
+Skill* createExplorerSkill(Skill::UseCallback callback, SkillBinding binding, json& skillConfig)
 {
 	auto cooldown = skillConfig["cooldown"].get<float>();
 	auto cost = skillConfig["cost"].get<float>();
+	auto name = skillConfig["description"].get<string>();
 
 	auto skill = Factory<Skill>::Create();
-	skill->Setup(skillName, cooldown, 0, callback, cost);
+	skill->Setup(name, cooldown, 0, callback, cost);
 	skill->SetBinding(binding);
 
 	return skill;
@@ -211,11 +212,11 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		skills = config["skills"].get<jarr_t>();
 
 		auto healConfig = findByName(skills, "Heal");
-		e->mSkills[HEAL_SKILL_INDEX] = createExplorerSkill("Heal", DoHeal, KEYCODE_Q, healConfig);
+		e->mSkills[HEAL_SKILL_INDEX] = createExplorerSkill(DoHeal, KEYCODE_Q, healConfig);
 		e->mSkills[HEAL_SKILL_INDEX]->mSceneObject = e;
 
 		auto meleeConfig = findByName(skills, "LongAttack");
-		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill("Melee", DoMelee, MOUSEBUTTON_LEFT, meleeConfig);
+		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill(DoMelee, MOUSEBUTTON_LEFT, meleeConfig);
 		e->mSkills[MELEE_SKILL_INDEX]->mSceneObject = e;
 
 		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
@@ -235,12 +236,17 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		poison->mSceneObject = e;
 		e->mSkills[POISON_SKILL_INDEX] = poison;
 
+
+		auto poisonConfig = findByName(skills, "SetTrapPoison");
+		e->mSkills[POISON_SKILL_INDEX] = createExplorerSkill(DoPoison, KEYCODE_Q, poisonConfig);
+		e->mSkills[POISON_SKILL_INDEX]->mSceneObject = e;
+
 		auto glueConfig = findByName(skills, "SetTrapGlue");
-		e->mSkills[SLOW_SKILL_INDEX] = createExplorerSkill("Glue Trap", DoSlow, KEYCODE_E, glueConfig);
+		e->mSkills[SLOW_SKILL_INDEX] = createExplorerSkill(DoSlow, KEYCODE_E, glueConfig);
 		e->mSkills[SLOW_SKILL_INDEX]->mSceneObject = e;
 
 		auto tossConfig = findByName(skills, "GrenadeToss");
-		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill("Grenade", DoMelee, MOUSEBUTTON_LEFT, tossConfig);
+		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill(DoMelee, MOUSEBUTTON_LEFT, tossConfig);
 		e->mSkills[MELEE_SKILL_INDEX]->mSceneObject = e;
 
 		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
@@ -257,11 +263,11 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		skills = config["skills"].get<jarr_t>();
 
 		auto sprintConfig = findByName(skills, "Sprint");
-		e->mSkills[SPRINT_SKILL_INDEX] = createExplorerSkill("Sprint", DoSprint, KEYCODE_Q, sprintConfig);
+		e->mSkills[SPRINT_SKILL_INDEX] = createExplorerSkill(DoSprint, KEYCODE_Q, sprintConfig);
 		e->mSkills[SPRINT_SKILL_INDEX]->mSceneObject = e;
 
 		auto meleeConfig = findByName(skills, "ConeAttack");
-		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill("Melee", DoMelee, MOUSEBUTTON_LEFT, meleeConfig);
+		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill(DoMelee, MOUSEBUTTON_LEFT, meleeConfig);
 		e->mSkills[MELEE_SKILL_INDEX]->mSceneObject = e;
 
 		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
