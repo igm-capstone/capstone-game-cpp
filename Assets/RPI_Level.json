@@ -2596,7 +2596,7 @@
           "center": [ 12.9030, -46.8560, -6.2881 ],
           "extents": [ 0.2479, 0.9971, 0.6707 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "SwatchPinkDAlbedo.png"
       },
       {
         "position": [ -92.2100, -45.6300, -6.5400 ],
@@ -2606,7 +2606,7 @@
           "center": [ -92.2073, -45.6381, -6.2881 ],
           "extents": [ 0.7801, 0.6686, 0.6707 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "SwatchPinkDAlbedo.png"
       },
       {
         "position": [ -92.3100, -55.2000, -6.5400 ],
@@ -2616,7 +2616,7 @@
           "center": [ -92.3106, -55.2085, -6.2881 ],
           "extents": [ 0.4631, 0.9171, 0.6707 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "SwatchPinkDAlbedo.png"
       },
       {
         "position": [ -72.1300, 5.7300, -11.5300 ],
@@ -2626,7 +2626,7 @@
           "center": [ -72.1364, 5.7357, -11.2781 ],
           "extents": [ 1.0099, 0.1889, 0.6707 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "SwatchPinkDAlbedo.png"
       },
       {
         "position": [ -76.8200, -4.8900, -11.5300 ],
@@ -2636,7 +2636,7 @@
           "center": [ -76.8282, -4.8926, -11.2781 ],
           "extents": [ 0.6809, 0.7694, 0.6707 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "SwatchPinkDAlbedo.png"
       },
       {
         "position": [ 22.0100, 16.8700, -6.5000 ],
@@ -2646,7 +2646,7 @@
           "center": [ 22.0036, 16.8644, -6.2481 ],
           "extents": [ 0.3119, 0.9789, 0.6707 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "SwatchPinkDAlbedo.png"
       },
       {
         "position": [ 12.0310, 37.7607, -1.5800 ],
@@ -2656,7 +2656,7 @@
           "center": [ 12.0322, 37.7523, -1.3281 ],
           "extents": [ 0.6479, 0.7974, 0.6707 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "SwatchPinkDAlbedo.png"
       },
       {
         "position": [ 15.8000, 46.5330, -1.5800 ],
@@ -2666,7 +2666,7 @@
           "center": [ 15.8096, 46.5319, -1.3281 ],
           "extents": [ 1.0486, 0.4323, 0.6707 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "SwatchPinkDAlbedo.png"
       },
       {
         "position": [ 11.3080, 54.9550, -1.5800 ],
@@ -2676,7 +2676,7 @@
           "center": [ 11.3105, 54.9457, -1.3281 ],
           "extents": [ 0.7904, 0.8135, 0.6707 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "SwatchPinkDAlbedo.png"
       },
       {
         "position": [ 56.1452, 51.4004, -1.1105 ],
@@ -2686,7 +2686,7 @@
           "center": [ 56.0355, 51.1739, -1.0965 ],
           "extents": [ 0.6526, 0.9834, 0.5859 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "SwatchPinkDAlbedo.png"
       },
       {
         "position": [ 54.4420, 55.1990, -1.1740 ],
@@ -2696,7 +2696,7 @@
           "center": [ 54.6530, 55.3349, -1.1507 ],
           "extents": [ 1.1253, 0.4934, 0.4759 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "SwatchPinkDAlbedo.png"
       },
       {
         "position": [ 64.1316, -13.2323, -11.5198 ],
@@ -2706,7 +2706,7 @@
           "center": [ 64.1239, -13.2358, -11.2679 ],
           "extents": [ 0.5803, 0.8478, 0.6707 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "SwatchPinkDAlbedo.png"
       },
       {
         "position": [ 75.2100, -13.6100, -11.5200 ],
@@ -2716,7 +2716,7 @@
           "center": [ 75.2020, -13.6070, -11.2681 ],
           "extents": [ 1.0098, 0.1892, 0.6707 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "SwatchPinkDAlbedo.png"
       }
     ],
     "BigBox": [
