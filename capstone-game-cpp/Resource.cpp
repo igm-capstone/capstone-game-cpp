@@ -188,6 +188,21 @@ void loadStaticMeshes(jarr_t objs, std::string model, vector<string>& textureNam
 				materialIDs.push_back(textureNames.size() - 1);
 			}
 		}
+		else
+		{
+			string str = "debugTexture.png";
+
+			vector<string>::iterator iter = find(textureNames.begin(), textureNames.end(), str);
+			if (iter != textureNames.end())
+			{
+				materialIDs.push_back(iter - textureNames.begin());
+			}
+			else
+			{
+				textureNames.push_back(str);
+				materialIDs.push_back(textureNames.size() - 1);
+			}
+		}
 
 		auto bounds = obj["bounds"];
 		if (!bounds.empty())
