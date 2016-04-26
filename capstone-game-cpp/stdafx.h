@@ -42,7 +42,7 @@ extern bool gDebugBT;
 #define MAX_FLYTRAPS      30
 #define MAX_MINIONS       100
 
-#define MAX_STATIC_MESHES 1800
+#define MAX_STATIC_MESHES 2500
 
 #define MAX_STATIC_COLLIDERS 300
 

@@ -1364,6 +1364,7 @@ void DX3D11Renderer::VCreateShaderTexture2DArray(IShaderResource* shader, const 
 	}
 
 	D3D11_TEXTURE2D_DESC textureDesc;
+	ZeroMemory(&textureDesc, sizeof(D3D11_TEXTURE2D_DESC));
 	textures[0]->GetDesc(&textureDesc);
 
 	D3D11_TEXTURE2D_DESC textureArrayDesc;

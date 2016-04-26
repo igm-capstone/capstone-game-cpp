@@ -126,8 +126,6 @@ void loadDomPoints(jarr_t objs)
 	{
 		auto dom = Factory<DominationPoint>::Create();
 		parseStaticMeshTransform(obj, dom->mTransform);
-		dom->mTransform->SetScale(vec3f(0.1f));
-
 
 		dom->mDominationTime = obj["captureTime"].get<float>();
 		dom->mTier = obj["tier"].get<int>();
@@ -178,6 +176,21 @@ void loadStaticMeshes(jarr_t objs, std::string model, vector<string>& textureNam
 			{
 				str = "debugTexture.png";
 			}
+
+			vector<string>::iterator iter = find(textureNames.begin(), textureNames.end(), str);
+			if (iter != textureNames.end())
+			{
+				materialIDs.push_back(iter - textureNames.begin());
+			}
+			else
+			{
+				textureNames.push_back(str);
+				materialIDs.push_back(textureNames.size() - 1);
+			}
+		}
+		else
+		{
+			string str = "debugTexture.png";
 
 			vector<string>::iterator iter = find(textureNames.begin(), textureNames.end(), str);
 			if (iter != textureNames.end())
@@ -423,18 +436,24 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 	// Set wall, and floor mesh colliders inactive.
 
 	vector<StaticMeshModel> inactiveStaticMeshModels = {
-		STATIC_MESH_MODEL_CORNER_WALL,
+		STATIC_MESH_MODEL_CURVED_STAIRS,
+		STATIC_MESH_MODEL_CURVED_STAIRS_LEFT,
 		STATIC_MESH_MODEL_CURVED_WALL,
-		STATIC_MESH_MODEL_DOOR_BLOCKED,
 		STATIC_MESH_MODEL_FLOOR,
-		STATIC_MESH_NORMAL_WALL,
+		STATIC_MESH_MODEL_OUTSIDE_FLOOR,
+		STATIC_MESH_STAIR_FULL,
+		STATIC_MESH_STAIR_HALF,
+		STATIC_MESH_STAIR_HALF_RAILING,
+		STATIC_MESH_STAIR_FULL_RAILING,
+		STATIC_MESH_MODEL_DOOR_BLOCKED,
 		STATIC_MESH_T_WALL,
 		STATIC_MESH_MODEL_TRI_WALL,
 		STATIC_MESH_MODEL_WALL,
+		STATIC_MESH_MODEL_CORNER_WALL,
 		STATIC_MESH_MODEL_D_DOOR_WALL,
 		STATIC_MESH_MODEL_S_DOOR_WALL,
-		STATIC_MESH_MODEL_S_WINDOW_WALL,
-		STATIC_MESH_MODEL_WINDOW_WALL
+		STATIC_MESH_MODEL_WALL_CONN,
+		STATIC_MESH_MODEL_WINDOW_WALL,
 	};
 
 	for (StaticMeshModel smm : inactiveStaticMeshModels)
