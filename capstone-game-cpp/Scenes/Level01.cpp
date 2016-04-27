@@ -803,7 +803,7 @@ void Level01::RenderShadowMaps()
 				indices.reserve(pBaseSceneObjects->size());
 
 				// Cull meshes given the current lamp frustum
-				CullAABBSceneObjects<StaticMesh>(frustum, *pBaseSceneObjects, indices);
+				CullOBBSceneObjects<StaticMesh>(frustum, *pBaseSceneObjects, indices);
 
 				// Bind Mesh
 				IMesh* mesh = mModelManager->GetModel(kStaticMeshModelNames[staticMeshIndex])->mMesh;

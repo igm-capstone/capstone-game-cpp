@@ -363,9 +363,9 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		level.lampVPTMatrices	= reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * lamps->size() * 6, alignof(mat4f), 0));
 		level.lampCount			= static_cast<short>(lamps->size());
 
-		vec3f posX = { 1.0f, 0.0f, 0.0f };
-		vec3f posY = { 0.0f, 1.0f, 0.0f };
-		vec3f posZ = { 0.0f, 0.0f, 1.0f };
+		vec3f posX = { +1.0f, 0.0f, 0.0f };
+		vec3f posY = { 0.0f, +1.0f, 0.0f };
+		vec3f posZ = { 0.0f, 0.0f, +1.0f };
 		vec3f negX = { -1.0f, 0.0f, 0.0f };
 		vec3f negY = { 0.0f, -1.0f, 0.0f };
 		vec3f negZ = { 0.0f, 0.0f, -1.0f };
