@@ -21,6 +21,8 @@
 #include "Shaders/obj/VSFwdFullScreenQuad.h"
 #include "Shaders/obj/VSDefInstancedColor.h"
 #include "Shaders/obj/PSDefInstancedMaterial.h"
+#include "Shaders/obj/PSFwdDistanceMaterial.h"
+#include "Shaders/obj/PSFwdPointLightVolume.h"
 #include "Shaders/obj/VSFwdLineTrace.h"
 #include "Shaders/obj/VSFwdSingleColor.h"
 #include "Shaders/obj/VSFwdSpotLightVolume.h"
@@ -43,6 +45,8 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mPSFwdSpotLightVolume(nullptr),
 	mPSDef2DTexture(nullptr),
 	mPSFwdSingleMaterial(nullptr),
+	mPSFwdDistanceMaterial(nullptr),
+	mPSFwdPointLightVolume(nullptr),
 	mVSDefInstancedColor(nullptr),
 	mVSDefInstancedMaterial(nullptr),
 	mVSDefSingleColor(nullptr),
@@ -244,6 +248,12 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VCreateShader(&mPSFwdSingleMaterial, &mGameAllocator);
 	renderer->VLoadPixelShader(mPSFwdSingleMaterial, gPSFwdSingleMaterial, sizeof(gPSFwdSingleMaterial));
 
+	renderer->VCreateShader(&mPSFwdDistanceMaterial, &mGameAllocator);
+	renderer->VLoadPixelShader(mPSFwdDistanceMaterial, gPSFwdDistanceMaterial, sizeof(gPSFwdDistanceMaterial));
+
+	renderer->VCreateShader(&mPSFwdPointLightVolume, &mGameAllocator);
+	renderer->VLoadPixelShader(mPSFwdPointLightVolume, gPSFwdPointLightVolume, sizeof(gPSFwdPointLightVolume));
+
 #pragma endregion
 
 #pragma region Compute Shaders
@@ -363,21 +373,22 @@ void ScareTacticsApplication::VShutdown()
 	mCSGridPass2->~IShader();
 	mPSDefColor->~IShader();
 	mPSDefMaterial->~IShader();
-	mPSFwdSingleMaterial->~IShader();
 	mPSDefInstancedMaterial->~IShader();
-
 	mPSFwd2DTexture->~IShader();
 	mPSFwdColor->~IShader();
 	mPSFwdDeferredOutput->~IShader();
 	mPSFwdSpotLightVolume->~IShader();
 	mPSDef2DTexture->~IShader();
+	mPSFwdSingleMaterial->~IShader();
+	mPSFwdDistanceMaterial->~IShader();
+	mPSFwdPointLightVolume->~IShader();
 
+	mVSDefInstancedColor->~IShader();
 	mVSDefInstancedMaterial->~IShader();
 	mVSDefSingleColor->~IShader();
 	mVSDefSingleMaterial->~IShader();
 	mVSDefSkinnedMaterial->~IShader();
 	mVSFwdFullScreenQuad->~IShader();
-	mVSDefInstancedColor->~IShader();
 	mVSFwdSingleColor->~IShader();
 	mVSFwdSpotLightVolume->~IShader();
 	mVSFwdSpriteGlyphs->~IShader();
