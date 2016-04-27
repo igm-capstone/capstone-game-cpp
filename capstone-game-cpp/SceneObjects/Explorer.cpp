@@ -281,7 +281,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	}
 	}
 
-	e->mController->mBaseMoveSpeed = config["moveSpeed"].get<float>();
+	e->mController->mBaseMoveSpeed = config["moveSpeed"].get<float>() / 10;
 	e->mHealth->SetMaxHealth(config["baseHealth"].get<float>());
 }
 

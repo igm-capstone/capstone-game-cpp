@@ -4,9 +4,9 @@
 
 enum ExplorerType //Spawn Order
 {
-	TRAPMASTER = 1,
-	HEALER,
-	SPRINTER
+	TRAPMASTER = 2,
+	HEALER = 3,
+	SPRINTER = 1,
 };
 
 class Explorer : public BaseSceneObject
