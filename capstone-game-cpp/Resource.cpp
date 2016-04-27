@@ -360,22 +360,32 @@ Resource::LevelInfo Resource::LoadLevel(string path, LinearAllocator& allocator)
 		loadLamps(lamps);
 
 		level.lampWorldMatrices = reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * lamps->size(), alignof(mat4f), 0));
-		level.lampVPTMatrices	= reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * lamps->size(), alignof(mat4f), 0));
+		level.lampVPTMatrices	= reinterpret_cast<mat4f*>(allocator.Allocate(sizeof(mat4f) * lamps->size() * 6, alignof(mat4f), 0));
 		level.lampCount			= static_cast<short>(lamps->size());
 
-		mat4f defaultRotation	= mat4f::rotateZ(PI * 0.5f);
-		vec3f defaultUp			= { 0.0f, 0.0f, -1.0f };
-
-		int i = 0;
+		vec3f posX = { 1.0f, 0.0f, 0.0f };
+		vec3f posY = { 0.0f, 1.0f, 0.0f };
+		vec3f posZ = { 0.0f, 0.0f, 1.0f };
+		vec3f negX = { -1.0f, 0.0f, 0.0f };
+		vec3f negY = { 0.0f, -1.0f, 0.0f };
+		vec3f negZ = { 0.0f, 0.0f, -1.0f };
+		
+		int lampIndex = 0;
 		for (Lamp& l : Factory<Lamp>())
 		{
-			level.lampWorldMatrices[i] = (mat4f::scale(l.mLightRadius) * defaultRotation * l.mTransform->GetWorldMatrix()).transpose();
-			
+			level.lampWorldMatrices[lampIndex] = (mat4f::scale(l.mLightRadius) * l.mTransform->GetWorldMatrix()).transpose();
+
 			// Note: we don't bother transposing this matrix because we need it for culling in row maj fashion.
-			level.lampVPTMatrices[i] = 
-				mat4f::lookToLH(l.mLightDirection, l.mTransform->GetPosition(), defaultUp) 
-				* mat4f::normalizedPerspectiveLH(l.mLightAngle, 1.0f, 0.1f, l.mLightRadius);
-			i++;
+			mat4f projection = mat4f::normalizedPerspectiveLH(PI * 0.5f, 1.0f, 0.1f, l.mLightRadius);
+			int lampRowIndex = lampIndex * 6;
+			level.lampVPTMatrices[lampRowIndex + 0] = mat4f::lookToLH(posX, l.mTransform->GetPosition(), posY) * projection;	// Pos X
+			level.lampVPTMatrices[lampRowIndex + 1] = mat4f::lookToLH(negX, l.mTransform->GetPosition(), posY) * projection;	// Neg X
+			level.lampVPTMatrices[lampRowIndex + 2] = mat4f::lookToLH(posY, l.mTransform->GetPosition(), negZ) * projection;	// Pos Y
+			level.lampVPTMatrices[lampRowIndex + 3] = mat4f::lookToLH(negY, l.mTransform->GetPosition(), posZ) * projection;	// Neg Y
+			level.lampVPTMatrices[lampRowIndex + 4] = mat4f::lookToLH(posZ, l.mTransform->GetPosition(), posY) * projection;	// Pos Z
+			level.lampVPTMatrices[lampRowIndex + 5] = mat4f::lookToLH(negZ, l.mTransform->GetPosition(), posY) * projection;	// Neg Z
+
+			lampIndex++;
 		}
 	}
 
