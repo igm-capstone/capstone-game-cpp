@@ -114,7 +114,7 @@ void NetworkClient::Update()
 					packet.AsTransform.Position, packet.AsTransform.Rotation);
 				break;
 			case SYNC_HEALTH:
-				NetworkRpc::SyncHealth(packet.UUID, packet.AsFloat);
+				NetworkRpc::SyncHealth(packet.UUID, packet.AsFloatArray[0], packet.AsFloatArray[1]);
 				break;
 			case SYNC_ANIMATION:
 				NetworkRpc::SyncAnimation(packet.UUID, packet.AsAnimation.State, packet.AsAnimation.Command);

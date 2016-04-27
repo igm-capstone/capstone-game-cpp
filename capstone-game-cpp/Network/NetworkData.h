@@ -61,6 +61,8 @@ struct Packet {
 			SkillPacketTypes Type = SKILL_TYPE_UNKNOWN;
 		} AsSkill;
 
+		float AsFloatArray[7];
+
 		float AsFloat;
 		bool AsBool;
 	}; // Package Specific Data

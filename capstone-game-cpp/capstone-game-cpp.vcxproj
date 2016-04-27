@@ -132,6 +132,7 @@
     <ClCompile Include="Components\FmodEvent.cpp" />
     <ClCompile Include="Components\FmodEventCollection.cpp" />
     <ClCompile Include="Components\GhostController.cpp" />
+    <ClCompile Include="Components\Health.cpp" />
     <ClCompile Include="Components\ImpController.cpp" />
     <ClCompile Include="Components\MinionController.cpp" />
     <ClCompile Include="Components\Skill.cpp" />

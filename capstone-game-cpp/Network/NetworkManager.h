@@ -50,7 +50,7 @@ public:
 
 	static void GrantAuthority(int UUID);
 	static void SyncTransform(int UUID, vec3f pos, quatf rot);
-	static void SyncHealth(int UUID, float val);
+	static void SyncHealth(int UUID, float val, float max);
 	static void SyncAnimation(int UUID, byte state, byte command);
 	static void Interact(int UUID);
 	static void Ready(unsigned clientID, bool isReady);

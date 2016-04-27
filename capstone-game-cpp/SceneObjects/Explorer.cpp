@@ -40,7 +40,7 @@ Explorer::Explorer()
 	mNetworkID->mIsActive = false;
 	mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
 	mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
-	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
+	//mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
 	mNetworkID->RegisterNetSyncAnimationCallback(&OnNetSyncAnimation);
 
 	Application::SharedInstance().GetModelManager()->GetModel(kSprinterModelName)->Link(this);
@@ -89,6 +89,7 @@ Explorer::Explorer()
 
 	mHealth = Factory<Health>::Create();
 	mHealth->mSceneObject = this;
+	mHealth->SetupNetworkID(mNetworkID);
 	mHealth->SetMaxHealth(1000.0f);
 	mHealth->RegisterHealthChangeCallback(OnHealthChange);
 	mHealth->RegisterHealthToZeroCallback(OnDeath);
@@ -280,7 +281,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	}
 
 	//e->mController->mSpeed = config["moveSpeed"].get<float>();
-	e->mHealth->SetMaxHealth(config["baseHealth"].get<float>());
+	e->mHealth->SetMaxHealth(config["baseHealth"].get<float>()*10);
 }
 
 void Explorer::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot)
@@ -301,12 +302,6 @@ void Explorer::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newR
 			ai.SetGridDirty(true);
 		}
 	}
-}
-
-void Explorer::OnNetHealthChange(BaseSceneObject* obj, float newVal)
-{
-	auto e = static_cast<Explorer*>(obj);
-	e->mHealth->SetHealth(newVal);
 }
 
 void Explorer::OnAnimationCommandExecuted(BaseSceneObject* obj, AnimationControllerState state, AnimationControllerCommand command) {
@@ -335,24 +330,9 @@ void Explorer::OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command
 	}
 }
 
-void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal, bool checkAuthority)
+void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal)
 {
-	auto e = static_cast<Explorer*>(obj);
-	if (!checkAuthority || e->mNetworkID->mHasAuthority)
-	{
-		Packet p(PacketTypes::SYNC_HEALTH);
-		p.UUID = e->mNetworkID->mUUID;
-		p.AsFloat = newVal;
 
-		if (Singleton<NetworkManager>::SharedInstance().mMode == NetworkManager::SERVER)
-		{
-			Singleton<NetworkManager>::SharedInstance().mServer.SendToAll(&p);
-		}
-		else
-		{
-			e->mNetworkClient->SendData(&p);
-		}
-	}
 }
 
 void Explorer::OnDeath(BaseSceneObject* obj)

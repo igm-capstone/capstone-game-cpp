@@ -49,10 +49,10 @@ public:
 	static void OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot);
 	static void OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth);
 	static void OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot);
-	static void OnNetHealthChange(BaseSceneObject* obj, float newVal);
+	//static void OnNetHealthChange(BaseSceneObject* obj, float newVal);
 	static void OnAnimationCommandExecuted(BaseSceneObject* obj, AnimationControllerState state, AnimationControllerCommand command);
 	static void OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command);
-	static void OnHealthChange(BaseSceneObject* obj, float newVal, bool checkAuthority);
+	static void OnHealthChange(BaseSceneObject* obj, float newVal);
 	static void OnDeath(BaseSceneObject* obj);
 	static void OnRevive(BaseSceneObject* obj);
 	static void OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other);
