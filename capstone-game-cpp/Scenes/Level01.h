@@ -18,6 +18,7 @@ class Level01 : public BaseScene
 	CBuffer::Model			mModel;
 	CBuffer::LightPVM		mLightPVM;			// Used for spotlight matrices
 	CBuffer::Light			mLightData;			// Used for spotlight data (color, angle, etc).
+	CBuffer::PointLight		mPointLight;
 	CBuffer::Effect			mTime;
 
 	// GPU Data

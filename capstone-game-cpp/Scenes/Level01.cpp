@@ -68,6 +68,7 @@ Level01::~Level01()
 #endif
 
 	mCubeMesh->~IMesh();
+	mSphereMesh->~IMesh();
 	mNDSQuadMesh->~IMesh();
 
 	for (Lamp& l : Factory<Lamp>())
@@ -75,16 +76,16 @@ Level01::~Level01()
 		l.mConeMesh->~IMesh();
 	}
 
+	mGBufferContext->~IRenderContext();
+	mShadowContext->~IRenderContext();
+	mGridContext->~IRenderContext();
+
 	mStaticMeshShaderResource->~IShaderResource();
 	mExplorerShaderResource->~IShaderResource();
 	mPLVShaderResource->~IShaderResource();
 	mSpritesShaderResource->~IShaderResource();
 	mGridShaderResource->~IShaderResource();
 	
-	mGBufferContext->~IRenderContext();
-	mShadowContext->~IRenderContext();
-	mGridContext->~IRenderContext();
-
 	ReleaseMacro(mFullSrcData);
 	ReleaseMacro(mFullSrcDataSRV);
 	ReleaseMacro(mSimpleSrcData);
@@ -242,7 +243,9 @@ void Level01::InitializeShaderResources()
 	mRenderer->VCreateRenderContext(&mGridContext, &mAllocator);
 
 	// Shadow Maps for each light
-	mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mLevel.lampCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+	//mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mLevel.lampCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+	mRenderer->VCreateContextCubicShadowTargets(mShadowContext, mLevel.lampCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+	mRenderer->VCreateContextDepthStencilTargets(mShadowContext, 1, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 
 	// Static Meshes
 	{
@@ -304,10 +307,10 @@ void Level01::InitializeShaderResources()
 	{
 		mRenderer->VCreateShaderResource(&mPLVShaderResource, &mAllocator);
 
-		void* cbPVLData[] = { &mLightData, mCameraManager->GetOrigin().pCols, &mTime };
-		size_t cbPVLSizes[] = { sizeof(CBuffer::Light), sizeof(vec4f), sizeof(CBuffer::Effect) };
+		void* cbPVLData[] = { &mLightData, mCameraManager->GetOrigin().pCols, &mTime, &mPointLight };
+		size_t cbPVLSizes[] = { sizeof(CBuffer::Light), sizeof(vec4f), sizeof(CBuffer::Effect), sizeof(CBuffer::PointLight) };
 
-		mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 3);
+		mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 4);
 		mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_BORDER, const_cast<float*>(Colors::black.pCols));
 		mRenderer->AddAdditiveBlendState(mPLVShaderResource);
 	}
@@ -568,8 +571,8 @@ void Level01::VUpdate(double milliseconds)
 
 void Level01::VFixedUpdate(double milliseconds)
 {
-	if (mAIManager->IsGridDirty()) ComputeGrid(); 
-	mAIManager->Update();
+	//if (mAIManager->IsGridDirty()) ComputeGrid(); 
+	//mAIManager->Update();
 
 	mNetworkManager->Update();
 }
@@ -757,7 +760,7 @@ void Level01::RenderShadowMaps()
 	mRenderer->SetViewport(0.0f, 0.0f, static_cast<float>(SHADOW_MAP_SIZE), static_cast<float>(SHADOW_MAP_SIZE), 0.0f, 1.0f);
 	mRenderer->VSetInputLayout(mApplication->mVSDefSingleMaterial);
 	mRenderer->VSetVertexShader(mApplication->mVSDefSingleMaterial);
-	mRenderer->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
+	mRenderer->VSetPixelShader(mApplication->mPSFwdDistanceMaterial);
 
 	// Identity here just to be compatible with shader.
 	mLightPVM.view = mat4f(1.0f);	
@@ -765,32 +768,72 @@ void Level01::RenderShadowMaps()
 	uint32_t lampIndex = 0;
 	for (Lamp& lamp : Factory<Lamp>())
 	{
-		mRenderer->VSetRenderContextDepthTarget(mShadowContext, lampIndex);
-		mRenderer->VClearDepthStencil(mShadowContext, lampIndex, 1.0f, 0);
+		float color[4] = { 0.0f, 0.0f, 0.0, 1.0f };
 
-		// Set view projection matrix for light frustum
-		mLightPVM.projection = mLevel.lampVPTMatrices[lampIndex].transpose();
-		
-		// Create frustum object for culling.
-		Rig3D::Frustum frustum;
-		Rig3D::ExtractNormalizedFrustumLH(&frustum, mLevel.lampVPTMatrices[lampIndex]);
+		mPointLight.color = lamp.mLightColor;
+		mPointLight.position = lamp.mTransform->GetPosition();
+		mPointLight.radius = lamp.mLightRadius;
+		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mPointLight, 3);
+		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 3, 0);
 
-		for (int staticMeshIndex = 0; staticMeshIndex < STATIC_MESH_MODEL_COUNT; staticMeshIndex++)
+		for (uint32_t faceIndex = 0; faceIndex < 6; faceIndex++)
 		{
-			if (staticMeshIndex == STATIC_MESH_WALL_LANTERN) { continue; }
-
-			// Get Objects for a given mesh
-			std::vector<BaseSceneObject*>* pBaseSceneObjects = mModelManager->RequestAllUsingModel(kStaticMeshModelNames[staticMeshIndex]);
+			uint32_t projIndex = (lampIndex * 6) + faceIndex;
 			
+			mRenderer->VSetRenderContextTargetWithDepth(mShadowContext, projIndex, 0);
+			mRenderer->VClearContextTarget(mShadowContext, projIndex, color);
+			mRenderer->VClearDepthStencil(mShadowContext, 0, 1.0f, 0);
+		
+			// Set view projection matrix for light frustum
+			mLightPVM.projection = mLevel.lampVPTMatrices[projIndex].transpose();
+
+			// Create frustum object for culling.
+			Rig3D::Frustum frustum;
+			Rig3D::ExtractNormalizedFrustumLH(&frustum, mLevel.lampVPTMatrices[projIndex]);
+
+			for (int staticMeshIndex = 0; staticMeshIndex < STATIC_MESH_MODEL_COUNT; staticMeshIndex++)
+			{
+				if (staticMeshIndex == STATIC_MESH_WALL_LANTERN) { continue; }
+
+				// Get Objects for a given mesh
+				std::vector<BaseSceneObject*>* pBaseSceneObjects = mModelManager->RequestAllUsingModel(kStaticMeshModelNames[staticMeshIndex]);
+
+				// Storage for indices we will draw
+				std::vector<uint32_t> indices;
+				indices.reserve(pBaseSceneObjects->size());
+
+				// Cull meshes given the current lamp frustum
+				CullAABBSceneObjects<StaticMesh>(frustum, *pBaseSceneObjects, indices);
+
+				// Bind Mesh
+				IMesh* mesh = mModelManager->GetModel(kStaticMeshModelNames[staticMeshIndex])->mMesh;
+				mRenderer->VBindMesh(mesh);
+
+				uint32_t indexCount = mesh->GetIndexCount();
+
+				// Render 
+				for (uint32_t filterIndex : indices)
+				{
+					mLightPVM.world = (*pBaseSceneObjects)[filterIndex]->mTransform->GetWorldMatrix().transpose();
+					mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
+					mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM.world, 1);
+
+					mRenderer->VSetVertexShaderConstantBuffers(mExplorerShaderResource);
+					mRenderer->VDrawIndexed(0, indexCount);
+				}
+			}
+
+			std::vector<BaseSceneObject*>* pDoors = mModelManager->RequestAllUsingModel(kDoorModelName);
+
 			// Storage for indices we will draw
 			std::vector<uint32_t> indices;
-			indices.reserve(pBaseSceneObjects->size());
+			indices.reserve(pDoors->size());
 
 			// Cull meshes given the current lamp frustum
-			CullAABBSceneObjects<StaticMesh>(frustum, *pBaseSceneObjects, indices);
+			CullOBBSceneObjects<Door>(frustum, *pDoors, indices);
 
 			// Bind Mesh
-			IMesh* mesh = mModelManager->GetModel(kStaticMeshModelNames[staticMeshIndex])->mMesh;
+			IMesh* mesh = mModelManager->GetModel(kDoorModelName)->mMesh;
 			mRenderer->VBindMesh(mesh);
 
 			uint32_t indexCount = mesh->GetIndexCount();
@@ -798,39 +841,13 @@ void Level01::RenderShadowMaps()
 			// Render 
 			for (uint32_t filterIndex : indices)
 			{
-				mLightPVM.world = (*pBaseSceneObjects)[filterIndex]->mTransform->GetWorldMatrix().transpose();
+				mLightPVM.world = (*pDoors)[filterIndex]->mTransform->GetWorldMatrix().transpose();
 				mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
 				mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM.world, 1);
 
 				mRenderer->VSetVertexShaderConstantBuffers(mExplorerShaderResource);
 				mRenderer->VDrawIndexed(0, indexCount);
 			}
-		}
-
-		std::vector<BaseSceneObject*>* pDoors = mModelManager->RequestAllUsingModel(kDoorModelName);
-
-		// Storage for indices we will draw
-		std::vector<uint32_t> indices;
-		indices.reserve(pDoors->size());
-
-		// Cull meshes given the current lamp frustum
-		CullOBBSceneObjects<Door>(frustum, *pDoors, indices);
-
-		// Bind Mesh
-		IMesh* mesh = mModelManager->GetModel(kDoorModelName)->mMesh;
-		mRenderer->VBindMesh(mesh);
-
-		uint32_t indexCount = mesh->GetIndexCount();
-
-		// Render 
-		for (uint32_t filterIndex : indices)
-		{
-			mLightPVM.world = (*pDoors)[filterIndex]->mTransform->GetWorldMatrix().transpose();
-			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
-			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM.world, 1);
-
-			mRenderer->VSetVertexShaderConstantBuffers(mExplorerShaderResource);
-			mRenderer->VDrawIndexed(0, indexCount);
 		}
 
 		lampIndex++;
@@ -1040,10 +1057,12 @@ void Level01::RenderSpotLightVolumes()
 
 	mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
 	mRenderer->VSetVertexShader(mApplication->mVSFwdSpotLightVolume);
-	mRenderer->VSetPixelShader(mApplication->mPSFwdSpotLightVolume);
+	mRenderer->VSetPixelShader(mApplication->mPSFwdPointLightVolume);
 
 	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
+	
+	mRenderer->VBindMesh(mSphereMesh);
 
 	uint32_t i = 0;
 	for (Lamp& l : Factory<Lamp>())
@@ -1067,14 +1086,17 @@ void Level01::RenderSpotLightVolumes()
 
 			mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
 			mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
+
 			mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);		// Position
 			mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);		// Normal
-			mRenderer->VSetPixelShaderDepthResourceView(mShadowContext, i, 2);	// Shadow
+			mRenderer->VSetPixelShaderResourceView(mShadowContext, i, 2);		// Shadow
 			mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);		// Border
 
-			mRenderer->VBindMesh(l.mConeMesh);
+			mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
 
-			mRenderer->VDrawIndexed(0, l.mConeMesh->GetIndexCount());
+			//mRenderer->VBindMesh(l.mConeMesh);
+
+			//mRenderer->VDrawIndexed(0, l.mConeMesh->GetIndexCount());
 		}
 		i++;
 	}
