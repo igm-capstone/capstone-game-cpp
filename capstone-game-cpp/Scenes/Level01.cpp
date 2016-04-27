@@ -1064,41 +1064,40 @@ void Level01::RenderSpotLightVolumes()
 	
 	mRenderer->VBindMesh(mSphereMesh);
 
-	uint32_t i = 0;
-	for (Lamp& l : Factory<Lamp>())
+	Frustum frustum;
+	mat4f projView = mCameraManager->GetCBufferPersp()->projection * mCameraManager->GetCBufferPersp()->view;
+	ExtractNormalizedFrustumLH(&frustum, projView.transpose());
+
+	std::vector<std::pair<Lamp*, uint32_t>> lampPairs;
+	CullLamps(frustum, &lampPairs);
+
+	for (std::pair<Lamp*, uint32_t> lampPair : lampPairs)
 	{
-		if (l.mStatus != LAMP_OFF) {
-			mModel.world = mLevel.lampWorldMatrices[i];
-			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mModel.world = mLevel.lampWorldMatrices[lampPair.second];
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 
-			// Set Light data
-			mLightData.viewProjection = (mLevel.lampVPTMatrices[i]).transpose();
-			mLightData.color = l.mLightColor;
-			if (l.mStatus == LAMP_DIMMED) mLightData.color *= 0.4f;
-			mLightData.direction = l.mLightDirection;
-			mLightData.range = l.mLightRadius;
-			mLightData.cosAngle = cos(l.mLightAngle);
+		// Set Light data
+		mLightData.viewProjection = (mLevel.lampVPTMatrices[lampPair.second]).transpose();
+		mLightData.color = lampPair.first->mLightColor;
+		if (lampPair.first->mStatus == LAMP_DIMMED) mLightData.color *= 0.4f;
+		mLightData.direction = lampPair.first->mLightDirection;
+		mLightData.range = lampPair.first->mLightRadius;
+		mLightData.cosAngle = cos(lampPair.first->mLightAngle);
 
-			mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
+		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
 
-			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
-			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 
-			mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
-			mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
+		mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
+		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
 
-			mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);		// Position
-			mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);		// Normal
-			mRenderer->VSetPixelShaderResourceView(mShadowContext, i, 2);		// Shadow
-			mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);		// Border
+		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);		// Position
+		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);		// Normal
+		mRenderer->VSetPixelShaderResourceView(mShadowContext, lampPair.second, 2);		// Shadow
+		mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);		// Border
 
-			mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
-
-			//mRenderer->VBindMesh(l.mConeMesh);
-
-			//mRenderer->VDrawIndexed(0, l.mConeMesh->GetIndexCount());
-		}
-		i++;
+		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
 	}
 
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
