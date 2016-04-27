@@ -30,6 +30,13 @@ namespace CBuffer {
 		float		padding[3];
 	};
 
+	struct PointLight
+	{
+		vec4f color;
+		vec3f position;
+		float radius;
+	};
+
 	struct SpriteSheet
 	{
 		int sheetWidth;
