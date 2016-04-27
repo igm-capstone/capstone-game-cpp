@@ -162,7 +162,7 @@ void Level01::InitializeAssets()
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
 
 	//mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
-	mLevel = Resource::LoadLevel("Assets/Level02_Test.json", mAllocator);
+	mLevel = Resource::LoadLevel("Assets/RPI_Level.json", mAllocator);
 
 
 	mFloorCollider.halfSize = mLevel.extents;
@@ -906,7 +906,7 @@ void Level01::RenderDoors()
 	}
 
 	// Putting Domination Points here for now.
-	model = mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_DOM_POINT]);
+	model = mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_GENERATOR]);
 	mRenderer->VBindMesh(model->mMesh);
 
 	vec4f gray = { 0.75f, 0.75f, 0.75f, 1.0f };
