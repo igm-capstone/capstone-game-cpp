@@ -782,6 +782,27 @@ void DX3D11Renderer::VCreateRenderResourceTexture2D(void * texture2D, uint32_t w
 	mDevice->CreateTexture2D(&texture2DDesc, nullptr, reinterpret_cast<ID3D11Texture2D**>(texture2D));
 }
 
+void DX3D11Renderer::VCreateRenderResourceTextureCube(ID3D11Texture2D** textureCube, uint32_t width, uint32_t height, uint8_t mipLevels, DXGI_FORMAT format)
+{
+	// Reference: http://www.hlsl.co.uk/blog/2014/11/19/creating-a-cubemap-in-dx11
+
+	D3D11_TEXTURE2D_DESC texture2DDesc;
+	texture2DDesc.Width = width;
+	texture2DDesc.Height = height;
+	texture2DDesc.MipLevels = mipLevels;
+	texture2DDesc.ArraySize = 6;
+	texture2DDesc.Format = format;
+	texture2DDesc.CPUAccessFlags = 0;
+	texture2DDesc.SampleDesc.Count = 1;
+	texture2DDesc.SampleDesc.Quality = 0;
+	texture2DDesc.Usage = D3D11_USAGE_DEFAULT;
+	texture2DDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	texture2DDesc.CPUAccessFlags = 0;
+	texture2DDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+
+	mDevice->CreateTexture2D(&texture2DDesc, nullptr, textureCube);
+}
+
 #pragma endregion 
 
 #pragma region SamplerState
@@ -1837,6 +1858,47 @@ void DX3D11Renderer::VCreateContextDepthStencilResourceTargets(IRenderContext* r
 	DX11RenderContext* context = static_cast<DX11RenderContext*>(renderContext);
 	context->SetDepthStencilViews(DSVs);
 	context->SetDepthStencilResourceViews(SRVs);
+}
+
+void DX3D11Renderer::VCreateContextCubicShadowTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height)
+{
+	std::vector<ID3D11RenderTargetView*> RTVs(count * 6);
+	std::vector<ID3D11ShaderResourceView*> SRVs(count);
+
+	for (uint32_t i = 0; i < count; i++)
+	{
+		ID3D11Texture2D* textureCube;
+		VCreateRenderResourceTextureCube(&textureCube, width, height, 1, DXGI_FORMAT_R32G32B32A32_FLOAT);
+
+		D3D11_TEXTURE2D_DESC textureDesc;
+		textureCube->GetDesc(&textureDesc);
+
+		D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
+		rtvDesc.Format = textureDesc.Format;
+		rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+		rtvDesc.Texture2DArray.ArraySize = 1;
+		rtvDesc.Texture2DArray.MipSlice = 0;
+
+		for (uint32_t j = 0; j < 6; j++)
+		{
+			rtvDesc.Texture2DArray.FirstArraySlice = j;
+			mDevice->CreateRenderTargetView(textureCube, &rtvDesc, &RTVs[(i * 6) + j]);
+		}
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
+		SRVDesc.Format = textureDesc.Format;
+		SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+		SRVDesc.Texture2D.MipLevels = 1;
+		SRVDesc.Texture2D.MostDetailedMip = 0;
+
+		mDevice->CreateShaderResourceView(textureCube, &SRVDesc, &SRVs[i]);
+
+		ReleaseMacro(textureCube);
+	}
+
+	DX11RenderContext* context = static_cast<DX11RenderContext*>(renderContext);
+	context->SetRenderTargetViews(RTVs);
+	context->SetShaderResourceViews(SRVs);
 }
 
 void DX3D11Renderer::VSetContextTarget()

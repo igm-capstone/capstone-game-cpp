@@ -104,6 +104,8 @@ namespace Rig3D
 		void VCreateRenderTexture2D(void* texture2D, uint32_t width, uint32_t height);
 		void VCreateRenderResourceTexture2D(void * texture2D, uint32_t width, uint32_t height);
 
+		void VCreateRenderResourceTextureCube(ID3D11Texture2D** textureCube, uint32_t width, uint32_t height, uint8_t mipLevels, DXGI_FORMAT format);
+
 #pragma endregion 
 
 #pragma region SamplerState
@@ -235,6 +237,8 @@ namespace Rig3D
 
 		void	VCreateContextResourceTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
 		void	VCreateContextDepthStencilResourceTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
+
+		void	VCreateContextCubicShadowTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
 
 		void	VSetContextTarget();
 		void	VSetContextTargetWithDepth();
