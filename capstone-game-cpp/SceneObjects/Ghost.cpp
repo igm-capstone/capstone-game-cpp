@@ -16,9 +16,10 @@ Skill* createGhostSkill(Skill::UseCallback callback, json& skillConfig)
 	auto cooldown = skillConfig["cooldown"].get<float>();
 	auto cost = skillConfig["cost"].get<float>();
 	auto name = skillConfig["description"].get<string>();
+	auto duration = skillConfig.find("duration") == skillConfig.end() ? 0.0f : skillConfig["duration"].get<float>();
 
 	auto skill = Factory<Skill>::Create();
-	skill->Setup(name, cooldown, 0, callback, cost);
+	skill->Setup(name, cooldown, duration, callback, cost);
 
 	return skill;
 }

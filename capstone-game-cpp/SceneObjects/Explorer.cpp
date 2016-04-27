@@ -21,9 +21,10 @@ Skill* createExplorerSkill(Skill::UseCallback callback, SkillBinding binding, js
 	auto cooldown = skillConfig["cooldown"].get<float>();
 	auto cost = skillConfig["cost"].get<float>();
 	auto name = skillConfig["description"].get<string>();
+	auto duration = skillConfig.find("duration") == skillConfig.end() ? 0.0f : skillConfig["duration"].get<float>();
 
 	auto skill = Factory<Skill>::Create();
-	skill->Setup(name, cooldown, 0, callback, cost);
+	skill->Setup(name, cooldown, duration, callback, cost);
 	skill->SetBinding(binding);
 
 	return skill;
