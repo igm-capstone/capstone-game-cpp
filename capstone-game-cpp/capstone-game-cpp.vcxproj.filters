@@ -24,6 +24,8 @@
     <FxCompile Include="Shaders\VSFwdSpriteGlyphs.hlsl" />
     <FxCompile Include="Shaders\VSFwdSingleMaterial.hlsl" />
     <FxCompile Include="Shaders\PSFwdSingleMaterial.hlsl" />
+    <FxCompile Include="Shaders\PSFwdDistanceMaterial.hlsl" />
+    <FxCompile Include="Shaders\PSFwdPointLightVolume.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
