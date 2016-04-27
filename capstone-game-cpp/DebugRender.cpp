@@ -212,7 +212,8 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 	gRenderer->VBindMesh(gSphereMesh);
 	for (Lamp& l : Factory<Lamp>())
 	{
-		
+		if (l.mStatus == LAMP_OFF) continue;
+
 		model->world = (mat4f::scale(l.mLightRadius) * l.mTransform->GetWorldMatrix()).transpose();
 		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
 		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
