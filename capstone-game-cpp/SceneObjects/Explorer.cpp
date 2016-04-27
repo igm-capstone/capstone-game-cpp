@@ -65,7 +65,6 @@ Explorer::Explorer()
 	mController = Factory<ExplorerController>::Create();
 	mController->mSceneObject = this;
 	mController->mIsActive = false;
-	mController->mSpeed = 0.05f;
 	mController->RegisterMoveCallback(&OnMove);
 	mController->mAnimationController = mAnimationController;	// Be careful if you move this code. AnimationController should exist before here.
 
@@ -276,12 +275,14 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
 		mUIManager->AddSkill(e->mSkills[SPRINT_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 1, 6);
 
+		e->mController->mSprintMultiplier = sprintConfig["speedMultiplier"].get<float>();
+
 		break;
 	}
 	}
 
-	//e->mController->mSpeed = config["moveSpeed"].get<float>();
-	e->mHealth->SetMaxHealth(config["baseHealth"].get<float>()*10);
+	e->mController->mBaseMoveSpeed = config["moveSpeed"].get<float>();
+	e->mHealth->SetMaxHealth(config["baseHealth"].get<float>());
 }
 
 void Explorer::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot)

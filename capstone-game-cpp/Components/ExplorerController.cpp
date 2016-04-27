@@ -24,12 +24,12 @@ ExplorerController::ExplorerController() :
 	mAngle(0),
 	mMouseLock(0),
 	mSprintDuration(0),
-	mAcceleration(10.0f),
-	mBaseMoveSpeed(20.0f),
 	mSpeedMultiplier(1),
+	mAcceleration(10.0f),
 	mCurrentSpeed(0),
 	mAnimationController(nullptr),
-	mSpeed(0.01f),
+	mBaseMoveSpeed(20.0f),
+	mSprintMultiplier(1.5),
 	mIsInteracting(false)
 {
 
@@ -43,7 +43,7 @@ ExplorerController::~ExplorerController()
 bool ExplorerController::Move(float dt, vec3f& pos)
 {
 	// update speed multiplier for the sprint skill
-	mSpeedMultiplier = mSprintDuration ? 2.0f : 1.0f;
+	mSpeedMultiplier = mSprintDuration ? mSprintMultiplier : 1.0f;
 
 	if (mSprintDuration > 0)
 	{
