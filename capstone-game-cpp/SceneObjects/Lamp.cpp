@@ -88,4 +88,7 @@ void Lamp::ToggleLamp()
 		mStatus = LAMP_ON;
 		break;
 	}
+
+	if (mNetworkManager->mMode == NetworkManager::SERVER)
+		Singleton<AIManager>::SharedInstance().SetGridDirty(true);
 }

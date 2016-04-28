@@ -571,8 +571,8 @@ void Level01::VUpdate(double milliseconds)
 
 void Level01::VFixedUpdate(double milliseconds)
 {
-	//if (mAIManager->IsGridDirty()) ComputeGrid(); 
-	//mAIManager->Update();
+	if (mAIManager->IsGridDirty()) ComputeGrid(); 
+	mAIManager->Update();
 
 	mNetworkManager->Update();
 }
@@ -1324,39 +1324,42 @@ void Level01::ComputeGrid()
 
 	mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
 	mRenderer->VSetVertexShader(mApplication->mVSFwdSpotLightVolume);
-	mRenderer->VSetPixelShader(mApplication->mPSFwdSpotLightVolume);
+	mRenderer->VSetPixelShader(mApplication->mPSFwdPointLightVolume);
 
 	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferFullLevelOrto(), 0);
 
+	mRenderer->VBindMesh(mSphereMesh);
+
 	uint32_t i = 0;
 	for (Lamp& l : Factory<Lamp>())
 	{
-		mModel.world = mLevel.lampWorldMatrices[i];
-		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		if (l.mStatus == LAMP_ON) {
+			mModel.world = mLevel.lampWorldMatrices[i];
+			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 
-		// Set Light data
-		mLightData.viewProjection = (mLevel.lampVPTMatrices[i]).transpose();
-		mLightData.color = l.mLightColor;
-		mLightData.direction = l.mLightDirection;
-		mLightData.range = l.mLightRadius;
-		mLightData.cosAngle = cos(l.mLightAngle);
+			// Set Light data
+			mLightData.viewProjection = (mLevel.lampVPTMatrices[i]).transpose();
+			mLightData.color = l.mLightColor;
+			mLightData.direction = l.mLightDirection;
+			mLightData.range = l.mLightRadius;
+			mLightData.cosAngle = cos(l.mLightAngle);
 
-		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
+			mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
 
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 
-		mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
-		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
-		mRenderer->VSetPixelShaderResourceView(mGridContext, 0, 0);		// Position
-		mRenderer->VSetPixelShaderResourceView(mGridContext, 1, 1);		// Normal
-		mRenderer->VSetPixelShaderDepthResourceView(mShadowContext, i, 2);	// Shadow
-		mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);		// Border
+			mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
+			mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
 
-		mRenderer->VBindMesh(l.mConeMesh);
+			mRenderer->VSetPixelShaderResourceView(mGridContext, 0, 0);		// Position
+			mRenderer->VSetPixelShaderResourceView(mGridContext, 1, 1);		// Normal
+			mRenderer->VSetPixelShaderResourceView(mShadowContext, i, 2);		// Shadow
+			mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);		// Border
 
-		mRenderer->VDrawIndexed(0, l.mConeMesh->GetIndexCount());
+			mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
+		}
 		i++;
 	}
 
@@ -1387,9 +1390,6 @@ void Level01::ComputeGrid()
 
 	// Reset current grid to -10 / 0 on player
 	mAIManager->ResetGridData();
-
-	//Copy previous results to a CPU friendly buffer
-	mDeviceContext->CopyResource(mOutputDataCPURead, mOutputData);
 
 	//Pass 1
 	mRenderer->VSetComputeShader(mApplication->mCSGridPass1);
@@ -1422,6 +1422,9 @@ void Level01::ComputeGrid()
 
 	mDeviceContext->CSSetShader(NULL, NULL, 0);
 	mDeviceContext->CSSetShaderResources(0, 3, mNullSRV);
+
+	//Copy previous results to a CPU friendly buffer
+	mDeviceContext->CopyResource(mOutputDataCPURead, mOutputData);
 
 	//Map and update
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
