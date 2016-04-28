@@ -82,6 +82,7 @@
     <ClCompile Include="SceneObjects\Lamp.cpp" />
     <ClCompile Include="UI\UIManager.cpp" />
     <ClCompile Include="jsonUtils.cpp" />
+    <ClCompile Include="Components\Health.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />

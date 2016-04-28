@@ -20,7 +20,6 @@ Minion::Minion()
 	mNetworkID->mIsActive = false;
 	mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
 	mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
-	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
 	mNetworkID->RegisterNetSyncAnimationCallback(&OnNetSyncAnimation);
 
 	mCollider = Factory<SphereColliderComponent>::Create();
@@ -43,8 +42,10 @@ Minion::Minion()
 
 	mHealth = Factory<Health>::Create();
 	mHealth->mSceneObject = this;
-	mHealth->SetMaxHealth(1000.0f);
+	mHealth->SetMaxHealth(10.0f);
+	mHealth->SetupNetworkID(mNetworkID);
 	mHealth->RegisterHealthChangeCallback(OnHealthChange);
+	mHealth->RegisterHealthToZeroCallback(OnDeath);
 }
 
 Minion::~Minion()
@@ -190,37 +191,16 @@ void Minion::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot
 	e->UpdateComponents(newRot, newPos);
 }
 
-void Minion::OnHealthChange(BaseSceneObject* obj, float newVal, bool shouldCheckAuthority)
+void Minion::OnHealthChange(BaseSceneObject* obj, float newVal)
 {
-	Minion* m = reinterpret_cast<Minion*>(obj);
-	if (!shouldCheckAuthority || m->mNetworkID->mHasAuthority)
-	{
-		Packet p(PacketTypes::SYNC_HEALTH);
-		p.UUID = m->mNetworkID->mUUID;
-		p.AsFloat = newVal;
 
-		if (Singleton<NetworkManager>::SharedInstance().mMode == NetworkManager::CLIENT)
-		{
-			Singleton<NetworkManager>::SharedInstance().mClient.SendData(&p);
-		}
-		else
-		{
-			m->mNetworkServer->SendToAll(&p);
-		}
-
-	}
-
-	if (m->mHealth->GetHealth() <= 0.0f)
-	{
-		m->mShouldDestroy = true;
-	}
 }
 
-
-void Minion::OnNetHealthChange(BaseSceneObject* obj, float newVal)
+void Minion::OnDeath(BaseSceneObject* obj)
 {
-	auto e = static_cast<Minion*>(obj);
-	e->mHealth->SetHealth(newVal);
+	TRACE_LOG("MINION DIED");
+	auto m = static_cast<Minion*>(obj);
+	m->mShouldDestroy = true;
 }
 
 void Minion::OnAnimationCommandExecuted(BaseSceneObject* obj, AnimationControllerState state, AnimationControllerCommand command) {

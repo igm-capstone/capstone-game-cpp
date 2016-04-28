@@ -5,24 +5,28 @@
     "baseEnergy": 100,
     "skills": [
       {
-        "name": "Basic Minion",
+        "name": "SpawnMinion",
+        "description": "Imp Squad",
         "cooldown": 2.0,
         "cost": 10,
         "spawnRadius": 4.0,
         "spawnCount": 2
       },
       {
-        "name": "AOE Bomber",
+        "name": "SpawnAOE",
+        "description": "Bomber",
         "cooldown": 4.0,
         "cost": 25
       },
       {
-        "name": "Flytrap",
+        "name": "SpawnPlant",
+        "description": "Terror Tree",
         "cooldown": 3.0,
         "cost": 20
       },
       {
-        "name": "Haunt Explorer To Minion",
+        "name": "Haunt_ExpToMinion",
+        "description": "Imp Illusion",
         "cooldown": 17.0,
         "cost": 0,
         "duration": 15.0
@@ -36,12 +40,14 @@
       "baseHealth": 140,
       "skills": [
         {
-          "name": "Skill",
+          "name": "InteractSkill",
+          "description": "InteractSkill",
           "cooldown": 0.0,
           "cost": 0
         },
         {
           "name": "ConeAttack",
+          "description": "Quick Slash",
           "cooldown": 0.3,
           "cost": 0,
           "damage": 8,
@@ -49,13 +55,15 @@
         },
         {
           "name": "Sprint",
+          "description": "Sprint",
           "cooldown": 2.0,
           "cost": 0,
           "duration": 1.0,
           "speedMultiplier": 1.5
         },
         {
-          "name": "Lantern",
+          "name": "SetRegLantern",
+          "description": "Drop Lantern",
           "cooldown": 1.0,
           "cost": 0,
           "charges": 6
@@ -68,12 +76,14 @@
       "baseHealth": 160,
       "skills": [
         {
-          "name": "Skill",
+          "name": "InteractSkill",
+          "description": "InteractSkill",
           "cooldown": 0.0,
           "cost": 0
         },
         {
           "name": "LongAttack",
+          "description": "Sword Swing",
           "cooldown": 0.4,
           "cost": 0,
           "damage": 17,
@@ -81,13 +91,15 @@
         },
         {
           "name": "Heal",
+          "description": "Heal",
           "cooldown": 6.0,
           "cost": 0,
           "heal": 60,
           "aoe": 3.0
         },
         {
-          "name": "Lantern",
+          "name": "SetRegLantern",
+          "description": "Drop Lantern",
           "cooldown": 1.0,
           "cost": 0,
           "charges": 6
@@ -101,11 +113,13 @@
       "skills": [
         {
           "name": "InteractSkill",
+          "description": "InteractSkill",
           "cooldown": 0.0,
           "cost": 0
         },
         {
           "name": "GrenadeToss",
+          "description": "Grenade Toss",
           "cooldown": 0.6,
           "cost": 0,
           "damage": 10,
@@ -114,7 +128,8 @@
           "knockback": 3.0
         },
         {
-          "name": "Skill",
+          "name": "SetTrapPoison",
+          "description": "Poison Trap",
           "cooldown": 2.5,
           "cost": 0,
           "duration": 0,
@@ -122,13 +137,15 @@
         },
         {
           "name": "SetTrapGlue",
+          "description": "Glue Trap",
           "cooldown": 2.5,
           "cost": 0,
           "duration": 0,
           "speedMultiplier": 0
         },
         {
-          "name": "Lantern",
+          "name": "SetRegLantern",
+          "description": "Drop Lantern",
           "cooldown": 1.0,
           "cost": 0,
           "charges": 6

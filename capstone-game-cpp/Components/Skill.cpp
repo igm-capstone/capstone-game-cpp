@@ -75,9 +75,12 @@ void Skill::SetBinding(SkillBinding binding)
 	mBinding = binding;
 }
 
-void Skill::Setup(const char* name, float cooldown, float duration, UseCallback callback, float cost)
+void Skill::Setup(string name, float cooldown, float duration, UseCallback callback, float cost)
 {
-	mName = name;
+	auto lastIndex = min(name.size(), sizeof(mName) - 1);
+	memcpy(mName, name.c_str(), lastIndex);
+	mName[lastIndex] = 0;
+
 	mCoolDown = cooldown;
 	mDuration = duration;
 	mCost = cost;

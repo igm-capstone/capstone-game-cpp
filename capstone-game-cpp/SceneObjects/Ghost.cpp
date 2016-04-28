@@ -11,13 +11,15 @@
 #include "Explorer.h"
 #include "jsonUtils.h"
 
-Skill* createGhostSkill(const char* skillName, Skill::UseCallback callback, json& skillConfig)
+Skill* createGhostSkill(Skill::UseCallback callback, json& skillConfig)
 {
 	auto cooldown = skillConfig["cooldown"].get<float>();
 	auto cost = skillConfig["cost"].get<float>();
-	
+	auto name = skillConfig["description"].get<string>();
+	auto duration = skillConfig.find("duration") == skillConfig.end() ? 0.0f : skillConfig["duration"].get<float>();
+
 	auto skill = Factory<Skill>::Create();
-	skill->Setup(skillName, cooldown, 0, callback, cost);
+	skill->Setup(name, cooldown, duration, callback, cost);
 
 	return skill;
 }
@@ -42,20 +44,20 @@ Ghost::Ghost() : mNetworkID(nullptr)
 	json& config = Application::SharedInstance().GetConfigJson()["ghost"];
 	jarr_t skills = config["skills"].get<jarr_t>();
 
-	json impConfig = findByName(skills, "Basic Minion");
-	mSkills[1] = createGhostSkill("Imp", DoSpawnImpMinion, impConfig);
+	json impConfig = findByName(skills, "SpawnMinion");
+	mSkills[1] = createGhostSkill(DoSpawnImpMinion, impConfig);
 	mSkills[1]->mSceneObject = this;
 
-	json abominationConfig = findByName(skills, "AOE Bomber");
-	mSkills[2] = createGhostSkill("Abomination", DoSpawnAbominationMinion, abominationConfig);
+	json abominationConfig = findByName(skills, "SpawnAOE");
+	mSkills[2] = createGhostSkill(DoSpawnAbominationMinion, abominationConfig);
 	mSkills[2]->mSceneObject = this;
 
-	json flytrapConfig = findByName(skills, "Flytrap");
-	mSkills[3] = createGhostSkill("Flytrap", DoSpawnFlytrapMinion, flytrapConfig);
+	json flytrapConfig = findByName(skills, "SpawnPlant");
+	mSkills[3] = createGhostSkill(DoSpawnFlytrapMinion, flytrapConfig);
 	mSkills[3]->mSceneObject = this;
 
-	json transmogrifyConfig = findByName(skills, "Haunt Explorer To Minion");
-	mSkills[4] = createGhostSkill("Transmogrify", DoTransmogrify, transmogrifyConfig);
+	json transmogrifyConfig = findByName(skills, "Haunt_ExpToMinion");
+	mSkills[4] = createGhostSkill(DoTransmogrify, transmogrifyConfig);
 	mSkills[4]->mSceneObject = this;
 	mSkills[4]->mDuration = transmogrifyConfig["duration"].get<float>();
 	

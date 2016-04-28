@@ -16,13 +16,15 @@
 #define POISON_SKILL_INDEX  1
 #define SLOW_SKILL_INDEX	2
 
-Skill* createExplorerSkill(const char* skillName, Skill::UseCallback callback, SkillBinding binding, json& skillConfig)
+Skill* createExplorerSkill(Skill::UseCallback callback, SkillBinding binding, json& skillConfig)
 {
 	auto cooldown = skillConfig["cooldown"].get<float>();
 	auto cost = skillConfig["cost"].get<float>();
+	auto name = skillConfig["description"].get<string>();
+	auto duration = skillConfig.find("duration") == skillConfig.end() ? 0.0f : skillConfig["duration"].get<float>();
 
 	auto skill = Factory<Skill>::Create();
-	skill->Setup(skillName, cooldown, 0, callback, cost);
+	skill->Setup(name, cooldown, duration, callback, cost);
 	skill->SetBinding(binding);
 
 	return skill;
@@ -38,7 +40,7 @@ Explorer::Explorer()
 	mNetworkID->mIsActive = false;
 	mNetworkID->RegisterNetAuthorityChangeCallback(&OnNetAuthorityChange);
 	mNetworkID->RegisterNetSyncTransformCallback(&OnNetSyncTransform);
-	mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
+	//mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
 	mNetworkID->RegisterNetSyncAnimationCallback(&OnNetSyncAnimation);
 
 	Application::SharedInstance().GetModelManager()->GetModel(kSprinterModelName)->Link(this);
@@ -63,7 +65,6 @@ Explorer::Explorer()
 	mController = Factory<ExplorerController>::Create();
 	mController->mSceneObject = this;
 	mController->mIsActive = false;
-	mController->mSpeed = 0.05f;
 	mController->RegisterMoveCallback(&OnMove);
 	mController->mAnimationController = mAnimationController;	// Be careful if you move this code. AnimationController should exist before here.
 
@@ -87,6 +88,7 @@ Explorer::Explorer()
 
 	mHealth = Factory<Health>::Create();
 	mHealth->mSceneObject = this;
+	mHealth->SetupNetworkID(mNetworkID);
 	mHealth->SetMaxHealth(1000.0f);
 	mHealth->RegisterHealthChangeCallback(OnHealthChange);
 	mHealth->RegisterHealthToZeroCallback(OnDeath);
@@ -211,11 +213,11 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		skills = config["skills"].get<jarr_t>();
 
 		auto healConfig = findByName(skills, "Heal");
-		e->mSkills[HEAL_SKILL_INDEX] = createExplorerSkill("Heal", DoHeal, KEYCODE_Q, healConfig);
+		e->mSkills[HEAL_SKILL_INDEX] = createExplorerSkill(DoHeal, KEYCODE_Q, healConfig);
 		e->mSkills[HEAL_SKILL_INDEX]->mSceneObject = e;
 
 		auto meleeConfig = findByName(skills, "LongAttack");
-		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill("Melee", DoMelee, MOUSEBUTTON_LEFT, meleeConfig);
+		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill(DoMelee, MOUSEBUTTON_LEFT, meleeConfig);
 		e->mSkills[MELEE_SKILL_INDEX]->mSceneObject = e;
 
 		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
@@ -235,12 +237,17 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		poison->mSceneObject = e;
 		e->mSkills[POISON_SKILL_INDEX] = poison;
 
+
+		auto poisonConfig = findByName(skills, "SetTrapPoison");
+		e->mSkills[POISON_SKILL_INDEX] = createExplorerSkill(DoPoison, KEYCODE_Q, poisonConfig);
+		e->mSkills[POISON_SKILL_INDEX]->mSceneObject = e;
+
 		auto glueConfig = findByName(skills, "SetTrapGlue");
-		e->mSkills[SLOW_SKILL_INDEX] = createExplorerSkill("Glue Trap", DoSlow, KEYCODE_E, glueConfig);
+		e->mSkills[SLOW_SKILL_INDEX] = createExplorerSkill(DoSlow, KEYCODE_E, glueConfig);
 		e->mSkills[SLOW_SKILL_INDEX]->mSceneObject = e;
 
 		auto tossConfig = findByName(skills, "GrenadeToss");
-		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill("Grenade", DoMelee, MOUSEBUTTON_LEFT, tossConfig);
+		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill(DoMelee, MOUSEBUTTON_LEFT, tossConfig);
 		e->mSkills[MELEE_SKILL_INDEX]->mSceneObject = e;
 
 		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
@@ -257,22 +264,24 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		skills = config["skills"].get<jarr_t>();
 
 		auto sprintConfig = findByName(skills, "Sprint");
-		e->mSkills[SPRINT_SKILL_INDEX] = createExplorerSkill("Sprint", DoSprint, KEYCODE_Q, sprintConfig);
+		e->mSkills[SPRINT_SKILL_INDEX] = createExplorerSkill(DoSprint, KEYCODE_Q, sprintConfig);
 		e->mSkills[SPRINT_SKILL_INDEX]->mSceneObject = e;
 
 		auto meleeConfig = findByName(skills, "ConeAttack");
-		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill("Melee", DoMelee, MOUSEBUTTON_LEFT, meleeConfig);
+		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill(DoMelee, MOUSEBUTTON_LEFT, meleeConfig);
 		e->mSkills[MELEE_SKILL_INDEX]->mSceneObject = e;
 
 		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
 		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
 		mUIManager->AddSkill(e->mSkills[SPRINT_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 1, 6);
 
+		e->mController->mSprintMultiplier = sprintConfig["speedMultiplier"].get<float>();
+
 		break;
 	}
 	}
 
-	//e->mController->mSpeed = config["moveSpeed"].get<float>();
+	e->mController->mBaseMoveSpeed = config["moveSpeed"].get<float>() / 10;
 	e->mHealth->SetMaxHealth(config["baseHealth"].get<float>());
 }
 
@@ -294,12 +303,6 @@ void Explorer::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newR
 			ai.SetGridDirty(true);
 		}
 	}
-}
-
-void Explorer::OnNetHealthChange(BaseSceneObject* obj, float newVal)
-{
-	auto e = static_cast<Explorer*>(obj);
-	e->mHealth->SetHealth(newVal);
 }
 
 void Explorer::OnAnimationCommandExecuted(BaseSceneObject* obj, AnimationControllerState state, AnimationControllerCommand command) {
@@ -328,24 +331,9 @@ void Explorer::OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command
 	}
 }
 
-void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal, bool checkAuthority)
+void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal)
 {
-	auto e = static_cast<Explorer*>(obj);
-	if (!checkAuthority || e->mNetworkID->mHasAuthority)
-	{
-		Packet p(PacketTypes::SYNC_HEALTH);
-		p.UUID = e->mNetworkID->mUUID;
-		p.AsFloat = newVal;
 
-		if (Singleton<NetworkManager>::SharedInstance().mMode == NetworkManager::SERVER)
-		{
-			Singleton<NetworkManager>::SharedInstance().mServer.SendToAll(&p);
-		}
-		else
-		{
-			e->mNetworkClient->SendData(&p);
-		}
-	}
 }
 
 void Explorer::OnDeath(BaseSceneObject* obj)
@@ -367,11 +355,8 @@ void Explorer::OnRevive(BaseSceneObject* obj)
 
 void Explorer::OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other)
 {
-	other->Is<Explorer>();
 	auto e = static_cast<Explorer*>(obj);
-	if (e->mNetworkID->mHasAuthority) {
-		e->mCameraManager->ChangeLookAtTo(e->mTransform->GetPosition());
-	}
+	e->OnMove(e, e->mTransform->GetPosition(), e->mTransform->GetRotation());
 }
 
 void Explorer::OnTriggerStay(BaseSceneObject* obj, BaseSceneObject* other)
