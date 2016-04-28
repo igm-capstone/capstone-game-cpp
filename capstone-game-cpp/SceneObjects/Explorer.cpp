@@ -224,6 +224,8 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
 		mUIManager->AddSkill(e->mSkills[HEAL_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 0, 6);
 
+		e->mAttackDamage = meleeConfig["damage"].get<float>();
+
 		break;
 	}
 	case TRAPMASTER:
@@ -255,6 +257,8 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		mUIManager->AddSkill(e->mSkills[POISON_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 2, 6);
 		mUIManager->AddSkill(e->mSkills[SLOW_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 4, 4);
 
+		e->mAttackDamage = tossConfig["damage"].get<float>();
+
 		break;
 	}
 	case SPRINTER:
@@ -275,6 +279,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
 		mUIManager->AddSkill(e->mSkills[SPRINT_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 1, 6);
 
+		e->mAttackDamage = meleeConfig["damage"].get<float>();
 		e->mController->mSprintMultiplier = sprintConfig["speedMultiplier"].get<float>();
 
 		break;
@@ -484,11 +489,13 @@ void Explorer::OnMeleeStop(void* obj)
 
 void Explorer::OnMeleeHit(BaseSceneObject* self, BaseSceneObject* other)
 {	
+	auto e = reinterpret_cast<Explorer*>(self);
+
 	// THis is currently an assumption that this object will have a Health component
 	if (other->Is<Minion>())
 	{
 		auto m = reinterpret_cast<Minion*>(other);
-		m->mHealth->TakeDamage(100.0f, false);
+		m->mHealth->TakeDamage(e->mAttackDamage, false);
 	}
 	else if (other->Is<Explorer>())
 	{

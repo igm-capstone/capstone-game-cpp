@@ -30,6 +30,7 @@ public:
 	class Node*							mCurrentNode;
 
 	MeleeColliderComponent				mMeleeColliderComponent;
+	float								mAttackDamage;
 
 private:
 	class NetworkClient*				mNetworkClient;
