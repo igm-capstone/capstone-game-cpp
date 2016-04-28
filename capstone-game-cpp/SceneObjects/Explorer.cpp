@@ -355,11 +355,8 @@ void Explorer::OnRevive(BaseSceneObject* obj)
 
 void Explorer::OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other)
 {
-	other->Is<Explorer>();
 	auto e = static_cast<Explorer*>(obj);
-	if (e->mNetworkID->mHasAuthority) {
-		e->mCameraManager->ChangeLookAtTo(e->mTransform->GetPosition());
-	}
+	e->OnMove(e, e->mTransform->GetPosition(), e->mTransform->GetRotation());
 }
 
 void Explorer::OnTriggerStay(BaseSceneObject* obj, BaseSceneObject* other)
