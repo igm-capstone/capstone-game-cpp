@@ -79,25 +79,21 @@ namespace Rig3D
 					vec3f n3 = { sinTheta1 * cosPhi0, cosTheta1, sinTheta1 * sinPhi0 };
 
 					Vertex v0, v1, v2, v3;
-					v0.Position = radius * n0;
-					v1.Position = radius * n1;
-					v2.Position = radius * n2;
-					v3.Position = radius * n3;
 
-					v0.Normal = n0;
-					v1.Normal = n1;
-					v2.Normal = n2;
-					v3.Normal = n3;
+					v0.SetPosition(radius * n0);
+					v1.SetPosition(radius * n1);
+					v2.SetPosition(radius * n2);
+					v3.SetPosition(radius * n3);
 
-					/*v0.UV = { 0.5f + (atan2(n0.z, n0.x) / (2.0f * pi)), 0.5f - (asin(n0.y) / pi) };
-					v0.UV = { 0.5f + (atan2(n1.z, n1.x) / (2.0f * pi)), 0.5f - (asin(n1.y) / pi) };
-					v0.UV = { 0.5f + (atan2(n2.z, n2.x) / (2.0f * pi)), 0.5f - (asin(n2.y) / pi) };
-					v0.UV = { 0.5f + (atan2(n3.z, n3.x) / (2.0f * pi)), 0.5f - (asin(n3.y) / pi) };*/
+					v0.SetNormal(n0);
+					v1.SetNormal(n1);
+					v2.SetNormal(n2);
+					v3.SetNormal(n3);
 
-					v0.UV = { (asin(n0.x) / pi) + 0.5f, (asin(n0.y) / pi) + 0.5f };
-					v1.UV = { (asin(n1.x) / pi) + 0.5f, (asin(n1.y) / pi) + 0.5f };
-					v2.UV = { (asin(n2.x) / pi) + 0.5f, (asin(n2.y) / pi) + 0.5f };
-					v3.UV = { (asin(n3.x) / pi) + 0.5f, (asin(n3.y) / pi) + 0.5f };
+					v0.SetUV({ (asin(n0.x) / pi) + 0.5f, (asin(n0.y) / pi) + 0.5f });
+					v1.SetUV({ (asin(n1.x) / pi) + 0.5f, (asin(n1.y) / pi) + 0.5f });
+					v2.SetUV({ (asin(n2.x) / pi) + 0.5f, (asin(n2.y) / pi) + 0.5f });
+					v3.SetUV({ (asin(n3.x) / pi) + 0.5f, (asin(n3.y) / pi) + 0.5f });
 					
 					if (t == 0)
 					{
