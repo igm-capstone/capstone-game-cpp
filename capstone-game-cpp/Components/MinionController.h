@@ -2,6 +2,7 @@
 #include "BaseComponent.h"
 #include <BehaviorTree/Tree.h>
 #include <Components/AnimationController.h>
+#include <json.h>
 
 class MinionController : public BaseComponent
 {
@@ -19,7 +20,13 @@ public:
 	class Rig3D::Timer& mTimer;
 	BehaviorTree::Tree* mBehaviorTree;
 	quatf mBaseRotation;
-	
+	float mBaseMoveSpeed;
+	float mAttackDamage;
+	float mAttackRange;
+	float mTurnRate;
+	float mStunOnHitDuration;
+	float mSplashRange;
+
 	// variables used by BT
 	vec3f mTarget;
 	float mSpeed;

@@ -22,8 +22,6 @@ void Health::OnSyncHealth(BaseSceneObject* obj, float newVal, float newMax)
 		return;
 	}
 
-
-	TRACE_LOG("sync health " << newVal << " " << newMax);
 	if (newVal >= 0)
 	{
 		auto oldVal = h->mCurrentHealth;

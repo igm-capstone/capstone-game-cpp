@@ -130,8 +130,8 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		auto h = Factory<Heal>::Create();
 		if (h)
 		{
-			h->Spawn(pos, UUID, duration);
 			h->mNetworkID->mHasAuthority = true;
+			h->Spawn(pos, UUID, duration);
 			h->mNetworkID->OnNetAuthorityChange(true);
 		}
 		break;
@@ -141,8 +141,8 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		auto p = Factory<Trap>::Create();
 		if (p)
 		{
-			p->SpawnPoison(UUID, pos, duration);
 			p->mNetworkID->mHasAuthority = true;
+			p->SpawnPoison(UUID, pos, duration);
 			p->mNetworkID->OnNetAuthorityChange(true);
 		}
 		break;
@@ -152,8 +152,8 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		auto s = Factory<Trap>::Create();
 		if (s)
 		{
-			s->SpawnSlow(UUID, pos, duration);
 			s->mNetworkID->mHasAuthority = true;
+			s->SpawnSlow(UUID, pos, duration);
 			s->mNetworkID->OnNetAuthorityChange(true);
 		}
 		break;
@@ -163,8 +163,8 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		auto f = Factory<Minion>::Create();
 		if (f)
 		{
-			f->SpawnFlytrap(pos, UUID);
 			f->mNetworkID->mHasAuthority = true;
+			f->SpawnFlytrap(pos, UUID);
 			f->mNetworkID->OnNetAuthorityChange(true);
 		}
 		break;
@@ -175,8 +175,8 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		auto m = Factory<Minion>::Create();
 		if (m)
 		{
-			m->SpawnImp(pos, UUID);
 			m->mNetworkID->mHasAuthority = true;
+			m->SpawnImp(pos, UUID);
 			m->mNetworkID->OnNetAuthorityChange(true);	
 		}
 		break;

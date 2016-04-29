@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "jsonUtils.h"
 
-json findByName(jarr_t& array, string name)
+using namespace nlohmann;
+
+json findByName(json::array_t& array, std::string name)
 {
 	for (json& child : array)
 	{
