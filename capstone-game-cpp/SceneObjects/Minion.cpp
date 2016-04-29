@@ -91,7 +91,7 @@ void Minion::Spawn(vec3f pos, int UUID, json config)
 
 	if (config.find("moveSpeed") != config.end())
 	{
-		mController->mBaseMoveSpeed = config["moveSpeed"].get<float>();
+		mController->mBaseMoveSpeed = config["moveSpeed"].get<float>() / 10;
 	}
 
 	if (config.find("turnRate") != config.end())

@@ -254,8 +254,10 @@ BehaviorStatus MinionController::MoveTowardsExplorer(Behavior& bh, void* data)
 	//	return BehaviorStatus::Success;
 	//}
 
+	float dt = 0.001f * static_cast<float>(self.mTimer.GetDeltaTime());
+
 	// speed per second
-	vec2f targetVelocity = normalize(direction) * 0.01f * static_cast<float>(self.mTimer.GetDeltaTime());
+	vec2f targetVelocity = normalize(direction) * self.mBaseMoveSpeed * dt;
 
 	// delta space for the current frame
 	vec3f ds = targetVelocity;
@@ -314,11 +316,10 @@ BehaviorStatus MinionController::MoveForward(Behavior& bh, void* data)
 		return BehaviorStatus::Failure;
 	}
 
-	auto timer = Singleton<Engine>::SharedInstance().GetTimer();
-	float dt = float(timer->GetDeltaTime()) * 0.001f;
+	float dt = 0.001f * static_cast<float>(self.mTimer.GetDeltaTime());
 
 	// speed per second
-	vec2f targetVelocity = normalize(vec2f(nextNode.worldPos) - vec2f(self.mPosition)) * 10 * dt;
+	vec2f targetVelocity = normalize(vec2f(nextNode.worldPos) - vec2f(self.mPosition)) * self.mBaseMoveSpeed * dt;
 
 	// delta space for the current frame
 	vec3f ds = targetVelocity;
