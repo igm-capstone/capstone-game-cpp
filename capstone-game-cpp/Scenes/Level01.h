@@ -55,7 +55,10 @@ class Level01 : public BaseScene
 	ID3D11Buffer*				mOutputData;
 	ID3D11Buffer*				mOutputDataCPURead;
 	ID3D11UnorderedAccessView*	mOutputDataSRV;
-	ID3D11RasterizerState*		mCCWRasterizerState;
+	ID3D11RasterizerState*		mLightingWriteRS;
+	ID3D11RasterizerState*		mLightingReadRS;
+	ID3D11DepthStencilState*	mLightingWriteDSS;
+	ID3D11DepthStencilState*	mLightingReadDSS;
 
 	GameState mGameState;
 	char mTiersCaptured[2];	
@@ -69,6 +72,7 @@ public:
 	void VInitialize() override;
 	void InitializeAssets();
 	void InitializeGeometry();
+	void InitializeRenderStates();
 	void InitializeShaderResources();
 	void InitializeGameState();
 

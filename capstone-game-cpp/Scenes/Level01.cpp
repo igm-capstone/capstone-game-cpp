@@ -58,7 +58,10 @@ Level01::Level01() :
 	mOutputData(nullptr),
 	mOutputDataCPURead(nullptr),
 	mOutputDataSRV(nullptr),
-	mCCWRasterizerState(nullptr),
+	mLightingWriteRS(nullptr),
+	mLightingReadRS(nullptr),
+	mLightingWriteDSS(nullptr),
+	mLightingReadDSS(nullptr),
 	mGameState(GAME_STATE_INITIAL)
 {
 	mAIManager->SetAllocator(&mAllocator);
@@ -97,7 +100,10 @@ Level01::~Level01()
 	ReleaseMacro(mOutputData);
 	ReleaseMacro(mOutputDataCPURead);
 	ReleaseMacro(mOutputDataSRV);
-	ReleaseMacro(mCCWRasterizerState);
+	ReleaseMacro(mLightingWriteRS);
+	ReleaseMacro(mLightingReadRS);
+	ReleaseMacro(mLightingWriteDSS);
+	ReleaseMacro(mLightingReadDSS);
 
 	mAllocator.Free();
 }
@@ -125,6 +131,7 @@ void Level01::VInitialize()
 
 	InitializeAssets();
 	InitializeGeometry();
+	InitializeRenderStates();
 	InitializeShaderResources();
 	RenderShadowMaps();
 
@@ -220,10 +227,13 @@ void Level01::InitializeGeometry()
 	// Spot Light Volume 
 	std::vector<GPU::Vertex1> coneVertices;
 
-	Geometry::Sphere(coneVertices, indices, 10, 10, 1.0f);
-	meshLibrary.NewMesh(&mGeodesicSphereMesh, mRenderer);
-	mRenderer->VSetMeshVertexBuffer(mGeodesicSphereMesh, &coneVertices[0], sizeof(GPU::Vertex1) * coneVertices.size(), sizeof(GPU::Vertex1));
-	mRenderer->VSetMeshIndexBuffer(mGeodesicSphereMesh, &indices[0], indices.size());
+	mModelManager->LoadModel<GPU::Vertex1>("Icosahedron");
+	mGeodesicSphereMesh = mModelManager->GetModel("Icosahedron")->mMesh;
+
+	//Geometry::Sphere(coneVertices, indices, 10, 10, 1.0f);
+	//meshLibrary.NewMesh(&mGeodesicSphereMesh, mRenderer);
+	//mRenderer->VSetMeshVertexBuffer(mGeodesicSphereMesh, &coneVertices[0], sizeof(GPU::Vertex1) * coneVertices.size(), sizeof(GPU::Vertex1));
+	//mRenderer->VSetMeshIndexBuffer(mGeodesicSphereMesh, &indices[0], indices.size());
 
 	coneVertices.clear();
 	indices.clear();
@@ -252,23 +262,84 @@ void Level01::InitializeGeometry()
 	mRenderer->VSetMeshIndexBuffer(mNDSQuadMesh, &indices[0], indices.size());
 }
 
-void Level01::InitializeShaderResources()
+void Level01::InitializeRenderStates()
 {
 	D3D11_RASTERIZER_DESC rasterizerDesc;
+	ZeroMemory(&rasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	rasterizerDesc.CullMode = D3D11_CULL_NONE;
+	rasterizerDesc.DepthClipEnable = true;
+
+	mRenderer->GetDevice()->CreateRasterizerState(&rasterizerDesc, &mLightingWriteRS);
+
 	ZeroMemory(&rasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
 	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 	rasterizerDesc.CullMode = D3D11_CULL_FRONT;
 	rasterizerDesc.DepthClipEnable = true;
 
-	mRenderer->GetDevice()->CreateRasterizerState(&rasterizerDesc, &mCCWRasterizerState);
-	
+	mRenderer->GetDevice()->CreateRasterizerState(&rasterizerDesc, &mLightingReadRS);
+
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	ZeroMemory(&depthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+
+	// Default depth state
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	// Stencil state
+	depthStencilDesc.StencilEnable = true;
+	depthStencilDesc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
+	depthStencilDesc.StencilWriteMask =  D3D11_DEFAULT_STENCIL_WRITE_MASK;
+
+	// Back face stencil
+	// Configure the stencil operation for the back facing polygons to increment the value in the stencil buffer 
+	// when the depth test fails but to keep it unchanged when either depth test or stencil test succeed.
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+
+	// Front face stencil
+	// Configure the stencil operation for the front facing polygons to decrement the value in the stencil buffer 
+	// when the depth test fails but to keep it unchanged when either depth test or stencil test succeed.
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+
+	mRenderer->GetDevice()->CreateDepthStencilState(&depthStencilDesc, &mLightingWriteDSS);
+
+//	ZeroMemory(&depthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+
+	// Default depth state
+	depthStencilDesc.DepthEnable = false;
+
+	// Stencil state
+	depthStencilDesc.StencilEnable = true;
+	depthStencilDesc.StencilReadMask =  D3D11_DEFAULT_STENCIL_READ_MASK;
+	depthStencilDesc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
+
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	mRenderer->GetDevice()->CreateDepthStencilState(&depthStencilDesc, &mLightingReadDSS);
+}
+
+void Level01::InitializeShaderResources()
+{
 	// Allocate render context
 	mRenderer->VCreateRenderContext(&mGBufferContext, &mAllocator);
 	mRenderer->VCreateRenderContext(&mShadowContext, &mAllocator);
 	mRenderer->VCreateRenderContext(&mGridContext, &mAllocator);
 
 	// Shadow Maps for each light
-	//mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mLevel.lampCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 	mRenderer->VCreateContextCubicShadowTargets(mShadowContext, mLevel.lampCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 	mRenderer->VCreateContextDepthStencilTargets(mShadowContext, 1, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 
@@ -783,7 +854,7 @@ void Level01::VRender()
 void Level01::RenderShadowMaps()
 {
 	mRenderer->GetDeviceContext()->RSSetState(nullptr);
-//	mRenderer->GetDeviceContext()->RSSetState(mCCWRasterizerState);
+
 	mRenderer->SetViewport(0.0f, 0.0f, static_cast<float>(SHADOW_MAP_SIZE), static_cast<float>(SHADOW_MAP_SIZE), 0.0f, 1.0f);
 	mRenderer->VSetInputLayout(mApplication->mVSDefSingleMaterial);
 	mRenderer->VSetVertexShader(mApplication->mVSDefSingleMaterial);
@@ -879,7 +950,6 @@ void Level01::RenderShadowMaps()
 
 		lampIndex++;
 	}
-//	mRenderer->GetDeviceContext()->RSSetState(nullptr);
 }
 
 void Level01::RenderStaticMeshes()
@@ -1076,30 +1146,50 @@ void Level01::RenderExplorers()
 
 void Level01::RenderSpotLightVolumes()
 {
-//	mRenderer->GetDeviceContext()->RSSetState(mCCWRasterizerState);
-
-	mRenderer->VSetRenderContextTarget(mGBufferContext, 3);
-	mRenderer->VClearContextTarget(mGBufferContext, 3, Colors::black.pCols);	// Albedo
-
-	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-	mRenderer->SetBlendState(mPLVShaderResource, 0, color, 0xffffffff);
-
-	mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
-	mRenderer->VSetVertexShader(mApplication->mVSFwdSpotLightVolume);
-	mRenderer->VSetPixelShader(mApplication->mPSFwdPointLightVolume);
-
-	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
-	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
-	
-	mRenderer->VBindMesh(mGeodesicSphereMesh);
-
+	// Cull light volumes first
 	Frustum frustum;
 	mat4f projView = (mCameraManager->GetCBufferPersp()->projection * mCameraManager->GetCBufferPersp()->view).transpose();
 	ExtractNormalizedFrustumLH(&frustum, projView);
 
 	std::vector<std::pair<Lamp*, uint32_t>> lampPairs;
 	CullLamps(frustum, &lampPairs);
+
+	mRenderer->VClearStencil(mGBufferContext, 0, 0);
+
+	// Stencil pass
+	mRenderer->GetDeviceContext()->RSSetState(mLightingWriteRS);
+	mRenderer->GetDeviceContext()->OMSetDepthStencilState(mLightingWriteDSS, 0);
+
+	mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
+	mRenderer->VSetVertexShader(mApplication->mVSFwdSpotLightVolume);
+	mRenderer->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
+
+	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
+	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
+
+	mRenderer->VBindMesh(mGeodesicSphereMesh);
+
+	for (std::pair<Lamp*, uint32_t> lampPair : lampPairs)
+	{
+		mModel.world = mLevel.lampWorldMatrices[lampPair.second];
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+		mRenderer->VDrawIndexed(0, mGeodesicSphereMesh->GetIndexCount());
+	}
+
+	// Albedo Pass
+	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	mRenderer->SetBlendState(mPLVShaderResource, 0, color, 0xffffffff);
+	mRenderer->GetDeviceContext()->RSSetState(mLightingReadRS);
+	mRenderer->GetDeviceContext()->OMSetDepthStencilState(mLightingReadDSS, 0);
+
+	mRenderer->VSetRenderContextTargetWithDepth(mGBufferContext, 3, 0);
+	mRenderer->VClearContextTarget(mGBufferContext, 3, Colors::black.pCols);	// Albedo
+
+	mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
+	mRenderer->VSetVertexShader(mApplication->mVSFwdSpotLightVolume);
+	mRenderer->VSetPixelShader(mApplication->mPSFwdPointLightVolume);
 
 	for (std::pair<Lamp*, uint32_t> lampPair : lampPairs)
 	{
@@ -1119,19 +1209,19 @@ void Level01::RenderSpotLightVolumes()
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 
-		mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
 		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
 
-		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);		// Position
-		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);		// Normal
+		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);					// Position
+		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);					// Normal
 		mRenderer->VSetPixelShaderResourceView(mShadowContext, lampPair.second, 2);		// Shadow
-		mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);		// Border
+		mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);					// Border
 
 		mRenderer->VDrawIndexed(0, mGeodesicSphereMesh->GetIndexCount());
 	}
 
-//	mRenderer->GetDeviceContext()->RSSetState(nullptr);
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
+	mRenderer->GetDeviceContext()->RSSetState(nullptr);
+	mRenderer->GetDeviceContext()->OMSetDepthStencilState(nullptr, 0);
 }
 
 void Level01::RenderFullScreenQuad()
@@ -1197,8 +1287,6 @@ void Level01::RenderMinions()
 		mRenderer->VDrawIndexed(0, ft.mModel->mMesh->GetIndexCount());
 	}
 }
-
-
 
 void Level01::RenderHealthBars()
 {
