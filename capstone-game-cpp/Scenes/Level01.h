@@ -30,6 +30,7 @@ class Level01 : public BaseScene
 	// Mesh
 	IMesh*				mCubeMesh;
 	IMesh*				mSphereMesh;
+	IMesh*				mGeodesicSphereMesh;
 	IMesh*				mNDSQuadMesh;
 
 	// RenderContext
@@ -54,6 +55,7 @@ class Level01 : public BaseScene
 	ID3D11Buffer*				mOutputData;
 	ID3D11Buffer*				mOutputDataCPURead;
 	ID3D11UnorderedAccessView*	mOutputDataSRV;
+	ID3D11RasterizerState*		mCCWRasterizerState;
 
 	GameState mGameState;
 	char mTiersCaptured[2];	

@@ -40,6 +40,8 @@ extern bool gDebugExplorer;
 
 Level01::Level01() :
 	mCubeMesh(nullptr),
+	mSphereMesh(nullptr),
+	mGeodesicSphereMesh(nullptr),
 	mNDSQuadMesh(nullptr),
 	mGBufferContext(nullptr),
 	mShadowContext(nullptr),
@@ -56,6 +58,7 @@ Level01::Level01() :
 	mOutputData(nullptr),
 	mOutputDataCPURead(nullptr),
 	mOutputDataSRV(nullptr),
+	mCCWRasterizerState(nullptr),
 	mGameState(GAME_STATE_INITIAL)
 {
 	mAIManager->SetAllocator(&mAllocator);
@@ -69,6 +72,7 @@ Level01::~Level01()
 
 	mCubeMesh->~IMesh();
 	mSphereMesh->~IMesh();
+	mGeodesicSphereMesh->~IMesh();
 	mNDSQuadMesh->~IMesh();
 
 	for (Lamp& l : Factory<Lamp>())
@@ -93,6 +97,7 @@ Level01::~Level01()
 	ReleaseMacro(mOutputData);
 	ReleaseMacro(mOutputDataCPURead);
 	ReleaseMacro(mOutputDataSRV);
+	ReleaseMacro(mCCWRasterizerState);
 
 	mAllocator.Free();
 }
@@ -161,6 +166,8 @@ void Level01::InitializeAssets()
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kTrapModelName);
 
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
+	
+//	mModelManager->LoadModel<GPU::Vertex1>("Icosahedron");
 
 	//mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 	mLevel = Resource::LoadLevel("Assets/RPI_Level.json", mAllocator);
@@ -213,6 +220,14 @@ void Level01::InitializeGeometry()
 	// Spot Light Volume 
 	std::vector<GPU::Vertex1> coneVertices;
 
+	Geometry::Sphere(coneVertices, indices, 10, 10, 1.0f);
+	meshLibrary.NewMesh(&mGeodesicSphereMesh, mRenderer);
+	mRenderer->VSetMeshVertexBuffer(mGeodesicSphereMesh, &coneVertices[0], sizeof(GPU::Vertex1) * coneVertices.size(), sizeof(GPU::Vertex1));
+	mRenderer->VSetMeshIndexBuffer(mGeodesicSphereMesh, &indices[0], indices.size());
+
+	coneVertices.clear();
+	indices.clear();
+
 	for (Lamp& l : Factory<Lamp>())
 	{
 		Geometry::SpotlightCone(coneVertices, indices, 6, 1.0f, l.mLightAngle);
@@ -224,6 +239,8 @@ void Level01::InitializeGeometry()
 		coneVertices.clear();
 		indices.clear();
 	}
+
+
 
 	// Billboard Quad (Sprites)
 	std::vector<GPU::VertexUV> ndsVertices;
@@ -237,6 +254,14 @@ void Level01::InitializeGeometry()
 
 void Level01::InitializeShaderResources()
 {
+	D3D11_RASTERIZER_DESC rasterizerDesc;
+	ZeroMemory(&rasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	rasterizerDesc.CullMode = D3D11_CULL_FRONT;
+	rasterizerDesc.DepthClipEnable = true;
+
+	mRenderer->GetDevice()->CreateRasterizerState(&rasterizerDesc, &mCCWRasterizerState);
+	
 	// Allocate render context
 	mRenderer->VCreateRenderContext(&mGBufferContext, &mAllocator);
 	mRenderer->VCreateRenderContext(&mShadowContext, &mAllocator);
@@ -757,6 +782,8 @@ void Level01::VRender()
 
 void Level01::RenderShadowMaps()
 {
+	mRenderer->GetDeviceContext()->RSSetState(nullptr);
+//	mRenderer->GetDeviceContext()->RSSetState(mCCWRasterizerState);
 	mRenderer->SetViewport(0.0f, 0.0f, static_cast<float>(SHADOW_MAP_SIZE), static_cast<float>(SHADOW_MAP_SIZE), 0.0f, 1.0f);
 	mRenderer->VSetInputLayout(mApplication->mVSDefSingleMaterial);
 	mRenderer->VSetVertexShader(mApplication->mVSDefSingleMaterial);
@@ -852,6 +879,7 @@ void Level01::RenderShadowMaps()
 
 		lampIndex++;
 	}
+//	mRenderer->GetDeviceContext()->RSSetState(nullptr);
 }
 
 void Level01::RenderStaticMeshes()
@@ -1048,6 +1076,8 @@ void Level01::RenderExplorers()
 
 void Level01::RenderSpotLightVolumes()
 {
+//	mRenderer->GetDeviceContext()->RSSetState(mCCWRasterizerState);
+
 	mRenderer->VSetRenderContextTarget(mGBufferContext, 3);
 	mRenderer->VClearContextTarget(mGBufferContext, 3, Colors::black.pCols);	// Albedo
 
@@ -1062,11 +1092,11 @@ void Level01::RenderSpotLightVolumes()
 	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
 	
-	mRenderer->VBindMesh(mSphereMesh);
+	mRenderer->VBindMesh(mGeodesicSphereMesh);
 
 	Frustum frustum;
-	mat4f projView = mCameraManager->GetCBufferPersp()->projection * mCameraManager->GetCBufferPersp()->view;
-	ExtractNormalizedFrustumLH(&frustum, projView.transpose());
+	mat4f projView = (mCameraManager->GetCBufferPersp()->projection * mCameraManager->GetCBufferPersp()->view).transpose();
+	ExtractNormalizedFrustumLH(&frustum, projView);
 
 	std::vector<std::pair<Lamp*, uint32_t>> lampPairs;
 	CullLamps(frustum, &lampPairs);
@@ -1097,9 +1127,10 @@ void Level01::RenderSpotLightVolumes()
 		mRenderer->VSetPixelShaderResourceView(mShadowContext, lampPair.second, 2);		// Shadow
 		mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);		// Border
 
-		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
+		mRenderer->VDrawIndexed(0, mGeodesicSphereMesh->GetIndexCount());
 	}
 
+//	mRenderer->GetDeviceContext()->RSSetState(nullptr);
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
 }
 
@@ -1329,7 +1360,7 @@ void Level01::ComputeGrid()
 	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferFullLevelOrto(), 0);
 
-	mRenderer->VBindMesh(mSphereMesh);
+	mRenderer->VBindMesh(mGeodesicSphereMesh);
 
 	uint32_t i = 0;
 	for (Lamp& l : Factory<Lamp>())
@@ -1358,7 +1389,7 @@ void Level01::ComputeGrid()
 			mRenderer->VSetPixelShaderResourceView(mShadowContext, i, 2);		// Shadow
 			mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);		// Border
 
-			mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
+			mRenderer->VDrawIndexed(0, mGeodesicSphereMesh->GetIndexCount());
 		}
 		i++;
 	}

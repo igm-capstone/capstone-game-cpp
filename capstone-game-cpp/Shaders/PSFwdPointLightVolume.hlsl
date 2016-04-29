@@ -42,7 +42,9 @@ float4 main(Pixel pixel) : SV_TARGET
 		return float4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
+	int d = (range > pixelToLightDistance);
+
 	float4 diffuse = lightColor;
 	float nDotL = dot(pixelToLight, normal);
-	return diffuse * saturate(nDotL);
+	return diffuse * saturate(nDotL) *d;
 }
