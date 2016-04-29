@@ -10,6 +10,9 @@
 #include <Network\NetworkClient.h>
 #include <Components/ImpController.h>
 #include <Components/FlyTrapController.h>
+#include <jsonUtils.h>
+
+using namespace nlohmann;
 
 Minion::Minion()
 	: mClass(UNKNOWN)
@@ -72,7 +75,7 @@ Minion::~Minion()
 	}
 }
 
-void Minion::Spawn(vec3f pos, int UUID)
+void Minion::Spawn(vec3f pos, int UUID, json config)
 {
 	mTransform->SetPosition(pos);
 	mTransform->SetRotation(mController->GetAdjustedRotation(0));
@@ -85,13 +88,51 @@ void Minion::Spawn(vec3f pos, int UUID)
 
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
+
+	if (config.find("moveSpeed") != config.end())
+	{
+		mController->mBaseMoveSpeed = config["moveSpeed"].get<float>();
+	}
+
+	if (config.find("turnRate") != config.end())
+	{
+		mController->mTurnRate = config["turnRate"].get<float>();
+	}
+
+	if (config.find("stunOnHitDuration") != config.end())
+	{
+		mController->mStunOnHitDuration = config["stunOnHitDuration"].get<float>();
+	}
+
+	if (config.find("attackDamage") != config.end())
+	{
+		mController->mAttackDamage = config["attackDamage"].get<float>();
+	}
+
+	if (config.find("attackRange") != config.end())
+	{
+		mController->mAttackRange = config["attackRange"].get<float>();
+	}
+
+	if (config.find("splashRange") != config.end())
+	{
+		mController->mSplashRange = config["splashRange"].get<float>();
+	}
+
+	if (config.find("baseHealth") != config.end())
+	{
+		mHealth->SetMaxHealth(config["baseHealth"].get<float>());
+	}
 }
 
 void Minion::SpawnImp(vec3f pos, int UUID)
 {
 	mClass = IMP;
 	mController = Factory<ImpController>::Create();
-	Spawn(pos, UUID);
+
+	auto minions = Application::SharedInstance().GetConfigJson()["minions"].get<json::array_t>();
+	auto config = findByName(minions, "BasicMinion");
+	Spawn(pos, UUID, config);
 
 	mTransform->SetScale(0.3f);
 	mCollider->mOffset = { 0.0f, 0.65f, 0.0f };
@@ -124,7 +165,11 @@ void Minion::SpawnFlytrap(vec3f pos, int UUID)
 {
 	mClass = FLYTRAP;
 	mController = Factory<FlyTrapController>::Create();
-	Spawn(pos, UUID);
+
+	auto minions = Application::SharedInstance().GetConfigJson()["minions"].get<json::array_t>();
+	auto config = findByName(minions, "PlantPolterTrap");
+	Spawn(pos, UUID, config);
+
 
 	mTransform->SetScale(0.35f);
 	mCollider->mOffset = { 0.0f, 0.75f, 0.0f };

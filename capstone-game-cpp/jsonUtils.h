@@ -2,9 +2,4 @@
 
 #include "json.h"
 
-using namespace nlohmann;
-using namespace std;
-
-using jarr_t = json::array_t;
-
-json findByName(jarr_t& array, string name);
+nlohmann::json findByName(nlohmann::json::array_t& array, std::string name);

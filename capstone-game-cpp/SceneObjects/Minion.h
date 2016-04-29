@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseSceneObject.h"
 #include <Components/AnimationController.h>
+#include <json.h>
 
 class Minion : public BaseSceneObject
 {
@@ -28,7 +29,7 @@ private:
 	Minion();
 	~Minion();
 
-	void Spawn(vec3f pos, int UUID);
+	void Spawn(vec3f pos, int UUID, nlohmann::json config);
 public:
 	
 	void SpawnImp(vec3f pos, int UUID);

@@ -16,6 +16,9 @@
 #define POISON_SKILL_INDEX  1
 #define SLOW_SKILL_INDEX	2
 
+using namespace nlohmann;
+using jarr_t = json::array_t;
+
 Skill* createExplorerSkill(Skill::UseCallback callback, SkillBinding binding, json& skillConfig)
 {
 	auto cooldown = skillConfig["cooldown"].get<float>();

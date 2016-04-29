@@ -11,6 +11,9 @@
 #include "Explorer.h"
 #include "jsonUtils.h"
 
+using namespace nlohmann;
+using jarr_t = json::array_t;
+
 Skill* createGhostSkill(Skill::UseCallback callback, json& skillConfig)
 {
 	auto cooldown = skillConfig["cooldown"].get<float>();
