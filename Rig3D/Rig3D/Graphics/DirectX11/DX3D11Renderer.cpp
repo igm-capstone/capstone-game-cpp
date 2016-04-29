@@ -2008,6 +2008,12 @@ void DX3D11Renderer::VClearDepthStencil(float depth, uint8_t stencil)
 	mDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
 }
 
+void DX3D11Renderer::VClearStencil(IRenderContext* renderContext, const uint32_t& atIndex, uint8_t stencil)
+{
+	ID3D11DepthStencilView** DSVs = static_cast<DX11RenderContext*>(renderContext)->GetDepthStencilViews();
+	mDeviceContext->ClearDepthStencilView(DSVs[atIndex], D3D11_CLEAR_STENCIL, 0.0f, stencil);
+}
+
 void DX3D11Renderer::VClearDepthStencil(IRenderContext* renderContext, const uint32_t& atIndex, float depth, uint8_t stencil)
 {
 	ID3D11DepthStencilView** DSVs = static_cast<DX11RenderContext*>(renderContext)->GetDepthStencilViews();

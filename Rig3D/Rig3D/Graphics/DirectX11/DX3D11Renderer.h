@@ -258,6 +258,7 @@ namespace Rig3D
 		void	VClearContextTarget(IRenderContext* renderContext, const uint32_t& atIndex, const float* color);
 
 		void	VClearDepthStencil(float depth, uint8_t stencil);
+		void VClearStencil(IRenderContext* renderContext, const uint32_t& atIndex, uint8_t stencil);
 		void	VClearDepthStencil(IRenderContext* renderContext, const uint32_t& atIndex, float depth, uint8_t stencil);
 
 		void	VSetVertexShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
