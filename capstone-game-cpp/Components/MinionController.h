@@ -19,7 +19,8 @@ public:
 	class Rig3D::Timer& mTimer;
 	BehaviorTree::Tree* mBehaviorTree;
 	quatf mBaseRotation;
-	
+	float mBaseMoveSpeed;
+
 	// variables used by BT
 	vec3f mTarget;
 	float mSpeed;
