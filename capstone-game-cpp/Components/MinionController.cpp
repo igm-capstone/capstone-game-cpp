@@ -170,7 +170,7 @@ bool MinionController::LookAt(vec2f dir)
 		return true;
 	}
 
-	mAngle = Mathf::LerpAngle(mAngle, targetAngle, 8 * dt);
+	mAngle = Mathf::LerpAngle(mAngle, targetAngle, mTurnRate * dt);
 	mIsTransformDirty = true;
 
 	return false;
@@ -401,12 +401,14 @@ void MinionController::OnMeleeStop(void* obj)
 	minion->mController->PlayStateAnimation(ANIM_STATE_IDLE);
 }
 
-void MinionController::OnMeleeHit(BaseSceneObject* minion, BaseSceneObject* other)
+void MinionController::OnMeleeHit(BaseSceneObject* obj, BaseSceneObject* other)
 {
+	auto self = reinterpret_cast<Minion*>(obj);
+
 	if (other->Is<Explorer>())
 	{
 		Explorer* explorer = reinterpret_cast<Explorer*>(other);
-		explorer->mHealth->TakeDamage(100.0f, false);
+		explorer->mHealth->TakeDamage(self->mController->mAttackDamage, false);
 	}
 }
 

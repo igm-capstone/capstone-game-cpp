@@ -96,7 +96,7 @@ void Minion::Spawn(vec3f pos, int UUID, json config)
 
 	if (config.find("turnRate") != config.end())
 	{
-		mController->mTurnRate = config["turnRate"].get<float>();
+		mController->mTurnRate = config["turnRate"].get<float>() / 10;
 	}
 
 	if (config.find("stunOnHitDuration") != config.end())
