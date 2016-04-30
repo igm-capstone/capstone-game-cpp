@@ -60,6 +60,8 @@ enum StaticMeshModel : int
 };
 
 extern const char* kSprinterModelName;
+extern const char* kTrapperModelName;
+extern const char* kProfessorModelName;
 extern const char* kMinionAnimModelName;
 extern const char* kPlantModelName;
 extern const char* kDoorModelName;

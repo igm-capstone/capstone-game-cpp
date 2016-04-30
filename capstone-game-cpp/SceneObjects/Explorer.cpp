@@ -46,24 +46,8 @@ Explorer::Explorer()
 	//mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
 	mNetworkID->RegisterNetSyncAnimationCallback(&OnNetSyncAnimation);
 
-	Application::SharedInstance().GetModelManager()->GetModel(kSprinterModelName)->Link(this);
-
 	mAnimationController = Factory<AnimationController>::Create();
 	mAnimationController->mSceneObject = this;
-	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
-	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
-	mAnimationController->RegisterCommandExecutedCallback(&OnAnimationCommandExecuted);
-	
-	SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gSprinterAnimations[Animations::SPRINTER_IDLE], nullptr, 0, true);
-	SetStateAnimation(mAnimationController, ANIM_STATE_RUN, &gSprinterAnimations[Animations::SPRINTER_RUN], nullptr, 0, true);
-
-	Animation melee = gSprinterAnimations[Animations::SPRINTER_ATTACK];
-	KeyframeOption meleeOptions[] = { { melee.startFrameIndex, OnMeleeStart },{ melee.endFrameIndex, OnMeleeStop } };
-	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gSprinterAnimations[Animations::SPRINTER_ATTACK], meleeOptions, 2, false);
-
-	/*Animation revive = gSprinterAnimations[Animations::SPRINTER_REVIVE];
-	KeyframeOption reviveOptions[] = { { revive.startFrameIndex, OnMeleeStart },{ revive.endFrameIndex, OnMeleeStop } };
-	SetStateAnimation(mAnimationController, ANIM_STATE_REVIVE, &gSprinterAnimations[Animations::SPRINTER_REVIVE], reviveOptions, 2, false);*/
 
 	mController = Factory<ExplorerController>::Create();
 	mController->mSceneObject = this;
@@ -148,6 +132,21 @@ void Explorer::Spawn(vec3f pos, int UUID)
 
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
+
+	switch (GetExplorerID())
+	{
+	case SPRINTER:
+		SetSprinterAnimations(this);
+		break;
+	case TRAPMASTER:
+		SetTrapperAnimations(this);
+		break;
+	case HEALER:
+		SetProfessorAnimations(this);
+		break;
+	default:
+		break;
+	}
 
 	mAnimationController->SetState(ANIM_STATE_IDLE);
 }

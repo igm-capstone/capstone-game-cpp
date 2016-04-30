@@ -2,7 +2,7 @@
 #include "SceneObjects\BaseSceneObject.h"
 #include <Components/AnimationController.h>
 
-enum ExplorerType //Spawn Order
+enum ExplorerType : uint8_t //Spawn Order
 {
 	TRAPMASTER = 2,
 	HEALER = 3,
@@ -40,9 +40,9 @@ private:
 	Explorer();
 	~Explorer();
 
+public:
 	ExplorerType GetExplorerID() { return static_cast<ExplorerType>(mNetworkClient->mID); }
 
-public:
 	void Spawn(vec3f pos, int UUID);
 	void DebugSpawn(vec3f pos, int UUID);
 	void UpdateComponents(quatf rotation, vec3f position);

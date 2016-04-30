@@ -168,6 +168,9 @@ void Level01::InitializeAssets()
 	}
 
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
+	mModelManager->LoadModel<GPU::SkinnedVertex>(kProfessorModelName);
+	mModelManager->LoadModel<GPU::SkinnedVertex>(kTrapperModelName);
+
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kPlantModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kTrapModelName);
@@ -393,7 +396,9 @@ void Level01::InitializeShaderResources()
 			"Assets/Textures/StaticMesh/Door.png", 
 			"Assets/Textures/Sprinter_D.png", 
 			"Assets/Textures/Heal.png",
-			"Assets/Textures/Trap.png"};
+			"Assets/Textures/Trap.png",
+			"Assets/Textures/Professor.png",
+		};
 		
 		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 6);
 		mRenderer->VAddShaderLinearSamplerState(mExplorerShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
@@ -1109,8 +1114,10 @@ void Level01::RenderExplorers()
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 
 	// Textures
-	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 3, 0);
+
 	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
+
+	uint8_t materialIDs[3] = { 3, 3, 7 };
 
 	for (Explorer& e : Factory<Explorer>())
 	{
@@ -1122,6 +1129,8 @@ void Level01::RenderExplorers()
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
 		
+		mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, materialIDs[0], 0);
+
 		mRenderer->VBindMesh(e.mModel->mMesh);
 		mRenderer->VDrawIndexed(0, e.mModel->mMesh->GetIndexCount());
 	}
