@@ -89,4 +89,7 @@ void Door::ToggleDoor()
 {
 	mColliderComponent->mIsActive ? mTransform->RotateRoll(0.5f*PI) : mTransform->RotateRoll(-0.5f*PI);
 	mColliderComponent->mIsActive = !mColliderComponent->mIsActive;
+
+	if (mNetworkManager->mMode == NetworkManager::SERVER)
+		Singleton<AIManager>::SharedInstance().SetGridDirty(true);
 }

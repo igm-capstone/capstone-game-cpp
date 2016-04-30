@@ -1,6 +1,7 @@
 #pragma once
 #include <Rig3D/Visibility.h>
 #include "SceneObjects/StaticCollider.h"
+#include "SceneObjects\Lamp.h"
 
 template <class SceneObjectType>
 inline void CullOBBSceneObjects(const Rig3D::Frustum& frustum, std::vector<BaseSceneObject*>& pBaseSceneObjects, std::vector<uint32_t>& indices)
@@ -86,6 +87,45 @@ inline void CullAABBSceneObjects(const Rig3D::Frustum& frustum, std::vector<Base
 	}
 }
 
+void CullLamps(const Rig3D::Frustum& frustum, std::vector<std::pair<Lamp*, uint32_t>>* lamps)
+{
+	float distance;
+	const Plane<vec3f>* planes[6] =
+	{
+		&frustum.front,
+		&frustum.back,
+		&frustum.left,
+		&frustum.right,
+		&frustum.bottom,
+		&frustum.top,
+	};
+
+	uint32_t lampIndex = 0;
+	for (Lamp& lamp : Factory<Lamp>())
+	{
+		if (lamp.mStatus != LAMP_OFF)
+		{
+			bool shouldCull = false;
+			for (uint32_t p = 0; p < 6; p++)
+			{
+				distance = cliqCity::graphicsMath::dot(planes[p]->normal, lamp.mTransform->GetPosition()) - (planes[p]->distance - lamp.mLightRadius);
+				if (distance < 0)
+				{
+					shouldCull = true;
+					break;
+				}
+			}
+
+			if (!shouldCull)
+			{
+				lamps->push_back({ &lamp, lampIndex });
+			}
+		}
+
+		lampIndex++;
+	}
+}
+
 inline void CullPlanes(const Rig3D::Frustum& frustum, std::vector<uint32_t>& indices, mat4f* planeWorldMatrices, float planeWidth, float planeHeight,
 	const uint32_t& count)
 {
@@ -134,4 +174,3 @@ inline void CullPlanes(const Rig3D::Frustum& frustum, std::vector<uint32_t>& ind
 		}
 	}
 }
-

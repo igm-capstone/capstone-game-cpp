@@ -782,6 +782,27 @@ void DX3D11Renderer::VCreateRenderResourceTexture2D(void * texture2D, uint32_t w
 	mDevice->CreateTexture2D(&texture2DDesc, nullptr, reinterpret_cast<ID3D11Texture2D**>(texture2D));
 }
 
+void DX3D11Renderer::VCreateRenderResourceTextureCube(ID3D11Texture2D** textureCube, uint32_t width, uint32_t height, uint8_t mipLevels, DXGI_FORMAT format)
+{
+	// Reference: http://www.hlsl.co.uk/blog/2014/11/19/creating-a-cubemap-in-dx11
+
+	D3D11_TEXTURE2D_DESC texture2DDesc;
+	texture2DDesc.Width = width;
+	texture2DDesc.Height = height;
+	texture2DDesc.MipLevels = mipLevels;
+	texture2DDesc.ArraySize = 6;
+	texture2DDesc.Format = format;
+	texture2DDesc.CPUAccessFlags = 0;
+	texture2DDesc.SampleDesc.Count = 1;
+	texture2DDesc.SampleDesc.Quality = 0;
+	texture2DDesc.Usage = D3D11_USAGE_DEFAULT;
+	texture2DDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	texture2DDesc.CPUAccessFlags = 0;
+	texture2DDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+
+	mDevice->CreateTexture2D(&texture2DDesc, nullptr, textureCube);
+}
+
 #pragma endregion 
 
 #pragma region SamplerState
@@ -1322,7 +1343,7 @@ void DX3D11Renderer::VCreateShaderTextures2D(IShaderResource* shader, const char
 	{
 		const wchar_t* wFilename;
 		CSTR2WSTR(filenames[i], wFilename);
-		DirectX::CreateWICTextureFromFile(mDevice, wFilename, nullptr, &SRVs[i]);
+		DirectX::CreateWICTextureFromFile(mDevice, mDeviceContext, wFilename, nullptr, &SRVs[i]);
 	}
 
 	reinterpret_cast<DX11ShaderResource*>(shader)->SetShaderResourceViews(SRVs);
@@ -1355,12 +1376,18 @@ void DX3D11Renderer::VCreateShaderContextTextures2D(IShaderResource* shader, IRe
 void DX3D11Renderer::VCreateShaderTexture2DArray(IShaderResource* shader, const char** filenames, const uint32_t count)
 {
 	std::vector<ID3D11Texture2D*> textures(count);
+	std::vector<ID3D11ShaderResourceView*> textureViews(count);
 
 	wchar_t* filename;
 	for (uint32_t i = 0; i < count; i++)
 	{
 		CSTR2WSTR(filenames[i], filename);
-		DirectX::CreateWICTextureFromFileEx(mDevice, filename, 0, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, false, reinterpret_cast<ID3D11Resource**>(&textures[i]), nullptr);
+		DirectX::CreateWICTextureFromFileEx(mDevice, mDeviceContext, filename, 0, D3D11_USAGE_DEFAULT, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE, D3D11_CPU_ACCESS_READ, D3D11_RESOURCE_MISC_GENERATE_MIPS, false, reinterpret_cast<ID3D11Resource**>(&textures[i]), reinterpret_cast<ID3D11ShaderResourceView**>(&textureViews[i]));
+	
+		D3D11_TEXTURE2D_DESC textureDesc;
+		ZeroMemory(&textureDesc, sizeof(D3D11_TEXTURE2D_DESC));
+		textures[i]->GetDesc(&textureDesc);
+		printf("");
 	}
 
 	D3D11_TEXTURE2D_DESC textureDesc;
@@ -1376,7 +1403,7 @@ void DX3D11Renderer::VCreateShaderTexture2DArray(IShaderResource* shader, const 
 	textureArrayDesc.SampleDesc.Count = 1;
 	textureArrayDesc.SampleDesc.Quality = 0;
 	textureArrayDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureArrayDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE ;
+	textureArrayDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	textureArrayDesc.CPUAccessFlags = 0;
 	textureArrayDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
@@ -1388,9 +1415,10 @@ void DX3D11Renderer::VCreateShaderTexture2DArray(IShaderResource* shader, const 
 	{
 		for (uint32_t j = 0; j < textureDesc.MipLevels; j++)
 		{
-			mDeviceContext->Map(textures[i], j, D3D11_MAP_READ, 0, &mappedSubresource);
+			/*mDeviceContext->Map(textures[i], j, D3D11_MAP_READ, 0, &mappedSubresource);
 			mDeviceContext->UpdateSubresource(textureArray, D3D11CalcSubresource(j, i, textureDesc.MipLevels), nullptr, mappedSubresource.pData, mappedSubresource.RowPitch, 0);
-			mDeviceContext->Unmap(textures[i], j);
+			mDeviceContext->Unmap(textures[i], j);*/
+			mDeviceContext->CopySubresourceRegion(textureArray, D3D11CalcSubresource(j, i, textureDesc.MipLevels), 0, 0, 0, textures[i], D3D11CalcSubresource(j, 0, textureDesc.MipLevels), nullptr);
 		}
 	}
 
@@ -1398,7 +1426,7 @@ void DX3D11Renderer::VCreateShaderTexture2DArray(IShaderResource* shader, const 
 	SRVDesc.Format = textureArrayDesc.Format;
 	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
 	SRVDesc.Texture2DArray.MostDetailedMip = 0;
-	SRVDesc.Texture2DArray.MipLevels = textureArrayDesc.MipLevels;
+	SRVDesc.Texture2DArray.MipLevels = textureDesc.MipLevels;
 	SRVDesc.Texture2DArray.FirstArraySlice = 0;
 	SRVDesc.Texture2DArray.ArraySize = count;
 
@@ -1406,12 +1434,16 @@ void DX3D11Renderer::VCreateShaderTexture2DArray(IShaderResource* shader, const 
 
 	mDevice->CreateShaderResourceView(textureArray, &SRVDesc, &SRVs[0]);
 
+	mDeviceContext->GenerateMips(SRVs[0]);
+
 	reinterpret_cast<DX11ShaderResource*>(shader)->AddShaderResourceViews(SRVs);
 
 	ReleaseMacro(textureArray);
+
 	for (uint32_t i = 0; i < count; i++)
 	{
 		ReleaseMacro(textures[i]);
+		ReleaseMacro(textureViews[i]);
 	}
 }
 
@@ -1422,7 +1454,7 @@ void DX3D11Renderer::VAddShaderTextures2D(IShaderResource* shader, const char** 
 	{
 		const wchar_t* wFilename;
 		CSTR2WSTR(filenames[i], wFilename);
-		DirectX::CreateWICTextureFromFile(mDevice, wFilename, nullptr, &SRVs[i]);
+		DirectX::CreateWICTextureFromFile(mDevice, mDeviceContext, wFilename, nullptr, &SRVs[i]);
 	}
 
 	reinterpret_cast<DX11ShaderResource*>(shader)->AddShaderResourceViews(SRVs);
@@ -1839,6 +1871,47 @@ void DX3D11Renderer::VCreateContextDepthStencilResourceTargets(IRenderContext* r
 	context->SetDepthStencilResourceViews(SRVs);
 }
 
+void DX3D11Renderer::VCreateContextCubicShadowTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height)
+{
+	std::vector<ID3D11RenderTargetView*> RTVs(count * 6);
+	std::vector<ID3D11ShaderResourceView*> SRVs(count);
+
+	for (uint32_t i = 0; i < count; i++)
+	{
+		ID3D11Texture2D* textureCube;
+		VCreateRenderResourceTextureCube(&textureCube, width, height, 1, DXGI_FORMAT_R32G32B32A32_FLOAT);
+
+		D3D11_TEXTURE2D_DESC textureDesc;
+		textureCube->GetDesc(&textureDesc);
+
+		D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
+		rtvDesc.Format = textureDesc.Format;
+		rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+		rtvDesc.Texture2DArray.ArraySize = 1;
+		rtvDesc.Texture2DArray.MipSlice = 0;
+
+		for (uint32_t j = 0; j < 6; j++)
+		{
+			rtvDesc.Texture2DArray.FirstArraySlice = j;
+			mDevice->CreateRenderTargetView(textureCube, &rtvDesc, &RTVs[(i * 6) + j]);
+		}
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
+		SRVDesc.Format = textureDesc.Format;
+		SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+		SRVDesc.Texture2D.MipLevels = 1;
+		SRVDesc.Texture2D.MostDetailedMip = 0;
+
+		mDevice->CreateShaderResourceView(textureCube, &SRVDesc, &SRVs[i]);
+
+		ReleaseMacro(textureCube);
+	}
+
+	DX11RenderContext* context = static_cast<DX11RenderContext*>(renderContext);
+	context->SetRenderTargetViews(RTVs);
+	context->SetShaderResourceViews(SRVs);
+}
+
 void DX3D11Renderer::VSetContextTarget()
 {
 	mDeviceContext->OMSetRenderTargets(1, &mRenderTargetView, nullptr);
@@ -1933,6 +2006,12 @@ void DX3D11Renderer::VClearContextTarget(IRenderContext* renderContext, const ui
 void DX3D11Renderer::VClearDepthStencil(float depth, uint8_t stencil)
 {
 	mDeviceContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, stencil);
+}
+
+void DX3D11Renderer::VClearStencil(IRenderContext* renderContext, const uint32_t& atIndex, uint8_t stencil)
+{
+	ID3D11DepthStencilView** DSVs = static_cast<DX11RenderContext*>(renderContext)->GetDepthStencilViews();
+	mDeviceContext->ClearDepthStencilView(DSVs[atIndex], D3D11_CLEAR_STENCIL, 0.0f, stencil);
 }
 
 void DX3D11Renderer::VClearDepthStencil(IRenderContext* renderContext, const uint32_t& atIndex, float depth, uint8_t stencil)

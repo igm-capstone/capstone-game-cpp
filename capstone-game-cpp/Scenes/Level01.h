@@ -18,6 +18,7 @@ class Level01 : public BaseScene
 	CBuffer::Model			mModel;
 	CBuffer::LightPVM		mLightPVM;			// Used for spotlight matrices
 	CBuffer::Light			mLightData;			// Used for spotlight data (color, angle, etc).
+	CBuffer::PointLight		mPointLight;
 	CBuffer::Effect			mTime;
 
 	// GPU Data
@@ -29,6 +30,7 @@ class Level01 : public BaseScene
 	// Mesh
 	IMesh*				mCubeMesh;
 	IMesh*				mSphereMesh;
+	IMesh*				mGeodesicSphereMesh;
 	IMesh*				mNDSQuadMesh;
 
 	// RenderContext
@@ -53,6 +55,10 @@ class Level01 : public BaseScene
 	ID3D11Buffer*				mOutputData;
 	ID3D11Buffer*				mOutputDataCPURead;
 	ID3D11UnorderedAccessView*	mOutputDataSRV;
+	ID3D11RasterizerState*		mLightingWriteRS;
+	ID3D11RasterizerState*		mLightingReadRS;
+	ID3D11DepthStencilState*	mLightingWriteDSS;
+	ID3D11DepthStencilState*	mLightingReadDSS;
 
 	GameState mGameState;
 	char mTiersCaptured[2];	
@@ -66,6 +72,7 @@ public:
 	void VInitialize() override;
 	void InitializeAssets();
 	void InitializeGeometry();
+	void InitializeRenderStates();
 	void InitializeShaderResources();
 	void InitializeGameState();
 

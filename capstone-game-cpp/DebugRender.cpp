@@ -209,14 +209,16 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 	
 	mat4f defaultRotation = mat4f::rotateZ(PI * 0.5f);
 
+	gRenderer->VBindMesh(gSphereMesh);
 	for (Lamp& l : Factory<Lamp>())
 	{
-		gRenderer->VBindMesh(l.mConeMesh);
-		model->world = (mat4f::scale(l.mLightRadius) * defaultRotation * l.mTransform->GetWorldMatrix()).transpose();
+		if (l.mStatus == LAMP_OFF) continue;
+
+		model->world = (mat4f::scale(l.mLightRadius) * l.mTransform->GetWorldMatrix()).transpose();
 		gRenderer->VUpdateShaderConstantBuffer(iShaderResource, model, 1);
 		gRenderer->VSetVertexShaderConstantBuffer(iShaderResource, 1, 1);
 
-		gRenderer->VDrawIndexed(0, l.mConeMesh->GetIndexCount());
+		gRenderer->VDrawIndexed(0, gSphereMesh->GetIndexCount());
 	}
 
 	gRenderer->GetDeviceContext()->RSSetState(nullptr);

@@ -1,3 +1,4 @@
+#pragma once
 #include "SceneObjects/BaseSceneObject.h"
 
 enum LampStatus

@@ -40,6 +40,8 @@ extern bool gDebugExplorer;
 
 Level01::Level01() :
 	mCubeMesh(nullptr),
+	mSphereMesh(nullptr),
+	mGeodesicSphereMesh(nullptr),
 	mNDSQuadMesh(nullptr),
 	mGBufferContext(nullptr),
 	mShadowContext(nullptr),
@@ -56,6 +58,10 @@ Level01::Level01() :
 	mOutputData(nullptr),
 	mOutputDataCPURead(nullptr),
 	mOutputDataSRV(nullptr),
+	mLightingWriteRS(nullptr),
+	mLightingReadRS(nullptr),
+	mLightingWriteDSS(nullptr),
+	mLightingReadDSS(nullptr),
 	mGameState(GAME_STATE_INITIAL)
 {
 	mAIManager->SetAllocator(&mAllocator);
@@ -68,6 +74,8 @@ Level01::~Level01()
 #endif
 
 	mCubeMesh->~IMesh();
+	mSphereMesh->~IMesh();
+	mGeodesicSphereMesh->~IMesh();
 	mNDSQuadMesh->~IMesh();
 
 	for (Lamp& l : Factory<Lamp>())
@@ -75,16 +83,16 @@ Level01::~Level01()
 		l.mConeMesh->~IMesh();
 	}
 
+	mGBufferContext->~IRenderContext();
+	mShadowContext->~IRenderContext();
+	mGridContext->~IRenderContext();
+
 	mStaticMeshShaderResource->~IShaderResource();
 	mExplorerShaderResource->~IShaderResource();
 	mPLVShaderResource->~IShaderResource();
 	mSpritesShaderResource->~IShaderResource();
 	mGridShaderResource->~IShaderResource();
 	
-	mGBufferContext->~IRenderContext();
-	mShadowContext->~IRenderContext();
-	mGridContext->~IRenderContext();
-
 	ReleaseMacro(mFullSrcData);
 	ReleaseMacro(mFullSrcDataSRV);
 	ReleaseMacro(mSimpleSrcData);
@@ -92,6 +100,10 @@ Level01::~Level01()
 	ReleaseMacro(mOutputData);
 	ReleaseMacro(mOutputDataCPURead);
 	ReleaseMacro(mOutputDataSRV);
+	ReleaseMacro(mLightingWriteRS);
+	ReleaseMacro(mLightingReadRS);
+	ReleaseMacro(mLightingWriteDSS);
+	ReleaseMacro(mLightingReadDSS);
 
 	mAllocator.Free();
 }
@@ -119,6 +131,7 @@ void Level01::VInitialize()
 
 	InitializeAssets();
 	InitializeGeometry();
+	InitializeRenderStates();
 	InitializeShaderResources();
 	RenderShadowMaps();
 
@@ -160,6 +173,8 @@ void Level01::InitializeAssets()
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kTrapModelName);
 
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
+	
+//	mModelManager->LoadModel<GPU::Vertex1>("Icosahedron");
 
 	//mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 	mLevel = Resource::LoadLevel("Assets/RPI_Level.json", mAllocator);
@@ -212,6 +227,17 @@ void Level01::InitializeGeometry()
 	// Spot Light Volume 
 	std::vector<GPU::Vertex1> coneVertices;
 
+	mModelManager->LoadModel<GPU::Vertex1>("Icosahedron");
+	mGeodesicSphereMesh = mModelManager->GetModel("Icosahedron")->mMesh;
+
+	//Geometry::Sphere(coneVertices, indices, 10, 10, 1.0f);
+	//meshLibrary.NewMesh(&mGeodesicSphereMesh, mRenderer);
+	//mRenderer->VSetMeshVertexBuffer(mGeodesicSphereMesh, &coneVertices[0], sizeof(GPU::Vertex1) * coneVertices.size(), sizeof(GPU::Vertex1));
+	//mRenderer->VSetMeshIndexBuffer(mGeodesicSphereMesh, &indices[0], indices.size());
+
+	coneVertices.clear();
+	indices.clear();
+
 	for (Lamp& l : Factory<Lamp>())
 	{
 		Geometry::SpotlightCone(coneVertices, indices, 6, 1.0f, l.mLightAngle);
@@ -224,6 +250,8 @@ void Level01::InitializeGeometry()
 		indices.clear();
 	}
 
+
+
 	// Billboard Quad (Sprites)
 	std::vector<GPU::VertexUV> ndsVertices;
 
@@ -234,6 +262,76 @@ void Level01::InitializeGeometry()
 	mRenderer->VSetMeshIndexBuffer(mNDSQuadMesh, &indices[0], indices.size());
 }
 
+void Level01::InitializeRenderStates()
+{
+	D3D11_RASTERIZER_DESC rasterizerDesc;
+	ZeroMemory(&rasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	rasterizerDesc.CullMode = D3D11_CULL_NONE;
+	rasterizerDesc.DepthClipEnable = true;
+
+	mRenderer->GetDevice()->CreateRasterizerState(&rasterizerDesc, &mLightingWriteRS);
+
+	ZeroMemory(&rasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+	rasterizerDesc.CullMode = D3D11_CULL_FRONT;
+	rasterizerDesc.DepthClipEnable = true;
+
+	mRenderer->GetDevice()->CreateRasterizerState(&rasterizerDesc, &mLightingReadRS);
+
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	ZeroMemory(&depthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+
+	// Default depth state
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	// Stencil state
+	depthStencilDesc.StencilEnable = true;
+	depthStencilDesc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
+	depthStencilDesc.StencilWriteMask =  D3D11_DEFAULT_STENCIL_WRITE_MASK;
+
+	// Back face stencil
+	// Configure the stencil operation for the back facing polygons to increment the value in the stencil buffer 
+	// when the depth test fails but to keep it unchanged when either depth test or stencil test succeed.
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+
+	// Front face stencil
+	// Configure the stencil operation for the front facing polygons to decrement the value in the stencil buffer 
+	// when the depth test fails but to keep it unchanged when either depth test or stencil test succeed.
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+
+	mRenderer->GetDevice()->CreateDepthStencilState(&depthStencilDesc, &mLightingWriteDSS);
+
+//	ZeroMemory(&depthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+
+	// Default depth state
+	depthStencilDesc.DepthEnable = false;
+
+	// Stencil state
+	depthStencilDesc.StencilEnable = true;
+	depthStencilDesc.StencilReadMask =  D3D11_DEFAULT_STENCIL_READ_MASK;
+	depthStencilDesc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
+
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_NOT_EQUAL;
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	mRenderer->GetDevice()->CreateDepthStencilState(&depthStencilDesc, &mLightingReadDSS);
+}
+
 void Level01::InitializeShaderResources()
 {
 	// Allocate render context
@@ -242,7 +340,8 @@ void Level01::InitializeShaderResources()
 	mRenderer->VCreateRenderContext(&mGridContext, &mAllocator);
 
 	// Shadow Maps for each light
-	mRenderer->VCreateContextDepthStencilResourceTargets(mShadowContext, mLevel.lampCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+	mRenderer->VCreateContextCubicShadowTargets(mShadowContext, mLevel.lampCount, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+	mRenderer->VCreateContextDepthStencilTargets(mShadowContext, 1, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 
 	// Static Meshes
 	{
@@ -304,10 +403,10 @@ void Level01::InitializeShaderResources()
 	{
 		mRenderer->VCreateShaderResource(&mPLVShaderResource, &mAllocator);
 
-		void* cbPVLData[] = { &mLightData, mCameraManager->GetOrigin().pCols, &mTime };
-		size_t cbPVLSizes[] = { sizeof(CBuffer::Light), sizeof(vec4f), sizeof(CBuffer::Effect) };
+		void* cbPVLData[] = { &mLightData, mCameraManager->GetOrigin().pCols, &mTime, &mPointLight };
+		size_t cbPVLSizes[] = { sizeof(CBuffer::Light), sizeof(vec4f), sizeof(CBuffer::Effect), sizeof(CBuffer::PointLight) };
 
-		mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 3);
+		mRenderer->VCreateShaderConstantBuffers(mPLVShaderResource, cbPVLData, cbPVLSizes, 4);
 		mRenderer->VAddShaderLinearSamplerState(mPLVShaderResource, SAMPLER_STATE_ADDRESS_BORDER, const_cast<float*>(Colors::black.pCols));
 		mRenderer->AddAdditiveBlendState(mPLVShaderResource);
 	}
@@ -754,10 +853,12 @@ void Level01::VRender()
 
 void Level01::RenderShadowMaps()
 {
+	mRenderer->GetDeviceContext()->RSSetState(nullptr);
+
 	mRenderer->SetViewport(0.0f, 0.0f, static_cast<float>(SHADOW_MAP_SIZE), static_cast<float>(SHADOW_MAP_SIZE), 0.0f, 1.0f);
 	mRenderer->VSetInputLayout(mApplication->mVSDefSingleMaterial);
 	mRenderer->VSetVertexShader(mApplication->mVSDefSingleMaterial);
-	mRenderer->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
+	mRenderer->VSetPixelShader(mApplication->mPSFwdDistanceMaterial);
 
 	// Identity here just to be compatible with shader.
 	mLightPVM.view = mat4f(1.0f);	
@@ -765,32 +866,72 @@ void Level01::RenderShadowMaps()
 	uint32_t lampIndex = 0;
 	for (Lamp& lamp : Factory<Lamp>())
 	{
-		mRenderer->VSetRenderContextDepthTarget(mShadowContext, lampIndex);
-		mRenderer->VClearDepthStencil(mShadowContext, lampIndex, 1.0f, 0);
+		float color[4] = { 0.0f, 0.0f, 0.0, 1.0f };
 
-		// Set view projection matrix for light frustum
-		mLightPVM.projection = mLevel.lampVPTMatrices[lampIndex].transpose();
-		
-		// Create frustum object for culling.
-		Rig3D::Frustum frustum;
-		Rig3D::ExtractNormalizedFrustumLH(&frustum, mLevel.lampVPTMatrices[lampIndex]);
+		mPointLight.color = lamp.mLightColor;
+		mPointLight.position = lamp.mTransform->GetPosition();
+		mPointLight.radius = lamp.mLightRadius;
+		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mPointLight, 3);
+		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 3, 0);
 
-		for (int staticMeshIndex = 0; staticMeshIndex < STATIC_MESH_MODEL_COUNT; staticMeshIndex++)
+		for (uint32_t faceIndex = 0; faceIndex < 6; faceIndex++)
 		{
-			if (staticMeshIndex == STATIC_MESH_WALL_LANTERN) { continue; }
-
-			// Get Objects for a given mesh
-			std::vector<BaseSceneObject*>* pBaseSceneObjects = mModelManager->RequestAllUsingModel(kStaticMeshModelNames[staticMeshIndex]);
+			uint32_t projIndex = (lampIndex * 6) + faceIndex;
 			
+			mRenderer->VSetRenderContextTargetWithDepth(mShadowContext, projIndex, 0);
+			mRenderer->VClearContextTarget(mShadowContext, projIndex, color);
+			mRenderer->VClearDepthStencil(mShadowContext, 0, 1.0f, 0);
+		
+			// Set view projection matrix for light frustum
+			mLightPVM.projection = mLevel.lampVPTMatrices[projIndex].transpose();
+
+			// Create frustum object for culling.
+			Rig3D::Frustum frustum;
+			Rig3D::ExtractNormalizedFrustumLH(&frustum, mLevel.lampVPTMatrices[projIndex]);
+
+			for (int staticMeshIndex = 0; staticMeshIndex < STATIC_MESH_MODEL_COUNT; staticMeshIndex++)
+			{
+				if (staticMeshIndex == STATIC_MESH_WALL_LANTERN) { continue; }
+
+				// Get Objects for a given mesh
+				std::vector<BaseSceneObject*>* pBaseSceneObjects = mModelManager->RequestAllUsingModel(kStaticMeshModelNames[staticMeshIndex]);
+
+				// Storage for indices we will draw
+				std::vector<uint32_t> indices;
+				indices.reserve(pBaseSceneObjects->size());
+
+				// Cull meshes given the current lamp frustum
+				CullOBBSceneObjects<StaticMesh>(frustum, *pBaseSceneObjects, indices);
+
+				// Bind Mesh
+				IMesh* mesh = mModelManager->GetModel(kStaticMeshModelNames[staticMeshIndex])->mMesh;
+				mRenderer->VBindMesh(mesh);
+
+				uint32_t indexCount = mesh->GetIndexCount();
+
+				// Render 
+				for (uint32_t filterIndex : indices)
+				{
+					mLightPVM.world = (*pBaseSceneObjects)[filterIndex]->mTransform->GetWorldMatrix().transpose();
+					mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
+					mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM.world, 1);
+
+					mRenderer->VSetVertexShaderConstantBuffers(mExplorerShaderResource);
+					mRenderer->VDrawIndexed(0, indexCount);
+				}
+			}
+
+			std::vector<BaseSceneObject*>* pDoors = mModelManager->RequestAllUsingModel(kDoorModelName);
+
 			// Storage for indices we will draw
 			std::vector<uint32_t> indices;
-			indices.reserve(pBaseSceneObjects->size());
+			indices.reserve(pDoors->size());
 
 			// Cull meshes given the current lamp frustum
-			CullAABBSceneObjects<StaticMesh>(frustum, *pBaseSceneObjects, indices);
+			CullOBBSceneObjects<Door>(frustum, *pDoors, indices);
 
 			// Bind Mesh
-			IMesh* mesh = mModelManager->GetModel(kStaticMeshModelNames[staticMeshIndex])->mMesh;
+			IMesh* mesh = mModelManager->GetModel(kDoorModelName)->mMesh;
 			mRenderer->VBindMesh(mesh);
 
 			uint32_t indexCount = mesh->GetIndexCount();
@@ -798,39 +939,13 @@ void Level01::RenderShadowMaps()
 			// Render 
 			for (uint32_t filterIndex : indices)
 			{
-				mLightPVM.world = (*pBaseSceneObjects)[filterIndex]->mTransform->GetWorldMatrix().transpose();
+				mLightPVM.world = (*pDoors)[filterIndex]->mTransform->GetWorldMatrix().transpose();
 				mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
 				mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM.world, 1);
 
 				mRenderer->VSetVertexShaderConstantBuffers(mExplorerShaderResource);
 				mRenderer->VDrawIndexed(0, indexCount);
 			}
-		}
-
-		std::vector<BaseSceneObject*>* pDoors = mModelManager->RequestAllUsingModel(kDoorModelName);
-
-		// Storage for indices we will draw
-		std::vector<uint32_t> indices;
-		indices.reserve(pDoors->size());
-
-		// Cull meshes given the current lamp frustum
-		CullOBBSceneObjects<Door>(frustum, *pDoors, indices);
-
-		// Bind Mesh
-		IMesh* mesh = mModelManager->GetModel(kDoorModelName)->mMesh;
-		mRenderer->VBindMesh(mesh);
-
-		uint32_t indexCount = mesh->GetIndexCount();
-
-		// Render 
-		for (uint32_t filterIndex : indices)
-		{
-			mLightPVM.world = (*pDoors)[filterIndex]->mTransform->GetWorldMatrix().transpose();
-			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM, 0);
-			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mLightPVM.world, 1);
-
-			mRenderer->VSetVertexShaderConstantBuffers(mExplorerShaderResource);
-			mRenderer->VDrawIndexed(0, indexCount);
 		}
 
 		lampIndex++;
@@ -1031,55 +1146,82 @@ void Level01::RenderExplorers()
 
 void Level01::RenderSpotLightVolumes()
 {
-	mRenderer->VSetRenderContextTarget(mGBufferContext, 3);
-	mRenderer->VClearContextTarget(mGBufferContext, 3, Colors::black.pCols);	// Albedo
+	// Cull light volumes first
+	Frustum frustum;
+	mat4f projView = (mCameraManager->GetCBufferPersp()->projection * mCameraManager->GetCBufferPersp()->view).transpose();
+	ExtractNormalizedFrustumLH(&frustum, projView);
 
-	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	std::vector<std::pair<Lamp*, uint32_t>> lampPairs;
+	CullLamps(frustum, &lampPairs);
 
-	mRenderer->SetBlendState(mPLVShaderResource, 0, color, 0xffffffff);
+	mRenderer->VClearStencil(mGBufferContext, 0, 0);
+
+	// Stencil pass
+	mRenderer->GetDeviceContext()->RSSetState(mLightingWriteRS);
+	mRenderer->GetDeviceContext()->OMSetDepthStencilState(mLightingWriteDSS, 0);
 
 	mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
 	mRenderer->VSetVertexShader(mApplication->mVSFwdSpotLightVolume);
-	mRenderer->VSetPixelShader(mApplication->mPSFwdSpotLightVolume);
+	mRenderer->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
 
 	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
 
-	uint32_t i = 0;
-	for (Lamp& l : Factory<Lamp>())
+	mRenderer->VBindMesh(mGeodesicSphereMesh);
+
+	for (std::pair<Lamp*, uint32_t> lampPair : lampPairs)
 	{
-		if (l.mStatus != LAMP_OFF) {
-			mModel.world = mLevel.lampWorldMatrices[i];
-			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mModel.world = mLevel.lampWorldMatrices[lampPair.second];
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+		mRenderer->VDrawIndexed(0, mGeodesicSphereMesh->GetIndexCount());
+	}
 
-			// Set Light data
-			mLightData.viewProjection = (mLevel.lampVPTMatrices[i]).transpose();
-			mLightData.color = l.mLightColor;
-			if (l.mStatus == LAMP_DIMMED) mLightData.color *= 0.4f;
-			mLightData.direction = l.mLightDirection;
-			mLightData.range = l.mLightRadius;
-			mLightData.cosAngle = cos(l.mLightAngle);
+	// Albedo Pass
+	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	mRenderer->SetBlendState(mPLVShaderResource, 0, color, 0xffffffff);
+	mRenderer->GetDeviceContext()->RSSetState(mLightingReadRS);
+	mRenderer->GetDeviceContext()->OMSetDepthStencilState(mLightingReadDSS, 0);
 
-			mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
+	mRenderer->VSetRenderContextTargetWithDepth(mGBufferContext, 3, 0);
+	mRenderer->VClearContextTarget(mGBufferContext, 3, Colors::black.pCols);	// Albedo
 
-			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
-			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+	mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
+	mRenderer->VSetVertexShader(mApplication->mVSFwdSpotLightVolume);
+	mRenderer->VSetPixelShader(mApplication->mPSFwdPointLightVolume);
 
-			mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
-			mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
-			mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);		// Position
-			mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);		// Normal
-			mRenderer->VSetPixelShaderDepthResourceView(mShadowContext, i, 2);	// Shadow
-			mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);		// Border
+	for (std::pair<Lamp*, uint32_t> lampPair : lampPairs)
+	{
+		mModel.world = mLevel.lampWorldMatrices[lampPair.second];
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 
-			mRenderer->VBindMesh(l.mConeMesh);
+		// Set Light data
+		mLightData.viewProjection = (mLevel.lampVPTMatrices[lampPair.second]).transpose();
+		mLightData.color = lampPair.first->mLightColor;
+		if (lampPair.first->mStatus == LAMP_DIMMED) mLightData.color *= 0.4f;
+		mLightData.direction = lampPair.first->mLightDirection;
+		mLightData.range = lampPair.first->mLightRadius;
+		mLightData.cosAngle = cos(lampPair.first->mLightAngle);
 
-			mRenderer->VDrawIndexed(0, l.mConeMesh->GetIndexCount());
-		}
-		i++;
+		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
+
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
+
+		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);					// Position
+		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);					// Normal
+		mRenderer->VSetPixelShaderResourceView(mShadowContext, lampPair.second, 2);		// Shadow
+		mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);					// Border
+
+		mRenderer->VDrawIndexed(0, mGeodesicSphereMesh->GetIndexCount());
 	}
 
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
+	mRenderer->GetDeviceContext()->RSSetState(nullptr);
+	mRenderer->GetDeviceContext()->OMSetDepthStencilState(nullptr, 0);
 }
 
 void Level01::RenderFullScreenQuad()
@@ -1145,8 +1287,6 @@ void Level01::RenderMinions()
 		mRenderer->VDrawIndexed(0, ft.mModel->mMesh->GetIndexCount());
 	}
 }
-
-
 
 void Level01::RenderHealthBars()
 {
@@ -1303,39 +1443,42 @@ void Level01::ComputeGrid()
 
 	mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
 	mRenderer->VSetVertexShader(mApplication->mVSFwdSpotLightVolume);
-	mRenderer->VSetPixelShader(mApplication->mPSFwdSpotLightVolume);
+	mRenderer->VSetPixelShader(mApplication->mPSFwdPointLightVolume);
 
 	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferFullLevelOrto(), 0);
 
+	mRenderer->VBindMesh(mGeodesicSphereMesh);
+
 	uint32_t i = 0;
 	for (Lamp& l : Factory<Lamp>())
 	{
-		mModel.world = mLevel.lampWorldMatrices[i];
-		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		if (l.mStatus == LAMP_ON) {
+			mModel.world = mLevel.lampWorldMatrices[i];
+			mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 
-		// Set Light data
-		mLightData.viewProjection = (mLevel.lampVPTMatrices[i]).transpose();
-		mLightData.color = l.mLightColor;
-		mLightData.direction = l.mLightDirection;
-		mLightData.range = l.mLightRadius;
-		mLightData.cosAngle = cos(l.mLightAngle);
+			// Set Light data
+			mLightData.viewProjection = (mLevel.lampVPTMatrices[i]).transpose();
+			mLightData.color = l.mLightColor;
+			mLightData.direction = l.mLightDirection;
+			mLightData.range = l.mLightRadius;
+			mLightData.cosAngle = cos(l.mLightAngle);
 
-		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
+			mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
 
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+			mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 
-		mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
-		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
-		mRenderer->VSetPixelShaderResourceView(mGridContext, 0, 0);		// Position
-		mRenderer->VSetPixelShaderResourceView(mGridContext, 1, 1);		// Normal
-		mRenderer->VSetPixelShaderDepthResourceView(mShadowContext, i, 2);	// Shadow
-		mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);		// Border
+			mRenderer->VSetPixelShaderConstantBuffers(mPLVShaderResource);
+			mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
 
-		mRenderer->VBindMesh(l.mConeMesh);
+			mRenderer->VSetPixelShaderResourceView(mGridContext, 0, 0);		// Position
+			mRenderer->VSetPixelShaderResourceView(mGridContext, 1, 1);		// Normal
+			mRenderer->VSetPixelShaderResourceView(mShadowContext, i, 2);		// Shadow
+			mRenderer->VSetPixelShaderSamplerStates(mPLVShaderResource);		// Border
 
-		mRenderer->VDrawIndexed(0, l.mConeMesh->GetIndexCount());
+			mRenderer->VDrawIndexed(0, mGeodesicSphereMesh->GetIndexCount());
+		}
 		i++;
 	}
 
@@ -1366,9 +1509,6 @@ void Level01::ComputeGrid()
 
 	// Reset current grid to -10 / 0 on player
 	mAIManager->ResetGridData();
-
-	//Copy previous results to a CPU friendly buffer
-	mDeviceContext->CopyResource(mOutputDataCPURead, mOutputData);
 
 	//Pass 1
 	mRenderer->VSetComputeShader(mApplication->mCSGridPass1);
@@ -1401,6 +1541,9 @@ void Level01::ComputeGrid()
 
 	mDeviceContext->CSSetShader(NULL, NULL, 0);
 	mDeviceContext->CSSetShaderResources(0, 3, mNullSRV);
+
+	//Copy previous results to a CPU friendly buffer
+	mDeviceContext->CopyResource(mOutputDataCPURead, mOutputData);
 
 	//Map and update
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
