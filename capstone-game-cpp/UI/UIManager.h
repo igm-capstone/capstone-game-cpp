@@ -46,7 +46,7 @@ public:
 	void RenderPanel();
 	void RenderButton(Button* b, vec2f pos);
 	void RenderToolTip(Button* b);
-	void AddSkill(Skill* name, SpriteSheetCode sheetID, int spriteID, int keySpriteID = -1, int toolTipID = -1, bool canClickToSetActive = false);
+	void AddSkill(Skill* name, SpriteSheetCode sheetID, int spriteID, int keySpriteID = -1, int toolTipID = -1, OnInteractArea onClick = nullptr);
 	void AddButton(vec2f pos, vec2f size, char* text, OnInteractArea function = false);
 	void SetActiveSkill(Skill* skill);
 	void SetReadyState(int playerID, bool isReady);

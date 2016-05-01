@@ -56,7 +56,7 @@ void UIManager::RenderToolTip(Button* b)
 	mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 16, pos + vec2f(0, 0), vec4f(1, 1, 1, 1), ALIGN_CENTER, "Description %d", b->toolTipID);
 }
 
-void UIManager::AddSkill(Skill* skill, SpriteSheetCode sheetID, int spriteID, int keySpriteID, int toolTipID, bool canClickToSetActive)
+void UIManager::AddSkill(Skill* skill, SpriteSheetCode sheetID, int spriteID, int keySpriteID, int toolTipID, OnInteractArea onClick)
 {
 	assert(numBtns < 4);
 
@@ -65,8 +65,7 @@ void UIManager::AddSkill(Skill* skill, SpriteSheetCode sheetID, int spriteID, in
 	mButtons[numBtns].skill = skill;
 	mButtons[numBtns].keySpriteID = keySpriteID;
 	mButtons[numBtns].toolTipID = toolTipID;
-	if (canClickToSetActive)
-		mButtons[numBtns].onClick = [this, skill]() { SetActiveSkill(skill); return true; };
+	mButtons[numBtns].onClick = onClick;
 
 	numBtns++;
 }
