@@ -91,7 +91,7 @@ Explorer::~Explorer()
 
 	// Skills
 	Factory<Skill>::Destroy(mSkills[MELEE_SKILL_INDEX]);
-	switch (GetExplorerID())
+	switch (GetExplorerType())
 	{
 	case HEALER:
 	{
@@ -125,6 +125,8 @@ void Explorer::DebugSpawn(vec3f pos, int UUID)
 
 void Explorer::Spawn(vec3f pos, int UUID)
 {
+	mExplorerType = static_cast<ExplorerType>(UUID);
+
 	mTransform->SetPosition(pos);		
 
 	mCollider->mIsActive = true;
@@ -133,7 +135,7 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
 
-	switch (GetExplorerID())
+	switch (GetExplorerType())
 	{
 	case SPRINTER:
 		SetSprinterAnimations(this);
@@ -207,7 +209,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 	jarr_t skills;
 
 	// Add more as we get more classes.
-	switch (e->GetExplorerID())
+	switch (e->GetExplorerType())
 	{
 	case HEALER:
 	{
@@ -392,7 +394,7 @@ void Explorer::UpdateComponents(quatf rotation, vec3f position)
 	mInteractionCollider->mCollider.origin = mCollider->mCollider.origin;
 	
 	// Add more cases as we add explorer types
-	switch (GetExplorerID())
+	switch (GetExplorerType())
 	{
 	case TRAPMASTER:
 	case HEALER:

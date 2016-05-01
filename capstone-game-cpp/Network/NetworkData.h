@@ -15,6 +15,7 @@ enum PacketTypes {
 	SYNC_ANIMATION	= 'N',
 	INTERACT		= 'I',
 	READY			= 'R',
+	DISCONNECT		= 'D',
 	UNKNOWN
 };
 
@@ -30,7 +31,7 @@ enum SkillPacketTypes : char
 };
 
 struct Packet {
-	unsigned char Type = UNKNOWN;
+	PacketTypes Type = UNKNOWN;
 	
 	union {
 		unsigned int UUID = 0;

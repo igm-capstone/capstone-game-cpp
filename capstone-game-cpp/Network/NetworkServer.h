@@ -19,7 +19,9 @@ private:
 	char mNetworkData[MAX_DATA_SIZE];
 	char mPacketData[sizeof(Packet)];
 
-	std::map<unsigned int, SOCKET> mClientList;
+	SOCKET mClientList[4] = { 0 };
+	int mClientCount = 0;
+	void RemoveClient(const unsigned clientID);
 
 public:
 	NetworkServer(void) {};
@@ -37,6 +39,5 @@ protected:
 private:
 	void CheckForNewClients();
 	void ReceiveFromClients();
-	int ReceiveData(unsigned int clientID, char* recvBuf);
 };
 
