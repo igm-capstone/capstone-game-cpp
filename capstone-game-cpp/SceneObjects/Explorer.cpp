@@ -347,7 +347,6 @@ void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal)
 
 void Explorer::OnDeath(BaseSceneObject* obj)
 {
-	TRACE_LOG("DIED");
 	Explorer* pExplorer = reinterpret_cast<Explorer*>(obj);
 	pExplorer->mInteractionCollider->mIsActive = true;
 	pExplorer->mCollider->mIsDynamic = false;
@@ -355,11 +354,9 @@ void Explorer::OnDeath(BaseSceneObject* obj)
 
 void Explorer::OnRevive(BaseSceneObject* obj)
 {
-	TRACE_LOG("REVIVED");
 	Explorer* pExplorer = reinterpret_cast<Explorer*>(obj);
 	pExplorer->mInteractionCollider->mIsActive = false;
 	pExplorer->mCollider->mIsDynamic = true;
-
 }
 
 void Explorer::OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other)
