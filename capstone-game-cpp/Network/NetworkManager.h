@@ -46,6 +46,7 @@ class NetworkRpc {
 	static NetworkManager* mNetworkManager;
 public:
 	static void SpawnExistingExplorer(int UUID, vec3f pos);
+	static void DisconnectExplorer(int UUID);
 	static void SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, float duration);
 
 	static void GrantAuthority(int UUID);

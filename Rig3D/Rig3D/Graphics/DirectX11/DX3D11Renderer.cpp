@@ -1410,7 +1410,6 @@ void DX3D11Renderer::VCreateShaderTexture2DArray(IShaderResource* shader, const 
 	ID3D11Texture2D* textureArray;
 	mDevice->CreateTexture2D(&textureArrayDesc, nullptr, &textureArray);
 
-	D3D11_MAPPED_SUBRESOURCE mappedSubresource;
 	for (uint32_t i = 0; i < count; i++)
 	{
 		for (uint32_t j = 0; j < textureDesc.MipLevels; j++)

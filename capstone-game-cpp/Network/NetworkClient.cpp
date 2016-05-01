@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "NetworkClient.h"
+#include <trace.h>
 
 bool NetworkClient::Init(void)
 {
@@ -9,19 +10,19 @@ bool NetworkClient::Init(void)
 
 	int ret = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (ret != 0) {
-		printf("WSAStartup failed: %d\n", ret);
+		TRACE_LOG("WSAStartup failed" << ret);
 		return false;
 	}
 
 	struct addrinfo *result = NULL, *ptr = NULL, hints;
 	ZeroMemory(&hints, sizeof(hints));
-	hints.ai_family = AF_UNSPEC;
+	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
 
 	ret = getaddrinfo(mIPAddress, DEFAULT_PORT, &hints, &result);
 	if (ret != 0) {
-		printf("getaddrinfo failed: %d\n", ret);
+		TRACE_LOG("getaddrinfo failed" << ret);
 		WSACleanup();
 		return false;
 	}
@@ -29,7 +30,7 @@ bool NetworkClient::Init(void)
 	for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
 		mConnectSocket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
 		if (mConnectSocket == INVALID_SOCKET) {
-			printf("socket failed: %ld\n", WSAGetLastError());
+			TRACE_LOG("socket failed: " << WSAGetLastError());
 			WSACleanup();
 			return false;
 		}
@@ -39,14 +40,14 @@ bool NetworkClient::Init(void)
 		{
 			closesocket(mConnectSocket);
 			mConnectSocket = INVALID_SOCKET;
-			printf("The server is down... did not connect");
+			TRACE_LOG("The server is down... did not connect");
 		}
 	}
 
 	freeaddrinfo(result);
 
 	if (mConnectSocket == INVALID_SOCKET) {
-		printf("Unable to connect to server!\n");
+		TRACE_LOG("Unable to connect to server!\n");
 		WSACleanup();
 		return false;
 	}
@@ -54,7 +55,23 @@ bool NetworkClient::Init(void)
 	u_long iMode = 1;
 	ret = ioctlsocket(mConnectSocket, FIONBIO, &iMode); //non-blocking mode
 	if (ret == SOCKET_ERROR) {
-		printf("ioctlsocket failed: %d\n", WSAGetLastError());
+		TRACE_LOG("ioctlsocket failed" << WSAGetLastError());
+		closesocket(mConnectSocket);
+		WSACleanup();
+		return false;
+	}
+
+	fd_set readset;
+	struct timeval tv;
+	tv.tv_sec = 5;
+	tv.tv_usec = 0;
+	do {
+		FD_ZERO(&readset);
+		FD_SET(mConnectSocket, &readset);
+		ret = select(mConnectSocket + 1, &readset, NULL, NULL, &tv);
+	} while (ret == -1 && errno == EINTR);
+	if (ret <= 0) {
+		TRACE_LOG("Connection wasnt accepted");
 		closesocket(mConnectSocket);
 		WSACleanup();
 		return false;
@@ -78,7 +95,7 @@ int NetworkClient::ReceiveData(char * recvBuf)
 
 	if (ret == 0)
 	{
-		printf("Connection closed\n");
+		TRACE_LOG("Connection closed\n");
 		closesocket(mConnectSocket);
 		WSACleanup();
 	}
@@ -103,6 +120,9 @@ void NetworkClient::Update()
 			case SPAWN_EXPLORER:
 				NetworkRpc::SpawnExistingExplorer(packet.UUID, packet.AsTransform.Position);
 				break;
+			case DISCONNECT:
+				NetworkRpc::DisconnectExplorer(packet.UUID);
+				break;
 			case SPAWN_SKILL:
 				NetworkRpc::SpawnExistingSkill(packet.AsSkill.Type, packet.UUID, packet.AsSkill.Position, packet.AsSkill.Duration);
 				break;
@@ -126,7 +146,7 @@ void NetworkClient::Update()
 				NetworkRpc::Ready(packet.ClientID, packet.AsBool);
 				break;
 			default:
-				printf("error in packet types\n");
+				TRACE_LOG("error in packet types\n");
 				break;
 		}
 	}

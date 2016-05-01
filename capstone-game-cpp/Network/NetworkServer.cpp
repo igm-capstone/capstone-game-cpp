@@ -1,7 +1,12 @@
 #include "stdafx.h"
 #include "NetworkServer.h"
+#include <trace.h>
+#include <SceneObjects/Explorer.h>
+#include <Components/NetworkID.h>
 
-bool NetworkServer::Init(void) 
+ExplorerType gSpawnOrder[] = { TRAPMASTER, HEALER, SPRINTER };
+
+bool NetworkServer::Init(void)
 {
 	WSADATA wsaData;
 
@@ -10,7 +15,7 @@ bool NetworkServer::Init(void)
 
 	int ret = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (ret != 0) {
-		printf("WSAStartup failed: %d\n", ret);
+		TRACE_LOG("WSAStartup failed:" << ret);
 		return false;
 	}
 
@@ -25,14 +30,14 @@ bool NetworkServer::Init(void)
 
 	ret = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
 	if (ret != 0) {
-		printf("getaddrinfo failed: %d\n", ret);
+		TRACE_LOG("getaddrinfo failed:" << ret);
 		WSACleanup();
 		return false;
 	}
 
 	mListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 	if (mListenSocket == INVALID_SOCKET) {
-		printf("socket failed: %ld\n", WSAGetLastError());
+		TRACE_LOG("socket failed:" << WSAGetLastError());
 		freeaddrinfo(result);
 		WSACleanup();
 		return false;
@@ -41,7 +46,7 @@ bool NetworkServer::Init(void)
 	u_long iMode = 1;
 	ret = ioctlsocket(mListenSocket, FIONBIO, &iMode);		// nonblocking mode
 	if (ret == SOCKET_ERROR) {
-		printf("ioctlsocket failed: %d\n", WSAGetLastError());
+		TRACE_LOG("ioctlsocket failed:" << WSAGetLastError());
 		freeaddrinfo(result);
 		closesocket(mListenSocket);
 		WSACleanup();
@@ -50,7 +55,7 @@ bool NetworkServer::Init(void)
 
 	ret = ::bind(mListenSocket, result->ai_addr, (int)result->ai_addrlen);
 	if (ret == SOCKET_ERROR) {
-		printf("bind failed: %d\n", WSAGetLastError());
+		TRACE_LOG("bind failed:" << WSAGetLastError());
 		freeaddrinfo(result);
 		closesocket(mListenSocket);
 		WSACleanup();
@@ -59,7 +64,7 @@ bool NetworkServer::Init(void)
 
 	ret = listen(mListenSocket, SOMAXCONN);
 	if (ret == SOCKET_ERROR) {
-		printf("listen: %d\n", WSAGetLastError());
+		TRACE_LOG("listen:" << WSAGetLastError());
 		freeaddrinfo(result);
 		closesocket(mListenSocket);
 		WSACleanup();
@@ -70,71 +75,65 @@ bool NetworkServer::Init(void)
 	return true;
 }
 
-
 void NetworkServer::Shutdown(void)
 {
 	closesocket(mListenSocket);
 	WSACleanup();
 }
 
-// accept new connections
 void NetworkServer::CheckForNewClients()
 {
-	if (mClientList.size() > MAX_EXPLORERS) return;
+	if (mClientCount == MAX_EXPLORERS) return;
 
 	mClientSocket = accept(mListenSocket, NULL, NULL);
 	if (mClientSocket == INVALID_SOCKET) return;
-	
+
 	char value = 1; //disable nagle on the client's socket
 	setsockopt(mClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
-	
-	auto i = 1;
-	while (true) {
-		if (mClientList.count(i) == 0) break;
-		i++;
+
+	unsigned int i;
+	for (auto type : gSpawnOrder) {
+		i = type;
+		if (!mClientList[i]) break;
 	}
-
-	mClientList[i] = mClientSocket;
-
-	printf("client %d connected\n", i);
+	
+	Packet p(PacketTypes::SET_CLIENT_ID);
+	p.ClientID = i;
+	p.Serialize(mPacketData);
+	auto ret = send(mClientSocket, mPacketData, sizeof(mPacketData), 0);
+	if (ret > 0) { 
+		mClientList[i] = mClientSocket; 
+		mClientCount++;
+		TRACE_LOG("client connected " << i);
+	}
+	else
+	{
+		closesocket(mClientSocket);
+		TRACE_LOG("client lost");
+	}
 }
 
-int NetworkServer::ReceiveData(unsigned int clientID, char* recvBuf)
+void NetworkServer::RemoveClient(const unsigned clientID)
 {
-	if (mClientList.find(clientID) != mClientList.end())
-	{
-		SOCKET currentSocket = mClientList[clientID];
-		int ret = recv(currentSocket, recvBuf, MAX_DATA_SIZE, 0);
-
-		if (ret == 0)
-		{
-			printf("client %d disconnected\n", clientID);
-			closesocket(currentSocket);
+	for each(auto &netID in Factory<NetworkID>()) {
+		if (netID.mIsActive && netID.mUUID == clientID) {
+			Explorer* e = static_cast<Explorer*>(netID.mSceneObject);
+			Factory<Explorer>::Destroy(e);
 		}
-
-		return ret;
 	}
 
-	return 0;
+	closesocket(mClientList[clientID]);
+	mClientList[clientID] = 0;
+	mClientCount--;
+
+	Packet p(DISCONNECT);
+	p.UUID = clientID;
+	SendToAll(&p);
 }
 
 void NetworkServer::SendToAll(Packet* p)
 {
-	SOCKET currentSocket;
-	int iSendResult;
-	p->Serialize(mPacketData);
-
-	for each (auto client in mClientList)
-	{
-		currentSocket = client.second;
-		iSendResult = send(client.second, mPacketData, sizeof(mPacketData), 0);
-
-		if (iSendResult == SOCKET_ERROR)
-		{
-			printf("send failed with error: %d\n", WSAGetLastError());
-			closesocket(currentSocket);
-		}
-	}
+	Retransmit(-1, p);
 }
 
 void NetworkServer::Retransmit(int originalSender, Packet* p)
@@ -143,17 +142,21 @@ void NetworkServer::Retransmit(int originalSender, Packet* p)
 	int iSendResult;
 	p->Serialize(mPacketData);
 
-	for each (auto client in mClientList)
+	for (int clientID = 1; clientID <= MAX_EXPLORERS; clientID++)
 	{
-		if (client.first == originalSender) continue;
-		currentSocket = client.second;
-		iSendResult = send(client.second, mPacketData, sizeof(mPacketData), 0);
+		currentSocket = mClientList[clientID];
 
-		if (iSendResult == SOCKET_ERROR)
+		if (!currentSocket) continue;
+		if (clientID == originalSender) continue;
+
+		iSendResult = send(currentSocket, mPacketData, sizeof(mPacketData), 0);
+
+		if (iSendResult <= 0)
 		{
-			printf("send failed with error: %d\n", WSAGetLastError());
-			closesocket(currentSocket);
+			TRACE_LOG("Retransmit failed with error: " << WSAGetLastError() << ". Disconnecting client: " << clientID);
+			RemoveClient(clientID);
 		}
+		//else TRACE_LOG("Sent " << p->Type << " to " << clientID);
 	}
 }
 
@@ -164,66 +167,67 @@ void NetworkServer::Send(int id, Packet* p)
 
 	iSendResult = send(mClientList[id], mPacketData, sizeof(mPacketData), 0);
 
-	if (iSendResult == SOCKET_ERROR)
+	if (iSendResult <= 0)
 	{
-		printf("send failed with error: %d\n", WSAGetLastError());
-		closesocket(mClientList[id]);
+		TRACE_LOG("Retransmit failed with error: " << WSAGetLastError() << ". Disconnecting client: " << id);
+		RemoveClient(id);
 	}
-
+	//else TRACE_LOG("Sent " << p->Type << " to " << id);
 }
 
 void NetworkServer::ReceiveFromClients()
 {
 	Packet packet;
+	SOCKET currentSocket;
 
-	for each (auto client in mClientList)
+	for (int clientID = 1; clientID <= MAX_EXPLORERS; clientID++)
 	{
-		int dataLength = ReceiveData(client.first, mNetworkData);
+		currentSocket = mClientList[clientID];
+		if (!currentSocket) continue;
 
-		if (dataLength <= 0) continue;
+		int dataLength = recv(currentSocket, mNetworkData, MAX_DATA_SIZE, 0);
 
-		for (int i = 0; i < dataLength; i += sizeof(Packet))
+		if (dataLength == 0 || (dataLength == -1 && WSAGetLastError() == WSAECONNRESET))
 		{
-			packet.Deserialize(&(mNetworkData[i]));
-			switch (packet.Type) {
+			TRACE_LOG("client disconnected: " << clientID);
+			RemoveClient(clientID);
+		}
+		else if (dataLength > 0) {
+			for (int i = 0; i < dataLength; i += sizeof(Packet))
+			{
+				packet.Deserialize(&(mNetworkData[i]));
+				switch (packet.Type) {
 				case INIT_CONNECTION:
-					{
-						//Inform the client ID
-						Packet p(PacketTypes::SET_CLIENT_ID);
-						p.ClientID = client.first;
-						Send(client.first, &p);
-
-						//Spawn on the server
-						NetworkCmd::SpawnNewExplorer(client.first);
-					}
+					NetworkCmd::SpawnNewExplorer(clientID);
 					break;
 				case SYNC_TRANSFORM:
-					Retransmit(client.first, &packet);
-					NetworkRpc::SyncTransform(packet.UUID, 
+					Retransmit(clientID, &packet);
+					NetworkRpc::SyncTransform(packet.UUID,
 						packet.AsTransform.Position, packet.AsTransform.Rotation);
 					break;
 				case SYNC_HEALTH:
-					Retransmit(client.first, &packet);
+					Retransmit(clientID, &packet);
 					NetworkRpc::SyncHealth(packet.UUID, packet.AsFloatArray[0], packet.AsFloatArray[1]);
 					break;
 				case SYNC_ANIMATION:
-					Retransmit(client.first, &packet);
+					Retransmit(clientID, &packet);
 					NetworkRpc::SyncAnimation(packet.UUID, packet.AsAnimation.State, packet.AsAnimation.Command);
 					break;
 				case SPAWN_SKILL:
 					NetworkCmd::SpawnNewSkill(packet.AsSkill.Type, packet.AsSkill.Position, packet.AsSkill.Duration);
 					break;
 				case INTERACT:
-					Retransmit(client.first, &packet);
+					Retransmit(clientID, &packet);
 					NetworkRpc::Interact(packet.UUID);
 					break;
 				case READY:
-					Retransmit(client.first, &packet);
+					Retransmit(clientID, &packet);
 					NetworkRpc::Ready(packet.ClientID, packet.AsBool);
 					break;
 				default:
-					printf("error in packet types\n");
+					TRACE_LOG("error in packet types\n");
 					break;
+				}
 			}
 		}
 	}

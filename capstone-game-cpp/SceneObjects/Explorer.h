@@ -2,11 +2,12 @@
 #include "SceneObjects\BaseSceneObject.h"
 #include <Components/AnimationController.h>
 
-enum ExplorerType //Spawn Order
+enum ExplorerType // For Spawn Order, check gSpawnOrder in NetworkManager.cpp
 {
-	TRAPMASTER = 2,
-	HEALER = 3,
-	SPRINTER = 1,
+	GHOST = 0, // padding
+	HEALER,
+	SPRINTER,
+	TRAPMASTER,
 };
 
 class Explorer : public BaseSceneObject
@@ -35,12 +36,13 @@ public:
 private:
 	class NetworkClient*				mNetworkClient;
 	class CameraManager*				mCameraManager;
+	ExplorerType						mExplorerType;
 
 private:
 	Explorer();
 	~Explorer();
 
-	ExplorerType GetExplorerID() { return static_cast<ExplorerType>(mNetworkClient->mID); }
+	ExplorerType GetExplorerType() { return mExplorerType; }
 
 public:
 	void Spawn(vec3f pos, int UUID);

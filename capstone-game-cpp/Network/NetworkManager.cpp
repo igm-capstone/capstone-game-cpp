@@ -9,6 +9,7 @@
 #include <SceneObjects/Trap.h>
 #include <SceneObjects/StatusEffect.h>
 #include <ScareTacticsApplication.h>
+#include <Mathf.h>
 
 NetworkManager::NetworkManager()
 {
@@ -71,7 +72,7 @@ void NetworkManager::Update()
 	}
 }
 
-int MyUUID::currentID = 0;
+int MyUUID::currentID = 10;
 NetworkManager* NetworkCmd::mNetworkManager = &Rig3D::Singleton<NetworkManager>::SharedInstance();
 NetworkManager* NetworkRpc::mNetworkManager = &Rig3D::Singleton<NetworkManager>::SharedInstance();
 
@@ -80,13 +81,14 @@ void NetworkCmd::SpawnNewExplorer(int clientID) {
 	// Get a spawn point
 	// FIMXE: logic to select spawn point
 	SpawnPoint& sp = *(Factory<SpawnPoint>().begin());
+	auto rndPos = sp.mTransform->GetPosition() + vec3f(Mathf::RandomRange(-4, 4), Mathf::RandomRange(-4, 4), 0);
 
 	auto e = Factory<Explorer>::Create();
-	e->Spawn(sp.mTransform->GetPosition(), MyUUID::GenUUID());
+	e->Spawn(rndPos, clientID);
 
 	Packet p(PacketTypes::SPAWN_EXPLORER);
 	p.UUID = e->mNetworkID->mUUID;
-	p.AsTransform.Position = sp.mTransform->GetPosition();
+	p.AsTransform.Position = rndPos;
 	mNetworkManager->mServer.SendToAll(&p);
 
 	Packet p2(PacketTypes::GRANT_AUTHORITY);
@@ -111,9 +113,29 @@ void NetworkCmd::SpawnNewExplorer(int clientID) {
 	}
 }
 
+void NetworkRpc::DisconnectExplorer(int UUID)
+{
+	for each(auto &netID in Factory<NetworkID>()) {
+		if (netID.mIsActive && netID.mUUID == UUID) {
+			Explorer* e = static_cast<Explorer*>(netID.mSceneObject);
+			Factory<Explorer>::Destroy(e);
+		}
+	}
+}
+
 void NetworkRpc::SpawnExistingExplorer(int UUID, vec3f pos) {
 	assert(mNetworkManager->mMode == NetworkManager::Mode::CLIENT);
-	auto e = Factory<Explorer>::Create();
+	
+	Explorer* e = nullptr;
+	// Prevent duplicates
+	for each(auto &netID in Factory<NetworkID>()) {
+		if (netID.mIsActive && netID.mUUID == UUID) {
+			e = static_cast<Explorer*>(netID.mSceneObject);
+		}
+	}
+
+	if (!e) e = Factory<Explorer>::Create();
+
 	e->Spawn(pos, UUID);
 }
 
