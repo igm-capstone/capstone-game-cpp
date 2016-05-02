@@ -137,20 +137,22 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
 
-	switch (GetExplorerType())
-	{
-	case SPRINTER:
-		SetSprinterAnimations(this);
-		break;
-	case TRAPMASTER:
-		SetTrapperAnimations(this);
-		break;
-	case HEALER:
-		SetProfessorAnimations(this);
-		break;
-	default:
-		break;
-	}
+	SetSprinterAnimations(this);
+
+	//switch (GetExplorerType())
+	//{
+	//case SPRINTER:
+	//	SetSprinterAnimations(this);
+	//	break;
+	//case TRAPMASTER:
+	//	SetTrapperAnimations(this);
+	//	break;
+	//case HEALER:
+	//	SetProfessorAnimations(this);
+	//	break;
+	//default:
+	//	break;
+	//}
 
 	mController->PlayStateAnimation(ANIM_STATE_IDLE);
 }
@@ -357,6 +359,7 @@ void Explorer::OnDeath(BaseSceneObject* obj)
 	pExplorer->mIsDead = true;
 	pExplorer->mInteractionCollider->mIsActive = true;
 	pExplorer->mCollider->mIsDynamic = false;
+	pExplorer->mController->PlayStateAnimation(ANIM_STATE_DEATH);
 	Singleton<AIManager>::SharedInstance().SetGridDirty(true);
 }
 
