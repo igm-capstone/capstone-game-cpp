@@ -21,6 +21,7 @@ public:
 	BehaviorTree::Tree* mBehaviorTree;
 	quatf mBaseRotation;
 	float mBaseMoveSpeed;
+	float mSpeedMultiplier;
 	float mAttackDamage;
 	float mAttackRange;
 	float mTurnRate;

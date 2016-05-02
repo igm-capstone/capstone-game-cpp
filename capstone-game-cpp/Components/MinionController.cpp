@@ -29,6 +29,7 @@ MinionController::MinionController()
 	, mBehaviorTree(nullptr)
 	, mBaseRotation(quatf::rollPitchYaw(-0.5f * PI, 0, 0) * quatf::rollPitchYaw(0, -0.5f * PI, 0))
 	, mBaseMoveSpeed(0)
+	, mSpeedMultiplier(1.0f)
 	, mAttackDamage(0)
 	, mAttackRange(0)
 	, mTurnRate(0)
@@ -257,7 +258,7 @@ BehaviorStatus MinionController::MoveTowardsExplorer(Behavior& bh, void* data)
 	float dt = 0.001f * static_cast<float>(self.mTimer.GetDeltaTime());
 
 	// speed per second
-	vec2f targetVelocity = normalize(direction) * self.mBaseMoveSpeed * dt;
+	vec2f targetVelocity = normalize(direction) * self.mBaseMoveSpeed * self.mSpeedMultiplier * dt;
 
 	// delta space for the current frame
 	vec3f ds = targetVelocity;
@@ -319,7 +320,7 @@ BehaviorStatus MinionController::MoveForward(Behavior& bh, void* data)
 	float dt = 0.001f * static_cast<float>(self.mTimer.GetDeltaTime());
 
 	// speed per second
-	vec2f targetVelocity = normalize(vec2f(nextNode.worldPos) - vec2f(self.mPosition)) * self.mBaseMoveSpeed * dt;
+	vec2f targetVelocity = normalize(vec2f(nextNode.worldPos) - vec2f(self.mPosition)) * self.mBaseMoveSpeed * self.mSpeedMultiplier * dt;
 
 	// delta space for the current frame
 	vec3f ds = targetVelocity;
