@@ -34,6 +34,8 @@ Skill* createExplorerSkill(Skill::UseCallback callback, SkillBinding binding, js
 }
 
 Explorer::Explorer()
+	: mAttackDamage(0)
+	, mIsDead(false)
 {
 	mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
 	mCameraManager = &Singleton<CameraManager>::SharedInstance();
@@ -150,7 +152,7 @@ void Explorer::Spawn(vec3f pos, int UUID)
 		break;
 	}
 
-	mAnimationController->SetState(ANIM_STATE_IDLE);
+	mController->PlayStateAnimation(ANIM_STATE_IDLE);
 }
 
 void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
@@ -256,6 +258,10 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill(DoMelee, MOUSEBUTTON_LEFT, tossConfig);
 		e->mSkills[MELEE_SKILL_INDEX]->mSceneObject = e;
 
+		// Hard coding until we 
+		e->mSkills[POISON_SKILL_INDEX]->mDuration = 5.0f;
+		e->mSkills[SLOW_SKILL_INDEX]->mDuration = 5.0f;
+
 		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
 		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
 		mUIManager->AddSkill(e->mSkills[POISON_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 2, 6);
@@ -348,15 +354,20 @@ void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal)
 void Explorer::OnDeath(BaseSceneObject* obj)
 {
 	Explorer* pExplorer = reinterpret_cast<Explorer*>(obj);
+	pExplorer->mIsDead = true;
 	pExplorer->mInteractionCollider->mIsActive = true;
 	pExplorer->mCollider->mIsDynamic = false;
+	Singleton<AIManager>::SharedInstance().SetGridDirty(true);
 }
 
 void Explorer::OnRevive(BaseSceneObject* obj)
 {
 	Explorer* pExplorer = reinterpret_cast<Explorer*>(obj);
+	pExplorer->mIsDead = false;
 	pExplorer->mInteractionCollider->mIsActive = false;
 	pExplorer->mCollider->mIsDynamic = true;
+
+	Singleton<AIManager>::SharedInstance().SetGridDirty(true);
 }
 
 void Explorer::OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other)

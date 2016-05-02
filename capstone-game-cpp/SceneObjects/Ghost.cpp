@@ -104,10 +104,10 @@ void Ghost::Spawn(BaseScene* scene)
 	mCameraManager->MoveCamera(level.center, level.center + vec3f(0.0f, 0.0f, -85.5f));
 
 	mUIManager = &scene->mUIManager;
-	mUIManager->AddSkill(mSkills[1], SPRITESHEET_GHOST_ICONS, 0, 0, 0, true);
-	mUIManager->AddSkill(mSkills[2], SPRITESHEET_GHOST_ICONS, 1, 1, 1, true);
-	mUIManager->AddSkill(mSkills[3], SPRITESHEET_GHOST_ICONS, 5, 2, 2, true);
-	mUIManager->AddSkill(mSkills[4], SPRITESHEET_GHOST_ICONS, 4, 9, 3, true);
+	mUIManager->AddSkill(mSkills[1], SPRITESHEET_GHOST_ICONS, 0, 0, 0, [this]() { this->SetActiveSkill(1); return true; });
+	mUIManager->AddSkill(mSkills[2], SPRITESHEET_GHOST_ICONS, 1, 1, 1, [this]() { this->SetActiveSkill(2); return true; });
+	mUIManager->AddSkill(mSkills[3], SPRITESHEET_GHOST_ICONS, 5, 2, 2, [this]() { this->SetActiveSkill(3); return true; });
+	mUIManager->AddSkill(mSkills[4], SPRITESHEET_GHOST_ICONS, 4, 9, 3, [this]() { this->SetActiveSkill(4); return true; });
 	SetActiveSkill(1);
 }
 

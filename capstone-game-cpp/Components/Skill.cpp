@@ -5,6 +5,7 @@
 #include <Rig3D/Parametric.h>
 #include <RayCast.h>
 #include <Colors.h>
+#include <SceneObjects/Explorer.h>
 
 SkillBinding::SkillBinding()
 {
@@ -98,6 +99,12 @@ public:
 void Skill::Update()
 {
 	if (!mIsActive) return;
+
+	// if skill holder is explorer, check if it is alive =P
+	if (mSceneObject->Is<Explorer>() && reinterpret_cast<Explorer*>(mSceneObject)->mIsDead)
+	{
+		return;
+	}
 
 	//--- check if a binding was activated
 	bool useSkill = false;

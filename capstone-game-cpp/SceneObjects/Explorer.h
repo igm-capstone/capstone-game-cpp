@@ -32,7 +32,7 @@ public:
 
 	MeleeColliderComponent				mMeleeColliderComponent;
 	float								mAttackDamage;
-
+	bool								mIsDead;
 private:
 	class NetworkClient*				mNetworkClient;
 	class CameraManager*				mCameraManager;
