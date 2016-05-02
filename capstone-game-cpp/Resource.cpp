@@ -102,8 +102,6 @@ void loadLamps(jarr_t objs)
 
 		parseTransform(obj, lamp->mTransform);
 
-		lamp->mTransform->SetPosition(lamp->mTransform->GetPosition() + vec3f(0.0f, 0.0f, -3.0f));
-
 		lamp->mLightColor		= { 1.0f, 1.0f, 1.0f, 1.0f };
 		lamp->mLightDirection	= defaultDirection * lamp->mTransform->GetRotationMatrix();
 		lamp->mLightRadius		= obj["lightRadius"].get<float>();
