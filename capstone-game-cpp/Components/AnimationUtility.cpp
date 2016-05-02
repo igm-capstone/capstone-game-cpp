@@ -6,10 +6,10 @@
 #include <ScareTacticsApplication.h>
 
 Animation gSprinterAnimations[Animations::SPRINTER_ANIMATION_COUNT] = {
-	{ "Sprinter_Mix_Finish", 1, 70, 1 },
-	{ "Sprinter_Mix_Finish", 80, 96, 1 },
-	{ "Sprinter_Mix_Finish", 175, 214, 1 },
-	{ "Sprinter_Mix_Finish", 144, 175, 1 }
+	{ "SprinterFinal.0003", 1, 70, 1 },
+	{ "SprinterFinal.0003", 80, 92, 1 },
+	{ "SprinterFinal.0003", 100, 150, 1 },
+	{ "SprinterFinal.0003", 160, 217, 1 }
 };
 
 Animation gTrapperAnimations[Animations::TRAPPER_ANIMATION_COUNT] = {
@@ -76,15 +76,11 @@ void SetSprinterAnimations(Explorer* explorer)
 
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_IDLE, &gSprinterAnimations[Animations::SPRINTER_IDLE], nullptr, 0, true);
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_RUN, &gSprinterAnimations[Animations::SPRINTER_RUN], nullptr, 0, true);
+	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_DEATH, &gSprinterAnimations[Animations::SPRINTER_DEATH], nullptr, 0, false);
 
-	Animation melee = gSprinterAnimations[Animations::SPRINTER_ATTACK];
+	Animation& melee = gSprinterAnimations[Animations::SPRINTER_ATTACK];
 	KeyframeOption meleeOptions[] = { { melee.startFrameIndex, Explorer::OnMeleeStart },{ melee.endFrameIndex, Explorer::OnMeleeStop } };
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_MELEE, &gSprinterAnimations[Animations::SPRINTER_ATTACK], meleeOptions, 2, false);
-
-	/*Animation revive = gSprinterAnimations[Animations::SPRINTER_REVIVE];
-	KeyframeOption reviveOptions[] = { { revive.startFrameIndex, OnMeleeStart },{ revive.endFrameIndex, OnMeleeStop } };
-	SetStateAnimation(mAnimationController, ANIM_STATE_REVIVE, &gSprinterAnimations[Animations::SPRINTER_REVIVE], reviveOptions, 2, false);*/
-
 }
 
 void SetProfessorAnimations(class Explorer* explorer)
