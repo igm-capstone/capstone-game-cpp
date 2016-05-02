@@ -153,7 +153,7 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
 
-	mAnimationController->SetState(ANIM_STATE_IDLE);
+	mController->PlayStateAnimation(ANIM_STATE_IDLE);
 }
 
 void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
