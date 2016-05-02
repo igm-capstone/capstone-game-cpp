@@ -34,6 +34,8 @@ Skill* createExplorerSkill(Skill::UseCallback callback, SkillBinding binding, js
 }
 
 Explorer::Explorer()
+	: mAttackDamage(0)
+	, mIsDead(false)
 {
 	mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
 	mCameraManager = &Singleton<CameraManager>::SharedInstance();
@@ -350,16 +352,20 @@ void Explorer::OnDeath(BaseSceneObject* obj)
 {
 	TRACE_LOG("DIED");
 	Explorer* pExplorer = reinterpret_cast<Explorer*>(obj);
+	pExplorer->mIsDead = true;
 	pExplorer->mInteractionCollider->mIsActive = true;
 	pExplorer->mCollider->mIsDynamic = false;
+	Singleton<AIManager>::SharedInstance().SetGridDirty(true);
 }
 
 void Explorer::OnRevive(BaseSceneObject* obj)
 {
 	TRACE_LOG("REVIVED");
 	Explorer* pExplorer = reinterpret_cast<Explorer*>(obj);
+	pExplorer->mIsDead = false;
 	pExplorer->mInteractionCollider->mIsActive = false;
 	pExplorer->mCollider->mIsDynamic = true;
+	Singleton<AIManager>::SharedInstance().SetGridDirty(true);
 
 }
 
