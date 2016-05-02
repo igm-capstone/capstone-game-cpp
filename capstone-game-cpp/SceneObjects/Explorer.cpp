@@ -257,6 +257,10 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill(DoMelee, MOUSEBUTTON_LEFT, tossConfig);
 		e->mSkills[MELEE_SKILL_INDEX]->mSceneObject = e;
 
+		// Hard coding until we 
+		e->mSkills[POISON_SKILL_INDEX]->mDuration = 5.0f;
+		e->mSkills[SLOW_SKILL_INDEX]->mDuration = 5.0f;
+
 		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
 		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
 		mUIManager->AddSkill(e->mSkills[POISON_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 2, 6);

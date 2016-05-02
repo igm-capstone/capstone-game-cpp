@@ -75,15 +75,16 @@ void Trap::SpawnPoison(int UUID, vec3f position, float duration)
 void Trap::SpawnSlow(int UUID, vec3f position, float duration)
 {
 	Spawn(UUID, position, duration);
+	mEffect->mOnEnterCallback = StatusEffect::OnSlowEnter;
 	mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
+	mEffect->mOnDestroyCallback = StatusEffect::OnSlowDestroy;
 	mEffect->mDuration = duration;
 }
 
 void Trap::Update(float seconds)
 {
-	TRACE_WATCH("TRAP", mDuration);
-	TRACE_WATCH("STATUS", mEffect->mDuration);
-
+	//TRACE_WATCH("TRAP", mDuration);
+	//TRACE_WATCH("STATUS", mEffect->mDuration);
 
 	// Check delay
 	if (mDelay > 0.0f)
@@ -130,11 +131,11 @@ void Trap::OnTriggerStay(BaseSceneObject* self, BaseSceneObject* other)
 
 	if (other->Is<Explorer>())
 	{
-		Explorer* pExplorer = reinterpret_cast<Explorer*>(other);
+	/*	Explorer* pExplorer = reinterpret_cast<Explorer*>(other);
 		if (pTrap->mEffect->mExplorers.find(pExplorer) == pTrap->mEffect->mExplorers.end())
 		{
 			pTrap->mEffect->mExplorers[pExplorer] = pTrap->mEffect->mDuration;
-		}
+		}*/
 	}
 	else if (other->Is<Minion>())
 	{
@@ -143,6 +144,11 @@ void Trap::OnTriggerStay(BaseSceneObject* self, BaseSceneObject* other)
 		{
 			pTrap->mEffect->mMinions[pMinion] = pTrap->mEffect->mDuration;
 		}
+	}
+
+	if (pTrap->mEffect->mOnEnterCallback)
+	{
+		pTrap->mEffect->mOnEnterCallback(pTrap->mEffect, other);
 	}
 }
 
