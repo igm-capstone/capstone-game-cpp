@@ -37,7 +37,10 @@ void AIManager::ResetGridData()
 	}
 
 	for each(auto &e in Factory<Explorer>()) {
-		GetNodeAt(e.mTransform->GetPosition())->weight = 0;
+		if (!e.mIsDead)
+		{
+			GetNodeAt(e.mTransform->GetPosition())->weight = 0;
+		}
 	}
 }
 
