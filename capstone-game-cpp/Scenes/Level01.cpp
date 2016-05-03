@@ -78,11 +78,6 @@ Level01::~Level01()
 	mGeodesicSphereMesh->~IMesh();
 	mNDSQuadMesh->~IMesh();
 
-	for (Lamp& l : Factory<Lamp>())
-	{
-		l.mConeMesh->~IMesh();
-	}
-
 	mGBufferContext->~IRenderContext();
 	mShadowContext->~IRenderContext();
 	mGridContext->~IRenderContext();
@@ -173,6 +168,7 @@ void Level01::InitializeAssets()
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kTrapModelName);
 
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
+	mModelManager->LoadModel<GPU::Vertex3>(kLanternModelName);
 	
 //	mModelManager->LoadModel<GPU::Vertex1>("Icosahedron");
 
@@ -237,20 +233,6 @@ void Level01::InitializeGeometry()
 
 	coneVertices.clear();
 	indices.clear();
-
-	for (Lamp& l : Factory<Lamp>())
-	{
-		Geometry::SpotlightCone(coneVertices, indices, 6, 1.0f, l.mLightAngle);
-
-		meshLibrary.NewMesh(&l.mConeMesh, mRenderer);
-		mRenderer->VSetMeshVertexBuffer(l.mConeMesh, &coneVertices[0], sizeof(GPU::Vertex1) * coneVertices.size(), sizeof(GPU::Vertex1));
-		mRenderer->VSetMeshIndexBuffer(l.mConeMesh, &indices[0], indices.size());
-
-		coneVertices.clear();
-		indices.clear();
-	}
-
-
 
 	// Billboard Quad (Sprites)
 	std::vector<GPU::VertexUV> ndsVertices;
