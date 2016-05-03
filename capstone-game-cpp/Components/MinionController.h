@@ -11,6 +11,7 @@ protected:
 	MinionController();
 	~MinionController();
 	BehaviorTree::Tree& CreateAttackSubtree();
+	BehaviorTree::Tree& CreateKnockbackSubtree();
 	BehaviorTree::Tree& CreateWanderSubtree();
 	BehaviorTree::Tree& CreateChaseSubtree();
 
@@ -33,6 +34,8 @@ public:
 	float mSpeed;
 	float mThinkTime;
 	float mWanderTime;
+	float mStunTime;
+	float mKnockbackDirection;
 	vec3f mPosition;
 	vec3f mLastPosition;
 	float mAngle;
@@ -44,12 +47,14 @@ public:
 	bool IsExplorerInRange(int range, bool setTarget = true);
 	bool LookAt(vec2f dir);
 	quatf GetAdjustedRotation(float angle);
+	void ApplyHitKnockback(float direction);
 
 	// behavior tree code
 	static bool IsExplorerInAttackRange(BehaviorTree::Behavior& bh, void* data);
 	static bool IsExplorerInLockRange(BehaviorTree::Behavior& bh, void* data);
 	static bool IsAttackInProgress(BehaviorTree::Behavior& bh, void* data);
 	static bool IsExplorerVisible(BehaviorTree::Behavior& bh, void* data);
+	static BehaviorTree::BehaviorStatus Knockback(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus StartAttack(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus TargetClosestExplorer(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus MoveTowardsExplorer(BehaviorTree::Behavior& bh, void* data);

@@ -236,9 +236,13 @@ void Minion::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot
 	e->UpdateComponents(newRot, newPos);
 }
 
-void Minion::OnHealthChange(BaseSceneObject* obj, float newVal)
+void Minion::OnHealthChange(BaseSceneObject* obj, float oldVal, float newVal, float hitDirection)
 {
-
+	if (hitDirection != FLT_MIN && oldVal > newVal)
+	{
+		auto self = static_cast<Minion*>(obj);
+		self->mController->ApplyHitKnockback(hitDirection);
+	}
 }
 
 void Minion::OnDeath(BaseSceneObject* obj)

@@ -55,7 +55,7 @@ public:
 	//static void OnNetHealthChange(BaseSceneObject* obj, float newVal);
 	static void OnAnimationCommandExecuted(BaseSceneObject* obj, AnimationControllerState state, AnimationControllerCommand command);
 	static void OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command);
-	static void OnHealthChange(BaseSceneObject* obj, float newVal);
+	static void OnHealthChange(BaseSceneObject* obj, float oldVal, float newVal, float hitDirection);
 	static void OnDeath(BaseSceneObject* obj);
 	static void OnRevive(BaseSceneObject* obj);
 	static void OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other);

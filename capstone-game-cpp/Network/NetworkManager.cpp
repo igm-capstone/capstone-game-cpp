@@ -313,11 +313,11 @@ void NetworkRpc::SyncTransform(int UUID, vec3f pos, quatf rot)
 	}
 }
 
-void NetworkRpc::SyncHealth(int UUID, float val, float max)
+void NetworkRpc::SyncHealth(int UUID, float val, float max, float dir)
 {
 	for each(auto &netID in Factory<NetworkID>()) {
 		if (netID.mUUID == UUID) {
-			netID.OnNetHealthChange(val, max);
+			netID.OnNetHealthChange(val, max, dir);
 		}
 	}
 }

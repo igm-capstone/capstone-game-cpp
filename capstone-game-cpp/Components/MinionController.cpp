@@ -38,6 +38,7 @@ MinionController::MinionController()
 	, mSpeed(0)
 	, mThinkTime(0)
 	, mWanderTime(0)
+	, mStunTime(0)
 	, mAngle(0)
 	, mDirectionIndex(0)
 	, mIsTransformDirty(false)
@@ -67,6 +68,13 @@ Tree& MinionController::CreateAttackSubtree()
 				.Action(&LookAtTarget, "(!) Look at Target")
 			.End()
 		.End()
+	.End();
+}
+
+Tree& MinionController::CreateKnockbackSubtree()
+{
+	return TreeBuilder(mAllocator, "(-->) Knockback")
+		.Action(&Knockback, "(!) Knockback")
 	.End();
 }
 
@@ -182,6 +190,12 @@ quatf MinionController::GetAdjustedRotation(float angle)
 	return normalize(quatf::angleAxis(angle, vec3f(0, 0, 1)) * mBaseRotation);
 }
 
+void MinionController::ApplyHitKnockback(float hitDirection)
+{
+	mStunTime = mStunOnHitDuration;
+	mKnockbackDirection = hitDirection;
+}
+
 bool MinionController::IsExplorerInAttackRange(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
@@ -219,6 +233,24 @@ bool MinionController::IsExplorerVisible(Behavior& bh, void* data)
 	auto state = conn.to->GetState();
 
 	return state == Node::PATH;
+}
+
+BehaviorStatus MinionController::Knockback(Behavior& bh, void* data)
+{
+	auto& self = *static_cast<MinionController*>(data);
+	
+	if (self.mStunTime <= 0)
+	{
+		return BehaviorStatus::Failure;
+	}
+
+	float dt = 0.001f * static_cast<float>(self.mTimer.GetDeltaTime());
+
+	self.mPosition += vec3f(cosf(self.mKnockbackDirection), sinf(self.mKnockbackDirection), 0) * dt * 10;
+
+	self.mStunTime = max(0, self.mStunTime - dt);
+
+	return BehaviorStatus::Running;
 }
 
 BehaviorStatus MinionController::StartAttack(Behavior& bh, void* data)
@@ -409,7 +441,7 @@ void MinionController::OnMeleeHit(BaseSceneObject* obj, BaseSceneObject* other)
 	if (other->Is<Explorer>())
 	{
 		Explorer* explorer = reinterpret_cast<Explorer*>(other);
-		explorer->mHealth->TakeDamage(self->mController->mAttackDamage, false);
+		explorer->mHealth->TakeDamage(self->mController->mAttackDamage, 0, false);
 		self->mMeleeColliderComponent->mIsActive = false;
 	}
 }

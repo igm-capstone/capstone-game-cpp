@@ -207,7 +207,7 @@ void NetworkServer::ReceiveFromClients()
 					break;
 				case SYNC_HEALTH:
 					Retransmit(clientID, &packet);
-					NetworkRpc::SyncHealth(packet.UUID, packet.AsFloatArray[0], packet.AsFloatArray[1]);
+					NetworkRpc::SyncHealth(packet.UUID, packet.AsFloatArray[0], packet.AsFloatArray[1], packet.AsFloatArray[2]);
 					break;
 				case SYNC_ANIMATION:
 					Retransmit(clientID, &packet);

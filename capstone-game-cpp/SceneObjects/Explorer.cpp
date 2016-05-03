@@ -355,7 +355,7 @@ void Explorer::OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command
 	}
 }
 
-void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal)
+void Explorer::OnHealthChange(BaseSceneObject* obj, float oldVal, float newVal, float hitDirection)
 {
 
 }
@@ -531,7 +531,8 @@ void Explorer::OnMeleeHit(BaseSceneObject* self, BaseSceneObject* other)
 	if (other->Is<Minion>())
 	{
 		auto m = reinterpret_cast<Minion*>(other);
-		m->mHealth->TakeDamage(e->mAttackDamage, false);
+		vec3f dir = other->mTransform->GetPosition() - self->mTransform->GetPosition();
+		m->mHealth->TakeDamage(e->mAttackDamage, atan2f(dir.y, dir.x), false);
 	}
 	else if (other->Is<Explorer>())
 	{
