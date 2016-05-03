@@ -592,6 +592,15 @@ void Level01::VUpdate(double milliseconds)
 		}
 	}
 
+	for (Lantern& l : Factory<Lantern>())
+	{
+		l.Update(seconds);
+		if (l.mShouldDestroy)
+		{
+			Factory<Lantern>::Destroy(&l);
+		}
+	}
+
 	for (StatusEffect& s : Factory<StatusEffect>())
 	{
 		if (!s.mIsActive)
@@ -1018,6 +1027,18 @@ void Level01::RenderDoors()
 
 		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
 	}
+
+	model = mModelManager->GetModel(kLanternModelName);
+	mRenderer->VBindMesh(model->mMesh);
+
+	for (Lantern& l : Factory<Lantern>())
+	{
+		mModel.world = l.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
+	}
 }
 
 void Level01::RenderEffects()
@@ -1136,37 +1157,41 @@ void Level01::RenderSpotLightVolumes()
 	std::vector<std::pair<Lamp*, uint32_t>> lampPairs;
 	CullLamps(frustum, &lampPairs);
 
-	mRenderer->VClearStencil(mGBufferContext, 0, 0);
+	std::vector<std::pair<Lantern*, uint32_t>> lanternPairs;
+	CullLanterns(frustum, &lanternPairs);
 
-	// Stencil pass
-	mRenderer->GetDeviceContext()->RSSetState(mLightingWriteRS);
-	mRenderer->GetDeviceContext()->OMSetDepthStencilState(mLightingWriteDSS, 0);
+	//mRenderer->VClearStencil(mGBufferContext, 0, 0);
 
-	mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
-	mRenderer->VSetVertexShader(mApplication->mVSFwdSpotLightVolume);
-	mRenderer->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
+	//// Stencil pass
+	//mRenderer->GetDeviceContext()->RSSetState(mLightingWriteRS);
+	//mRenderer->GetDeviceContext()->OMSetDepthStencilState(mLightingWriteDSS, 0);
+
+	//mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
+	//mRenderer->VSetVertexShader(mApplication->mVSFwdSpotLightVolume);
+	//mRenderer->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
 
 	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
 
 	mRenderer->VBindMesh(mGeodesicSphereMesh);
 
-	for (std::pair<Lamp*, uint32_t> lampPair : lampPairs)
-	{
-		mModel.world = mLevel.lampWorldMatrices[lampPair.second];
-		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
-		mRenderer->VDrawIndexed(0, mGeodesicSphereMesh->GetIndexCount());
-	}
+	//for (std::pair<Lamp*, uint32_t> lampPair : lampPairs)
+	//{
+	//	mModel.world = mLevel.lampWorldMatrices[lampPair.second];
+	//	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+	//	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+	//	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+	//	mRenderer->VDrawIndexed(0, mGeodesicSphereMesh->GetIndexCount());
+	//}
 
 	// Albedo Pass
 	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	mRenderer->SetBlendState(mPLVShaderResource, 0, color, 0xffffffff);
 	mRenderer->GetDeviceContext()->RSSetState(mLightingReadRS);
-	mRenderer->GetDeviceContext()->OMSetDepthStencilState(mLightingReadDSS, 0);
+	//mRenderer->GetDeviceContext()->OMSetDepthStencilState(mLightingReadDSS, 0);
 
-	mRenderer->VSetRenderContextTargetWithDepth(mGBufferContext, 3, 0);
+	mRenderer->VSetRenderContextTarget(mGBufferContext, 3);
+//	mRenderer->VSetRenderContextTargetWithDepth(mGBufferContext, 3, 0);
 	mRenderer->VClearContextTarget(mGBufferContext, 3, Colors::black.pCols);	// Albedo
 
 	mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
@@ -1201,9 +1226,32 @@ void Level01::RenderSpotLightVolumes()
 		mRenderer->VDrawIndexed(0, mGeodesicSphereMesh->GetIndexCount());
 	}
 
+	mRenderer->VSetPixelShader(mApplication->mPSFwdPointLightVolumeNS);
+
+	for (std::pair<Lantern*, uint32_t> lanternPair : lanternPairs)
+	{
+		mModel.world = (mat4f::scale(lanternPair.first->mColliderComponent->mCollider.radius) * mat4f::translate(lanternPair.first->GetLightPosition())).transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+
+		// Set Light data
+		mLightData.color = lanternPair.first->mLightColor;
+		mLightData.range = lanternPair.first->mColliderComponent->mCollider.radius;
+
+		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
+
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
+
+		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);					// Position
+		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);					// Normal
+		mRenderer->VDrawIndexed(0, mGeodesicSphereMesh->GetIndexCount());
+	}
+
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
 	mRenderer->GetDeviceContext()->RSSetState(nullptr);
-	mRenderer->GetDeviceContext()->OMSetDepthStencilState(nullptr, 0);
+	//mRenderer->GetDeviceContext()->OMSetDepthStencilState(nullptr, 0);
 }
 
 void Level01::RenderFullScreenQuad()
@@ -1554,6 +1602,7 @@ void Level01::VShutdown()
 	CLEAR_FACTORY(SpawnPoint)
 	CLEAR_FACTORY(DominationPoint)
 	CLEAR_FACTORY(Lamp)
+	CLEAR_FACTORY(Lantern)
 	CLEAR_FACTORY(Region)
 	CLEAR_FACTORY(Door)
 }
