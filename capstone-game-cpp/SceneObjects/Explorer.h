@@ -66,6 +66,7 @@ public:
 	static bool DoHeal(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
 	static bool DoPoison(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
 	static bool DoSlow(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
+	static bool DoLantern(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition);
 
 	static void OnMeleeStart(void* obj);
 	static void OnMeleeStop(void* obj);

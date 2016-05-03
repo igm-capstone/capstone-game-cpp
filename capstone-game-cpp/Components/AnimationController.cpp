@@ -94,6 +94,8 @@ void AnimationController::SetState(AnimationControllerState state)
 	{
 		mState = ANIM_STATE_NULL;
 	}
+
+	mIsPaused ? OnCommandExecuted(mState, ANIM_STATE_COMMAND_PAUSE) : OnCommandExecuted(mState, ANIM_STATE_COMMAND_PLAY);
 }
 
 void AnimationController::PlayAnimation(const char* name, bool shoudLoop)

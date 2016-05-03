@@ -20,7 +20,6 @@ class ExplorerController : public BaseComponent
 	float mSprintDuration;
 	quatf mModelRotation;
 
-	float mSpeedMultiplier;
 	float mAcceleration;
 	vec3f mCurrentSpeed;
 	void UpdateInteractWill();
@@ -35,6 +34,7 @@ class ExplorerController : public BaseComponent
 public:
 	class AnimationController* mAnimationController;
 	float mBaseMoveSpeed;
+	float mSpeedMultiplier;
 	float mSprintMultiplier;
 
 	bool mIsInteracting;

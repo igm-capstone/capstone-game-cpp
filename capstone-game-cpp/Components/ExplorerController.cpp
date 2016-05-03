@@ -24,11 +24,11 @@ ExplorerController::ExplorerController() :
 	mAngle(0),
 	mMouseLock(0),
 	mSprintDuration(0),
-	mSpeedMultiplier(1),
 	mAcceleration(10.0f),
 	mCurrentSpeed(0),
 	mAnimationController(nullptr),
 	mBaseMoveSpeed(20.0f),
+	mSpeedMultiplier(1),
 	mSprintMultiplier(1.5),
 	mIsInteracting(false)
 {
