@@ -6,7 +6,6 @@
 #include <Mathf.h>
 #include <Colors.h>
 
-
 void GhostController::Update(double milliseconds)
 {
 	if (!mIsActive) return;
@@ -52,7 +51,6 @@ void GhostController::Update(double milliseconds)
 
 		camManager->ChangeLookAtBy(ds);
 	}
-
 
 	if (mInput->GetKeyDown(KEYCODE_1))
 	{

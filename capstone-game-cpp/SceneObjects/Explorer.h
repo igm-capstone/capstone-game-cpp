@@ -2,7 +2,7 @@
 #include "SceneObjects\BaseSceneObject.h"
 #include <Components/AnimationController.h>
 
-enum ExplorerType // For Spawn Order, check gSpawnOrder in NetworkManager.cpp
+enum ExplorerType : char // For Spawn Order, check gSpawnOrder in NetworkManager.cpp
 {
 	GHOST = 0, // padding
 	HEALER,
@@ -33,10 +33,10 @@ public:
 	MeleeColliderComponent				mMeleeColliderComponent;
 	float								mAttackDamage;
 	bool								mIsDead;
+	ExplorerType						mExplorerType;
 private:
 	class NetworkClient*				mNetworkClient;
 	class CameraManager*				mCameraManager;
-	ExplorerType						mExplorerType;
 
 private:
 	Explorer();

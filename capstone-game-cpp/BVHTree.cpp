@@ -289,8 +289,8 @@ BaseColliderComponent* BVHTree::RayCastRecursively(Ray<vec3f> ray, vec3f &hitPos
 			if (IntersectRayOBB(ray, pOBB->mCollider, poi, t))
 			{
 				if (mNodes[i].object->mLayer != COLLISION_LAYER_INTERACTABLE &&
-					mNodes[i].object->mLayer != COLLISION_LAYER_FLOOR /*&&
-					mNodes[i].object->mLayer != COLLISION_LAYER_EXPLORER*/) //Explorer is out because right now I can only do OBB from the nodes.
+					mNodes[i].object->mLayer != COLLISION_LAYER_FLOOR &&
+					mNodes[i].object->mLayer != COLLISION_LAYER_EXPLORER) //Explorer is out because right now I can only do OBB from the nodes.
 				{
 					auto potentialTarget = RayCastRecursively(ray, poi, static_cast<int>(i));
 					

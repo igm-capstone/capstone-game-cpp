@@ -28,6 +28,7 @@ private:
 
 public:
 	void Spawn(class BaseScene* scene);
+	int GetActiveSkill();
 	void SetActiveSkill(int skillNum);
 	void TickMana(float milliseconds);
 	float GetMana() { return mMana; };

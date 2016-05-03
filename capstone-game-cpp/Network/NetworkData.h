@@ -28,7 +28,8 @@ enum SkillPacketTypes : char
 	SKILL_TYPE_LANTERN,
 	SKILL_TYPE_IMP_MINION,
 	SKILL_TYPE_ABOMINATION_MINION,
-	SKILL_TYPE_FLYTRAP_MINION
+	SKILL_TYPE_FLYTRAP_MINION,
+	SKILL_TYPE_TRANSMOGRIFY
 };
 
 struct Packet {
@@ -58,9 +59,10 @@ struct Packet {
 
 		struct
 		{
-			vec3f Position = { 0, 0, 0 };
-			float Duration = 0;
-			SkillPacketTypes Type = SKILL_TYPE_UNKNOWN;
+			vec3f	Position = { 0, 0, 0 };					// 12
+			float	Duration = 0;							//	4
+			int		TargetUUID = -1;						//  4
+			SkillPacketTypes Type = SKILL_TYPE_UNKNOWN;		//  1
 		} AsSkill;
 
 		float AsFloatArray[7];

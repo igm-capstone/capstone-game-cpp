@@ -140,7 +140,7 @@ void NetworkRpc::SpawnExistingExplorer(int UUID, vec3f pos) {
 	e->Spawn(pos, UUID);
 }
 
-void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
+void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration, int targetUUID)
 {
 	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER);
 
@@ -215,6 +215,11 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		}
 		break;
 	}
+	case SKILL_TYPE_TRANSMOGRIFY:
+	{
+
+		break;
+	}
 	case SKILL_TYPE_UNKNOWN:
 	default:
 		break;
@@ -225,10 +230,11 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 	p.AsSkill.Position = pos;
 	p.AsSkill.Duration = duration;
 	p.AsSkill.Type = type;
+	p.AsSkill.TargetUUID = targetUUID;
 	mNetworkManager->mServer.SendToAll(&p);
 }
 
-void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, float duration)
+void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, float duration, int targetUUID)
 {
 	assert(mNetworkManager->mMode == NetworkManager::Mode::CLIENT);
 
@@ -287,6 +293,26 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 		{
 			m->SpawnImp(pos, UUID);
 		}
+		break;
+	}
+	case SKILL_TYPE_TRANSMOGRIFY:
+	{
+		unsigned int explorerUUID = static_cast<unsigned int>(targetUUID);
+
+		Explorer* pExplorer = nullptr;
+		for (Explorer& e : Factory<Explorer>())
+		{
+			if (e.mNetworkID->mUUID == explorerUUID)
+			{
+				pExplorer = &e;
+			}
+		}
+
+		if (pExplorer)
+		{
+			// Swap Model...	
+		}
+
 		break;
 	}
 	case SKILL_TYPE_UNKNOWN:
