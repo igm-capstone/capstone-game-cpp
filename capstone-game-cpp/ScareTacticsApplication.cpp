@@ -23,6 +23,8 @@
 #include "Shaders/obj/PSDefInstancedMaterial.h"
 #include "Shaders/obj/PSFwdDistanceMaterial.h"
 #include "Shaders/obj/PSFwdPointLightVolume.h"
+#include "Shaders/obj/PSFwdPointLightVolumeNS.h"
+
 #include "Shaders/obj/VSFwdLineTrace.h"
 #include "Shaders/obj/VSFwdSingleColor.h"
 #include "Shaders/obj/VSFwdSpotLightVolume.h"
@@ -47,6 +49,7 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mPSFwdSingleMaterial(nullptr),
 	mPSFwdDistanceMaterial(nullptr),
 	mPSFwdPointLightVolume(nullptr),
+	mPSFwdPointLightVolumeNS(nullptr),
 	mVSDefInstancedColor(nullptr),
 	mVSDefInstancedMaterial(nullptr),
 	mVSDefSingleColor(nullptr),
@@ -254,6 +257,9 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VCreateShader(&mPSFwdPointLightVolume, &mGameAllocator);
 	renderer->VLoadPixelShader(mPSFwdPointLightVolume, gPSFwdPointLightVolume, sizeof(gPSFwdPointLightVolume));
 
+	renderer->VCreateShader(&mPSFwdPointLightVolumeNS, &mGameAllocator);
+	renderer->VLoadPixelShader(mPSFwdPointLightVolumeNS, gPSFwdPointLightVolumeNS, sizeof(gPSFwdPointLightVolumeNS));
+
 #pragma endregion
 
 #pragma region Compute Shaders
@@ -382,6 +388,7 @@ void ScareTacticsApplication::VShutdown()
 	mPSFwdSingleMaterial->~IShader();
 	mPSFwdDistanceMaterial->~IShader();
 	mPSFwdPointLightVolume->~IShader();
+	mPSFwdPointLightVolumeNS->~IShader();
 
 	mVSDefInstancedColor->~IShader();
 	mVSDefInstancedMaterial->~IShader();

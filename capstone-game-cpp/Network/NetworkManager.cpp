@@ -10,6 +10,7 @@
 #include <SceneObjects/StatusEffect.h>
 #include <ScareTacticsApplication.h>
 #include <Mathf.h>
+#include <SceneObjects/Lantern.h>
 
 NetworkManager::NetworkManager()
 {
@@ -180,6 +181,17 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		}
 		break;
 	}
+	case SKILL_TYPE_LANTERN:
+	{
+		auto l = Factory<Lantern>::Create();
+		if (l)
+		{
+			l->mNetworkID->mHasAuthority = true;
+			l->Spawn(UUID, pos, duration);
+			l->mNetworkID->OnNetAuthorityChange(true);
+		}
+		break;
+	}
 	case SKILL_TYPE_FLYTRAP_MINION:
 	{
 		auto f = Factory<Minion>::Create();
@@ -246,6 +258,15 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 		if (s)
 		{
 			s->SpawnSlow(UUID, pos, duration);
+		}
+		break;
+	}
+	case SKILL_TYPE_LANTERN:
+	{
+		auto l = Factory<Lantern>::Create();
+		if (l)
+		{
+			l->Spawn(UUID, pos, duration);
 		}
 		break;
 	}

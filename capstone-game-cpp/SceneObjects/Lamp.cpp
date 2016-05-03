@@ -7,8 +7,7 @@
 
 
 Lamp::Lamp()
-	: mConeMesh(nullptr)
-	, mNetworkManager(&Singleton<NetworkManager>::SharedInstance())
+	: mNetworkManager(&Singleton<NetworkManager>::SharedInstance())
 	, mLightRadius(0.0f)
 	, mLightAngle(0.0f)
 	, mStatus(LAMP_OFF)

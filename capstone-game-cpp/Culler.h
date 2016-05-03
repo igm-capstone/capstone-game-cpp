@@ -2,6 +2,7 @@
 #include <Rig3D/Visibility.h>
 #include "SceneObjects/StaticCollider.h"
 #include "SceneObjects\Lamp.h"
+#include "SceneObjects/Lantern.h"
 
 template <class SceneObjectType>
 inline void CullOBBSceneObjects(const Rig3D::Frustum& frustum, std::vector<BaseSceneObject*>& pBaseSceneObjects, std::vector<uint32_t>& indices)
@@ -123,6 +124,42 @@ void CullLamps(const Rig3D::Frustum& frustum, std::vector<std::pair<Lamp*, uint3
 		}
 
 		lampIndex++;
+	}
+}
+
+inline void CullLanterns(const Rig3D::Frustum& frustum, std::vector<std::pair<Lantern*, uint32_t>>* lanterns)
+{
+	float distance;
+	const Plane<vec3f>* planes[6] =
+	{
+		&frustum.front,
+		&frustum.back,
+		&frustum.left,
+		&frustum.right,
+		&frustum.bottom,
+		&frustum.top,
+	};
+
+	uint32_t lanternIndex = 0;
+	for (Lantern& lantern : Factory<Lantern>())
+	{
+		bool shouldCull = false;
+		for (uint32_t p = 0; p < 6; p++)
+		{
+			distance = cliqCity::graphicsMath::dot(planes[p]->normal, lantern.mTransform->GetPosition()) - (planes[p]->distance - lantern.mColliderComponent->mCollider.radius);
+			if (distance < 0)
+			{
+				shouldCull = true;
+				break;
+			}
+		}
+
+		if (!shouldCull)
+		{
+			lanterns->push_back({ &lantern, lanternIndex });
+		}
+
+		lanternIndex++;
 	}
 }
 
