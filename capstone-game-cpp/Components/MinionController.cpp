@@ -410,6 +410,7 @@ void MinionController::OnMeleeHit(BaseSceneObject* obj, BaseSceneObject* other)
 	{
 		Explorer* explorer = reinterpret_cast<Explorer*>(other);
 		explorer->mHealth->TakeDamage(self->mController->mAttackDamage, false);
+		self->mMeleeColliderComponent->mIsActive = false;
 	}
 }
 
