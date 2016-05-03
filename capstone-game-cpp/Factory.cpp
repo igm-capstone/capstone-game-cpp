@@ -13,6 +13,7 @@
 #include "SceneObjects\Heal.h"
 #include "SceneObjects\Trap.h"
 #include "SceneObjects\StatusEffect.h"
+#include "SceneObjects\Lantern.h"
 
 #include "Components\NetworkID.h"
 #include "Components\ColliderComponent.h"
@@ -74,3 +75,4 @@ REGISTER_FACTORY ( PlaneColliderComponent,			100)
 REGISTER_FACTORY ( Heal, 5)
 REGISTER_FACTORY ( Trap, 5)
 REGISTER_FACTORY ( StatusEffect, 8)
+REGISTER_FACTORY ( Lantern, 10)
