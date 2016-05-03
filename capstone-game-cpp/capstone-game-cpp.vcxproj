@@ -141,6 +141,7 @@
     <ClCompile Include="Factory.cpp" />
     <ClCompile Include="Components\FlyTrapController.cpp" />
     <ClCompile Include="jsonUtils.cpp" />
+    <ClCompile Include="SceneObjects\Lantern.cpp" />
     <ClCompile Include="SceneObjects\Door.cpp" />
     <ClCompile Include="SceneObjects\Heal.cpp" />
     <ClCompile Include="ModelManager.cpp" />
@@ -214,6 +215,7 @@
     <ClInclude Include="FBXResource.h" />
     <ClInclude Include="Components\FlyTrapController.h" />
     <ClInclude Include="jsonUtils.h" />
+    <ClInclude Include="SceneObjects\Lantern.h" />
     <ClInclude Include="SceneObjects\Heal.h" />
     <ClInclude Include="fmodwrap.h" />
     <ClInclude Include="Mathf.h" />
@@ -275,6 +277,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shaders\PSFwdPointLightVolume.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\PSFwdPointLightVolumeNS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
     </FxCompile>
