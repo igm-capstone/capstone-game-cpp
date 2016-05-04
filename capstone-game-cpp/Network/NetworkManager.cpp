@@ -11,6 +11,7 @@
 #include <ScareTacticsApplication.h>
 #include <Mathf.h>
 #include <SceneObjects/Lantern.h>
+#include <SceneObjects/Explosion.h>
 
 NetworkManager::NetworkManager()
 {
@@ -204,14 +205,35 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		break;
 	}
 	case SKILL_TYPE_IMP_MINION:
-	case SKILL_TYPE_ABOMINATION_MINION: // for now
 	{
 		auto m = Factory<Minion>::Create();
 		if (m)
 		{
 			m->mNetworkID->mHasAuthority = true;
 			m->SpawnImp(pos, UUID);
+			m->mNetworkID->OnNetAuthorityChange(true);
+		}
+		break;
+	}
+	case SKILL_TYPE_ABOMINATION_MINION: // for now
+	{
+		auto m = Factory<Minion>::Create();
+		if (m)
+		{
+			m->mNetworkID->mHasAuthority = true;
+			m->SpawnAbomination(pos, UUID);
 			m->mNetworkID->OnNetAuthorityChange(true);	
+		}
+		break;
+	}
+	case SKILL_TYPE_EXPLOSION:
+	{
+		auto h = Factory<Explosion>::Create();
+		if (h)
+		{
+			h->mNetworkID->mHasAuthority = true;
+			h->Spawn(pos, UUID, duration);
+			h->mNetworkID->OnNetAuthorityChange(true);
 		}
 		break;
 	}
@@ -280,12 +302,29 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 		break;
 	}
 	case SKILL_TYPE_IMP_MINION:
-	case SKILL_TYPE_ABOMINATION_MINION:
 	{
 		auto m = Factory<Minion>::Create();
 		if (m)
 		{
 			m->SpawnImp(pos, UUID);
+		}
+		break;
+	}
+	case SKILL_TYPE_ABOMINATION_MINION:
+	{
+		auto m = Factory<Minion>::Create();
+		if (m)
+		{
+			m->SpawnAbomination(pos, UUID);
+		}
+		break;
+	}
+	case SKILL_TYPE_EXPLOSION:
+	{
+		auto h = Factory<Explosion>::Create();
+		if (h)
+		{
+			h->Spawn(pos, UUID, duration);
 		}
 		break;
 	}

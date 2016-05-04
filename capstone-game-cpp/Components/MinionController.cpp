@@ -11,6 +11,7 @@
 #include "AnimationController.h"
 #include <SceneObjects/Explorer.h>
 #include "Health.h"
+#include "NetworkID.h"
 
 using namespace BehaviorTree;
 using namespace chrono;
@@ -55,6 +56,25 @@ MinionController::~MinionController()
 Tree& MinionController::CreateAttackSubtree()
 {
 	return TreeBuilder(mAllocator, "(-->) Attack")
+		.Composite<Parallel>()
+			.Decorator<Mute>()
+				.Conditional()
+					.Predicate(&IsExplorerInAttackRange, "(?) Is Explorer in Attack Range")
+					.Action(&StartAttack, "(!) Start Attack")
+				.End()
+			.End()
+			.Conditional()
+				.Predicate(&IsAttackInProgress, "(?) Is Attack in Progress")
+				.Action(&TargetClosestExplorer, "(!) Target Explorer")
+				.Action(&LookAtTarget, "(!) Look at Target")
+			.End()
+		.End()
+	.End();
+}
+
+BehaviorTree::Tree & MinionController::CreateSuicideAttackSubtree()
+{
+	return TreeBuilder(mAllocator, "(-->) Suicide Attack")
 		.Composite<Parallel>()
 			.Decorator<Mute>()
 				.Conditional()
@@ -418,6 +438,18 @@ BehaviorStatus MinionController::LookAtTarget(Behavior& bh, void* data)
 	self.LookAt(dir);
 
 	return BehaviorStatus::Success;
+}
+
+void MinionController::OnSuicide(void* obj)
+{
+	auto& self = *reinterpret_cast<Minion*>(obj);
+
+	self.mShouldDestroy = true;
+	
+	if (self.mNetworkID->mHasAuthority)
+	{
+		NetworkCmd::SpawnNewSkill(SkillPacketTypes::SKILL_TYPE_EXPLOSION, self.mTransform->GetPosition() - vec3f(0.0f, 0.0f, 2.5f), 1.0f);
+	}
 }
 
 void MinionController::OnMeleeStart(void* obj)

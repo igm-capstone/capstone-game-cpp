@@ -122,6 +122,7 @@
     <ClCompile Include="BehaviorTree\Composite.cpp" />
     <ClCompile Include="BehaviorTree\Sequence.cpp" />
     <ClCompile Include="BehaviorTree\TestSuite.cpp" />
+    <ClCompile Include="Components\AbominationController.cpp" />
     <ClCompile Include="Components\AnimationController.cpp" />
     <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="CollisionManager.cpp" />
@@ -141,6 +142,7 @@
     <ClCompile Include="Factory.cpp" />
     <ClCompile Include="Components\FlyTrapController.cpp" />
     <ClCompile Include="jsonUtils.cpp" />
+    <ClCompile Include="SceneObjects\Explosion.cpp" />
     <ClCompile Include="SceneObjects\Lantern.cpp" />
     <ClCompile Include="SceneObjects\Door.cpp" />
     <ClCompile Include="SceneObjects\Heal.cpp" />
@@ -198,6 +200,7 @@
     <ClInclude Include="BehaviorTree\Composite.h" />
     <ClInclude Include="BehaviorTree\Sequence.h" />
     <ClInclude Include="BehaviorTree\TestSuite.h" />
+    <ClInclude Include="Components\AbominationController.h" />
     <ClInclude Include="Components\AnimationController.h" />
     <ClInclude Include="CameraManager.h" />
     <ClInclude Include="CollisionManager.h" />
@@ -215,6 +218,7 @@
     <ClInclude Include="FBXResource.h" />
     <ClInclude Include="Components\FlyTrapController.h" />
     <ClInclude Include="jsonUtils.h" />
+    <ClInclude Include="SceneObjects\Explosion.h" />
     <ClInclude Include="SceneObjects\Lantern.h" />
     <ClInclude Include="SceneObjects\Heal.h" />
     <ClInclude Include="fmodwrap.h" />

@@ -11,6 +11,7 @@ protected:
 	MinionController();
 	~MinionController();
 	BehaviorTree::Tree& CreateAttackSubtree();
+	BehaviorTree::Tree& CreateSuicideAttackSubtree();
 	BehaviorTree::Tree& CreateKnockbackSubtree();
 	BehaviorTree::Tree& CreateWanderSubtree();
 	BehaviorTree::Tree& CreateChaseSubtree();
@@ -63,10 +64,10 @@ public:
 	static BehaviorTree::BehaviorStatus UpdateWanderDirection(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus LookForward(BehaviorTree::Behavior& bh, void* data);
 	static BehaviorTree::BehaviorStatus LookAtTarget(BehaviorTree::Behavior& bh, void* data);
-
 	void PlayStateAnimation(AnimationControllerState state);
 	void PauseStateAnimation(AnimationControllerState state);
 
+	static void OnSuicide(void* obj);
 	static void OnMeleeStart(void* obj);
 	static void OnMeleeStop(void* obj);
 	static void OnMeleeHit(BaseSceneObject* minion, BaseSceneObject* other);

@@ -32,6 +32,8 @@
 #include <Components/DominationPointController.h>
 #include <Components/ImpController.h>
 #include <Components/FlyTrapController.h>
+#include <Components/AbominationController.h>
+#include <SceneObjects/Explosion.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -1081,6 +1083,16 @@ void Level01::RenderEffects()
 		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
 	}
 
+	for (Explosion& explosion : Factory<Explosion>())
+	{
+		mModel.world = explosion.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
+	}
+
+
 	mTime.color = { 1.0f, 0.1f, 1.0f, 1.0f };
 
 	for (Trap& trap : Factory<Trap>())
@@ -1285,6 +1297,23 @@ void Level01::RenderMinions()
 	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
 
 	for (MinionController& mc : Factory<ImpController>())
+	{
+		Minion& m = *static_cast<Minion*>(mc.mSceneObject);
+
+		mModel.world = m.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		m.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatrices);
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
+
+		mRenderer->VBindMesh(m.mModel->mMesh);
+		mRenderer->VDrawIndexed(0, m.mModel->mMesh->GetIndexCount());
+	}
+
+	for (AbominationController& mc : Factory<AbominationController>())
 	{
 		Minion& m = *static_cast<Minion*>(mc.mSceneObject);
 
