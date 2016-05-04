@@ -110,7 +110,7 @@ Tree& MinionController::CreateChaseSubtree()
 bool MinionController::Update(double milliseconds)
 {
 	if (!mIsActive) return false;
-	
+
 	mLastPosition = mPosition;
 	mPosition = mSceneObject->mTransform->GetPosition();
 	//mAngle = mSceneObject->mTransform->GetRollPitchYaw().x;

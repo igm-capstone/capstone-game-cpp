@@ -542,7 +542,10 @@ void Level01::VUpdate(double milliseconds)
 
 	for (auto& mc : Factory<Minion>())
 	{
-		mc.mController->Update(milliseconds);
+		if (mNetworkManager->mMode == NetworkManager::SERVER)
+		{
+			mc.mController->Update(milliseconds);
+		}
 
 		if (mc.mShouldDestroy)
 		{
