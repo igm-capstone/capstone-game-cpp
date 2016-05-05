@@ -1420,17 +1420,25 @@ void Level01::RenderMinions()
 	}
 }
 
-void Level01::RenderHealthBars()
+void Level01::RenderWorldSpaceSprites()
 {
 	bool isGhost = mNetworkManager->ID() == 0;
-	UINT sCount = 0;
+
+	for (auto& d : Factory<DominationPoint>())
+	{
+		if (d.mTier == 1 && mGameState < GAME_STATE_CAPTURE_1) continue;
+		auto screenPos = mCameraManager->World2Screen(d.mTransform->GetPosition());
+		mSpriteManager->DrawSprite(SPRITESHEET_GENERAL_ICONS, 6, screenPos, isGhost ? vec2f(70, 70) : vec2f(300, 300), vec4f(1, 1, 1, .5f));
+		mSpriteManager->DrawSprite(SPRITESHEET_GENERAL_ICONS, 6, screenPos, isGhost ? vec2f(70, 70) : vec2f(300, 300), vec4f(1, 0, 0, .5f), vec2f(1, 1), 2 * PI * d.mController->mProgress);
+	}
+
 	for (Health& h : Factory<Health>())
 	{
 		auto screenPos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, isGhost ? -30.0f : -90.0f);
 		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 1, screenPos, isGhost ? vec2f(75, 11) : vec2f(90, 12), vec4f(1, 1, 1, 1), vec2f(h.GetHealthPerc(), 1));
 		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 0, screenPos, isGhost ? vec2f(75, 11) : vec2f(90, 12));
 	}
-
+	
 	for (StatusEffect& s : Factory<StatusEffect>())
 	{
 		for (auto &m : s.mMinions) {
