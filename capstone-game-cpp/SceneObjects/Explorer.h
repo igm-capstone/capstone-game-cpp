@@ -2,7 +2,7 @@
 #include "SceneObjects\BaseSceneObject.h"
 #include <Components/AnimationController.h>
 
-enum ExplorerType // For Spawn Order, check gSpawnOrder in NetworkManager.cpp
+enum ExplorerType : uint8_t // For Spawn Order, check gSpawnOrder in NetworkServer.cpp
 {
 	GHOST = 0, // padding
 	HEALER,
@@ -42,9 +42,9 @@ private:
 	Explorer();
 	~Explorer();
 
+public:
 	ExplorerType GetExplorerType() { return mExplorerType; }
 
-public:
 	void Spawn(vec3f pos, int UUID);
 	void DebugSpawn(vec3f pos, int UUID);
 	void UpdateComponents(quatf rotation, vec3f position);

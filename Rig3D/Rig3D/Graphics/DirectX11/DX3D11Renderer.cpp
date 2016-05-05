@@ -1382,7 +1382,7 @@ void DX3D11Renderer::VCreateShaderTexture2DArray(IShaderResource* shader, const 
 	for (uint32_t i = 0; i < count; i++)
 	{
 		CSTR2WSTR(filenames[i], filename);
-		DirectX::CreateWICTextureFromFileEx(mDevice, mDeviceContext, filename, 0, D3D11_USAGE_DEFAULT, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE, D3D11_CPU_ACCESS_READ, D3D11_RESOURCE_MISC_GENERATE_MIPS, false, reinterpret_cast<ID3D11Resource**>(&textures[i]), reinterpret_cast<ID3D11ShaderResourceView**>(&textureViews[i]));
+		DirectX::CreateWICTextureFromFileEx(mDevice, mDeviceContext, filename, 0, D3D11_USAGE_DEFAULT, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE, 0, D3D11_RESOURCE_MISC_GENERATE_MIPS, false, reinterpret_cast<ID3D11Resource**>(&textures[i]), reinterpret_cast<ID3D11ShaderResourceView**>(&textureViews[i]));
 	
 		D3D11_TEXTURE2D_DESC textureDesc;
 		ZeroMemory(&textureDesc, sizeof(D3D11_TEXTURE2D_DESC));
