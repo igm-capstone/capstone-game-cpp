@@ -81,7 +81,8 @@ public:
 	void UpdateGameState(double milliseconds);
 	bool IsExplorerAlive();
 	void SetReady(int clientID);
-
+	void SetRestart();
+	void Restart();
 	void VRender() override;
 	void RenderShadowMaps();	// Not called per frame
 	void RenderStaticMeshes();

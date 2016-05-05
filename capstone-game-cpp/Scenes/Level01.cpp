@@ -34,6 +34,7 @@
 #include <Components/FlyTrapController.h>
 #include <Components/AbominationController.h>
 #include <SceneObjects/Explosion.h>
+#include <Mathf.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -693,6 +694,66 @@ void Level01::SetReady(int clientID)
 	}
 }
 
+void Level01::SetRestart()
+{
+	Packet p(RESTART);
+	
+	Restart();
+
+	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
+		mNetworkManager->mClient.SendData(&p);
+	}
+	else if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
+		mNetworkManager->mServer.SendToAll(&p);
+	}
+}
+
+void Level01::Restart()
+{
+	TRACE_LOG("Restarting");
+	
+	CLEAR_FACTORY(Minion);
+	CLEAR_FACTORY(Lantern);
+	CLEAR_FACTORY(Trap);
+	CLEAR_FACTORY(StatusEffect);
+
+	for (auto& lamp : Factory<Lamp>())
+	{
+		lamp.mStatus = LAMP_OFF;
+	}
+
+	for (auto& door : Factory<Door>())
+	{
+		if (!door.mColliderComponent->mIsActive) door.ToggleDoor();
+	}
+
+	for (auto& d : Factory<DominationPoint>())
+	{
+		d.mController->mProgress = 0;
+		d.mController->isDominated = false;
+	}
+
+	SpawnPoint& sp = *(Factory<SpawnPoint>().begin());
+	for (auto& e : Factory<Explorer>())
+	{
+		auto rndPos = sp.mTransform->GetPosition() + vec3f(Mathf::RandomRange(-4, 4), Mathf::RandomRange(-4, 4), 0);
+		e.mTransform->SetPosition(rndPos);
+		e.OnMove(&e, rndPos, e.mTransform->GetRotation());
+		e.mHealth->SetHealth(9999);
+	}
+
+	for (auto& g : Factory<Ghost>())
+	{
+		g.TickMana(99999);
+	}
+
+	mGameState = GAME_STATE_INITIAL;
+	mUIManager.SetReadyState(0, false);
+	mUIManager.SetReadyState(1, false);
+	mUIManager.SetReadyState(2, false);
+	mUIManager.SetReadyState(3, false);
+}
+
 void Level01::UpdateGameState(double milliseconds)
 {
 	GameState currentState = mGameState;
@@ -831,10 +892,10 @@ void Level01::VRender()
 	switch (mGameState)
 	{
 	case GAME_STATE_FINAL_GHOST_WIN:
-		mUIManager.RenderEndScreen(true);
+		mUIManager.RenderEndScreen(true, [this]() {SetRestart(); return true; });
 		break;
 	case GAME_STATE_FINAL_EXPLORERS_WIN:
-		mUIManager.RenderEndScreen(false);
+		mUIManager.RenderEndScreen(false, [this]() {SetRestart(); return true; });
 		break;
 	case GAME_STATE_INITIAL:
 		mUIManager.RenderReadyScreen(mNetworkManager->ID());

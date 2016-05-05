@@ -383,3 +383,8 @@ void NetworkRpc::Ready(unsigned clientID, bool isReady)
 {
 	Application::SharedInstance().GetCurrentScene()->mUIManager.SetReadyState(clientID, isReady);
 }
+
+void NetworkRpc::Restart()
+{
+	Application::SharedInstance().GetCurrentScene()->Restart();
+}
