@@ -87,7 +87,7 @@ namespace Rig3D
 		float b = cliqCity::graphicsMath::dot(m, ray.normal);
 
 		// Let c = difference between distance from rayOrigin to sphereOrigin and sphereRadius
-		float c = cliqCity::graphicsMath::dot(m, m) - sphere.radius * sphere.radius;
+		float c = cliqCity::graphicsMath::dot(m, m) - (sphere.radius * sphere.radius);
 
 		// If c > 0 rayOrigin is outside of sphere and if b > 0.0f ray is pointing away from sphere.
 		if (c > 0.0f && b > 0.0f)
@@ -104,6 +104,11 @@ namespace Rig3D
 		}
 
 		t = -b - sqrt(discriminant);
+		if (t < 0.0f)
+		{
+			t = 0.0f;
+		}
+
 		poi = ray.origin + t * ray.normal;
 
 		return 1;
