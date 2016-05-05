@@ -19,6 +19,7 @@ public:
 	float	mDuration;
 	bool	mIsActive;
 	bool	mShouldDestroy;
+	const char* mFlavorText;
 
 	StatusEnterCallback	 mOnEnterCallback;
 	StatusUpdateCallback mOnUpdateCallback;

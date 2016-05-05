@@ -1422,12 +1422,25 @@ void Level01::RenderMinions()
 
 void Level01::RenderHealthBars()
 {
+	bool isGhost = mNetworkManager->ID() == 0;
 	UINT sCount = 0;
 	for (Health& h : Factory<Health>())
 	{
-		auto screenPos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, -90);
-		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 1, screenPos, vec2f(90, 12), vec4f(1,1,1,1), vec2f(h.GetHealthPerc(), 1));
-		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 0, screenPos, vec2f(90, 12));
+		auto screenPos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, isGhost ? -30.0f : -90.0f);
+		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 1, screenPos, isGhost ? vec2f(75, 11) : vec2f(90, 12), vec4f(1, 1, 1, 1), vec2f(h.GetHealthPerc(), 1));
+		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 0, screenPos, isGhost ? vec2f(75, 11) : vec2f(90, 12));
+	}
+
+	for (StatusEffect& s : Factory<StatusEffect>())
+	{
+		for (auto &m : s.mMinions) {
+			auto screenPos = mCameraManager->World2Screen(m.first->mTransform->GetPosition());
+			mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, isGhost ? 10.0f : 14.0f, screenPos, vec4f(1, 1, 1, 1), ALIGN_CENTER, "%s", s.mFlavorText);
+		}
+		for (auto &m : s.mExplorers) {
+			auto screenPos = mCameraManager->World2Screen(m.first->mTransform->GetPosition());
+			mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, isGhost ? 10.0f : 14.0f, screenPos, vec4f(1, 1, 1, 1), ALIGN_CENTER, "%s", s.mFlavorText);
+		}
 	}
 }
 

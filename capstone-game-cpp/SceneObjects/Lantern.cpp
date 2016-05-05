@@ -49,6 +49,7 @@ void Lantern::Spawn(int UUID, vec3f position, float duration)
 	mStatusEffect->mOnEnterCallback = StatusEffect::OnSlowEnter;
 	mStatusEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
 	mStatusEffect->mOnDestroyCallback = StatusEffect::OnSlowDestroy;
+	mStatusEffect->mFlavorText = "SLOWED";
 	mStatusEffect->mDuration = duration;
 }
 
