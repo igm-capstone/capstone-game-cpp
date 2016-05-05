@@ -70,9 +70,9 @@ namespace PathFinder
 			auto j = node->y;
 
 			auto notLeftEdge = i > 0;
-			auto notRightEdge = i < mNumCols - 1;
+			auto notRightEdge = i < mNumRows - 1;
 			auto notBottomEdge = j > 0;
-			auto notTopEdge = j < mNumRows - 1;
+			auto notTopEdge = j < mNumCols - 1;
 			auto connections = new vector<Connection<T>>();
 			connections->reserve(8);
 
