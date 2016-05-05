@@ -32,7 +32,7 @@ MinionController::MinionController()
 	, mBaseMoveSpeed(0)
 	, mSpeedMultiplier(1.0f)
 	, mAttackDamage(0)
-	, mAttackRange(0)
+	, mAttackRange(2)
 	, mTurnRate(0)
 	, mStunOnHitDuration(0)
 	, mSplashRange(0)
@@ -40,6 +40,7 @@ MinionController::MinionController()
 	, mThinkTime(0)
 	, mWanderTime(0)
 	, mStunTime(0)
+	, mKnockbackDirection(0)
 	, mAngle(0)
 	, mDirectionIndex(0)
 	, mIsTransformDirty(false)
@@ -65,31 +66,35 @@ Tree& MinionController::CreateAttackSubtree()
 			.End()
 			.Conditional()
 				.Predicate(&IsAttackInProgress, "(?) Is Attack in Progress")
-				.Action(&TargetClosestExplorer, "(!) Target Explorer")
-				.Action(&LookAtTarget, "(!) Look at Target")
+				.Composite<Parallel>()
+					.Action(&TargetClosestExplorer, "(!) Target Explorer")
+					.Action(&LookAtTarget, "(!) Look at Target")
+				.End()
 			.End()
 		.End()
 	.End();
 }
 
-BehaviorTree::Tree & MinionController::CreateSuicideAttackSubtree()
-{
-	return TreeBuilder(mAllocator, "(-->) Suicide Attack")
-		.Composite<Parallel>()
-			.Decorator<Mute>()
-				.Conditional()
-					.Predicate(&IsExplorerInAttackRange, "(?) Is Explorer in Attack Range")
-					.Action(&StartAttack, "(!) Start Attack")
-				.End()
-			.End()
-			.Conditional()
-				.Predicate(&IsAttackInProgress, "(?) Is Attack in Progress")
-				.Action(&TargetClosestExplorer, "(!) Target Explorer")
-				.Action(&LookAtTarget, "(!) Look at Target")
-			.End()
-		.End()
-	.End();
-}
+//BehaviorTree::Tree & MinionController::CreateSuicideAttackSubtree()
+//{
+//	return TreeBuilder(mAllocator, "(-->) Suicide Attack")
+//		.Composite<Parallel>()
+//			.Decorator<Mute>()
+//				.Conditional()
+//					.Predicate(&IsExplorerInAttackRange, "(?) Is Explorer in Attack Range")
+//					.Action(&StartAttack, "(!) Start Attack")
+//				.End()
+//			.End()
+//			.Conditional()
+//				.Predicate(&IsAttackInProgress, "(?) Is Attack in Progress")
+//				.Composite<Parallel>()
+//					.Action(&TargetClosestExplorer, "(!) Target Explorer")
+//					.Action(&LookAtTarget, "(!) Look at Target")
+//				.End()
+//			.End()
+//		.End()
+//	.End();
+//}
 
 Tree& MinionController::CreateKnockbackSubtree()
 {
@@ -201,7 +206,7 @@ bool MinionController::LookAt(vec2f dir)
 
 	mAngle = Mathf::LerpAngle(mAngle, targetAngle, mTurnRate * dt);
 	mIsTransformDirty = true;
-
+	TRACE_WATCH("angle", mAngle);
 	return false;
 }
 
@@ -220,7 +225,7 @@ bool MinionController::IsExplorerInAttackRange(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
 
-	return self.IsExplorerInRange(3);
+	return self.IsExplorerInRange(int(self.mAttackRange));
 }
 
 bool MinionController::IsExplorerInLockRange(Behavior& bh, void* data)

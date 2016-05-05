@@ -113,7 +113,8 @@ void Minion::Spawn(vec3f pos, int UUID, json config)
 
 	if (config.find("attackRange") != config.end())
 	{
-		mController->mAttackRange = config["attackRange"].get<float>();
+		// hardcoded (Wanna fix? go ahead)
+		//mController->mAttackRange = config["attackRange"].get<float>();
 	}
 
 	if (config.find("splashRange") != config.end())
@@ -211,7 +212,7 @@ void Minion::SpawnFlytrap(vec3f pos, int UUID)
 	mCollider->mIsDynamic = false;
 
 	mMeleeColliderComponent->mCollider.radius = 1.0f;
-	mMeleeColliderComponent->mOffset = { 0.0f, 0.65f, mCollider->mCollider.radius + mMeleeColliderComponent->mCollider.radius + 0.01f };
+	mMeleeColliderComponent->mOffset = { -(mCollider->mCollider.radius + mMeleeColliderComponent->mCollider.radius + 0.01f), 0.65f, 0.0f };
 	mMeleeColliderComponent->mIsDynamic = false;
 
 	Application::SharedInstance().GetModelManager()->GetModel(kPlantModelName)->Link(this);
