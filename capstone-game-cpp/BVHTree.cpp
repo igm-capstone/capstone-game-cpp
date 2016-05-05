@@ -274,43 +274,52 @@ void BVHTree::AddNodeRecursively(BaseColliderComponent* pColliderComponent, cons
 	}
 }
 
-BaseColliderComponent* BVHTree::RayCastRecursively(Ray<vec3f> ray, vec3f &hitPos, const int& parentIndex)
+BaseColliderComponent* BVHTree::RayCast(Ray<vec3f> ray, vec3f& poi)
 {
-	BaseColliderComponent* ret = nullptr;
-	vec3f retPoi;
-	vec3f poi; float t;
+	BaseColliderComponent* pCollider = nullptr;
+	float tMin = FLT_MAX;
 
-	for (uint32_t i = parentIndex; i < mNodes.size(); i++)
+	RayCastRecursively(ray, 0, &pCollider, poi, tMin);
+	
+	return pCollider;
+}
+
+void BVHTree::RayCastRecursively(Ray<vec3f> ray, const int& parentIndex, BaseColliderComponent** pCollider, vec3f& poi, float& tMin)
+{
+	std::vector<uint32_t> indices;
+	GetNodeIndices(indices, [parentIndex](const BVHNode& other)
 	{
-		if (mNodes[i].parentIndex == parentIndex)
+		return (other.parentIndex == parentIndex &&
+			(other.object->mLayer == COLLISION_LAYER_ROOT ||
+				other.object->mLayer == COLLISION_LAYER_QUADRANT ||
+				other.object->mLayer == COLLISION_LAYER_INTERACTABLE ||
+				other.object->mLayer == COLLISION_LAYER_FLOOR ||
+				other.object->mLayer == COLLISION_LAYER_EXPLORER));
+	});
+
+	float t;
+
+	for (uint32_t index : indices)
+	{
+		BVHNode* pNode = &mNodes[index];
+
+		if (pNode->object->mOnRayTest(ray, pNode->object, poi, t))
 		{
-			OrientedBoxColliderComponent* pOBB = reinterpret_cast<OrientedBoxColliderComponent*>(mNodes[i].object);
-			
-			if (IntersectRayOBB(ray, pOBB->mCollider, poi, t))
+			if (pNode->object->mLayer == COLLISION_LAYER_ROOT ||
+				pNode->object->mLayer == COLLISION_LAYER_QUADRANT)
 			{
-				if (mNodes[i].object->mLayer != COLLISION_LAYER_INTERACTABLE &&
-					mNodes[i].object->mLayer != COLLISION_LAYER_FLOOR &&
-					mNodes[i].object->mLayer != COLLISION_LAYER_EXPLORER) //Explorer is out because right now I can only do OBB from the nodes.
+				RayCastRecursively(ray, index, pCollider, poi, tMin);
+			}
+			else
+			{
+				if (t < tMin)
 				{
-					auto potentialTarget = RayCastRecursively(ray, poi, static_cast<int>(i));
-					
-					//Relies on CLayer numbers to get most relevant raycast target
-					if (potentialTarget && (!ret || potentialTarget->mLayer < ret->mLayer)) {
-						ret = potentialTarget;
-						retPoi = poi;
-					}
-				}
-				else
-				{
-					ret = mNodes[i].object;
-					retPoi = poi;
+					tMin = t;
+					*pCollider = pNode->object;
 				}
 			}
 		}
 	}
-
-	hitPos = retPoi;
-	return ret;
 }
 
 void BVHTree::GetNodeIndices(std::vector<uint32_t>& indices, const CLayer& layer, std::function<bool(const BVHNode& other)> predicate)
