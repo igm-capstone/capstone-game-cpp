@@ -9,6 +9,7 @@
 #include <Components/Health.h>
 #include <Network\NetworkClient.h>
 #include <Components/ImpController.h>
+#include <Components/AbominationController.h>
 #include <Components/FlyTrapController.h>
 #include <jsonUtils.h>
 
@@ -65,10 +66,11 @@ Minion::~Minion()
 	case IMP:
 		Factory<ImpController>::Destroy(reinterpret_cast<ImpController*>(mController));
 		break;
+	case ABOMINATION:
+		Factory<AbominationController>::Destroy(reinterpret_cast<AbominationController*>(mController));
+		break;
 	case FLYTRAP:
 		Factory<FlyTrapController>::Destroy(reinterpret_cast<FlyTrapController*>(mController));
-		break;
-	case ABOMINATION:
 		break;
 	default:
 		break;
@@ -141,8 +143,6 @@ void Minion::SpawnImp(vec3f pos, int UUID)
 	mMeleeColliderComponent->mCollider.radius = 1.0f;
 	mMeleeColliderComponent->mOffset = { 0.0f, 0.65f, mCollider->mCollider.radius + mMeleeColliderComponent->mCollider.radius + 0.01f };
 
-	mController->mSceneObject = this;
-
 	Application::SharedInstance().GetModelManager()->GetModel(kMinionAnimModelName)->Link(this);
 	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
 	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
@@ -154,6 +154,40 @@ void Minion::SpawnImp(vec3f pos, int UUID)
 	};
 
 	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionAnimations[Animations::MINION_ATTACK], meleeOptions, 2, false);
+	SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gMinionAnimations[Animations::MINION_WALK], nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_WALK, &gMinionAnimations[Animations::MINION_WALK], nullptr, 0, true);
+	SetStateAnimation(mAnimationController, ANIM_STATE_RUN, &gMinionAnimations[Animations::MINION_RUN], nullptr, 0, true);
+	SetRestFrameIndex(mAnimationController, gMinionRestFrameIndex);
+}
+
+
+void Minion::SpawnAbomination(vec3f pos, int UUID)
+{
+	mClass = ABOMINATION;
+	mController = Factory<AbominationController>::Create();
+
+	auto minions = Application::SharedInstance().GetConfigJson()["minions"].get<json::array_t>();
+	auto config = findByName(minions, "AOEToad");
+	Spawn(pos, UUID, config);
+
+	mTransform->SetScale(0.3f);
+	mCollider->mOffset = { 0.0f, 0.65f, 0.0f };
+	mCollider->mCollider.radius = 1.45f;
+
+	mMeleeColliderComponent->mCollider.radius = 1.0f;
+	mMeleeColliderComponent->mOffset = { 0.0f, 0.65f, mCollider->mCollider.radius + mMeleeColliderComponent->mCollider.radius + 0.01f };
+
+	Application::SharedInstance().GetModelManager()->GetModel(kMinionAnimModelName)->Link(this);
+	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
+	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
+
+	Animation melee = gMinionAnimations[Animations::MINION_ATTACK];
+	KeyframeOption meleeOptions[] = {
+		{ melee.startFrameIndex + 15, &MinionController::OnSuicide },
+		//{ melee.endFrameIndex,        &MinionController::OnMeleeStop },
+	};
+
+	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gMinionAnimations[Animations::MINION_ATTACK], meleeOptions, 1, false);
 	SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gMinionAnimations[Animations::MINION_WALK], nullptr, 0, true);
 	SetStateAnimation(mAnimationController, ANIM_STATE_WALK, &gMinionAnimations[Animations::MINION_WALK], nullptr, 0, true);
 	SetStateAnimation(mAnimationController, ANIM_STATE_RUN, &gMinionAnimations[Animations::MINION_RUN], nullptr, 0, true);
@@ -236,9 +270,13 @@ void Minion::OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot
 	e->UpdateComponents(newRot, newPos);
 }
 
-void Minion::OnHealthChange(BaseSceneObject* obj, float newVal)
+void Minion::OnHealthChange(BaseSceneObject* obj, float oldVal, float newVal, float hitDirection)
 {
-
+	if (hitDirection != FLT_MIN && oldVal > newVal)
+	{
+		auto self = static_cast<Minion*>(obj);
+		self->mController->ApplyHitKnockback(hitDirection);
+	}
 }
 
 void Minion::OnDeath(BaseSceneObject* obj)

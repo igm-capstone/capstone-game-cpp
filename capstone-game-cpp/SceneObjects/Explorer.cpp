@@ -15,6 +15,7 @@
 #define HEAL_SKILL_INDEX	1
 #define POISON_SKILL_INDEX  1
 #define SLOW_SKILL_INDEX	2
+#define LANTERN_SKILL_INDEX 3
 
 using namespace nlohmann;
 using jarr_t = json::array_t;
@@ -93,6 +94,8 @@ Explorer::~Explorer()
 
 	// Skills
 	Factory<Skill>::Destroy(mSkills[MELEE_SKILL_INDEX]);
+	Factory<Skill>::Destroy(mSkills[LANTERN_SKILL_INDEX]);
+
 	switch (GetExplorerType())
 	{
 	case HEALER:
@@ -212,6 +215,11 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 
 	json config;
 	jarr_t skills;
+
+	e->mSkills[LANTERN_SKILL_INDEX] = Factory<Skill>::Create();
+	e->mSkills[LANTERN_SKILL_INDEX]->Setup("Lantern", 5, 5, DoLantern, 0);
+	e->mSkills[LANTERN_SKILL_INDEX]->SetBinding(MOUSEBUTTON_RIGHT);
+	e->mSkills[LANTERN_SKILL_INDEX]->mSceneObject = e;
 
 	// Add more as we get more classes.
 	switch (e->GetExplorerType())
@@ -349,7 +357,7 @@ void Explorer::OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command
 	}
 }
 
-void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal)
+void Explorer::OnHealthChange(BaseSceneObject* obj, float oldVal, float newVal, float hitDirection)
 {
 
 }
@@ -480,6 +488,22 @@ bool Explorer::DoSlow(BaseSceneObject* obj, float duration, BaseSceneObject* tar
 	return true;
 }
 
+bool Explorer::DoLantern(BaseSceneObject* obj, float duration, BaseSceneObject* target, vec3f worldPosition)
+{
+	Explorer* explorer = reinterpret_cast<Explorer*>(obj);
+	if (explorer->mNetworkID->mHasAuthority)
+	{
+		Packet p(PacketTypes::SPAWN_SKILL);
+		p.AsSkill.Position = explorer->mTransform->GetPosition();
+		p.AsSkill.Duration = explorer->mSkills[LANTERN_SKILL_INDEX]->mDuration;
+		p.AsSkill.Type = SkillPacketTypes::SKILL_TYPE_LANTERN;
+		p.UUID = explorer->mNetworkID->mUUID;
+		explorer->mNetworkClient->SendData(&p);
+	}
+	return true;
+}
+
+
 void Explorer::OnMeleeStart(void* obj)
 {
 	auto e = reinterpret_cast<Explorer*>(obj);
@@ -508,7 +532,8 @@ void Explorer::OnMeleeHit(BaseSceneObject* self, BaseSceneObject* other)
 	if (other->Is<Minion>())
 	{
 		auto m = reinterpret_cast<Minion*>(other);
-		m->mHealth->TakeDamage(e->mAttackDamage, false);
+		vec3f dir = other->mTransform->GetPosition() - self->mTransform->GetPosition();
+		m->mHealth->TakeDamage(e->mAttackDamage, atan2f(dir.y, dir.x), false);
 	}
 	else if (other->Is<Explorer>())
 	{

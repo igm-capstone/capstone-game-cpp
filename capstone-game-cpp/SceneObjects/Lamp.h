@@ -14,7 +14,6 @@ class Lamp : public BaseSceneObject
 
 public:
 	class OrientedBoxColliderComponent* mTrigger;
-	class IMesh*          mConeMesh;
 	class NetworkID*      mNetworkID;
 	class NetworkManager* mNetworkManager;
 

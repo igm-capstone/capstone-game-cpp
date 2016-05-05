@@ -32,6 +32,8 @@
 #include <Components/DominationPointController.h>
 #include <Components/ImpController.h>
 #include <Components/FlyTrapController.h>
+#include <Components/AbominationController.h>
+#include <SceneObjects/Explosion.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -77,11 +79,6 @@ Level01::~Level01()
 	mSphereMesh->~IMesh();
 	mGeodesicSphereMesh->~IMesh();
 	mNDSQuadMesh->~IMesh();
-
-	for (Lamp& l : Factory<Lamp>())
-	{
-		l.mConeMesh->~IMesh();
-	}
 
 	mGBufferContext->~IRenderContext();
 	mShadowContext->~IRenderContext();
@@ -176,6 +173,7 @@ void Level01::InitializeAssets()
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kTrapModelName);
 
 	mModelManager->LoadModel<GPU::Vertex3>(kDoorModelName);
+	mModelManager->LoadModel<GPU::Vertex3>(kLanternModelName);
 	
 //	mModelManager->LoadModel<GPU::Vertex1>("Icosahedron");
 
@@ -240,20 +238,6 @@ void Level01::InitializeGeometry()
 
 	coneVertices.clear();
 	indices.clear();
-
-	for (Lamp& l : Factory<Lamp>())
-	{
-		Geometry::SpotlightCone(coneVertices, indices, 6, 1.0f, l.mLightAngle);
-
-		meshLibrary.NewMesh(&l.mConeMesh, mRenderer);
-		mRenderer->VSetMeshVertexBuffer(l.mConeMesh, &coneVertices[0], sizeof(GPU::Vertex1) * coneVertices.size(), sizeof(GPU::Vertex1));
-		mRenderer->VSetMeshIndexBuffer(l.mConeMesh, &indices[0], indices.size());
-
-		coneVertices.clear();
-		indices.clear();
-	}
-
-
 
 	// Billboard Quad (Sprites)
 	std::vector<GPU::VertexUV> ndsVertices;
@@ -566,7 +550,10 @@ void Level01::VUpdate(double milliseconds)
 
 	for (auto& mc : Factory<Minion>())
 	{
-		mc.mController->Update(milliseconds);
+		if (mNetworkManager->mMode == NetworkManager::SERVER)
+		{
+			mc.mController->Update(milliseconds);
+		}
 
 		if (mc.mShouldDestroy)
 		{
@@ -600,11 +587,12 @@ void Level01::VUpdate(double milliseconds)
 	for (Heal& h : Factory<Heal>())
 	{
 		h.Update(seconds);
-		h.mDuration -= seconds;
-		if (h.mDuration <= 0.0f)
-		{
-			Factory<Heal>::Destroy(&h);
-		}
+
+	}
+
+	for (Explosion& e : Factory<Explosion>())
+	{
+		e.Update(seconds);
 	}
 
 	for (Trap& t: Factory<Trap>())
@@ -613,6 +601,15 @@ void Level01::VUpdate(double milliseconds)
 		if (t.mShouldDestroy)
 		{
 			Factory<Trap>::Destroy(&t);
+		}
+	}
+
+	for (Lantern& l : Factory<Lantern>())
+	{
+		l.Update(seconds);
+		if (l.mShouldDestroy)
+		{
+			Factory<Lantern>::Destroy(&l);
 		}
 	}
 
@@ -1042,6 +1039,18 @@ void Level01::RenderDoors()
 
 		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
 	}
+
+	model = mModelManager->GetModel(kLanternModelName);
+	mRenderer->VBindMesh(model->mMesh);
+
+	for (Lantern& l : Factory<Lantern>())
+	{
+		mModel.world = l.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
+	}
 }
 
 void Level01::RenderEffects()
@@ -1080,6 +1089,16 @@ void Level01::RenderEffects()
 
 		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
 	}
+
+	for (Explosion& explosion : Factory<Explosion>())
+	{
+		mModel.world = explosion.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
+	}
+
 
 	mTime.color = { 1.0f, 0.1f, 1.0f, 1.0f };
 
@@ -1165,37 +1184,41 @@ void Level01::RenderSpotLightVolumes()
 	std::vector<std::pair<Lamp*, uint32_t>> lampPairs;
 	CullLamps(frustum, &lampPairs);
 
-	mRenderer->VClearStencil(mGBufferContext, 0, 0);
+	std::vector<std::pair<Lantern*, uint32_t>> lanternPairs;
+	CullLanterns(frustum, &lanternPairs);
 
-	// Stencil pass
-	mRenderer->GetDeviceContext()->RSSetState(mLightingWriteRS);
-	mRenderer->GetDeviceContext()->OMSetDepthStencilState(mLightingWriteDSS, 0);
+	//mRenderer->VClearStencil(mGBufferContext, 0, 0);
 
-	mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
-	mRenderer->VSetVertexShader(mApplication->mVSFwdSpotLightVolume);
-	mRenderer->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
+	//// Stencil pass
+	//mRenderer->GetDeviceContext()->RSSetState(mLightingWriteRS);
+	//mRenderer->GetDeviceContext()->OMSetDepthStencilState(mLightingWriteDSS, 0);
+
+	//mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
+	//mRenderer->VSetVertexShader(mApplication->mVSFwdSpotLightVolume);
+	//mRenderer->GetDeviceContext()->PSSetShader(nullptr, nullptr, 0);
 
 	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, mCameraManager->GetOrigin().pCols, 1);
 	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mCameraManager->GetCBufferPersp(), 0);
 
 	mRenderer->VBindMesh(mGeodesicSphereMesh);
 
-	for (std::pair<Lamp*, uint32_t> lampPair : lampPairs)
-	{
-		mModel.world = mLevel.lampWorldMatrices[lampPair.second];
-		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
-		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
-		mRenderer->VDrawIndexed(0, mGeodesicSphereMesh->GetIndexCount());
-	}
+	//for (std::pair<Lamp*, uint32_t> lampPair : lampPairs)
+	//{
+	//	mModel.world = mLevel.lampWorldMatrices[lampPair.second];
+	//	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+	//	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+	//	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+	//	mRenderer->VDrawIndexed(0, mGeodesicSphereMesh->GetIndexCount());
+	//}
 
 	// Albedo Pass
 	float color[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	mRenderer->SetBlendState(mPLVShaderResource, 0, color, 0xffffffff);
 	mRenderer->GetDeviceContext()->RSSetState(mLightingReadRS);
-	mRenderer->GetDeviceContext()->OMSetDepthStencilState(mLightingReadDSS, 0);
+	//mRenderer->GetDeviceContext()->OMSetDepthStencilState(mLightingReadDSS, 0);
 
-	mRenderer->VSetRenderContextTargetWithDepth(mGBufferContext, 3, 0);
+	mRenderer->VSetRenderContextTarget(mGBufferContext, 3);
+//	mRenderer->VSetRenderContextTargetWithDepth(mGBufferContext, 3, 0);
 	mRenderer->VClearContextTarget(mGBufferContext, 3, Colors::black.pCols);	// Albedo
 
 	mRenderer->VSetInputLayout(mApplication->mVSFwdSpotLightVolume);
@@ -1230,9 +1253,32 @@ void Level01::RenderSpotLightVolumes()
 		mRenderer->VDrawIndexed(0, mGeodesicSphereMesh->GetIndexCount());
 	}
 
+	mRenderer->VSetPixelShader(mApplication->mPSFwdPointLightVolumeNS);
+
+	for (std::pair<Lantern*, uint32_t> lanternPair : lanternPairs)
+	{
+		mModel.world = (mat4f::scale(lanternPair.first->mColliderComponent->mCollider.radius) * mat4f::translate(lanternPair.first->GetLightPosition())).transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+
+		// Set Light data
+		mLightData.color = lanternPair.first->mLightColor;
+		mLightData.range = lanternPair.first->mColliderComponent->mCollider.radius;
+
+		mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mLightData, 0);
+
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 0, 0);
+
+		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 0, 0);					// Position
+		mRenderer->VSetPixelShaderResourceView(mGBufferContext, 1, 1);					// Normal
+		mRenderer->VDrawIndexed(0, mGeodesicSphereMesh->GetIndexCount());
+	}
+
 	mRenderer->GetDeviceContext()->OMSetBlendState(nullptr, color, 0xffffffff);
 	mRenderer->GetDeviceContext()->RSSetState(nullptr);
-	mRenderer->GetDeviceContext()->OMSetDepthStencilState(nullptr, 0);
+	//mRenderer->GetDeviceContext()->OMSetDepthStencilState(nullptr, 0);
 }
 
 void Level01::RenderFullScreenQuad()
@@ -1263,6 +1309,23 @@ void Level01::RenderMinions()
 	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
 
 	for (MinionController& mc : Factory<ImpController>())
+	{
+		Minion& m = *static_cast<Minion*>(mc.mSceneObject);
+
+		mModel.world = m.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		m.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatrices);
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
+
+		mRenderer->VBindMesh(m.mModel->mMesh);
+		mRenderer->VDrawIndexed(0, m.mModel->mMesh->GetIndexCount());
+	}
+
+	for (AbominationController& mc : Factory<AbominationController>())
 	{
 		Minion& m = *static_cast<Minion*>(mc.mSceneObject);
 
@@ -1583,6 +1646,7 @@ void Level01::VShutdown()
 	CLEAR_FACTORY(SpawnPoint)
 	CLEAR_FACTORY(DominationPoint)
 	CLEAR_FACTORY(Lamp)
+	CLEAR_FACTORY(Lantern)
 	CLEAR_FACTORY(Region)
 	CLEAR_FACTORY(Door)
 }

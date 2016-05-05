@@ -39,11 +39,12 @@ public:
 	MinionClass GetClass() const { return mClass; }
 
 	void UpdateComponents(quatf rotation, vec3f position);
+	void ApplyHitStun();
 
 	static void OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot);
 	static void OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth);
 	static void OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot);
-	static void OnHealthChange(BaseSceneObject* obj, float newVal);
+	static void OnHealthChange(BaseSceneObject* obj, float oldVal, float newVal, float hitDirection);
 	static void OnDeath(BaseSceneObject* obj);
 	//static void OnNetHealthChange(BaseSceneObject* obj, float newVal);
 	static void OnAnimationCommandExecuted(BaseSceneObject* obj, AnimationControllerState state, AnimationControllerCommand command);

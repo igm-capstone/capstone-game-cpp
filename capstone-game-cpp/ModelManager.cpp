@@ -10,9 +10,11 @@ const char* kTrapperModelName		= "Trapmaster_Final";
 const char* kProfessorModelName		= "ProfMayor";
 const char* kMinionAnimModelName	= "Minion_Test";
 const char* kPlantModelName			= "FlyTrap";
+const char* kTrapModelName			= "TrapAnimated";
 
 const char* kDoorModelName			= "Door";
-const char* kTrapModelName			= "TrapAnimated";
+const char* kLanternModelName		= "PortableLantern";
+
 
 const char* kStaticMeshModelNames[STATIC_MESH_MODEL_COUNT] =
 {

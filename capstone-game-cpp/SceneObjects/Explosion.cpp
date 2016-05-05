@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Heal.h"
+#include "Explosion.h"
 #include "Components/ColliderComponent.h"
 #include "Components/NetworkID.h"
 #include "Explorer.h"
@@ -7,7 +7,11 @@
 #include <trace.h>
 
 
-Heal::Heal() : mSphereColliderComponent(Factory<SphereColliderComponent>::Create()), mNetworkID(Factory<NetworkID>::Create()), mHealthRestored(50.0f), mDuration(0.0f)
+Explosion::Explosion() 
+	: mSphereColliderComponent(Factory<SphereColliderComponent>::Create())
+	, mNetworkID(Factory<NetworkID>::Create())
+	, mExplosionDamage(50.0f)
+	, mDuration(0.0f)
 {
 	mSphereColliderComponent->mCollider.radius = 5.0f;
 	mSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
@@ -20,13 +24,13 @@ Heal::Heal() : mSphereColliderComponent(Factory<SphereColliderComponent>::Create
 	mNetworkID->mSceneObject = this;
 }
 
-Heal::~Heal()
+Explosion::~Explosion()
 {
 	Factory<SphereColliderComponent>::Destroy(mSphereColliderComponent);
 	Factory<NetworkID>::Destroy(mNetworkID);
 }
 
-void Heal::Spawn(vec3f pos, int UUID, float duration)
+void Explosion::Spawn(vec3f pos, int UUID, float duration)
 {
 	mTransform->SetPosition(pos);
 	mSphereColliderComponent->mCollider.origin = pos;
@@ -34,7 +38,7 @@ void Heal::Spawn(vec3f pos, int UUID, float duration)
 	mDuration = duration;
 }
 
-void Heal::Update(float seconds)
+void Explosion::Update(float seconds)
 {
 	static float growthRate = 2.0f * seconds;
 	vec3f scale = mTransform->GetScale();
@@ -48,12 +52,12 @@ void Heal::Update(float seconds)
 	mDuration -= seconds;
 	if (mDuration <= 0.0f)
 	{
-		Factory<Heal>::Destroy(this);
+		Factory<Explosion>::Destroy(this);
 	}
 }
 
-void Heal::OnTriggerEnter(BaseSceneObject* self, BaseSceneObject* other)
+void Explosion::OnTriggerEnter(BaseSceneObject* self, BaseSceneObject* other)
 {
 	Explorer* pExlorer = reinterpret_cast<Explorer*>(other);
-	pExlorer->mHealth->SetHealth(pExlorer->mHealth->GetHealth() + reinterpret_cast<Heal*>(self)->mHealthRestored);
+	pExlorer->mHealth->SetHealth(pExlorer->mHealth->GetHealth() - reinterpret_cast<Explosion*>(self)->mExplosionDamage);
 }

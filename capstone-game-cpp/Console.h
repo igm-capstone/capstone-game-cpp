@@ -18,12 +18,29 @@ class Console
 		time_t timestamp;
 	};
 
+	struct Command
+	{
+		const char* name;
+		void(*callback)(int argc, char* argv[]);
+	};
+
+public:
+	class AutoCommandRegister
+	{
+	public:
+		AutoCommandRegister(const char* name, void(*callback)(int argc, char* argv[]))
+		{
+			Rig3D::Singleton<Console>::SharedInstance().RegisterCommand({ name, callback });
+		}
+	};
+
+private:
 	char                  mInputBuf[256];
 	ImVector<ConsoleItem> mItems;
 	bool                  mScrollToBottom;
 	ImVector<char*>       mHistory;
 	int                   mHistoryPos;    // -1: new line, 0..History.Size-1 browsing history.
-	ImVector<const char*> mCommands;
+	ImVector<Command>     mCommands;
 	bool                  mVisible;
 
 protected:
@@ -41,6 +58,7 @@ protected:
 	void* DrawConsole();
 	void AddLog(const char* fmt, ...) IM_PRINTFARGS(2);
 	void ClearLog();
+	void DisplayHelpText();
 
 public:
 	static void Show();
@@ -50,4 +68,13 @@ public:
 	static void Log(const char* fmt, ...) IM_PRINTFARGS(2);
 	static void Clear();
 	static bool IsVisible();
+	static void Help();
+	
+	void RegisterCommand(Command command);
 };
+
+#define CONSOLE_COMMAND(command_name)                             \
+    void __console_command__##command_name(int argc, char* argv[]);                            \
+    static Console::AutoCommandRegister __auto_command_register_##command_name(#command_name, __console_command__##command_name); \
+    void __console_command__##command_name(int argc, char* argv[])
+

@@ -13,6 +13,7 @@
 #include "SceneObjects/StaticMesh.h"
 #include "SceneObjects/Trap.h"
 #include "SceneObjects/Lamp.h"
+#include "SceneObjects/Lantern.h"
 
 #define PARTITION_X_COUNT 3
 #define PARTITION_Y_COUNT 2
@@ -161,6 +162,14 @@ void BVHTree::Update()
 		if (trap.mSphereColliderComponent->mIsActive)
 		{
 			AddNodeRecursively(trap.mSphereColliderComponent, EXPLORER_PARENT_LAYER_INDEX, 1, 0, 0);
+		}
+	}
+
+	for (Lantern& lantern : Factory<Lantern>())
+	{
+		if (lantern.mColliderComponent->mIsActive)
+		{
+			AddNodeRecursively(lantern.mColliderComponent, EXPLORER_PARENT_LAYER_INDEX, 1, 0, 0);
 		}
 	}
 }

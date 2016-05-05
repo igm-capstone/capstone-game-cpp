@@ -7,10 +7,10 @@ Console::Console()
 	ClearLog();
 	memset(mInputBuf, 0, sizeof(mInputBuf));
 	mHistoryPos = -1;
-	mCommands.push_back("HELP");
-	mCommands.push_back("HISTORY");
-	mCommands.push_back("CLEAR");
-	mCommands.push_back("CLASSIFY");  // "classify" is here to provide an example of "C"+[tab] completing to "CL" and displaying matches.
+	//mCommands.push_back("HELP");
+	//mCommands.push_back("HISTORY");
+	//mCommands.push_back("CLEAR");
+	//mCommands.push_back("CLASSIFY");  // "classify" is here to provide an example of "C"+[tab] completing to "CL" and displaying matches.
 }
 
 Console::~Console()
@@ -42,22 +42,17 @@ void Console::ExecCommand(const char* command_line)
 	mHistory.push_back(strdup(command_line));
 
 	// Process command
-	if (Stricmp(command_line, "CLEAR") == 0)
+	bool found = false;
+	for (auto command : mCommands)
 	{
-		ClearLog();
+		if (Stricmp(command_line, command.name) == 0)
+		{
+			command.callback(0, nullptr);
+			found = true;
+			break;
+		}
 	}
-	else if (Stricmp(command_line, "HELP") == 0)
-	{
-		AddLog("Commands:");
-		for (int i = 0; i < mCommands.Size; i++)
-			AddLog("- %s", mCommands[i]);
-	}
-	else if (Stricmp(command_line, "HISTORY") == 0)
-	{
-		for (int i = mHistory.Size >= 10 ? mHistory.Size - 10 : 0; i < mHistory.Size; i++)
-			AddLog("%3d: %s\n", i, mHistory[i]);
-	}
-	else
+	if (!found)
 	{
 		AddLog("Unknown command: '%s'\n", command_line);
 	}
@@ -92,8 +87,8 @@ int Console::TextEditCallback(ImGuiTextEditCallbackData* data)
 		// Build a list of candidates
 		ImVector<const char*> candidates;
 		for (int i = 0; i < mCommands.Size; i++)
-			if (Strnicmp(mCommands[i], word_start, (int)(word_end - word_start)) == 0)
-				candidates.push_back(mCommands[i]);
+			if (Strnicmp(mCommands[i].name, word_start, (int)(word_end - word_start)) == 0)
+				candidates.push_back(mCommands[i].name);
 
 		if (candidates.Size == 0)
 		{
@@ -300,6 +295,21 @@ void Console::AddLog(const char* fmt, ...)
 	mScrollToBottom = true;
 }
 
+void Console::DisplayHelpText()
+{
+	AddLog("Available commands:");
+	for (int i = 0; i < mCommands.Size; i++)
+		AddLog("- %s", mCommands[i]);
+	AddLog("\n");
+	
+	AddLog("Create new commands using the CONSOLE_COMMAND macro defined in \"Console.h\". e.g.:");
+	AddLog("\n");
+	AddLog("CONSOLE_COMMAND(my_awesome_command)");
+	AddLog("{");
+	AddLog("	Engine::PerformApocalypse();");
+	AddLog("}");
+}
+
 void Console::Clear()
 {
 	Rig3D::Singleton<Console>::SharedInstance().ClearLog();
@@ -308,6 +318,16 @@ void Console::Clear()
 bool Console::IsVisible()
 {
 	return Rig3D::Singleton<Console>::SharedInstance().mVisible;
+}
+
+void Console::Help()
+{
+	Rig3D::Singleton<Console>::SharedInstance().DisplayHelpText();
+}
+
+void Console::RegisterCommand(Command command)
+{
+	mCommands.push_back(command);
 }
 
 void Console::Log(const char* fmt, ...)
@@ -337,4 +357,14 @@ void Console::Toggle()
 {
 	Console& c = Rig3D::Singleton<Console>::SharedInstance();
 	c.mVisible = !c.mVisible;
+}
+
+CONSOLE_COMMAND(clear)
+{
+	Console::Clear();
+}
+
+CONSOLE_COMMAND(help)
+{
+	Console::Help();
 }

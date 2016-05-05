@@ -26,6 +26,7 @@
     <FxCompile Include="Shaders\PSFwdSingleMaterial.hlsl" />
     <FxCompile Include="Shaders\PSFwdDistanceMaterial.hlsl" />
     <FxCompile Include="Shaders\PSFwdPointLightVolume.hlsl" />
+    <FxCompile Include="Shaders\PSFwdPointLightVolumeNS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
@@ -83,6 +84,9 @@
     <ClCompile Include="UI\UIManager.cpp" />
     <ClCompile Include="jsonUtils.cpp" />
     <ClCompile Include="Components\Health.cpp" />
+    <ClCompile Include="SceneObjects\Lantern.cpp" />
+    <ClCompile Include="Components\AbominationController.cpp" />
+    <ClCompile Include="SceneObjects\Explosion.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -164,6 +168,9 @@
     <ClInclude Include="UI\UIManager.h" />
     <ClInclude Include="jsonUtils.h" />
     <ClInclude Include="BINResource.h" />
+    <ClInclude Include="SceneObjects\Lantern.h" />
+    <ClInclude Include="Components\AbominationController.h" />
+    <ClInclude Include="SceneObjects\Explosion.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />

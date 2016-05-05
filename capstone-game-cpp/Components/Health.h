@@ -6,6 +6,8 @@ class Health : public BaseComponent {
 
 	float	mCurrentHealth;
 	float	mMaxHealth;
+	float	mLastHitDirection;
+
 	class NetworkID* mNetworkID;
 	class NetworkManager& mNetworkManager;
 
@@ -20,14 +22,14 @@ class Health : public BaseComponent {
 		
 	}
 
-	static void OnSyncHealth(BaseSceneObject* obj, float newVal, float newMax);
+	static void OnSyncHealth(BaseSceneObject* obj, float newVal, float newMax, float hitDirection);
 
 public:
 
 	void SetupNetworkID(NetworkID* networkID);
 	
 	void SetMaxHealth(float i);
-	void TakeDamage(float i, bool checkAuthority = true);
+	void TakeDamage(float i, float direction, bool checkAuthority = true);
 	void SyncHealth(bool checkAuthority);
 	void SetHealth(float val, bool checkAuthority = true);
 
@@ -38,5 +40,5 @@ public:
 
 	EXPOSE_CALLBACK_0(HealthToZero);
 	EXPOSE_CALLBACK_0(HealthFromZero);
-	EXPOSE_CALLBACK_1(HealthChange, float);
+	EXPOSE_CALLBACK_3(HealthChange, float, float, float);
 };

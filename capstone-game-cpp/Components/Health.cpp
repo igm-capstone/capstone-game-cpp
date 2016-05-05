@@ -5,7 +5,7 @@
 #include <SceneObjects/Minion.h>
 #include <trace.h>
 
-void Health::OnSyncHealth(BaseSceneObject* obj, float newVal, float newMax)
+void Health::OnSyncHealth(BaseSceneObject* obj, float newVal, float newMax, float hitDirection)
 {
 	Health* h;
 	if (obj->Is<Explorer>())
@@ -20,6 +20,13 @@ void Health::OnSyncHealth(BaseSceneObject* obj, float newVal, float newMax)
 	{
 		TRACE_WARN("??? helth is being used by something other than explarer or minion, please fix OnSyncHealth");
 		return;
+	}
+
+	h->mLastHitDirection = hitDirection;
+
+	if (newMax >= 0)
+	{
+		h->mMaxHealth = newMax;
 	}
 
 	if (newVal >= 0)
@@ -37,15 +44,11 @@ void Health::OnSyncHealth(BaseSceneObject* obj, float newVal, float newMax)
 		}
 		else if (newVal != oldVal)
 		{
-			h->OnHealthChange(newVal);
+			h->OnHealthChange(oldVal, newVal, hitDirection);
 		}
 
 	}
 
-	if (newMax >= 0)
-	{
-		h->mMaxHealth = newMax;
-	}
 }
 
 
@@ -71,8 +74,9 @@ void Health::SetMaxHealth(float val)
 	SyncHealth(true);
 }
 
-void Health::TakeDamage(float i, bool checkAuthority)
+void Health::TakeDamage(float i, float direction, bool checkAuthority)
 {
+	mLastHitDirection = direction;
 	SetHealth(mCurrentHealth - i, checkAuthority);
 }
 
@@ -84,6 +88,7 @@ void Health::SyncHealth(bool checkAuthority)
 		p.UUID = mNetworkID->mUUID;
 		p.AsFloatArray[0] = mCurrentHealth;
 		p.AsFloatArray[1] = mMaxHealth;
+		p.AsFloatArray[2] = mLastHitDirection;
 
 		if (mNetworkManager.mMode == NetworkManager::SERVER)
 		{
@@ -122,6 +127,6 @@ void Health::SetHealth(float val, bool checkAuthority)
 	}
 	else if (mCurrentHealth != prevHealth)
 	{
-		OnHealthChange(val);
+		OnHealthChange(prevHealth, mCurrentHealth, mLastHitDirection);
 	}
 }

@@ -10,6 +10,8 @@
 #include <SceneObjects/StatusEffect.h>
 #include <ScareTacticsApplication.h>
 #include <Mathf.h>
+#include <SceneObjects/Lantern.h>
+#include <SceneObjects/Explosion.h>
 
 NetworkManager::NetworkManager()
 {
@@ -180,6 +182,17 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		}
 		break;
 	}
+	case SKILL_TYPE_LANTERN:
+	{
+		auto l = Factory<Lantern>::Create();
+		if (l)
+		{
+			l->mNetworkID->mHasAuthority = true;
+			l->Spawn(UUID, pos, duration);
+			l->mNetworkID->OnNetAuthorityChange(true);
+		}
+		break;
+	}
 	case SKILL_TYPE_FLYTRAP_MINION:
 	{
 		auto f = Factory<Minion>::Create();
@@ -192,14 +205,35 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		break;
 	}
 	case SKILL_TYPE_IMP_MINION:
-	case SKILL_TYPE_ABOMINATION_MINION: // for now
 	{
 		auto m = Factory<Minion>::Create();
 		if (m)
 		{
 			m->mNetworkID->mHasAuthority = true;
 			m->SpawnImp(pos, UUID);
+			m->mNetworkID->OnNetAuthorityChange(true);
+		}
+		break;
+	}
+	case SKILL_TYPE_ABOMINATION_MINION: // for now
+	{
+		auto m = Factory<Minion>::Create();
+		if (m)
+		{
+			m->mNetworkID->mHasAuthority = true;
+			m->SpawnAbomination(pos, UUID);
 			m->mNetworkID->OnNetAuthorityChange(true);	
+		}
+		break;
+	}
+	case SKILL_TYPE_EXPLOSION:
+	{
+		auto h = Factory<Explosion>::Create();
+		if (h)
+		{
+			h->mNetworkID->mHasAuthority = true;
+			h->Spawn(pos, UUID, duration);
+			h->mNetworkID->OnNetAuthorityChange(true);
 		}
 		break;
 	}
@@ -249,6 +283,15 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 		}
 		break;
 	}
+	case SKILL_TYPE_LANTERN:
+	{
+		auto l = Factory<Lantern>::Create();
+		if (l)
+		{
+			l->Spawn(UUID, pos, duration);
+		}
+		break;
+	}
 	case SKILL_TYPE_FLYTRAP_MINION:
 	{
 		auto f = Factory<Minion>::Create();
@@ -259,12 +302,29 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 		break;
 	}
 	case SKILL_TYPE_IMP_MINION:
-	case SKILL_TYPE_ABOMINATION_MINION:
 	{
 		auto m = Factory<Minion>::Create();
 		if (m)
 		{
 			m->SpawnImp(pos, UUID);
+		}
+		break;
+	}
+	case SKILL_TYPE_ABOMINATION_MINION:
+	{
+		auto m = Factory<Minion>::Create();
+		if (m)
+		{
+			m->SpawnAbomination(pos, UUID);
+		}
+		break;
+	}
+	case SKILL_TYPE_EXPLOSION:
+	{
+		auto h = Factory<Explosion>::Create();
+		if (h)
+		{
+			h->Spawn(pos, UUID, duration);
 		}
 		break;
 	}
@@ -292,11 +352,11 @@ void NetworkRpc::SyncTransform(int UUID, vec3f pos, quatf rot)
 	}
 }
 
-void NetworkRpc::SyncHealth(int UUID, float val, float max)
+void NetworkRpc::SyncHealth(int UUID, float val, float max, float dir)
 {
 	for each(auto &netID in Factory<NetworkID>()) {
 		if (netID.mUUID == UUID) {
-			netID.OnNetHealthChange(val, max);
+			netID.OnNetHealthChange(val, max, dir);
 		}
 	}
 }

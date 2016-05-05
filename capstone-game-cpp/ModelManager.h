@@ -66,6 +66,7 @@ extern const char* kMinionAnimModelName;
 extern const char* kPlantModelName;
 extern const char* kDoorModelName;
 extern const char* kTrapModelName;
+extern const char* kLanternModelName;
 
 extern const char* kStaticMeshModelNames[STATIC_MESH_MODEL_COUNT];
 
