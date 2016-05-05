@@ -60,7 +60,7 @@ extern bool gDebugBT;
 
 #define GRID_MULT_OF	6
 
-#define FIXED_UPDATE 60.0  // X fixed updates per sec
+#define FIXED_UPDATE 100.0  // X fixed updates per sec, also fixed FPS.
 
 #define MAX_DOORS 50
 #define MAX_LAMPS 50

@@ -344,8 +344,8 @@ void ScareTacticsApplication::VUpdate(float deltaTime)
 		if (mAcumTimer > 1000.0f / FIXED_UPDATE) {
 			mCurrentScene->VFixedUpdate(mAcumTimer);
 			mAcumTimer = 0;
+			mCurrentScene->VRender();
 		}
-		mCurrentScene->VRender();
 	}
 	else
 	{
@@ -353,8 +353,8 @@ void ScareTacticsApplication::VUpdate(float deltaTime)
 		if (mAcumTimer > 1000.0f / FIXED_UPDATE) {
 			mLoadingScreen->VFixedUpdate(mAcumTimer);
 			mAcumTimer = 0;
+			mLoadingScreen->VRender();
 		}
-		mLoadingScreen->VRender();
 	}
 }
 

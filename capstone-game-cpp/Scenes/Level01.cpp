@@ -575,7 +575,52 @@ void Level01::VUpdate(double milliseconds)
 	{
 		skill.Update();
 	}
+		
 
+#ifdef _DEBUG
+	if (mInput->GetKeyDown(KEYCODE_F3))
+	{
+		gDebugGrid = !gDebugGrid;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F4))
+	{
+		gDebugColl = !gDebugColl;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F5))
+	{
+		gDebugOrto = !gDebugOrto;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F6))
+	{
+		gDebugGBuffer = !gDebugGBuffer;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F7))
+	{
+		gDebugBVH = !gDebugBVH;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F8))
+	{
+		gDebugBT = !gDebugBT;
+	}
+	//Do not use F9, already used else-where
+	if (mInput->GetKeyDown(KEYCODE_F10))
+	{
+		SetRestart();
+	}
+#endif
+
+	UpdateGameState(milliseconds); //Input
+
+	mNetworkManager->Update();
+}
+
+void Level01::VFixedUpdate(double milliseconds)
+{
 	for (AnimationController& ac : Factory<AnimationController>())
 	{
 		ac.Update(milliseconds);
@@ -628,52 +673,8 @@ void Level01::VUpdate(double milliseconds)
 		}
 	}
 
-#ifdef _DEBUG
-	if (mInput->GetKeyDown(KEYCODE_F3))
-	{
-		gDebugGrid = !gDebugGrid;
-	}
-
-	if (mInput->GetKeyDown(KEYCODE_F4))
-	{
-		gDebugColl = !gDebugColl;
-	}
-
-	if (mInput->GetKeyDown(KEYCODE_F5))
-	{
-		gDebugOrto = !gDebugOrto;
-	}
-
-	if (mInput->GetKeyDown(KEYCODE_F6))
-	{
-		gDebugGBuffer = !gDebugGBuffer;
-	}
-
-	if (mInput->GetKeyDown(KEYCODE_F7))
-	{
-		gDebugBVH = !gDebugBVH;
-	}
-
-	if (mInput->GetKeyDown(KEYCODE_F8))
-	{
-		gDebugBT = !gDebugBT;
-	}
-	//Do not use F9, already used else-where
-	if (mInput->GetKeyDown(KEYCODE_F10))
-	{
-		Application::SharedInstance().LoadScene<Level01>();
-	}
-#endif
-
-	UpdateGameState(milliseconds); //Input
-}
-
-void Level01::VFixedUpdate(double milliseconds)
-{
 	if (mAIManager->IsGridDirty()) ComputeGrid(); 
 	mAIManager->Update();
-
-	mNetworkManager->Update();
 }
 
 void Level01::SetReady(int clientID)
