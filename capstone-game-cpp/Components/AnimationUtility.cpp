@@ -109,6 +109,7 @@ void SetTrapperAnimations(class Explorer* explorer)
 
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_IDLE, &gTrapperAnimations[Animations::TRAPPER_IDLE], nullptr, 0, true);
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_RUN, &gTrapperAnimations[Animations::TRAPPER_RUN], nullptr, 0, true);
+	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_DEATH, &gTrapperAnimations[Animations::TRAPPER_DEATH], nullptr, 0, false);
 
 	Animation melee = gTrapperAnimations[Animations::TRAPPER_THROW];
 	KeyframeOption meleeOptions[] = { { melee.startFrameIndex, Explorer::OnMeleeStart },{ melee.endFrameIndex, Explorer::OnMeleeStop } };

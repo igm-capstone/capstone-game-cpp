@@ -370,7 +370,7 @@ void Explorer::OnRevive(BaseSceneObject* obj)
 	pExplorer->mIsDead = false;
 	pExplorer->mInteractionCollider->mIsActive = false;
 	pExplorer->mCollider->mIsDynamic = true;
-
+	pExplorer->mController->PlayStateAnimation(ANIM_STATE_IDLE);
 	Singleton<AIManager>::SharedInstance().SetGridDirty(true);
 }
 
