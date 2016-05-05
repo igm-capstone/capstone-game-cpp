@@ -33,6 +33,7 @@ public:
 	MeleeColliderComponent				mMeleeColliderComponent;
 	float								mAttackDamage;
 	bool								mIsDead;
+	
 private:
 	class NetworkClient*				mNetworkClient;
 	class CameraManager*				mCameraManager;
@@ -54,6 +55,7 @@ public:
 	static void OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot);
 	//static void OnNetHealthChange(BaseSceneObject* obj, float newVal);
 	static void OnAnimationCommandExecuted(BaseSceneObject* obj, AnimationControllerState state, AnimationControllerCommand command);
+	static void OnAnimStateChange(BaseSceneObject* obj, AnimationControllerState prevState, AnimationControllerState newState);
 	static void OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command);
 	static void OnHealthChange(BaseSceneObject* obj, float oldVal, float newVal, float hitDirection);
 	static void OnDeath(BaseSceneObject* obj);

@@ -51,6 +51,8 @@ Explorer::Explorer()
 
 	mAnimationController = Factory<AnimationController>::Create();
 	mAnimationController->mSceneObject = this;
+	mAnimationController->RegisterStateChangedCallback(&OnAnimStateChange);
+	mAnimationController->RegisterCommandExecutedCallback(&OnAnimationCommandExecuted);
 
 	mController = Factory<ExplorerController>::Create();
 	mController->mSceneObject = this;
@@ -64,7 +66,7 @@ Explorer::Explorer()
 	mCollider->mSceneObject = this;
 	mCollider->mIsActive = false;
 	mCollider->mLayer = COLLISION_LAYER_EXPLORER;
-	mCollider->mOffset = { 0.0f, 2.5f, 0.0f };
+	mCollider->mOffset = { 0.0f, 1.0f, 0.0f };
 	mCollider->RegisterCollisionExitCallback(&OnCollisionExit);
 	
 	mInteractionCollider = Factory<SphereColliderComponent>::Create();
@@ -340,6 +342,18 @@ void Explorer::OnAnimationCommandExecuted(BaseSceneObject* obj, AnimationControl
 		p.AsAnimation.State = state;
 		p.AsAnimation.Command = command;
 		e->mNetworkClient->SendData(&p);
+	}
+}
+
+void Explorer::OnAnimStateChange(BaseSceneObject* obj, AnimationControllerState prevState, AnimationControllerState newState)
+{
+	if (newState != ANIM_STATE_MELEE)
+	{
+		auto e = reinterpret_cast<Explorer*>(obj);
+		if (e->mNetworkID->mHasAuthority)
+		{
+			e->mMeleeColliderComponent.asBaseColliderComponent->mIsActive = false;
+		}
 	}
 }
 

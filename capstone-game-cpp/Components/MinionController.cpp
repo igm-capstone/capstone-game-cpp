@@ -32,7 +32,7 @@ MinionController::MinionController()
 	, mBaseMoveSpeed(0)
 	, mSpeedMultiplier(1.0f)
 	, mAttackDamage(0)
-	, mAttackRange(2)
+	, mAttackRange(1)
 	, mTurnRate(0)
 	, mStunOnHitDuration(0)
 	, mSplashRange(0)
@@ -231,7 +231,7 @@ bool MinionController::IsExplorerInAttackRange(Behavior& bh, void* data)
 bool MinionController::IsExplorerInLockRange(Behavior& bh, void* data)
 {
 	auto& self = *static_cast<MinionController*>(data);
-
+	
 	return self.IsExplorerInRange(10);
 }
 

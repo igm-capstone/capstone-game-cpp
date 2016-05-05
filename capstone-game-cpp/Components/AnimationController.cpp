@@ -74,6 +74,7 @@ void AnimationController::SetState(AnimationControllerState state)
 		return;
 	}
 
+	auto prevState = mState;
 	mState = state;
 
 	if (mStateAnimationMap.find(mState) != mStateAnimationMap.end())
@@ -95,6 +96,7 @@ void AnimationController::SetState(AnimationControllerState state)
 		mState = ANIM_STATE_NULL;
 	}
 
+	OnStateChanged(prevState, state);
 	mIsPaused ? OnCommandExecuted(mState, ANIM_STATE_COMMAND_PAUSE) : OnCommandExecuted(mState, ANIM_STATE_COMMAND_PLAY);
 }
 

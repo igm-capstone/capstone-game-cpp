@@ -72,7 +72,6 @@ void SetSprinterAnimations(Explorer* explorer)
 
 	explorer->mAnimationController->mSkeletalAnimations = &explorer->mModel->mSkeletalAnimations;
 	explorer->mAnimationController->mSkeletalHierarchy = explorer->mModel->mSkeletalHierarchy;
-	explorer->mAnimationController->RegisterCommandExecutedCallback(&Explorer::OnAnimationCommandExecuted);
 
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_IDLE, &gSprinterAnimations[Animations::SPRINTER_IDLE], nullptr, 0, true);
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_RUN, &gSprinterAnimations[Animations::SPRINTER_RUN], nullptr, 0, true);
@@ -89,7 +88,6 @@ void SetProfessorAnimations(class Explorer* explorer)
 
 	explorer->mAnimationController->mSkeletalAnimations = &explorer->mModel->mSkeletalAnimations;
 	explorer->mAnimationController->mSkeletalHierarchy = explorer->mModel->mSkeletalHierarchy;
-	explorer->mAnimationController->RegisterCommandExecutedCallback(&Explorer::OnAnimationCommandExecuted);
 
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_IDLE, &gProfessorAnimations[Animations::PROFESSOR_IDLE], nullptr, 0, true);
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_RUN, &gProfessorAnimations[Animations::PROFESSOR_RUN], nullptr, 0, true);
@@ -105,7 +103,6 @@ void SetTrapperAnimations(class Explorer* explorer)
 
 	explorer->mAnimationController->mSkeletalAnimations = &explorer->mModel->mSkeletalAnimations;
 	explorer->mAnimationController->mSkeletalHierarchy = explorer->mModel->mSkeletalHierarchy;
-	explorer->mAnimationController->RegisterCommandExecutedCallback(&Explorer::OnAnimationCommandExecuted);
 
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_IDLE, &gTrapperAnimations[Animations::TRAPPER_IDLE], nullptr, 0, true);
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_RUN, &gTrapperAnimations[Animations::TRAPPER_RUN], nullptr, 0, true);
