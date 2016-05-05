@@ -181,10 +181,6 @@ void Level01::InitializeAssets()
 	//mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 	mLevel = Resource::LoadLevel("Assets/RPI_Level.json", mAllocator);
 
-
-	mFloorCollider.halfSize = mLevel.extents;
-	mFloorCollider.origin = mLevel.center;
-
 	mFloorCollider.halfSize = mLevel.extents;
 	mFloorCollider.origin	= mLevel.center;
 
@@ -1532,7 +1528,7 @@ void Level01::ComputeGrid()
 
 	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 0, 1);
 	
-	//First no floors
+	//First no floors/stairs
 	int instanceCount = 0;
 	for (Factory<StaticMesh>::iterator it = Factory<StaticMesh>().begin(); it != Factory<StaticMesh>().end();)
 	{
@@ -1540,7 +1536,11 @@ void Level01::ComputeGrid()
 		auto modelCluster = staticMesh.mModel;
 		auto numElements = modelCluster->ShareCount();
 
-		if (modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR]) {
+		if (modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR] &&
+			modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_STAIRS] &&
+			modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_STAIRS_LEFT] &&
+			modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_STAIR_FULL] &&
+			modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_STAIR_HALF]) {
 			mRenderer->VBindMesh(modelCluster->mMesh);
 			mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
 		}
@@ -1551,7 +1551,7 @@ void Level01::ComputeGrid()
 
 	mRenderer->VCopySubresource(mGridContext, 4, 2);
 
-	//Now only the floors
+	//Now only the floors/stairs
 	instanceCount = 0;
 	for (Factory<StaticMesh>::iterator it = Factory<StaticMesh>().begin(); it != Factory<StaticMesh>().end();)
 	{
@@ -1559,7 +1559,11 @@ void Level01::ComputeGrid()
 		auto modelCluster = staticMesh.mModel;
 		auto numElements = modelCluster->ShareCount();
 
-		if (modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR]) {
+		if (modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR] &&
+			modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_STAIRS] &&
+			modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_STAIRS_LEFT] &&
+			modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_STAIR_FULL] &&
+			modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_STAIR_HALF]) {
 			mRenderer->VBindMesh(modelCluster->mMesh);
 			mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
 			break; // Early exit;
