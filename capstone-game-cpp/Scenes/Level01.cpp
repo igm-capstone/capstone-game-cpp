@@ -1119,8 +1119,7 @@ void Level01::RenderExplorers()
 	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
 
 	//uint8_t materialIDs[3] = { 6, 3, 7 };
-	uint8_t materialIDs[3] = { 7, 7, 7 };
-
+	uint8_t materialIDs[3] = { 3, 3, 7 };
 
 	for (Explorer& e : Factory<Explorer>())
 	{

@@ -129,6 +129,7 @@ void Explorer::Spawn(vec3f pos, int UUID)
 {
 	mExplorerType = static_cast<ExplorerType>(UUID);
 
+	mTransform->SetRotation(-0.5f * PI, 0, 0);
 	mTransform->SetPosition(pos);		
 
 	mCollider->mIsActive = true;
@@ -137,22 +138,22 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
 
-	SetSprinterAnimations(this);
-
-	//switch (GetExplorerType())
-	//{
-	//case SPRINTER:
-	//	SetSprinterAnimations(this);
-	//	break;
-	//case TRAPMASTER:
-	//	SetTrapperAnimations(this);
-	//	break;
-	//case HEALER:
+	switch (GetExplorerType())
+	{
+	case HEALER:
+		SetSprinterAnimations(this);
 	//	SetProfessorAnimations(this);
-	//	break;
-	//default:
-	//	break;
-	//}
+		break;
+	case SPRINTER:
+		SetSprinterAnimations(this);
+		break;
+	case TRAPMASTER:
+		SetTrapperAnimations(this);
+		mTransform->SetScale(vec3f(0.5f));
+		break;
+	default:
+		break;
+	}
 
 	mController->PlayStateAnimation(ANIM_STATE_IDLE);
 }

@@ -2,7 +2,7 @@
 #include "SceneObjects\BaseSceneObject.h"
 #include <Components/AnimationController.h>
 
-enum ExplorerType : uint8_t // For Spawn Order, check gSpawnOrder in NetworkManager.cpp
+enum ExplorerType : uint8_t // For Spawn Order, check gSpawnOrder in NetworkServer.cpp
 {
 	GHOST = 0, // padding
 	HEALER,
