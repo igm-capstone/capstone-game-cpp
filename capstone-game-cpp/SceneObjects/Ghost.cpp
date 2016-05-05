@@ -132,7 +132,6 @@ bool Ghost::DoSpawnMinion(BaseSceneObject* obj, float duration, BaseSceneObject*
 	ghost->mEvents->Play("Spawn");
 
 	TRACE_LOG("Spawning at " << pos);
-	char optional[3];
 
 	NetworkCmd::SpawnNewSkill(minionType, pos, duration);
 
@@ -160,7 +159,7 @@ bool Ghost::DoMouseClick(BaseSceneObject* obj, float duration, BaseSceneObject* 
 		auto door = reinterpret_cast<Door*>(target);
 		door->Interact();
 	}
-	if (target->Is<Lamp>()) {
+	else if (target->Is<Lamp>()) {
 		auto lamp = reinterpret_cast<Lamp*>(target);
 		lamp->Interact();
 	}
@@ -168,8 +167,10 @@ bool Ghost::DoMouseClick(BaseSceneObject* obj, float duration, BaseSceneObject* 
 		//Spawn X or transmogrify
 		Skill* activeSkill = ghost->mSkills[ghost->mActiveSkill];
 
-		if (ghost->mMana >= activeSkill->mCost) {
-			if (activeSkill->UseSkill(target, pos)) {
+		if (ghost->mMana >= activeSkill->mCost) 
+		{
+			if (activeSkill->UseSkill(target, pos)) 
+			{
 				ghost->mMana -= activeSkill->mCost;
 			}
 		} else {

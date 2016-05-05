@@ -124,7 +124,7 @@ void Skill::Update()
 		auto ray = mCameraManager->Screen2Ray(mInput->mousePosition);
 
 
-		auto ret = bvhTree->mBVHTree.RayCastRecursively(ray, skillPos);
+		auto ret = bvhTree->mBVHTree.RayCast(ray, skillPos);
 		target = ret ? ret->mSceneObject : nullptr;
 	}
 

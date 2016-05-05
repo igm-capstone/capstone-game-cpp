@@ -34,6 +34,7 @@
 #include <Components/FlyTrapController.h>
 #include <Components/AbominationController.h>
 #include <SceneObjects/Explosion.h>
+#include <SceneObjects/Transmogrify.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -595,7 +596,7 @@ void Level01::VUpdate(double milliseconds)
 		e.Update(seconds);
 	}
 
-	for (Trap& t: Factory<Trap>())
+	for (Trap& t : Factory<Trap>())
 	{
 		t.Update(seconds);
 		if (t.mShouldDestroy)
@@ -626,6 +627,11 @@ void Level01::VUpdate(double milliseconds)
 		{
 			Factory<StatusEffect>::Destroy(&s);
 		}
+	}
+
+	for (Transmogrify& t : Factory<Transmogrify>())
+	{
+		t.Update(seconds);
 	}
 
 #ifdef _DEBUG

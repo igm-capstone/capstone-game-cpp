@@ -12,6 +12,7 @@
 #include <Mathf.h>
 #include <SceneObjects/Lantern.h>
 #include <SceneObjects/Explosion.h>
+#include <SceneObjects/Transmogrify.h>
 
 NetworkManager::NetworkManager()
 {
@@ -228,6 +229,11 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration,
 	}
 	case SKILL_TYPE_TRANSMOGRIFY:
 	{
+		auto t = Factory<Transmogrify>::Create();
+		if (t)
+		{
+			t->Spawn(duration, targetUUID);
+		}
 		break;
 	}
 	case SKILL_TYPE_EXPLOSION:
@@ -317,20 +323,10 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 	}
 	case SKILL_TYPE_TRANSMOGRIFY:
 	{
-		unsigned int explorerUUID = static_cast<unsigned int>(targetUUID);
-
-		Explorer* pExplorer = nullptr;
-		for (Explorer& e : Factory<Explorer>())
+		auto t = Factory<Transmogrify>::Create();
+		if (t)
 		{
-			if (e.mNetworkID->mUUID == explorerUUID)
-			{
-				pExplorer = &e;
-			}
-		}
-
-		if (pExplorer)
-		{
-			// Swap Model...	
+			t->Spawn(duration, targetUUID);
 		}
 		break;
 	}

@@ -87,6 +87,7 @@
     <ClCompile Include="SceneObjects\Lantern.cpp" />
     <ClCompile Include="Components\AbominationController.cpp" />
     <ClCompile Include="SceneObjects\Explosion.cpp" />
+    <ClCompile Include="SceneObjects\Transmogrify.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\AnimationController.h" />
@@ -171,6 +172,7 @@
     <ClInclude Include="SceneObjects\Lantern.h" />
     <ClInclude Include="Components\AbominationController.h" />
     <ClInclude Include="SceneObjects\Explosion.h" />
+    <ClInclude Include="SceneObjects\Transmogrify.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
