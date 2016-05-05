@@ -581,11 +581,12 @@ void Level01::VUpdate(double milliseconds)
 	for (Heal& h : Factory<Heal>())
 	{
 		h.Update(seconds);
-		h.mDuration -= seconds;
-		if (h.mDuration <= 0.0f)
-		{
-			Factory<Heal>::Destroy(&h);
-		}
+
+	}
+
+	for (Explosion& e : Factory<Explosion>())
+	{
+		e.Update(seconds);
 	}
 
 	for (Trap& t: Factory<Trap>())
