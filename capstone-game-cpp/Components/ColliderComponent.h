@@ -4,7 +4,7 @@
 
 typedef int(*InteresectOBB)(class BaseColliderComponent*, class OrientedBoxColliderComponent*);
 typedef int(*InteresectSphere)(class BaseColliderComponent*, class SphereColliderComponent*);
-
+typedef int(*IntersectRay)(Ray<vec3f>, class BaseColliderComponent*, vec3f& poi, float& t);
 
 enum CLayer : short
 {
@@ -25,6 +25,8 @@ class BaseColliderComponent :
 public:
 	InteresectOBB	 mOnObbTest;
 	InteresectSphere mOnSphereTest;
+	IntersectRay mOnRayTest;
+
 	vec3f	mOffset;
 	CLayer	mLayer;
 	bool	mIsDynamic;
@@ -38,7 +40,7 @@ public:
 	EXPOSE_CALLBACK_1(TriggerExit, BaseSceneObject*)
 
 protected:
-	BaseColliderComponent() : mOnObbTest(nullptr), mOnSphereTest(nullptr), mOffset(0.0f), mLayer(COLLISION_LAYER_ROOT), mIsDynamic(true), mIsTrigger(false) {};
+	BaseColliderComponent() : mOnObbTest(nullptr), mOnSphereTest(nullptr), mOnRayTest(nullptr), mOffset(0.0f), mLayer(COLLISION_LAYER_ROOT), mIsDynamic(true), mIsTrigger(false) {};
 	~BaseColliderComponent() {};
 };
 
@@ -53,6 +55,7 @@ public:
 
 	static int IntersectAABBOBB(class BaseColliderComponent*, class OrientedBoxColliderComponent*);
 	static int IntersectAABBSphere(class BaseColliderComponent*, class SphereColliderComponent*);
+	static int IntersectRayAABB(Ray<vec3f>, class BaseColliderComponent*, vec3f&, float&);
 };
 
 class OrientedBoxColliderComponent : 
@@ -66,6 +69,7 @@ public:
 
 	static int IntersectOBBOBB(class BaseColliderComponent*, class OrientedBoxColliderComponent*);
 	static int IntersectOBBSphere(class BaseColliderComponent*, class SphereColliderComponent*);
+	static int IntersectRayOBB(Ray<vec3f>, class BaseColliderComponent*, vec3f&, float&);
 };
 
 class QuadColliderComponent :
@@ -89,6 +93,7 @@ public:
 
 	static int IntersectSphereOBB(class BaseColliderComponent*, class OrientedBoxColliderComponent*);
 	static int IntersectSphereSphere(class BaseColliderComponent*, class SphereColliderComponent*);
+	static int IntersectRaySphere(Ray<vec3f>, class BaseColliderComponent*, vec3f&, float&);
 };
 
 class PlaneColliderComponent :

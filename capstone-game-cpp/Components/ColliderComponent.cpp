@@ -10,6 +10,7 @@ BoxColliderComponent::BoxColliderComponent()
 	mCollider.halfSize	= { 0.5f, 0.5f, 0.5f };
 	mOnObbTest = IntersectAABBOBB;
 	mOnSphereTest = IntersectAABBSphere;
+	mOnRayTest = IntersectRayAABB;
 }
 
 BoxColliderComponent::~BoxColliderComponent()
@@ -27,6 +28,11 @@ int BoxColliderComponent::IntersectAABBSphere(BaseColliderComponent* self, Spher
 	return Rig3D::IntersectSphereAABB(other->mCollider, reinterpret_cast<BoxColliderComponent*>(self)->mCollider, unused);
 }
 
+int BoxColliderComponent::IntersectRayAABB(Ray<vec3f> ray, BaseColliderComponent* self, vec3f& poi, float& t)
+{
+	return Rig3D::IntersectRayAABB(ray, reinterpret_cast<BoxColliderComponent*>(self)->mCollider, poi, t);
+}
+
 #pragma endregion 
 
 #pragma region OrientedBoxColliderComponent
@@ -42,6 +48,7 @@ OrientedBoxColliderComponent::OrientedBoxColliderComponent()
 
 	mOnObbTest = IntersectOBBOBB;
 	mOnSphereTest = IntersectOBBSphere;
+	mOnRayTest = IntersectRayOBB;
 }
 
 OrientedBoxColliderComponent::~OrientedBoxColliderComponent()
@@ -58,6 +65,12 @@ int OrientedBoxColliderComponent::IntersectOBBSphere(BaseColliderComponent* self
 	vec3f unused;
 	return Rig3D::IntersectSphereOBB(other->mCollider, reinterpret_cast<OrientedBoxColliderComponent*>(self)->mCollider, unused);
 }
+
+int OrientedBoxColliderComponent::IntersectRayOBB(Ray<vec3f> ray, BaseColliderComponent* self, vec3f& poi, float& t)
+{
+	return Rig3D::IntersectRayOBB(ray, reinterpret_cast<OrientedBoxColliderComponent*>(self)->mCollider, poi, t);
+}
+
 
 #pragma endregion 
 
@@ -84,6 +97,7 @@ SphereColliderComponent::SphereColliderComponent()
 
 	mOnObbTest		= IntersectSphereOBB;
 	mOnSphereTest	= IntersectSphereSphere;
+	mOnRayTest = IntersectRaySphere;
 }
 
 SphereColliderComponent::~SphereColliderComponent()
@@ -100,6 +114,12 @@ int SphereColliderComponent::IntersectSphereSphere(BaseColliderComponent* self, 
 {
 	return Rig3D::IntersectSphereSphere(other->mCollider, reinterpret_cast<SphereColliderComponent*>(self)->mCollider);
 }
+
+int SphereColliderComponent::IntersectRaySphere(Ray<vec3f> ray, BaseColliderComponent* self, vec3f& poi, float& t)
+{
+	return Rig3D::IntersectRaySphere(ray, reinterpret_cast<SphereColliderComponent*>(self)->mCollider, poi, t);
+}
+
 
 #pragma endregion 
 
