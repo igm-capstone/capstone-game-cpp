@@ -54,7 +54,7 @@ void StatusEffect::OnPoisonUpdate(StatusEffect* self, float seconds)
 	{
 		if (iter->second > 0.0f)
 		{
-			iter->first->mHealth->TakeDamage(5.0f * seconds);
+			iter->first->mHealth->TakeDamage(5.0f * seconds, FLT_MIN);
 			iter->second -= seconds;
 		}
 	}
@@ -63,7 +63,7 @@ void StatusEffect::OnPoisonUpdate(StatusEffect* self, float seconds)
 	{
 		if (iter->second > 0.0f)
 		{
-			iter->first->mHealth->TakeDamage(5.0f * seconds);
+			iter->first->mHealth->TakeDamage(5.0f * seconds, FLT_MIN);
 			iter->second -= seconds;
 		}
 	}

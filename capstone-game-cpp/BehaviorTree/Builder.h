@@ -253,11 +253,11 @@ namespace BehaviorTree
 			return builder;
 		}
 
-		LeafBuilder<TreeBuilder, Behavior> Action(UpdateCallback update, std::string name = "Action")
+		TreeBuilder Action(UpdateCallback update, std::string name = "Action")
 		{
 			auto builder = LeafBuilder<TreeBuilder, BehaviorTree::Behavior>(this, this, update, name);
 			mTree->Start(*builder.mBehavior);
-			return builder;
+			return *this;
 		}
 
 

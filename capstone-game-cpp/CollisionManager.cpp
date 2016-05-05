@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "SceneObjects/Region.h"
 #include "SceneObjects/Heal.h"
+#include "SceneObjects/Explosion.h"
 
 // Functor used to find matching collisions
 namespace
@@ -86,6 +87,18 @@ void CollisionManager::DetectTriggers(std::vector<Collision>& frameCollisions)
 	for (Explorer& e : Factory<Explorer>())
 	{
 		for (Heal& h : Factory<Heal>())
+		{
+			if (IntersectSphereSphere(e.mCollider->mCollider, h.mSphereColliderComponent->mCollider))
+			{
+				frameCollisions.push_back(Collision());
+
+				Collision* pTrigger = &frameCollisions.back();
+				pTrigger->colliderA.SphereCollider = e.mCollider;
+				pTrigger->colliderB.SphereCollider = h.mSphereColliderComponent;
+			}
+		}
+
+		for (Explosion& h : Factory<Explosion>())
 		{
 			if (IntersectSphereSphere(e.mCollider->mCollider, h.mSphereColliderComponent->mCollider))
 			{

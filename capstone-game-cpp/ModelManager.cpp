@@ -5,7 +5,9 @@
 
 const uint32_t kStaticMeshModelTextureCount = 18;
 
-const char* kSprinterModelName		= "Sprinter_Final";
+const char* kSprinterModelName		= "Sprinter";
+const char* kTrapperModelName		= "Trapmaster_Final";
+const char* kProfessorModelName		= "ProfMayor";
 const char* kMinionAnimModelName	= "Minion_Test";
 const char* kPlantModelName			= "FlyTrap";
 const char* kTrapModelName			= "TrapAnimated";

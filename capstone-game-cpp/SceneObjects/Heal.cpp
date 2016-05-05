@@ -44,6 +44,12 @@ void Heal::Update(float seconds)
 		vec3f s = vec3f(cliqCity::graphicsMath::lerp(1.0f, mSphereColliderComponent->mCollider.radius, 1.0f - mDuration));
 		mTransform->SetScale(s);
 	}
+
+	mDuration -= seconds;
+	if (mDuration <= 0.0f)
+	{
+		Factory<Heal>::Destroy(this);
+	}
 }
 
 void Heal::OnTriggerEnter(BaseSceneObject* self, BaseSceneObject* other)

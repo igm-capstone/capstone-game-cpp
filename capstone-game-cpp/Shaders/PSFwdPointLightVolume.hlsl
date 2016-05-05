@@ -35,9 +35,9 @@ float4 main(Pixel pixel) : SV_TARGET
 
 	float cubeMapDistance = cubeDepthMap.Sample(depthSamplerState, -pixelToLight).r;
 	
-	float bias = 0.0001f;
+	float bias = 0.001f;
 
-	if (pixelToLightDistance - bias > cubeMapDistance)
+	if (pixelToLightDistance - bias > cubeMapDistance )
 	{
 		return float4(0.0f, 0.0f, 0.0f, 1.0f);
 	}

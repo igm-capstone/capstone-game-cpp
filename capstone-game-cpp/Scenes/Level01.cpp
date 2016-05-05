@@ -32,6 +32,8 @@
 #include <Components/DominationPointController.h>
 #include <Components/ImpController.h>
 #include <Components/FlyTrapController.h>
+#include <Components/AbominationController.h>
+#include <SceneObjects/Explosion.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -162,7 +164,10 @@ void Level01::InitializeAssets()
 		mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[i]);
 	}
 
+	mModelManager->LoadModel<GPU::SkinnedVertex>(kProfessorModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
+	mModelManager->LoadModel<GPU::SkinnedVertex>(kTrapperModelName);
+
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kPlantModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kTrapModelName);
@@ -375,9 +380,12 @@ void Level01::InitializeShaderResources()
 			"Assets/Textures/StaticMesh/Door.png", 
 			"Assets/Textures/Sprinter_D.png", 
 			"Assets/Textures/Heal.png",
-			"Assets/Textures/Trap.png"};
+			"Assets/Textures/Trap.png",
+			"Assets/Textures/Professor.png",
+			"Assets/Textures/Trapper_Texture.png"
+		};
 		
-		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 6);
+		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 8);
 		mRenderer->VAddShaderLinearSamplerState(mExplorerShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 	}
 
@@ -542,7 +550,10 @@ void Level01::VUpdate(double milliseconds)
 
 	for (auto& mc : Factory<Minion>())
 	{
-		mc.mController->Update(milliseconds);
+		if (mNetworkManager->mMode == NetworkManager::SERVER)
+		{
+			mc.mController->Update(milliseconds);
+		}
 
 		if (mc.mShouldDestroy)
 		{
@@ -576,11 +587,12 @@ void Level01::VUpdate(double milliseconds)
 	for (Heal& h : Factory<Heal>())
 	{
 		h.Update(seconds);
-		h.mDuration -= seconds;
-		if (h.mDuration <= 0.0f)
-		{
-			Factory<Heal>::Destroy(&h);
-		}
+
+	}
+
+	for (Explosion& e : Factory<Explosion>())
+	{
+		e.Update(seconds);
 	}
 
 	for (Trap& t: Factory<Trap>())
@@ -1078,6 +1090,16 @@ void Level01::RenderEffects()
 		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
 	}
 
+	for (Explosion& explosion : Factory<Explosion>())
+	{
+		mModel.world = explosion.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
+	}
+
+
 	mTime.color = { 1.0f, 0.1f, 1.0f, 1.0f };
 
 	for (Trap& trap : Factory<Trap>())
@@ -1112,8 +1134,11 @@ void Level01::RenderExplorers()
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 
 	// Textures
-	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 3, 0);
+
 	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
+
+	//uint8_t materialIDs[3] = { 6, 3, 7 };
+	uint8_t materialIDs[3] = { 3, 3, 7 };
 
 	for (Explorer& e : Factory<Explorer>())
 	{
@@ -1125,6 +1150,8 @@ void Level01::RenderExplorers()
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
 		
+		mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, materialIDs[e.GetExplorerType() - 1], 0);
+
 		mRenderer->VBindMesh(e.mModel->mMesh);
 		mRenderer->VDrawIndexed(0, e.mModel->mMesh->GetIndexCount());
 	}
@@ -1282,6 +1309,23 @@ void Level01::RenderMinions()
 	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
 
 	for (MinionController& mc : Factory<ImpController>())
+	{
+		Minion& m = *static_cast<Minion*>(mc.mSceneObject);
+
+		mModel.world = m.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		m.mAnimationController->mSkeletalHierarchy.CalculateSkinningMatrices(mSkinnedMeshMatrices);
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
+
+		mRenderer->VBindMesh(m.mModel->mMesh);
+		mRenderer->VDrawIndexed(0, m.mModel->mMesh->GetIndexCount());
+	}
+
+	for (AbominationController& mc : Factory<AbominationController>())
 	{
 		Minion& m = *static_cast<Minion*>(mc.mSceneObject);
 

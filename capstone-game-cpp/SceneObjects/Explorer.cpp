@@ -49,24 +49,8 @@ Explorer::Explorer()
 	//mNetworkID->RegisterNetHealthChangeCallback(&OnNetHealthChange);
 	mNetworkID->RegisterNetSyncAnimationCallback(&OnNetSyncAnimation);
 
-	Application::SharedInstance().GetModelManager()->GetModel(kSprinterModelName)->Link(this);
-
 	mAnimationController = Factory<AnimationController>::Create();
 	mAnimationController->mSceneObject = this;
-	mAnimationController->mSkeletalAnimations = &mModel->mSkeletalAnimations;
-	mAnimationController->mSkeletalHierarchy = mModel->mSkeletalHierarchy;
-	mAnimationController->RegisterCommandExecutedCallback(&OnAnimationCommandExecuted);
-	
-	SetStateAnimation(mAnimationController, ANIM_STATE_IDLE, &gSprinterAnimations[Animations::SPRINTER_IDLE], nullptr, 0, true);
-	SetStateAnimation(mAnimationController, ANIM_STATE_RUN, &gSprinterAnimations[Animations::SPRINTER_RUN], nullptr, 0, true);
-
-	Animation melee = gSprinterAnimations[Animations::SPRINTER_ATTACK];
-	KeyframeOption meleeOptions[] = { { melee.startFrameIndex, OnMeleeStart },{ melee.endFrameIndex, OnMeleeStop } };
-	SetStateAnimation(mAnimationController, ANIM_STATE_MELEE, &gSprinterAnimations[Animations::SPRINTER_ATTACK], meleeOptions, 2, false);
-
-	/*Animation revive = gSprinterAnimations[Animations::SPRINTER_REVIVE];
-	KeyframeOption reviveOptions[] = { { revive.startFrameIndex, OnMeleeStart },{ revive.endFrameIndex, OnMeleeStop } };
-	SetStateAnimation(mAnimationController, ANIM_STATE_REVIVE, &gSprinterAnimations[Animations::SPRINTER_REVIVE], reviveOptions, 2, false);*/
 
 	mController = Factory<ExplorerController>::Create();
 	mController->mSceneObject = this;
@@ -148,6 +132,7 @@ void Explorer::Spawn(vec3f pos, int UUID)
 {
 	mExplorerType = static_cast<ExplorerType>(UUID);
 
+	mTransform->SetRotation(-0.5f * PI, 0, 0);
 	mTransform->SetPosition(pos);		
 
 	mCollider->mIsActive = true;
@@ -155,6 +140,23 @@ void Explorer::Spawn(vec3f pos, int UUID)
 
 	mNetworkID->mIsActive = true;
 	mNetworkID->mUUID = UUID;
+
+	switch (GetExplorerType())
+	{
+	case HEALER:
+		SetSprinterAnimations(this);
+	//	SetProfessorAnimations(this);
+		break;
+	case SPRINTER:
+		SetSprinterAnimations(this);
+		break;
+	case TRAPMASTER:
+		SetTrapperAnimations(this);
+		mTransform->SetScale(vec3f(0.5f));
+		break;
+	default:
+		break;
+	}
 
 	mController->PlayStateAnimation(ANIM_STATE_IDLE);
 }
@@ -355,30 +357,29 @@ void Explorer::OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command
 	}
 }
 
-void Explorer::OnHealthChange(BaseSceneObject* obj, float newVal)
+void Explorer::OnHealthChange(BaseSceneObject* obj, float oldVal, float newVal, float hitDirection)
 {
 
 }
 
 void Explorer::OnDeath(BaseSceneObject* obj)
 {
-	TRACE_LOG("DIED");
 	Explorer* pExplorer = reinterpret_cast<Explorer*>(obj);
 	pExplorer->mIsDead = true;
 	pExplorer->mInteractionCollider->mIsActive = true;
 	pExplorer->mCollider->mIsDynamic = false;
+	pExplorer->mController->PlayStateAnimation(ANIM_STATE_DEATH);
 	Singleton<AIManager>::SharedInstance().SetGridDirty(true);
 }
 
 void Explorer::OnRevive(BaseSceneObject* obj)
 {
-	TRACE_LOG("REVIVED");
 	Explorer* pExplorer = reinterpret_cast<Explorer*>(obj);
 	pExplorer->mIsDead = false;
 	pExplorer->mInteractionCollider->mIsActive = false;
 	pExplorer->mCollider->mIsDynamic = true;
+	pExplorer->mController->PlayStateAnimation(ANIM_STATE_IDLE);
 	Singleton<AIManager>::SharedInstance().SetGridDirty(true);
-
 }
 
 void Explorer::OnCollisionExit(BaseSceneObject* obj, BaseSceneObject* other)
@@ -531,7 +532,8 @@ void Explorer::OnMeleeHit(BaseSceneObject* self, BaseSceneObject* other)
 	if (other->Is<Minion>())
 	{
 		auto m = reinterpret_cast<Minion*>(other);
-		m->mHealth->TakeDamage(e->mAttackDamage, false);
+		vec3f dir = other->mTransform->GetPosition() - self->mTransform->GetPosition();
+		m->mHealth->TakeDamage(e->mAttackDamage, atan2f(dir.y, dir.x), false);
 	}
 	else if (other->Is<Explorer>())
 	{

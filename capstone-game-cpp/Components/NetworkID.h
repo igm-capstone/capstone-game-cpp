@@ -11,7 +11,7 @@ public:
 
 	EXPOSE_CALLBACK_1(NetAuthorityChange, bool)
 	EXPOSE_CALLBACK_2(NetSyncTransform, vec3f, quatf)
-	EXPOSE_CALLBACK_2(NetHealthChange, float, float)
+	EXPOSE_CALLBACK_3(NetHealthChange, float, float, float)
 	EXPOSE_CALLBACK_2(NetSyncAnimation, byte, byte)
 	EXPOSE_CALLBACK_0(Interact)
 };

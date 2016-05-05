@@ -11,6 +11,7 @@
 #include "SceneObjects\Region.h"
 #include "SceneObjects\Door.h"
 #include "SceneObjects\Heal.h"
+#include "SceneObjects\Explosion.h"
 #include "SceneObjects\Trap.h"
 #include "SceneObjects\StatusEffect.h"
 #include "SceneObjects\Lantern.h"
@@ -20,6 +21,7 @@
 #include "Components\ExplorerController.h"
 #include "Components\GhostController.h"
 #include "Components\FlyTrapController.h"
+#include "Components\AbominationController.h"
 #include "Components\ImpController.h"
 #include "Components\DominationPointController.h"
 #include "Components\Skill.h"
@@ -62,6 +64,7 @@ REGISTER_FACTORY ( SphereColliderComponent,			MAX_EXPLORERS + MAX_MINIONS + MAX_
 REGISTER_FACTORY ( ExplorerController,				MAX_EXPLORERS)
 REGISTER_FACTORY ( GhostController,					1	)
 REGISTER_FACTORY ( ImpController,					MAX_IMPS)
+REGISTER_FACTORY ( AbominationController,			MAX_ABOMINATIONS)
 REGISTER_FACTORY ( FlyTrapController,				MAX_FLYTRAPS)
 
 REGISTER_FACTORY ( DominationPointController,		5	)
@@ -73,6 +76,7 @@ REGISTER_FACTORY ( AnimationController,				MAX_EXPLORERS + MAX_MINIONS)
 REGISTER_FACTORY ( PlaneColliderComponent,			100)
 
 REGISTER_FACTORY ( Heal, 5)
+REGISTER_FACTORY ( Explosion, 10)
 REGISTER_FACTORY ( Trap, 5)
 REGISTER_FACTORY ( StatusEffect, 8)
 REGISTER_FACTORY ( Lantern, 10)
