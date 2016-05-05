@@ -131,7 +131,8 @@ Ray<vec3f> CameraManager::Viewport2Ray(const vec2f& viewport)
 	vec4f ray_clip = vec4f(viewport.x, viewport.y, -1.0f, 1.0f) * (mCameraPersp.GetProjectionMatrix()).inverse();
 	ray_clip.w = 0;
 
-	pRay.normal = ray_clip * (mCameraPersp.GetViewMatrix()).inverse();
+	pRay.normal =  cliqCity::graphicsMath::normalize(ray_clip * (mCameraPersp.GetViewMatrix()).inverse());
+
 	pRay.origin = mOrigin;
 
 	return pRay;
