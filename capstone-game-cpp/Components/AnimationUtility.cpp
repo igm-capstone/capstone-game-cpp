@@ -7,7 +7,7 @@
 
 Animation gSprinterAnimations[Animations::SPRINTER_ANIMATION_COUNT] = {
 	{ "SprinterFinal.0004", 1, 70, 1 },
-	{ "SprinterFinal.0004", 80, 92, 1 },
+	{ "SprinterFinal.0004", 80, 93, 1 },
 	{ "SprinterFinal.0004", 100, 150, 1 },
 	{ "SprinterFinal.0004", 160, 217, 1 }
 };
