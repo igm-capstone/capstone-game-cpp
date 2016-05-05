@@ -167,8 +167,8 @@ void Level01::InitializeAssets()
 		mModelManager->LoadModel<GPU::Vertex3>(kStaticMeshModelNames[i]);
 	}
 
-	mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kProfessorModelName);
+	mModelManager->LoadModel<GPU::SkinnedVertex>(kSprinterModelName);
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kTrapperModelName);
 
 	mModelManager->LoadModel<GPU::SkinnedVertex>(kMinionAnimModelName);
@@ -398,9 +398,10 @@ void Level01::InitializeShaderResources()
 			"Assets/Textures/Heal.png",
 			"Assets/Textures/Trap.png",
 			"Assets/Textures/Professor.png",
+			"Assets/Textures/Trapper_Texture.png"
 		};
 		
-		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 7);
+		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 8);
 		mRenderer->VAddShaderLinearSamplerState(mExplorerShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 	}
 
@@ -1117,7 +1118,9 @@ void Level01::RenderExplorers()
 
 	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
 
-	uint8_t materialIDs[3] = { 6, 3, 3 };
+	//uint8_t materialIDs[3] = { 6, 3, 7 };
+	uint8_t materialIDs[3] = { 7, 7, 7 };
+
 
 	for (Explorer& e : Factory<Explorer>())
 	{

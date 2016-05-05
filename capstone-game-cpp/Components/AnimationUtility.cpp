@@ -6,17 +6,17 @@
 #include <ScareTacticsApplication.h>
 
 Animation gSprinterAnimations[Animations::SPRINTER_ANIMATION_COUNT] = {
-	{ "SprinterFinal.0003", 1, 70, 1 },
-	{ "SprinterFinal.0003", 80, 92, 1 },
-	{ "SprinterFinal.0003", 100, 150, 1 },
-	{ "SprinterFinal.0003", 160, 217, 1 }
+	{ "SprinterFinal.0004", 1, 70, 1 },
+	{ "SprinterFinal.0004", 80, 92, 1 },
+	{ "SprinterFinal.0004", 100, 150, 1 },
+	{ "SprinterFinal.0004", 160, 217, 1 }
 };
 
 Animation gTrapperAnimations[Animations::TRAPPER_ANIMATION_COUNT] = {
-	{ "Take 001", 1, 55, 1 },
-	{ "Take 001", 60, 80, 1 },
-	{ "Take 001", 90, 125, 1 },
-	{ "Take 001", 140, 208, 1 }
+	{ "SwootPants_Final.0002", 1, 55, 1 },
+	{ "SwootPants_Final.0002", 60, 80, 1 },
+	{ "SwootPants_Final.0002", 90, 125, 1 },
+	{ "SwootPants_Final.0002", 140, 208, 1 }
 };
 
 Animation gProfessorAnimations[Animations::PROFESSOR_ANIMATION_COUNT] = {
