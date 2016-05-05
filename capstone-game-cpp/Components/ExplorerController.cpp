@@ -22,7 +22,7 @@ ExplorerController::ExplorerController() :
 	mApplication(&Application::SharedInstance()),
 	mCameraManager(&Singleton<CameraManager>::SharedInstance()),
 	mAngle(0),
-	mMouseLock(0),
+	mMoveLockCooldown(0),
 	mSprintDuration(0),
 	mAcceleration(10.0f),
 	mCurrentSpeed(0),
@@ -74,7 +74,6 @@ bool ExplorerController::Move(float dt, vec3f& pos)
 
 bool ExplorerController::RotateTowardsMoveDirection(float dt, vec3f& pos, quatf& rot)
 {
-
 	auto lastPos = mSceneObject->mTransform->GetPosition();
 	auto dir = normalize(pos - lastPos);
 
@@ -82,12 +81,8 @@ bool ExplorerController::RotateTowardsMoveDirection(float dt, vec3f& pos, quatf&
 		return false;
 	}
 
-	//TRACE_LINE(lastPos, lastPos + dir * 5, Colors::red);
-
-	float targetAngle = atan2f(dir.y, dir.x);
-	mAngle = Mathf::LerpAngle(mAngle, targetAngle, 8 * dt);
-
-	return UpdateRotation(mAngle, rot);
+	mTargetAngle = atan2f(dir.y, dir.x);
+	return RotateTowardsTargetAngle(dt, rot);
 }
 
 bool ExplorerController::RotateTowardsMousePosition(float dt, vec3f& pos, quatf& rot)
@@ -102,10 +97,13 @@ bool ExplorerController::RotateTowardsMousePosition(float dt, vec3f& pos, quatf&
 		return false;
 	}
 
-	//TRACE_LINE(lastPos, lastPos + dir * 5, Colors::green);
+	mTargetAngle = atan2(dir.y, dir.x);
+	return RotateTowardsTargetAngle(dt, rot);
+}
 
-	float targetAngle = atan2(dir.y, dir.x);
-	mAngle = Mathf::LerpAngle(mAngle, targetAngle, 15 * dt);
+bool ExplorerController::RotateTowardsTargetAngle(float dt, quatf& rot)
+{
+	mAngle = Mathf::LerpAngle(mAngle, mTargetAngle, 5 * dt);
 
 	return UpdateRotation(mAngle, rot);
 }
@@ -114,7 +112,7 @@ bool ExplorerController::UpdateRotation(float angle, quatf& rot) {
 	quatf newRot = CalculateExplorerRotation(angle);
 
 	auto hasRotated = rot != newRot;
-	if (hasRotated && CanMove())
+	if (hasRotated/* && CanMove()*/)
 	{
 		rot = newRot;
 	}
@@ -156,23 +154,37 @@ bool ExplorerController::Update(double milliseconds)
 	// this line is to prevent huge dts during debug time
 	dt = min(dt, 0.05f);
 
+	if (mMoveLockCooldown > 0) {
+		mMoveLockCooldown = max(mMoveLockCooldown - dt, 0);
+	}
+
 	auto pos = mSceneObject->mTransform->GetPosition();
 	auto rot = mSceneObject->mTransform->GetRotation();
 
 	bool hasMoved   = Move(dt, pos);
 	bool hasRotated = false;
-	if (mMouseLock) {
-		mMouseLock = max(mMouseLock - dt, 0);
+	if (!CanMove()) {
+		hasRotated = RotateTowardsTargetAngle(dt, rot);
+	}
+	else if (!hasMoved) {
 		hasRotated = RotateTowardsMousePosition(dt, pos, rot);
 	}
 	else {
 		hasRotated = RotateTowardsMoveDirection(dt, pos, rot);
 	}
 
-	if (hasMoved /*|| hasRotated*/)
+	if (hasMoved || hasRotated)
 	{
-		PlayStateAnimation(ANIM_STATE_RUN);
-		OnMove(pos, rot);
+		if (hasMoved)
+		{
+			PlayStateAnimation(ANIM_STATE_RUN);
+		}
+		else if (mAnimationController->GetState() != ANIM_STATE_MELEE)
+		{
+			PlayStateAnimation(ANIM_STATE_IDLE);
+		}
+
+		OnMove(pos, rot, hasMoved);
 	}
 	else
 	{
@@ -180,10 +192,6 @@ bool ExplorerController::Update(double milliseconds)
 		{
 			PlayStateAnimation(ANIM_STATE_IDLE);
 		}
-	}
-
-	if (mInput->GetMouseButtonDown(MOUSEBUTTON_RIGHT)) {
-		mMouseLock = .2f;
 	}
 
 	UpdateInteractWill();
@@ -207,9 +215,8 @@ void ExplorerController::Melee()
 
 	if (magnitude(dir) > 0.001f) 
 	{
-		float targetAngle = atan2(dir.y, dir.x);
-		quatf rotation = CalculateExplorerRotation(targetAngle);
-		mSceneObject->mTransform->SetRotation(rotation);
+		mTargetAngle = atan2(dir.y, dir.x);
+		mMoveLockCooldown = 1.0f;
 	}
 
 	PlayStateAnimation(ANIM_STATE_MELEE);
@@ -217,6 +224,8 @@ void ExplorerController::Melee()
 
 bool ExplorerController::CanMove()
 {
+	return mMoveLockCooldown <= 0;
+
 	return mAnimationController->GetState() != ANIM_STATE_MELEE;
 }
 

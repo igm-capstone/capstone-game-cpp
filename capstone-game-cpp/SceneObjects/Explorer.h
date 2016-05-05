@@ -49,7 +49,7 @@ public:
 	void DebugSpawn(vec3f pos, int UUID);
 	void UpdateComponents(quatf rotation, vec3f position);
 
-	static void OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot);
+	static void OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot, bool sync = true);
 	static void OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth);
 	static void OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot);
 	//static void OnNetHealthChange(BaseSceneObject* obj, float newVal);

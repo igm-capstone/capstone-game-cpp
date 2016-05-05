@@ -15,7 +15,8 @@ class ExplorerController : public BaseComponent
 	CameraManager* mCameraManager;
 	
 	float mAngle;
-	float mMouseLock;
+	float mTargetAngle;
+	float mMoveLockCooldown;
 
 	float mSprintDuration;
 	quatf mModelRotation;
@@ -28,6 +29,7 @@ class ExplorerController : public BaseComponent
 	bool Move(float dt, vec3f& pos);
 	bool RotateTowardsMoveDirection(float dt, vec3f& pos, quatf& rot);
 	bool RotateTowardsMousePosition(float dt, vec3f& pos, quatf& rot);
+	bool RotateTowardsTargetAngle(float dt, quatf& rot);
 	bool UpdateRotation(float angle, quatf & rot);
 	bool CanMove();
 
@@ -47,7 +49,7 @@ public:
 	void PlayStateAnimation(AnimationControllerState state);
 	void PauseStateAnimation(AnimationControllerState state);
 
-	EXPOSE_CALLBACK_2(Move, vec3f, quatf)
+	EXPOSE_CALLBACK_3(Move, vec3f, quatf, bool)
 	EXPOSE_CALLBACK_0(BeginInteract)
 	EXPOSE_CALLBACK_0(EndInteract)
 };
