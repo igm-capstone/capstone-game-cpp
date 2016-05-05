@@ -219,6 +219,7 @@ void AnimationController::UpdateAnimation(SkeletalAnimation* pCurrentAnimation, 
 
 	SkeletalHierarchy& skeletalHierarchy = mSkeletalHierarchy;
 
+	if (mCurrentAnimationPlayTime < 0) mCurrentAnimationPlayTime = 0;
 	float t = mCurrentAnimationStartIndex + mCurrentAnimationPlayTime * framesPerMS;
 	mCurrentKeyframeIndex = static_cast<int>(floorf(t));
 	//TRACE_WATCH("Keyframe", mCurrentKeyframeIndex);
