@@ -34,6 +34,7 @@
 #include <Components/FlyTrapController.h>
 #include <Components/AbominationController.h>
 #include <SceneObjects/Explosion.h>
+#include <Mathf.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -179,10 +180,6 @@ void Level01::InitializeAssets()
 
 	//mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 	mLevel = Resource::LoadLevel("Assets/RPI_Level.json", mAllocator);
-
-
-	mFloorCollider.halfSize = mLevel.extents;
-	mFloorCollider.origin = mLevel.center;
 
 	mFloorCollider.halfSize = mLevel.extents;
 	mFloorCollider.origin	= mLevel.center;
@@ -575,7 +572,52 @@ void Level01::VUpdate(double milliseconds)
 	{
 		skill.Update();
 	}
+		
 
+#ifdef _DEBUG
+	if (mInput->GetKeyDown(KEYCODE_F3))
+	{
+		gDebugGrid = !gDebugGrid;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F4))
+	{
+		gDebugColl = !gDebugColl;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F5))
+	{
+		gDebugOrto = !gDebugOrto;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F6))
+	{
+		gDebugGBuffer = !gDebugGBuffer;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F7))
+	{
+		gDebugBVH = !gDebugBVH;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F8))
+	{
+		gDebugBT = !gDebugBT;
+	}
+	//Do not use F9, already used else-where
+	if (mInput->GetKeyDown(KEYCODE_F10))
+	{
+		SetRestart();
+	}
+#endif
+
+	UpdateGameState(milliseconds); //Input
+
+	mNetworkManager->Update();
+}
+
+void Level01::VFixedUpdate(double milliseconds)
+{
 	for (AnimationController& ac : Factory<AnimationController>())
 	{
 		ac.Update(milliseconds);
@@ -628,52 +670,8 @@ void Level01::VUpdate(double milliseconds)
 		}
 	}
 
-#ifdef _DEBUG
-	if (mInput->GetKeyDown(KEYCODE_F3))
-	{
-		gDebugGrid = !gDebugGrid;
-	}
-
-	if (mInput->GetKeyDown(KEYCODE_F4))
-	{
-		gDebugColl = !gDebugColl;
-	}
-
-	if (mInput->GetKeyDown(KEYCODE_F5))
-	{
-		gDebugOrto = !gDebugOrto;
-	}
-
-	if (mInput->GetKeyDown(KEYCODE_F6))
-	{
-		gDebugGBuffer = !gDebugGBuffer;
-	}
-
-	if (mInput->GetKeyDown(KEYCODE_F7))
-	{
-		gDebugBVH = !gDebugBVH;
-	}
-
-	if (mInput->GetKeyDown(KEYCODE_F8))
-	{
-		gDebugBT = !gDebugBT;
-	}
-	//Do not use F9, already used else-where
-	if (mInput->GetKeyDown(KEYCODE_F10))
-	{
-		Application::SharedInstance().LoadScene<Level01>();
-	}
-#endif
-
-	UpdateGameState(milliseconds); //Input
-}
-
-void Level01::VFixedUpdate(double milliseconds)
-{
 	if (mAIManager->IsGridDirty()) ComputeGrid(); 
 	mAIManager->Update();
-
-	mNetworkManager->Update();
 }
 
 void Level01::SetReady(int clientID)
@@ -690,6 +688,66 @@ void Level01::SetReady(int clientID)
 	else if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
 		mNetworkManager->mServer.SendToAll(&p);
 	}
+}
+
+void Level01::SetRestart()
+{
+	Packet p(RESTART);
+	
+	Restart();
+
+	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
+		mNetworkManager->mClient.SendData(&p);
+	}
+	else if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
+		mNetworkManager->mServer.SendToAll(&p);
+	}
+}
+
+void Level01::Restart()
+{
+	TRACE_LOG("Restarting");
+	
+	CLEAR_FACTORY(Minion);
+	CLEAR_FACTORY(Lantern);
+	CLEAR_FACTORY(Trap);
+	CLEAR_FACTORY(StatusEffect);
+
+	for (auto& lamp : Factory<Lamp>())
+	{
+		lamp.mStatus = LAMP_OFF;
+	}
+
+	for (auto& door : Factory<Door>())
+	{
+		if (!door.mColliderComponent->mIsActive) door.ToggleDoor();
+	}
+
+	for (auto& d : Factory<DominationPoint>())
+	{
+		d.mController->mProgress = 0;
+		d.mController->isDominated = false;
+	}
+
+	SpawnPoint& sp = *(Factory<SpawnPoint>().begin());
+	for (auto& e : Factory<Explorer>())
+	{
+		auto rndPos = sp.mTransform->GetPosition() + vec3f(Mathf::RandomRange(-4, 4), Mathf::RandomRange(-4, 4), 0);
+		e.mTransform->SetPosition(rndPos);
+		e.OnMove(&e, rndPos, e.mTransform->GetRotation());
+		e.mHealth->SetHealth(9999);
+	}
+
+	for (auto& g : Factory<Ghost>())
+	{
+		g.TickMana(99999);
+	}
+
+	mGameState = GAME_STATE_INITIAL;
+	mUIManager.SetReadyState(0, false);
+	mUIManager.SetReadyState(1, false);
+	mUIManager.SetReadyState(2, false);
+	mUIManager.SetReadyState(3, false);
 }
 
 void Level01::UpdateGameState(double milliseconds)
@@ -830,10 +888,10 @@ void Level01::VRender()
 	switch (mGameState)
 	{
 	case GAME_STATE_FINAL_GHOST_WIN:
-		mUIManager.RenderEndScreen(true);
+		mUIManager.RenderEndScreen(true, [this]() {SetRestart(); return true; });
 		break;
 	case GAME_STATE_FINAL_EXPLORERS_WIN:
-		mUIManager.RenderEndScreen(false);
+		mUIManager.RenderEndScreen(false, [this]() {SetRestart(); return true; });
 		break;
 	case GAME_STATE_INITIAL:
 		mUIManager.RenderReadyScreen(mNetworkManager->ID());
@@ -1470,7 +1528,7 @@ void Level01::ComputeGrid()
 
 	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 0, 1);
 	
-	//First no floors
+	//First no floors/stairs
 	int instanceCount = 0;
 	for (Factory<StaticMesh>::iterator it = Factory<StaticMesh>().begin(); it != Factory<StaticMesh>().end();)
 	{
@@ -1478,7 +1536,11 @@ void Level01::ComputeGrid()
 		auto modelCluster = staticMesh.mModel;
 		auto numElements = modelCluster->ShareCount();
 
-		if (modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR]) {
+		if (modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR] &&
+			modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_STAIRS] &&
+			modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_STAIRS_LEFT] &&
+			modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_STAIR_FULL] &&
+			modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_STAIR_HALF]) {
 			mRenderer->VBindMesh(modelCluster->mMesh);
 			mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
 		}
@@ -1489,7 +1551,7 @@ void Level01::ComputeGrid()
 
 	mRenderer->VCopySubresource(mGridContext, 4, 2);
 
-	//Now only the floors
+	//Now only the floors/stairs
 	instanceCount = 0;
 	for (Factory<StaticMesh>::iterator it = Factory<StaticMesh>().begin(); it != Factory<StaticMesh>().end();)
 	{
@@ -1497,7 +1559,11 @@ void Level01::ComputeGrid()
 		auto modelCluster = staticMesh.mModel;
 		auto numElements = modelCluster->ShareCount();
 
-		if (modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR]) {
+		if (modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR] &&
+			modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_STAIRS] &&
+			modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_STAIRS_LEFT] &&
+			modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_STAIR_FULL] &&
+			modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_STAIR_HALF]) {
 			mRenderer->VBindMesh(modelCluster->mMesh);
 			mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
 			break; // Early exit;

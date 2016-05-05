@@ -224,6 +224,10 @@ void NetworkServer::ReceiveFromClients()
 					Retransmit(clientID, &packet);
 					NetworkRpc::Ready(packet.ClientID, packet.AsBool);
 					break;
+				case RESTART:
+					Retransmit(clientID, &packet);
+					NetworkRpc::Restart();
+					break;
 				default:
 					TRACE_LOG("error in packet types\n");
 					break;

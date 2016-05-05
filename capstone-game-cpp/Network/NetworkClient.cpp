@@ -145,6 +145,9 @@ void NetworkClient::Update()
 			case READY:
 				NetworkRpc::Ready(packet.ClientID, packet.AsBool);
 				break;
+			case RESTART:
+				NetworkRpc::Restart();
+				break;
 			default:
 				TRACE_LOG("error in packet types\n");
 				break;
