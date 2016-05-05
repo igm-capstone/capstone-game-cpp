@@ -224,7 +224,7 @@ void AnimationController::UpdateAnimation(SkeletalAnimation* pCurrentAnimation, 
 	float u = t - mCurrentKeyframeIndex;
 	for (JointAnimation jointAnimation : pCurrentAnimation->jointAnimations)
 	{
-		Keyframe& current = jointAnimation.keyframes[mCurrentKeyframeIndex];
+		Keyframe& current = jointAnimation.keyframes[min(mCurrentKeyframeIndex, mCurrentAnimationEndIndex)];
 		Keyframe& next = jointAnimation.keyframes[min(mCurrentKeyframeIndex + 1, mCurrentAnimationEndIndex)];
 
 		quatf rotation = cliqCity::graphicsMath::normalize(cliqCity::graphicsMath::slerp(current.rotation, next.rotation, u));

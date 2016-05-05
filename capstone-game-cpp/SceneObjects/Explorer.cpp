@@ -59,7 +59,7 @@ Explorer::Explorer()
 	mController->mAnimationController = mAnimationController;	// Be careful if you move this code. AnimationController should exist before here.
 
 	mCollider = Factory<SphereColliderComponent>::Create();
-	mCollider->mCollider.radius = 1.4f;
+	mCollider->mCollider.radius = 0.5f;
 	mCollider->mIsDynamic = true;
 	mCollider->mSceneObject = this;
 	mCollider->mIsActive = false;
@@ -161,14 +161,14 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	mController->PlayStateAnimation(ANIM_STATE_IDLE);
 }
 
-void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
+void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot, bool sync)
 {
 	auto e = static_cast<Explorer*>(obj);
 	e->mTransform->SetPosition(newPos);
 	e->mTransform->SetRotation(newRot);
 	e->UpdateComponents(newRot, newPos);
 
-	if (e->mNetworkID->mHasAuthority) {
+	if (sync && e->mNetworkID->mHasAuthority) {
 		e->mCameraManager->ChangeLookAtTo(newPos);
 		Packet p(PacketTypes::SYNC_TRANSFORM);
 		p.UUID = e->mNetworkID->mUUID;
