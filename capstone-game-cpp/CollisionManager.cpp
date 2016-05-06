@@ -531,23 +531,9 @@ void CollisionManager::DetectCollisions(double milliseconds)
 
 		if (pMinRegion)
 		{
-			if (minZ == FLT_MAX)
-			{
-				__debugbreak();
-			}
 			position.z = Mathf::Lerp(position.z, minZ, min(float(milliseconds) * 0.01f, 1));
-
-			if (position.z > 1000.0f || position.z < -1000.0f)
-			{
-				__debugbreak();
-			}
-
 			pSphereComponent->mSceneObject->mTransform->SetPosition(position);
 			pNode->object->OnCollisionExit(pMinRegion);
-		}
-		else
-		{
-			TRACE_WARN("No pRegion (Minion: " << pSphereComponent->mSceneObject->Is<Minion>() << ") (Explorer: " << pSphereComponent->mSceneObject->Is<Explorer>() << ")");
 		}
 
 		colliderIndices.clear();
