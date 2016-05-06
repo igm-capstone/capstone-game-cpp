@@ -1445,8 +1445,9 @@ void Level01::RenderWorldSpaceSprites()
 
 	for (Health& h : Factory<Health>())
 	{
+		auto isExplorer = h.mSceneObject->Is<Explorer>();
 		auto screenPos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, isGhost ? -30.0f : -90.0f);
-		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 1, screenPos, isGhost ? vec2f(75, 11) : vec2f(90, 12), vec4f(1, 1, 1, 1), vec2f(h.GetHealthPerc(), 1));
+		mSpriteManager->DrawSprite(SPRITESHEET_BARS, isExplorer ? 2 : 1, screenPos, isGhost ? vec2f(75, 11) : vec2f(90, 12), vec4f(1, 1, 1, 1), vec2f(h.GetHealthPerc(), 1));
 		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 0, screenPos, isGhost ? vec2f(75, 11) : vec2f(90, 12));
 	}
 

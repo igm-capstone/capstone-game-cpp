@@ -247,9 +247,9 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		e->mSkills[HEAL_SKILL_INDEX]->mDuration = 2.0f;
 
 		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
-		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
+		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 4, 8);
 		mUIManager->AddSkill(e->mSkills[HEAL_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 0, 6);
-		mUIManager->AddSkill(e->mSkills[LANTERN_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 6, 9);
+		mUIManager->AddSkill(e->mSkills[LANTERN_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 7, 9);
 
 		e->mAttackDamage = meleeConfig["damage"].get<float>();
 
@@ -279,8 +279,8 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
 		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
 		mUIManager->AddSkill(e->mSkills[POISON_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 2, 6);
-		mUIManager->AddSkill(e->mSkills[SLOW_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 4, 4);
-		mUIManager->AddSkill(e->mSkills[LANTERN_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 6, 9);
+		mUIManager->AddSkill(e->mSkills[SLOW_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 3, 4);
+		mUIManager->AddSkill(e->mSkills[LANTERN_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 7, 9);
 
 		e->mAttackDamage = tossConfig["damage"].get<float>();
 
@@ -301,9 +301,9 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		e->mSkills[MELEE_SKILL_INDEX]->mSceneObject = e;
 
 		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
-		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
+		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 6, 8);
 		mUIManager->AddSkill(e->mSkills[SPRINT_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 1, 6);
-		mUIManager->AddSkill(e->mSkills[LANTERN_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 6, 9);
+		mUIManager->AddSkill(e->mSkills[LANTERN_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 7, 9);
 
 		e->mAttackDamage = meleeConfig["damage"].get<float>();
 		e->mController->mSprintMultiplier = sprintConfig["speedMultiplier"].get<float>();

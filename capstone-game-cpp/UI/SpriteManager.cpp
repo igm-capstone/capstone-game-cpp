@@ -14,7 +14,7 @@ void SpriteManager::Initialize(Rig3D::IMesh* spriteMesh, Rig3D::IShaderResource*
 	LoadFont("Assets/UI/Fonts/ashcanbb_bold.ttf_sdf.png");
 	LoadSpriteSheet("Assets/UI/Health.png", 900, 112, 1, 4);
 	LoadSpriteSheet("Assets/UI/UI_ghostIcons.png", 256, 256, 4, 4);
-	LoadSpriteSheet("Assets/UI/UI_playerIcons1024.png", 256, 256, 4, 4);
+	LoadSpriteSheet("Assets/UI/UI_explorerIcons.png", 256, 256, 4, 4);
 	LoadSpriteSheet("Assets/UI/Panels.png", 1024, 256, 1, 4);
 	LoadSpriteSheet("Assets/UI/Keys.png", 96, 96, 8, 2);
 	LoadSpriteSheet("Assets/UI/Icons.png", 256, 256, 4, 4);
