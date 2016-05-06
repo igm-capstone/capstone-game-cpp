@@ -33,7 +33,7 @@ void UIManager::RenderPanel()
 
 void UIManager::RenderSkillButton(Button* b, vec2f pos)
 {
-	if (b->isHighlighted) mSpriteManager->DrawSprite(b->sheetID, 7, pos, vec2f(100, 100), vec4f(0,0.5f,0.13f,1));
+	if (b->isHighlighted) mSpriteManager->DrawSprite(b->sheetID, 7, pos, vec2f(100, 100), vec4f(0,0.65f,0.16f,1));
 	mSpriteManager->DrawSprite(b->sheetID, 8+b->spriteID, pos, vec2f(100, 100));
 	mSpriteManager->DrawSprite(b->sheetID, b->spriteID, pos, vec2f(100, 100), vec4f(1,1,1,1), vec3f(1,1), 2*PI * b->skill->Recharged());
 	mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 16, pos + vec2f(0,30), vec4f(1, 1, 1, 1), ALIGN_CENTER, "%s", b->skill->mName);
