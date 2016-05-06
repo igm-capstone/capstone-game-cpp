@@ -185,7 +185,7 @@ bool ExplorerController::Update(double milliseconds)
 			PlayStateAnimation(ANIM_STATE_IDLE);
 		}
 
-		OnMove(pos, rot, hasMoved);
+		OnMove(pos, rot);
 	}
 	else
 	{

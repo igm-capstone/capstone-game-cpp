@@ -38,6 +38,7 @@ Explorer::Explorer()
 	: mAttackDamage(0)
 	, mIsDead(false)
 	, mIsTransmogrified(false)
+	, mLastPosition()
 {
 	mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
 	mCameraManager = &Singleton<CameraManager>::SharedInstance();
@@ -165,14 +166,14 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	mController->PlayStateAnimation(ANIM_STATE_IDLE);
 }
 
-void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot, bool sync)
+void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
 {
 	auto e = static_cast<Explorer*>(obj);
 	e->mTransform->SetPosition(newPos);
 	e->mTransform->SetRotation(newRot);
 	e->UpdateComponents(newRot, newPos);
 
-	if (sync && e->mNetworkID->mHasAuthority) {
+	if (magnitude(e->mLastPosition - newPos) > 0 && e->mNetworkID->mHasAuthority) {
 		e->mCameraManager->ChangeLookAtTo(newPos);
 		Packet p(PacketTypes::SYNC_TRANSFORM);
 		p.UUID = e->mNetworkID->mUUID;
@@ -180,6 +181,8 @@ void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot, bool syn
 		p.AsTransform.Rotation = newRot;
 		e->mNetworkClient->SendData(&p);
 	}
+
+	e->mLastPosition = newPos;
 
 	if (gDebugExplorer) {
 		auto& ai = Singleton<AIManager>::SharedInstance();

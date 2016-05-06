@@ -51,7 +51,7 @@ public:
 	void PlayStateAnimation(AnimationControllerState state, bool forceRestart = false);
 	void PauseStateAnimation(AnimationControllerState state);
 
-	EXPOSE_CALLBACK_3(Move, vec3f, quatf, bool)
+	EXPOSE_CALLBACK_2(Move, vec3f, quatf)
 	EXPOSE_CALLBACK_0(BeginInteract)
 	EXPOSE_CALLBACK_0(EndInteract)
 };

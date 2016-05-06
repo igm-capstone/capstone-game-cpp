@@ -206,7 +206,6 @@ bool MinionController::LookAt(vec2f dir)
 
 	mAngle = Mathf::LerpAngle(mAngle, targetAngle, mTurnRate * dt);
 	mIsTransformDirty = true;
-	TRACE_WATCH("angle", mAngle);
 	return false;
 }
 
