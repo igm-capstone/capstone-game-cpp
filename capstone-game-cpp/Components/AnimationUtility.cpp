@@ -24,7 +24,7 @@ Animation gProfessorAnimations[Animations::PROFESSOR_ANIMATION_COUNT] = {
 	{ "Take 001", 80, 94, 1 },
 	{ "Take 001", 105, 153, 1 },
 	{ "Take 001", 165, 223, 1 },
-	{ "Take 001", 245, 330, 1 }
+	{ "Take 001", 245, 322, 1 }
 };
 
 Animation gMinionAnimations[Animations::MINION_ANIMATION_COUNT] = {
@@ -92,7 +92,7 @@ void SetProfessorAnimations(class Explorer* explorer)
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_IDLE, &gProfessorAnimations[Animations::PROFESSOR_IDLE], nullptr, 0, true);
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_RUN, &gProfessorAnimations[Animations::PROFESSOR_RUN], nullptr, 0, true);
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_SKILL_0, &gProfessorAnimations[Animations::PROFESSOR_HEAL], nullptr, 0, false);
-	//SetStateAnimation(explorer->mAnimationController, ANIM_STATE_DEATH, &gProfessorAnimations[Animations::PROFESSOR_DEATH], nullptr, 0, false);
+	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_DEATH, &gProfessorAnimations[Animations::PROFESSOR_DEATH], nullptr, 0, false);
 
 	Animation melee = gProfessorAnimations[Animations::PROFESSOR_ATTACK];
 	KeyframeOption meleeOptions[] = { { melee.startFrameIndex, Explorer::OnMeleeStart },{ melee.endFrameIndex, Explorer::OnMeleeStop } };
