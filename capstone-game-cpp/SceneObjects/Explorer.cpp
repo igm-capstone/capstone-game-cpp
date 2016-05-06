@@ -555,9 +555,11 @@ void Explorer::OnMeleeHit(BaseSceneObject* self, BaseSceneObject* other)
 	}
 	else if (other->Is<Explorer>())
 	{
-
-		// Check Friendly Fire or haunt state of explorer.
-		//	auto e = reinterpret_cast<Explorer*>(other);
-		//	e->mHealth->TakeDamage(100.0f, false);
+		auto t = reinterpret_cast<Explorer*>(other);
+		if (t->mIsTransmogrified)
+		{
+			vec3f dir = other->mTransform->GetPosition() - self->mTransform->GetPosition();
+			t->mHealth->TakeDamage(e->mAttackDamage, atan2f(dir.y, dir.x), false);
+		}
 	}
 }
