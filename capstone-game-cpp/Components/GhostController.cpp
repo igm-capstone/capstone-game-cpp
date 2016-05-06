@@ -44,12 +44,12 @@ void GhostController::Update(double milliseconds)
 			vec2f overflow = targetOrigin - targetFrame.origin;
 			ds -= overflow;
 		}
-
+/*
 		TRACE_LINE(origin + extents, origin - extents, Colors::blue);
 		TRACE_LINE(targetFrame.origin + targetFrame.halfSize, targetFrame.origin - targetFrame.halfSize, Colors::red);
 		TRACE_LINE(sceneBounds.origin + sceneBounds.halfSize, sceneBounds.origin - sceneBounds.halfSize, Colors::green);
 
-		camManager->ChangeLookAtBy(ds);
+	*/	camManager->ChangeLookAtBy(ds);
 	}
 
 	if (mInput->GetKeyDown(KEYCODE_1))
