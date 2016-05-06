@@ -14,6 +14,15 @@ bool MainMenuScene::gLocalServer = false;
 bool MainMenuScene::gDebugBoth = false;
 extern bool gDebugExplorer;
 
+MainMenuScene::MainMenuScene(): mErrorMsg(nullptr), mResource(nullptr)
+{}
+
+MainMenuScene::~MainMenuScene()
+{
+	mResource->~IShaderResource();
+	mAllocator.Free();
+}
+
 void MainMenuScene::VInitialize()
 {
 	mState = BASE_SCENE_STATE_INITIALIZING;
@@ -60,6 +69,7 @@ void MainMenuScene::VRender()
 	mRenderer->VSetPixelShader(mApplication->mPSFwdTexture);
 
 	mRenderer->VSetPixelShaderResourceView(mResource, 0, 0);
+	mRenderer->VSetPixelShaderSamplerStates(mResource);
 
 	mRenderer->GetDeviceContext()->Draw(3, 0);
 
@@ -87,8 +97,8 @@ void MainMenuScene::RenderMainMenu(BaseScene* s)
 #ifdef _DEBUG
 	ImGui::SetNextWindowPos(ImVec2(0.439f * w, 0.528f * h), ImGuiSetCond_Always);
 	ImGui::SetNextWindowContentWidth(0.15f * w);
-#elif
-	ImGui::SetNextWindowPos(ImVec2(0.439f * w, 0.55f * h), ImGuiSetCond_Always);
+#else
+	ImGui::SetNextWindowPos(ImVec2(0.439f * w, 0.56f * h), ImGuiSetCond_Always);
 	ImGui::SetNextWindowContentSize(ImVec2(0.15f * w, 0.266f * h));
 #endif
 
@@ -166,9 +176,6 @@ void MainMenuScene::VShutdown()
 	mState = BASE_SCENE_STATE_SHUTDOWN;
 
 	// Shutdown code here
-	mResource->~IShaderResource();
-
-	mAllocator.Free();
 }
 
 void MainMenuScene::VOnResize()

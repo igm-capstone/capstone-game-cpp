@@ -11,8 +11,8 @@ public:
 	static bool gLocalServer;
 	static bool gDebugBoth;
 
-	MainMenuScene() {};
-	~MainMenuScene() override {}
+	MainMenuScene();
+	~MainMenuScene() override;
 
 	void VInitialize() override;
 	void VUpdate(double milliseconds) override;
