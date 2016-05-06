@@ -149,7 +149,7 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	case HEALER:
 	//	SetSprinterAnimations(this);
 		SetProfessorAnimations(this);
-		mTransform->SetScale(vec3f(0.25f));
+		mTransform->SetScale(vec3f(0.20f));
 		break;
 	case SPRINTER:
 		SetSprinterAnimations(this);
@@ -240,6 +240,8 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		auto meleeConfig = findByName(skills, "LongAttack");
 		e->mSkills[MELEE_SKILL_INDEX] = createExplorerSkill(DoMelee, MOUSEBUTTON_LEFT, meleeConfig);
 		e->mSkills[MELEE_SKILL_INDEX]->mSceneObject = e;
+
+		e->mSkills[HEAL_SKILL_INDEX]->mDuration = 2.0f;
 
 		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
 		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
@@ -467,7 +469,7 @@ bool Explorer::DoHeal(BaseSceneObject* obj, float duration, BaseSceneObject* tar
 		explorer->mController->PlayStateAnimation(ANIM_STATE_SKILL_0);
 
 		Packet p(PacketTypes::SPAWN_SKILL);
-		p.AsSkill.Position = explorer->mTransform->GetPosition() - vec3f(0.0f, 0.0f, 2.5f);
+		p.AsSkill.Position = explorer->mTransform->GetPosition();
 		p.AsSkill.Duration = explorer->mSkills[HEAL_SKILL_INDEX]->mDuration;
 		p.AsSkill.Type = SkillPacketTypes::SKILL_TYPE_HEAL;
 		p.UUID = explorer->mNetworkID->mUUID;

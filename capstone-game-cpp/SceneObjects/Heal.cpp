@@ -7,9 +7,9 @@
 #include <trace.h>
 
 
-Heal::Heal() : mSphereColliderComponent(Factory<SphereColliderComponent>::Create()), mNetworkID(Factory<NetworkID>::Create()), mHealthRestored(50.0f), mDuration(0.0f)
+Heal::Heal() : mSphereColliderComponent(Factory<SphereColliderComponent>::Create()), mNetworkID(Factory<NetworkID>::Create()), mHealthRestored(50.0f), mActiveDuration(0.0f), mDuration(0.0f)
 {
-	mSphereColliderComponent->mCollider.radius = 5.0f;
+	mSphereColliderComponent->mCollider.radius = 2.5f;
 	mSphereColliderComponent->mLayer = COLLISION_LAYER_EXPLORER_SKILL;
 	mSphereColliderComponent->mIsTrigger = true;
 	mSphereColliderComponent->mIsDynamic = false;
@@ -28,6 +28,7 @@ Heal::~Heal()
 
 void Heal::Spawn(vec3f pos, int UUID, float duration)
 {
+	TRACE_LOG("HEAL");
 	mTransform->SetPosition(pos);
 	mSphereColliderComponent->mCollider.origin = pos;
 	mNetworkID->mUUID = UUID;
@@ -36,17 +37,18 @@ void Heal::Spawn(vec3f pos, int UUID, float duration)
 
 void Heal::Update(float seconds)
 {
-	static float growthRate = 2.0f * seconds;
+	static float growthRate = seconds;
 	vec3f scale = mTransform->GetScale();
 
 	if (scale.x <= mSphereColliderComponent->mCollider.radius)
 	{
-		vec3f s = vec3f(cliqCity::graphicsMath::lerp(1.0f, mSphereColliderComponent->mCollider.radius, 1.0f - mDuration));
+		float t = mActiveDuration / mDuration;
+		vec3f s = vec3f(cliqCity::graphicsMath::lerp(0.0f, mSphereColliderComponent->mCollider.radius, t));
 		mTransform->SetScale(s);
 	}
 
-	mDuration -= seconds;
-	if (mDuration <= 0.0f)
+	mActiveDuration += seconds;
+	if (mActiveDuration >= mDuration)
 	{
 		Factory<Heal>::Destroy(this);
 	}
