@@ -25,4 +25,8 @@ public:
 	bool StartClient();
 
 	static void RenderMainMenu(BaseScene* s);
+
+	LinearAllocator		mAllocator;
+
+	IShaderResource* mResource;
 };
