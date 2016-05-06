@@ -735,6 +735,8 @@ void Level01::Restart()
 	{
 		d.mController->mProgress = 0;
 		d.mController->isDominated = false;
+		for (int i = 0; i < MAX_EXPLORERS; i++)
+			d.mController->mExplorers[i] = nullptr;
 	}
 
 	SpawnPoint& sp = *(Factory<SpawnPoint>().begin());
@@ -1471,8 +1473,24 @@ void Level01::RenderWorldSpaceSprites()
 	for (Health& h : Factory<Health>())
 	{
 		auto isExplorer = h.mSceneObject->Is<Explorer>();
+		auto isTransmogrified = isExplorer && static_cast<Explorer*>(h.mSceneObject)->mIsTransmogrified;
+
 		auto screenPos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, isGhost ? -30.0f : -90.0f);
-		mSpriteManager->DrawSprite(SPRITESHEET_BARS, isExplorer ? 2 : 1, screenPos, isGhost ? vec2f(75, 11) : vec2f(90, 12), vec4f(1, 1, 1, 1), vec2f(h.GetHealthPerc(), 1));
+		int color;
+		if (isGhost)
+		{
+			if (isExplorer)
+				color = 1;
+			else
+				color = 2;
+		} else
+		{
+			if (isExplorer && !isTransmogrified)
+				color = 2;
+			else
+				color = 1;
+		}
+		mSpriteManager->DrawSprite(SPRITESHEET_BARS, color, screenPos, isGhost ? vec2f(75, 11) : vec2f(90, 12), vec4f(1, 1, 1, 1), vec2f(h.GetHealthPerc(), 1));
 		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 0, screenPos, isGhost ? vec2f(75, 11) : vec2f(90, 12));
 	}
 

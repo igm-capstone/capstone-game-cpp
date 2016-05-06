@@ -144,6 +144,12 @@ Transform* Transform::GetParent() const
 
 void Transform::SetRotation(const quatf& rotation)
 {
+	if (std::isnan(mRotation.w) || std::isnan(mRotation.x) ||
+		std::isnan(mRotation.y) || std::isnan(mRotation.z))
+	{
+		__debugbreak();
+	}
+
 	mRotation.w = rotation.w;
 	mRotation.v.x = rotation.v.x;
 	mRotation.v.y = rotation.v.y;
@@ -155,6 +161,12 @@ void Transform::SetRotation(const quatf& rotation)
 void Transform::SetRotation(const vec3f& euler)
 {
 	mRotation = quatf::rollPitchYaw(euler.z, euler.x, euler.y);
+
+	if (std::isnan(mRotation.w) || std::isnan(mRotation.x) ||
+		std::isnan(mRotation.y) || std::isnan(mRotation.z))
+	{
+		__debugbreak();
+	}
 
 	mIsDirty = true;
 }
@@ -187,6 +199,12 @@ void Transform::SetParent(Transform* parent)
 void Transform::SetRotation(const float x, const float y, const float z)
 {
 	mRotation = quatf::rollPitchYaw(z, x, y);
+
+	if (std::isnan(mRotation.w) || std::isnan(mRotation.x) ||
+		std::isnan(mRotation.y) || std::isnan(mRotation.z))
+	{
+		__debugbreak();
+	}
 
 	mIsDirty = true;
 }
