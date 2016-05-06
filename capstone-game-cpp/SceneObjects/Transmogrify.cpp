@@ -55,6 +55,7 @@ void Transmogrify::Attach(Explorer* pExplorer)
 	pExplorer->mAnimationController = mAnimationController;
 	pExplorer->mAnimationController->mSceneObject = pExplorer;
 	mAnimationController->mIsActive = true;
+	mAnimationController->SetState(mTargetAnimationController->GetState());
 
 	mTransform->SetScale(pExplorer->mTransform->GetScale());
 	pExplorer->mTransform->SetScale(0.3f); // Minion model scale
