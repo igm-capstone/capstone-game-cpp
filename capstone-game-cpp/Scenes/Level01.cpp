@@ -1197,10 +1197,8 @@ void Level01::RenderExplorers()
 	mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 0, 0);
 
 	// Textures
-
 	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
 
-	//uint8_t materialIDs[3] = { 6, 3, 7 };
 	uint8_t materialIDs[4] = { 6, 3, 7, 0 };
 
 	for (Explorer& e : Factory<Explorer>())
