@@ -14,7 +14,7 @@
       "ramps": 25,
       "staticColliders": 229,
       "regions": 62,
-      "staticMeshes": 2068
+      "staticMeshes": 2065
     }
   },
   "lamps": [
@@ -2845,26 +2845,6 @@
         "bounds": {
           "center": [ -18.5345, -61.8119, -6.5359 ],
           "extents": [ 1.0007, 1.9773, 0.9459 ]
-        },
-        "textureName": "Couch.png"
-      },
-      {
-        "position": [ -1.5600, -42.4595, -5.5899 ],
-        "rotation": [ 0.0000, 0.0000, -0.6075, -0.7943 ],
-        "scale": [ 1.1300, 1.1300, 1.1300 ],
-        "bounds": {
-          "center": [ -1.5363, -42.4659, -6.5358 ],
-          "extents": [ 0.2835, 2.1979, 0.9459 ]
-        },
-        "textureName": "Couch.png"
-      },
-      {
-        "position": [ -1.5600, -35.0498, -5.5900 ],
-        "rotation": [ 0.0000, 0.0000, -0.8051, -0.5932 ],
-        "scale": [ 1.1300, 1.1300, 1.1300 ],
-        "bounds": {
-          "center": [ -1.5365, -35.0425, -6.5359 ],
-          "extents": [ 1.4175, 1.7034, 0.9459 ]
         },
         "textureName": "Couch.png"
       },
@@ -14958,16 +14938,6 @@
         "scale": [ 1.9000, 2.0000, 1.5000 ],
         "bounds": {
           "center": [ 41.8400, -72.5100, -6.2666 ],
-          "extents": [ 1.4091, 2.9752, 0.6866 ]
-        },
-        "textureName": "DiningTable_Chair_Study-Chair.png"
-      },
-      {
-        "position": [ -8.5600, -39.5500, -5.5800 ],
-        "rotation": [ 0.0000, 0.0000, 0.0000, 1.0000 ],
-        "scale": [ 1.9000, 2.0000, 1.5000 ],
-        "bounds": {
-          "center": [ -8.5600, -39.5500, -6.2666 ],
           "extents": [ 1.4091, 2.9752, 0.6866 ]
         },
         "textureName": "DiningTable_Chair_Study-Chair.png"
