@@ -147,8 +147,9 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	switch (GetExplorerType())
 	{
 	case HEALER:
-		SetSprinterAnimations(this);
-	//	SetProfessorAnimations(this);
+	//	SetSprinterAnimations(this);
+		SetProfessorAnimations(this);
+		mTransform->SetScale(vec3f(0.25f));
 		break;
 	case SPRINTER:
 		SetSprinterAnimations(this);
@@ -463,6 +464,8 @@ bool Explorer::DoHeal(BaseSceneObject* obj, float duration, BaseSceneObject* tar
 	Explorer* explorer = reinterpret_cast<Explorer*>(obj);
 	if (explorer->mNetworkID->mHasAuthority)
 	{
+		explorer->mController->PlayStateAnimation(ANIM_STATE_SKILL_0);
+
 		Packet p(PacketTypes::SPAWN_SKILL);
 		p.AsSkill.Position = explorer->mTransform->GetPosition() - vec3f(0.0f, 0.0f, 2.5f);
 		p.AsSkill.Duration = explorer->mSkills[HEAL_SKILL_INDEX]->mDuration;

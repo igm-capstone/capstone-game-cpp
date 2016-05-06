@@ -380,7 +380,7 @@ void Level01::InitializeShaderResources()
 			"Assets/Textures/Heal.png",
 			"Assets/Textures/Trap.png",
 			"Assets/Textures/Professor.png",
-			"Assets/Textures/Trapper_Texture.png"
+			"Assets/Textures/Trapper_D_1024.png"
 		};
 		
 		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 8);
@@ -1201,7 +1201,7 @@ void Level01::RenderExplorers()
 	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
 
 	//uint8_t materialIDs[3] = { 6, 3, 7 };
-	uint8_t materialIDs[4] = { 3, 3, 7, 0 };
+	uint8_t materialIDs[4] = { 6, 3, 7, 0 };
 
 	for (Explorer& e : Factory<Explorer>())
 	{
