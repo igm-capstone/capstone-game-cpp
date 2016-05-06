@@ -9,6 +9,7 @@
 #include <Components/AnimationUtility.h>
 #include "jsonUtils.h"
 #include "Minion.h"
+#include <Console.h>
 
 #define MELEE_SKILL_INDEX	0
 #define SPRINT_SKILL_INDEX	1
@@ -570,5 +571,17 @@ void Explorer::OnMeleeHit(BaseSceneObject* self, BaseSceneObject* other)
 		{
 			e->mMeleeColliderComponent.asBaseColliderComponent->mIsActive = false;
 		}
+	}
+}
+
+CONSOLE_COMMAND(e_list)
+{
+	for(auto& e : Factory<Explorer>())
+	{
+		TRACE("Explorer [" << int(e.GetExplorerType()) << "]:" << Trace::endl);
+		TRACE("   - Position   : " << e.mTransform->GetPosition() << Trace::endl);
+		TRACE("   - Rotation   : " << e.mTransform->GetRotation() << Trace::endl);
+		TRACE("   - Max Health : " << e.mHealth->GetMaxHealth() << Trace::endl);
+		TRACE("   - Health     : " << e.mHealth->GetHealth() << Trace::endl);
 	}
 }

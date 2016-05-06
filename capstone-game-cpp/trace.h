@@ -105,6 +105,7 @@ public:
 	Trace &operator << (vec2f v) { ss << std::fixed << std::setprecision(2) << "vec2f(" << v.x << ", " << v.y << ")"; return *this; }
 	Trace &operator << (vec3f v) { ss << std::fixed << std::setprecision(2) << "vec3f(" << v.x << ", " << v.y << ", " << v.z << ")"; return *this; }
 	Trace &operator << (vec4f v) { ss << std::fixed << std::setprecision(2) << "vec4f(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")"; return *this; }
+	Trace &operator << (quatf v) { ss << std::fixed << std::setprecision(2) << "quatf(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")"; return *this; }
 
 	static Trace &endl(Trace &trace);
 
