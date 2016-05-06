@@ -67,9 +67,9 @@ void AnimationController::SetStateAnimation(AnimationControllerState state, cons
 	}
 }
 
-void AnimationController::SetState(AnimationControllerState state)
+void AnimationController::SetState(AnimationControllerState state, bool forceRestart)
 {
-	if (mState == state)
+	if (mState == state && !forceRestart)
 	{
 		return;
 	}

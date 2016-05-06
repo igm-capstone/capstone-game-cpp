@@ -7,22 +7,23 @@
 
 Animation gSprinterAnimations[Animations::SPRINTER_ANIMATION_COUNT] = {
 	{ "Take 001", 1, 70, 1 },
-	{ "Take 001", 80, 93, 1 },
-	{ "Take 001", 100, 150, 1 },
+	{ "Take 001", 80, 93, 0.95f },
+	{ "Take 001", 100, 130, 1.25f },
+	{ "Take 001", 130, 150, 1 },
 	{ "Take 001", 160, 217, 1 }
 };
 
 Animation gTrapperAnimations[Animations::TRAPPER_ANIMATION_COUNT] = {
 	{ "SwootPants_Final.0002", 1, 55, 1 },
 	{ "SwootPants_Final.0002", 60, 80, 1 },
-	{ "SwootPants_Final.0002", 90, 125, 1 },
+	{ "SwootPants_Final.0002", 90, 125, 1.30f },
 	{ "SwootPants_Final.0002", 140, 208, 1 }
 };
 
 Animation gProfessorAnimations[Animations::PROFESSOR_ANIMATION_COUNT] = {
-	{ "Take 001", 1, 73, 1 },
+	{ "Take 001", 1, 73, 0.9f },
 	{ "Take 001", 80, 94, 1 },
-	{ "Take 001", 105, 153, 1 },
+	{ "Take 001", 105, 153, 1.25f },
 	{ "Take 001", 165, 223, 1 },
 	{ "Take 001", 245, 322, 1 }
 };
@@ -78,8 +79,13 @@ void SetSprinterAnimations(Explorer* explorer)
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_DEATH, &gSprinterAnimations[Animations::SPRINTER_DEATH], nullptr, 0, false);
 
 	Animation& melee = gSprinterAnimations[Animations::SPRINTER_ATTACK];
-	KeyframeOption meleeOptions[] = { { melee.startFrameIndex, Explorer::OnMeleeStart },{ melee.endFrameIndex, Explorer::OnMeleeStop } };
+	KeyframeOption meleeOptions[] = { { melee.startFrameIndex + 10, Explorer::OnMeleeStart }, { melee.endFrameIndex, Explorer::OnMeleeStop }
+};
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_MELEE, &gSprinterAnimations[Animations::SPRINTER_ATTACK], meleeOptions, 2, false);
+
+	Animation& meleeAlt = gSprinterAnimations[Animations::SPRINTER_ATTACK_2];
+	KeyframeOption meleeAltOptions[] = { { meleeAlt.startFrameIndex + 10, Explorer::OnMeleeStart },{ meleeAlt.endFrameIndex, Explorer::OnMeleeStop } };
+	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_MELEE_ALT, &gSprinterAnimations[Animations::SPRINTER_ATTACK_2], meleeAltOptions, 2, false);
 }
 
 void SetProfessorAnimations(class Explorer* explorer)
@@ -95,7 +101,8 @@ void SetProfessorAnimations(class Explorer* explorer)
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_DEATH, &gProfessorAnimations[Animations::PROFESSOR_DEATH], nullptr, 0, false);
 
 	Animation melee = gProfessorAnimations[Animations::PROFESSOR_ATTACK];
-	KeyframeOption meleeOptions[] = { { melee.startFrameIndex, Explorer::OnMeleeStart },{ melee.endFrameIndex, Explorer::OnMeleeStop } };
+	KeyframeOption meleeOptions[] = { { melee.startFrameIndex + 18, Explorer::OnMeleeStart }, { melee.endFrameIndex, Explorer::OnMeleeStop }
+};
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_MELEE, &gProfessorAnimations[Animations::PROFESSOR_ATTACK], meleeOptions, 2, false);
 }
 
@@ -111,6 +118,6 @@ void SetTrapperAnimations(class Explorer* explorer)
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_DEATH, &gTrapperAnimations[Animations::TRAPPER_DEATH], nullptr, 0, false);
 
 	Animation melee = gTrapperAnimations[Animations::TRAPPER_THROW];
-	KeyframeOption meleeOptions[] = { { melee.startFrameIndex, Explorer::OnMeleeStart },{ melee.endFrameIndex, Explorer::OnMeleeStop } };
+	KeyframeOption meleeOptions[] = { { melee.startFrameIndex + 18, Explorer::OnMeleeStart },{ melee.endFrameIndex, Explorer::OnMeleeStop } };
 	SetStateAnimation(explorer->mAnimationController, ANIM_STATE_MELEE, &gTrapperAnimations[Animations::TRAPPER_THROW], meleeOptions, 2, false);
 }

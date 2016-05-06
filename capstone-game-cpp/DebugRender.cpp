@@ -174,7 +174,7 @@ void RenderWallColliders(void* pShaderResource, void* pCameraManager, void* pMod
 
 		gRenderer->VDrawIndexed(0, gSphereMesh->GetIndexCount());
 
-		if (s.mMeleeColliderComponent.asSphereColliderComponent)
+		if (s.mMeleeColliderComponent.asSphereColliderComponent && s.mMeleeColliderComponent.asSphereColliderComponent->mIsActive)
 		{
 			c = s.mMeleeColliderComponent.asSphereColliderComponent;
 			model->world = (mat4f::scale(c->mCollider.radius) * mat4f::translate(c->mCollider.origin)).transpose();

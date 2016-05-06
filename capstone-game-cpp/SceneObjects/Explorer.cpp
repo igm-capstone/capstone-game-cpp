@@ -552,6 +552,10 @@ void Explorer::OnMeleeHit(BaseSceneObject* self, BaseSceneObject* other)
 		auto m = reinterpret_cast<Minion*>(other);
 		vec3f dir = other->mTransform->GetPosition() - self->mTransform->GetPosition();
 		m->mHealth->TakeDamage(e->mAttackDamage, atan2f(dir.y, dir.x), false);
+		if (e->mNetworkID->mHasAuthority)
+		{
+			e->mMeleeColliderComponent.asBaseColliderComponent->mIsActive = false;
+		}
 	}
 	else if (other->Is<Explorer>())
 	{
@@ -560,6 +564,10 @@ void Explorer::OnMeleeHit(BaseSceneObject* self, BaseSceneObject* other)
 		{
 			vec3f dir = other->mTransform->GetPosition() - self->mTransform->GetPosition();
 			t->mHealth->TakeDamage(e->mAttackDamage, atan2f(dir.y, dir.x), false);
+		}
+		if (e->mNetworkID->mHasAuthority)
+		{
+			e->mMeleeColliderComponent.asBaseColliderComponent->mIsActive = false;
 		}
 	}
 }

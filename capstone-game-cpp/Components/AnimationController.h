@@ -27,6 +27,7 @@ enum AnimationControllerState : char
 	ANIM_STATE_WALK,
 	ANIM_STATE_RUN,
 	ANIM_STATE_MELEE,
+	ANIM_STATE_MELEE_ALT,
 	ANIM_STATE_SKILL_0,
 	ANIM_STATE_SKILL_1,
 	ANIM_STATE_SKILL_2,
@@ -80,7 +81,7 @@ public:
 
 	inline void	SetRestFrameIndex(uint32_t index) { mRestIndex = index; }
 	
-	void SetState(AnimationControllerState state);
+	void SetState(AnimationControllerState state, bool forceRestart = false);
 	void SetStateAnimation(AnimationControllerState state, const char* name, uint32_t startIndex, uint32_t endIndex,float speed, KeyframeOption* options, uint32_t count, bool shouldLoop);
 
 	inline void Resume() {
