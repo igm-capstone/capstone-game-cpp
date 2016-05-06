@@ -22,6 +22,7 @@ ExplorerController::ExplorerController() :
 	mApplication(&Application::SharedInstance()),
 	mCameraManager(&Singleton<CameraManager>::SharedInstance()),
 	mAngle(0),
+	mTargetAngle(0),
 	mMoveLockCooldown(0),
 	mSprintDuration(0),
 	mAcceleration(10.0f),
@@ -179,7 +180,7 @@ bool ExplorerController::Update(double milliseconds)
 		{
 			PlayStateAnimation(ANIM_STATE_RUN);
 		}
-		else if (mAnimationController->GetState() != ANIM_STATE_MELEE)
+		else if (mAnimationController->GetState() != ANIM_STATE_MELEE && mAnimationController->GetState() != ANIM_STATE_MELEE_ALT)
 		{
 			PlayStateAnimation(ANIM_STATE_IDLE);
 		}
@@ -188,7 +189,7 @@ bool ExplorerController::Update(double milliseconds)
 	}
 	else
 	{
-		if (mAnimationController->GetState() != ANIM_STATE_MELEE)
+		if (mAnimationController->GetState() != ANIM_STATE_MELEE && mAnimationController->GetState() != ANIM_STATE_MELEE_ALT)
 		{
 			PlayStateAnimation(ANIM_STATE_IDLE);
 		}
@@ -219,7 +220,14 @@ void ExplorerController::Melee()
 		mMoveLockCooldown = 1.0f;
 	}
 
-	PlayStateAnimation(ANIM_STATE_MELEE);
+	PlayStateAnimation(mMeleeAlt ? ANIM_STATE_MELEE_ALT : ANIM_STATE_MELEE, true);
+
+	auto exp = reinterpret_cast<Explorer*>(mSceneObject);
+	if (exp->GetExplorerType() == SPRINTER)
+	{
+		mMeleeAlt = Mathf::RandomRange() > 0.5f;
+	}
+
 }
 
 bool ExplorerController::CanMove()
@@ -229,10 +237,10 @@ bool ExplorerController::CanMove()
 	return mAnimationController->GetState() != ANIM_STATE_MELEE;
 }
 
-void ExplorerController::PlayStateAnimation(AnimationControllerState state)
+void ExplorerController::PlayStateAnimation(AnimationControllerState state, bool forceRestart)
 {
 	AnimationController* pAnimationController = reinterpret_cast<Explorer*>(mSceneObject)->mAnimationController;
-	pAnimationController->SetState(state);
+	pAnimationController->SetState(state, forceRestart);
 	pAnimationController->Resume();
 }
 void ExplorerController::PauseStateAnimation(AnimationControllerState state)

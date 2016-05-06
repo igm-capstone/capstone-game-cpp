@@ -23,6 +23,8 @@ class ExplorerController : public BaseComponent
 
 	float mAcceleration;
 	vec3f mCurrentSpeed;
+	bool mMeleeAlt;
+
 	void UpdateInteractWill();
 	
 	// delta time in seconds
@@ -46,7 +48,7 @@ public:
 	void Sprint(float duration);
 	void Melee();
 
-	void PlayStateAnimation(AnimationControllerState state);
+	void PlayStateAnimation(AnimationControllerState state, bool forceRestart = false);
 	void PauseStateAnimation(AnimationControllerState state);
 
 	EXPOSE_CALLBACK_3(Move, vec3f, quatf, bool)
