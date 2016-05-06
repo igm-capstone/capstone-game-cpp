@@ -124,7 +124,7 @@ void NetworkClient::Update()
 				NetworkRpc::DisconnectExplorer(packet.UUID);
 				break;
 			case SPAWN_SKILL:
-				NetworkRpc::SpawnExistingSkill(packet.AsSkill.Type, packet.UUID, packet.AsSkill.Position, packet.AsSkill.Duration);
+				NetworkRpc::SpawnExistingSkill(packet.AsSkill.Type, packet.UUID, packet.AsSkill.Position, packet.AsSkill.Duration, packet.AsSkill.TargetUUID);
 				break;
 			case GRANT_AUTHORITY:
 				NetworkRpc::GrantAuthority(packet.UUID);

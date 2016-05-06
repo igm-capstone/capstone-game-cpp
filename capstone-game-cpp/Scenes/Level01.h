@@ -92,7 +92,7 @@ public:
 	void RenderFullScreenQuad();
 	void RenderMinions();
 	void RenderEffects();
-	void RenderHealthBars();
+	void RenderWorldSpaceSprites();
 	void RenderSprites();
 	void RenderGrid();
 	void ComputeGrid();

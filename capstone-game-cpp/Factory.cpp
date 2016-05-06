@@ -15,6 +15,7 @@
 #include "SceneObjects\Trap.h"
 #include "SceneObjects\StatusEffect.h"
 #include "SceneObjects\Lantern.h"
+#include "SceneObjects\Transmogrify.h"
 
 #include "Components\NetworkID.h"
 #include "Components\ColliderComponent.h"
@@ -80,3 +81,4 @@ REGISTER_FACTORY ( Explosion, 10)
 REGISTER_FACTORY ( Trap, 5)
 REGISTER_FACTORY ( StatusEffect, 8)
 REGISTER_FACTORY ( Lantern, 10)
+REGISTER_FACTORY ( Transmogrify, 3)

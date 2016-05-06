@@ -214,7 +214,7 @@ void NetworkServer::ReceiveFromClients()
 					NetworkRpc::SyncAnimation(packet.UUID, packet.AsAnimation.State, packet.AsAnimation.Command);
 					break;
 				case SPAWN_SKILL:
-					NetworkCmd::SpawnNewSkill(packet.AsSkill.Type, packet.AsSkill.Position, packet.AsSkill.Duration);
+					NetworkCmd::SpawnNewSkill(packet.AsSkill.Type, packet.AsSkill.Position, packet.AsSkill.Duration, packet.AsSkill.TargetUUID);
 					break;
 				case INTERACT:
 					Retransmit(clientID, &packet);

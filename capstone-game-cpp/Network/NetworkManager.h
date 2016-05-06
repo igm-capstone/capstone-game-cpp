@@ -39,7 +39,7 @@ class NetworkCmd
 	static NetworkManager* mNetworkManager;
 public:
 	static void SpawnNewExplorer(int clientID);
-	static void SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration);
+	static void SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration, int targetUUID = -1);
 };
 
 class NetworkRpc {
@@ -47,7 +47,7 @@ class NetworkRpc {
 public:
 	static void SpawnExistingExplorer(int UUID, vec3f pos);
 	static void DisconnectExplorer(int UUID);
-	static void SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, float duration);
+	static void SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, float duration, int targetUUID = -1);
 
 	static void GrantAuthority(int UUID);
 	static void SyncTransform(int UUID, vec3f pos, quatf rot);

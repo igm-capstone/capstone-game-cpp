@@ -12,6 +12,7 @@
 #include <Mathf.h>
 #include <SceneObjects/Lantern.h>
 #include <SceneObjects/Explosion.h>
+#include <SceneObjects/Transmogrify.h>
 
 NetworkManager::NetworkManager()
 {
@@ -141,7 +142,7 @@ void NetworkRpc::SpawnExistingExplorer(int UUID, vec3f pos) {
 	e->Spawn(pos, UUID);
 }
 
-void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
+void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration, int targetUUID)
 {
 	assert(mNetworkManager->mMode == NetworkManager::Mode::SERVER);
 
@@ -226,6 +227,15 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 		}
 		break;
 	}
+	case SKILL_TYPE_TRANSMOGRIFY:
+	{
+		auto t = Factory<Transmogrify>::Create();
+		if (t)
+		{
+			t->Spawn(duration, targetUUID);
+		}
+		break;
+	}
 	case SKILL_TYPE_EXPLOSION:
 	{
 		auto h = Factory<Explosion>::Create();
@@ -247,10 +257,11 @@ void NetworkCmd::SpawnNewSkill(SkillPacketTypes type, vec3f pos, float duration)
 	p.AsSkill.Position = pos;
 	p.AsSkill.Duration = duration;
 	p.AsSkill.Type = type;
+	p.AsSkill.TargetUUID = targetUUID;
 	mNetworkManager->mServer.SendToAll(&p);
 }
 
-void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, float duration)
+void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, float duration, int targetUUID)
 {
 	assert(mNetworkManager->mMode == NetworkManager::Mode::CLIENT);
 
@@ -307,6 +318,15 @@ void NetworkRpc::SpawnExistingSkill(SkillPacketTypes type, int UUID, vec3f pos, 
 		if (m)
 		{
 			m->SpawnImp(pos, UUID);
+		}
+		break;
+	}
+	case SKILL_TYPE_TRANSMOGRIFY:
+	{
+		auto t = Factory<Transmogrify>::Create();
+		if (t)
+		{
+			t->Spawn(duration, targetUUID);
 		}
 		break;
 	}

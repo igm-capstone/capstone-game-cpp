@@ -34,6 +34,7 @@
 #include <Components/FlyTrapController.h>
 #include <Components/AbominationController.h>
 #include <SceneObjects/Explosion.h>
+#include <SceneObjects/Transmogrify.h>
 #include <Mathf.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
@@ -629,7 +630,6 @@ void Level01::VFixedUpdate(double milliseconds)
 	for (Heal& h : Factory<Heal>())
 	{
 		h.Update(seconds);
-
 	}
 
 	for (Explosion& e : Factory<Explosion>())
@@ -637,7 +637,7 @@ void Level01::VFixedUpdate(double milliseconds)
 		e.Update(seconds);
 	}
 
-	for (Trap& t: Factory<Trap>())
+	for (Trap& t : Factory<Trap>())
 	{
 		t.Update(seconds);
 		if (t.mShouldDestroy)
@@ -669,6 +669,50 @@ void Level01::VFixedUpdate(double milliseconds)
 			Factory<StatusEffect>::Destroy(&s);
 		}
 	}
+
+	for (Transmogrify& t : Factory<Transmogrify>())
+	{
+		t.Update(seconds);
+	}
+
+#ifdef _DEBUG
+	if (mInput->GetKeyDown(KEYCODE_F3))
+	{
+		gDebugGrid = !gDebugGrid;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F4))
+	{
+		gDebugColl = !gDebugColl;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F5))
+	{
+		gDebugOrto = !gDebugOrto;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F6))
+	{
+		gDebugGBuffer = !gDebugGBuffer;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F7))
+	{
+		gDebugBVH = !gDebugBVH;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F8))
+	{
+		gDebugBT = !gDebugBT;
+	}
+	//Do not use F9, already used else-where
+	if (mInput->GetKeyDown(KEYCODE_F10))
+	{
+		Application::SharedInstance().LoadScene<Level01>();
+	}
+#endif
+
+	UpdateGameState(milliseconds); //Input
 
 	if (mAIManager->IsGridDirty()) ComputeGrid(); 
 	mAIManager->Update();
@@ -880,7 +924,7 @@ void Level01::VRender()
 
 	RenderEffects();
 	
-	RenderHealthBars();
+	RenderWorldSpaceSprites();
 	mUIManager.RenderPanel();
 	if (mNetworkManager->mMode == NetworkManager::SERVER) mUIManager.RenderManaBar();
 	mUIManager.RenderObjectives(mGameState, mNetworkManager->mMode == NetworkManager::SERVER);
@@ -1196,7 +1240,7 @@ void Level01::RenderExplorers()
 	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
 
 	//uint8_t materialIDs[3] = { 6, 3, 7 };
-	uint8_t materialIDs[3] = { 3, 3, 7 };
+	uint8_t materialIDs[4] = { 3, 3, 7, 0 };
 
 	for (Explorer& e : Factory<Explorer>())
 	{
@@ -1208,7 +1252,9 @@ void Level01::RenderExplorers()
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
 		
-		mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, materialIDs[e.GetExplorerType() - 1], 0);
+		uint8_t materialIndex = (e.mIsTransmogrified) ? 3 : e.GetExplorerType() - 1;
+
+		mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, materialIDs[materialIndex], 0);
 
 		mRenderer->VBindMesh(e.mModel->mMesh);
 		mRenderer->VDrawIndexed(0, e.mModel->mMesh->GetIndexCount());
@@ -1438,7 +1484,7 @@ void Level01::RenderWorldSpaceSprites()
 		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 1, screenPos, isGhost ? vec2f(75, 11) : vec2f(90, 12), vec4f(1, 1, 1, 1), vec2f(h.GetHealthPerc(), 1));
 		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 0, screenPos, isGhost ? vec2f(75, 11) : vec2f(90, 12));
 	}
-	
+
 	for (StatusEffect& s : Factory<StatusEffect>())
 	{
 		for (auto &m : s.mMinions) {
