@@ -71,7 +71,9 @@ void Transmogrify::Detach()
 
 	Explorer* pExplorer = reinterpret_cast<Explorer*>(mTargetAnimationController->mSceneObject);
 	pExplorer->mAnimationController = mTargetAnimationController;
-	mTargetAnimationController->mIsActive = true;
+	pExplorer->mAnimationController->mIsActive = true;
+	pExplorer->mAnimationController->SetState(mAnimationController->GetState());
+	mTargetAnimationController = nullptr;
 	
 	pExplorer->mModel = mTargetModelCluster;
 	pExplorer->mTransform->SetScale(mTransform->GetScale());
