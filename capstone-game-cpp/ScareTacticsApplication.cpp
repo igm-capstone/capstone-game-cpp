@@ -24,6 +24,7 @@
 #include "Shaders/obj/PSFwdDistanceMaterial.h"
 #include "Shaders/obj/PSFwdPointLightVolume.h"
 #include "Shaders/obj/PSFwdPointLightVolumeNS.h"
+#include "Shaders/obj/PSFwdTexture.h"
 
 #include "Shaders/obj/VSFwdLineTrace.h"
 #include "Shaders/obj/VSFwdSingleColor.h"
@@ -50,6 +51,7 @@ ScareTacticsApplication::ScareTacticsApplication() :
 	mPSFwdDistanceMaterial(nullptr),
 	mPSFwdPointLightVolume(nullptr),
 	mPSFwdPointLightVolumeNS(nullptr),
+	mPSFwdTexture(nullptr),
 	mVSDefInstancedColor(nullptr),
 	mVSDefInstancedMaterial(nullptr),
 	mVSDefSingleColor(nullptr),
@@ -72,7 +74,7 @@ ScareTacticsApplication::ScareTacticsApplication() :
 {
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->AddFontDefault();
-	io.Fonts->AddFontFromFileTTF("Assets/UI/Fonts/ashcanbb_reg.ttf", 30.0f, NULL, NULL);
+	io.Fonts->AddFontFromFileTTF("Assets/UI/Fonts/ashcanbb_reg.ttf", 20.0f, NULL, NULL);
 }
 
 ScareTacticsApplication::~ScareTacticsApplication()
@@ -260,6 +262,9 @@ void ScareTacticsApplication::InitializeShaders()
 	renderer->VCreateShader(&mPSFwdPointLightVolumeNS, &mGameAllocator);
 	renderer->VLoadPixelShader(mPSFwdPointLightVolumeNS, gPSFwdPointLightVolumeNS, sizeof(gPSFwdPointLightVolumeNS));
 
+	renderer->VCreateShader(&mPSFwdTexture, &mGameAllocator);
+	renderer->VLoadPixelShader(mPSFwdTexture, gPSFwdTexture, sizeof(gPSFwdTexture));
+
 #pragma endregion
 
 #pragma region Compute Shaders
@@ -389,6 +394,7 @@ void ScareTacticsApplication::VShutdown()
 	mPSFwdDistanceMaterial->~IShader();
 	mPSFwdPointLightVolume->~IShader();
 	mPSFwdPointLightVolumeNS->~IShader();
+	mPSFwdTexture->~IShader();
 
 	mVSDefInstancedColor->~IShader();
 	mVSDefInstancedMaterial->~IShader();

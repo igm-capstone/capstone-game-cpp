@@ -27,6 +27,7 @@
     <FxCompile Include="Shaders\PSFwdDistanceMaterial.hlsl" />
     <FxCompile Include="Shaders\PSFwdPointLightVolume.hlsl" />
     <FxCompile Include="Shaders\PSFwdPointLightVolumeNS.hlsl" />
+    <FxCompile Include="Shaders\PSFwdTexture.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Components\AnimationController.cpp" />
