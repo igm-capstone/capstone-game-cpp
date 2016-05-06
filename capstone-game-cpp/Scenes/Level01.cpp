@@ -379,11 +379,14 @@ void Level01::InitializeShaderResources()
 			"Assets/Textures/Sprinter_D_1024.png", 
 			"Assets/Textures/Heal.png",
 			"Assets/Textures/Trap.png",
-			"Assets/Textures/Professor.png",
-			"Assets/Textures/Trapper_D_1024.png"
+			"Assets/Textures/Professor_D_1024.png",
+			"Assets/Textures/Trapper_D_1024.png",
+			"Assets/Textures/Generator.png",
+			"Assets/Textures/LightCannon.png",
+			"Assets/Textures/PortableLantern.png"
 		};
 		
-		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 8);
+		mRenderer->VAddShaderTextures2D(mExplorerShaderResource, filenames, 11);
 		mRenderer->VAddShaderLinearSamplerState(mExplorerShaderResource, SAMPLER_STATE_ADDRESS_WRAP);
 	}
 
@@ -1092,13 +1095,33 @@ void Level01::RenderDoors()
 	model = mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_GENERATOR]);
 	mRenderer->VBindMesh(model->mMesh);
 
-	vec4f gray = { 0.75f, 0.75f, 0.75f, 1.0f };
+	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 8, 0);
 
-	mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &gray, 3);
+	DominationPoint* lp = nullptr;
 
 	for (DominationPoint& dp : Factory<DominationPoint>())
 	{
+		if (dp.mTier > 0)
+		{
+			lp = &dp;
+			continue;
+		}
+
 		mModel.world = dp.mTransform->GetWorldMatrix().transpose();
+		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
+		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
+
+		mRenderer->VDrawIndexed(0, model->mMesh->GetIndexCount());
+	}
+
+	if (lp)
+	{
+	model = mModelManager->GetModel(kStaticMeshModelNames[STATIC_MESH_MODEL_LIGHT_CANNON]);
+		mRenderer->VBindMesh(model->mMesh);
+
+		mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 9, 0);
+
+		mModel.world = lp->mTransform->GetWorldMatrix().transpose();
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, &mModel, 1);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 1, 1);
 
@@ -1107,6 +1130,8 @@ void Level01::RenderDoors()
 
 	model = mModelManager->GetModel(kLanternModelName);
 	mRenderer->VBindMesh(model->mMesh);
+
+	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 9, 0);
 
 	for (Lantern& l : Factory<Lantern>())
 	{

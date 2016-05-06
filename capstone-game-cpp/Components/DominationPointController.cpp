@@ -15,7 +15,7 @@ void DominationPointController::Update(double milliseconds)
 	int count = 0;
 	for (auto exp : mExplorers)
 	{
-		if (exp == nullptr)
+		if (exp == nullptr || exp->mIsDead)
 		{
 			continue;
 		}
