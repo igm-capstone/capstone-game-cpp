@@ -15,6 +15,7 @@ enum PacketTypes {
 	SYNC_ANIMATION	= 'N',
 	INTERACT		= 'I',
 	READY			= 'R',
+	RESTART			= 'r',
 	DISCONNECT		= 'D',
 	UNKNOWN
 };

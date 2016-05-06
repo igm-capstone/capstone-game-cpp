@@ -27,11 +27,11 @@ void UIManager::RenderPanel()
 
 	for (auto i = 0; i < numBtns; i++)
 	{
-		RenderButton(&mButtons[i], mSpriteManager->perc2f(0.5f, 0) + vec2f(-64.0f * (numBtns-1) + 128.0f * i, 64));
+		RenderSkillButton(&mButtons[i], mSpriteManager->perc2f(0.5f, 0) + vec2f(-64.0f * (numBtns-1) + 128.0f * i, 64));
 	}
 }
 
-void UIManager::RenderButton(Button* b, vec2f pos)
+void UIManager::RenderSkillButton(Button* b, vec2f pos)
 {
 	mSpriteManager->DrawSprite(b->sheetID, 8+b->spriteID, pos, vec2f(100, 100));
 	mSpriteManager->DrawSprite(b->sheetID, b->spriteID, pos, vec2f(100, 100), vec4f(1,1,1,1), vec3f(1,1), 2*PI * b->skill->Recharged());
@@ -45,6 +45,15 @@ void UIManager::RenderButton(Button* b, vec2f pos)
 	}
 	if (b->onClick != nullptr) {
 		AddInteractableArea(pos - vec2f(50, 50), pos + vec2f(50, 50), b->onClick, true);
+	}
+}
+
+void UIManager::RenderButton(vec2f pos, OnInteractArea onClick, const char* label)
+{
+	mSpriteManager->DrawSprite(SPRITESHEET_PANELS, 1, pos, vec2f(240, 60));
+	mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 20, pos + vec2f(0, -10), vec4f(1, 1, 1, 1), ALIGN_CENTER, "%s", label);
+	if (onClick != nullptr) {
+		AddInteractableArea(pos - vec2f(120, 30), pos + vec2f(120, 30), onClick, true);
 	}
 }
 
@@ -114,26 +123,28 @@ void UIManager::RenderManaBar()
 
 void UIManager::RenderObjectives(GameState gameState, bool isServer)
 {
-	auto anchor = mSpriteManager->perc2f(0, 0.85f) + vec2f(10, 0);
+	auto anchor = mSpriteManager->perc2f(0, 0.84f) + vec2f(10, 0);
 	int i = 0;
 
 	mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 14, anchor + vec2f(10, 0), vec4f(0.5f, 1, 0.5f, 1), ALIGN_LEFT, "%s", isServer ? "Areas Exorcised" : "Objectives");
 	mSpriteManager->DrawSprite(SPRITESHEET_BARS, 3, anchor + vec2f(50, 6), vec2f(-250, 38), vec4f(0.84f, 1, 0.4f, 1));
 	for each (DominationPoint& dp in Factory<DominationPoint>()) {
-		if ((dp.mTier == 0 && gameState <= GAME_STATE_CAPTURE_0) || (dp.mTier == 1 && gameState >= GAME_STATE_CAPTURE_1)) {
+		if ((dp.mTier == 0 && gameState <= GAME_STATE_CAPTURE_0) || (dp.mTier == 1 && gameState >= GAME_STATE_CAPTURE_1) || gameState > GAME_STATE_CAPTURE_1) {
 			mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 13, anchor + vec2f(10, 30.0f * ++i), dp.mController->isDominated ? vec4f(0.7f, 0.7f, 0.7f, 1) : vec4f(1, 1, 1, 1), ALIGN_LEFT, dp.mName);
 			mSpriteManager->DrawSprite(SPRITESHEET_CONTROL_ICONS, dp.mController->isDominated ? 11 : 10, anchor + vec2f(150, 30.0f * i + 6) + vec2f(0, 0), vec2f(16, 16), dp.mController->isDominated ? vec4f(0.7f, 0.7f, 0.7f, 1) : vec4f(1, 1, 1, 1));
 		}
 	}
 }
 
-void UIManager::RenderEndScreen(bool ghostWins)
+void UIManager::RenderEndScreen(bool ghostWins, OnInteractArea onClick)
 {
 	BlockGame(true);
 
 	mSpriteManager->DrawSprite(SPRITESHEET_CONTROL_ICONS, 15, mSpriteManager->perc2f(0.5f, 0.5f), mSpriteManager->perc2f(1, 1), vec4f(0.7f, 0.7f, 0.7f, 0.5f));
 
 	mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, 75, mSpriteManager->perc2f(0.5f, 0.4f), vec4f(0.55f, 0.27f, 0.69f, 1), ALIGN_CENTER, "%s", ghostWins ? "Ghost Wins!" : "Explorers Win!");
+
+	RenderButton(mSpriteManager->perc2f(0.5f, 0.6f), onClick, "Restart");
 }
 
 void UIManager::RenderReadyScreen(int playerID)

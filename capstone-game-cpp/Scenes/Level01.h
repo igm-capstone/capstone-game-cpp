@@ -81,7 +81,8 @@ public:
 	void UpdateGameState(double milliseconds);
 	bool IsExplorerAlive();
 	void SetReady(int clientID);
-
+	void SetRestart();
+	void Restart();
 	void VRender() override;
 	void RenderShadowMaps();	// Not called per frame
 	void RenderStaticMeshes();
@@ -91,7 +92,7 @@ public:
 	void RenderFullScreenQuad();
 	void RenderMinions();
 	void RenderEffects();
-	void RenderHealthBars();
+	void RenderWorldSpaceSprites();
 	void RenderSprites();
 	void RenderGrid();
 	void ComputeGrid();

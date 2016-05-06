@@ -35,6 +35,7 @@
 #include <Components/AbominationController.h>
 #include <SceneObjects/Explosion.h>
 #include <SceneObjects/Transmogrify.h>
+#include <Mathf.h>
 
 static const vec3f kVectorZero	= { 0.0f, 0.0f, 0.0f };
 static const vec3f kVectorUp	= { 0.0f, 1.0f, 0.0f };
@@ -180,10 +181,6 @@ void Level01::InitializeAssets()
 
 	//mLevel = Resource::LoadLevel("Assets/Level02.json", mAllocator);
 	mLevel = Resource::LoadLevel("Assets/RPI_Level.json", mAllocator);
-
-
-	mFloorCollider.halfSize = mLevel.extents;
-	mFloorCollider.origin = mLevel.center;
 
 	mFloorCollider.halfSize = mLevel.extents;
 	mFloorCollider.origin	= mLevel.center;
@@ -576,7 +573,52 @@ void Level01::VUpdate(double milliseconds)
 	{
 		skill.Update();
 	}
+		
 
+#ifdef _DEBUG
+	if (mInput->GetKeyDown(KEYCODE_F3))
+	{
+		gDebugGrid = !gDebugGrid;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F4))
+	{
+		gDebugColl = !gDebugColl;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F5))
+	{
+		gDebugOrto = !gDebugOrto;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F6))
+	{
+		gDebugGBuffer = !gDebugGBuffer;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F7))
+	{
+		gDebugBVH = !gDebugBVH;
+	}
+
+	if (mInput->GetKeyDown(KEYCODE_F8))
+	{
+		gDebugBT = !gDebugBT;
+	}
+	//Do not use F9, already used else-where
+	if (mInput->GetKeyDown(KEYCODE_F10))
+	{
+		SetRestart();
+	}
+#endif
+
+	UpdateGameState(milliseconds); //Input
+
+	mNetworkManager->Update();
+}
+
+void Level01::VFixedUpdate(double milliseconds)
+{
 	for (AnimationController& ac : Factory<AnimationController>())
 	{
 		ac.Update(milliseconds);
@@ -588,7 +630,6 @@ void Level01::VUpdate(double milliseconds)
 	for (Heal& h : Factory<Heal>())
 	{
 		h.Update(seconds);
-
 	}
 
 	for (Explosion& e : Factory<Explosion>())
@@ -672,14 +713,9 @@ void Level01::VUpdate(double milliseconds)
 #endif
 
 	UpdateGameState(milliseconds); //Input
-}
 
-void Level01::VFixedUpdate(double milliseconds)
-{
 	if (mAIManager->IsGridDirty()) ComputeGrid(); 
 	mAIManager->Update();
-
-	mNetworkManager->Update();
 }
 
 void Level01::SetReady(int clientID)
@@ -696,6 +732,66 @@ void Level01::SetReady(int clientID)
 	else if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
 		mNetworkManager->mServer.SendToAll(&p);
 	}
+}
+
+void Level01::SetRestart()
+{
+	Packet p(RESTART);
+	
+	Restart();
+
+	if (mNetworkManager->mMode == NetworkManager::Mode::CLIENT) {
+		mNetworkManager->mClient.SendData(&p);
+	}
+	else if (mNetworkManager->mMode == NetworkManager::Mode::SERVER) {
+		mNetworkManager->mServer.SendToAll(&p);
+	}
+}
+
+void Level01::Restart()
+{
+	TRACE_LOG("Restarting");
+	
+	CLEAR_FACTORY(Minion);
+	CLEAR_FACTORY(Lantern);
+	CLEAR_FACTORY(Trap);
+	CLEAR_FACTORY(StatusEffect);
+
+	for (auto& lamp : Factory<Lamp>())
+	{
+		lamp.mStatus = LAMP_OFF;
+	}
+
+	for (auto& door : Factory<Door>())
+	{
+		if (!door.mColliderComponent->mIsActive) door.ToggleDoor();
+	}
+
+	for (auto& d : Factory<DominationPoint>())
+	{
+		d.mController->mProgress = 0;
+		d.mController->isDominated = false;
+	}
+
+	SpawnPoint& sp = *(Factory<SpawnPoint>().begin());
+	for (auto& e : Factory<Explorer>())
+	{
+		auto rndPos = sp.mTransform->GetPosition() + vec3f(Mathf::RandomRange(-4, 4), Mathf::RandomRange(-4, 4), 0);
+		e.mTransform->SetPosition(rndPos);
+		e.OnMove(&e, rndPos, e.mTransform->GetRotation());
+		e.mHealth->SetHealth(9999);
+	}
+
+	for (auto& g : Factory<Ghost>())
+	{
+		g.TickMana(99999);
+	}
+
+	mGameState = GAME_STATE_INITIAL;
+	mUIManager.SetReadyState(0, false);
+	mUIManager.SetReadyState(1, false);
+	mUIManager.SetReadyState(2, false);
+	mUIManager.SetReadyState(3, false);
 }
 
 void Level01::UpdateGameState(double milliseconds)
@@ -828,7 +924,7 @@ void Level01::VRender()
 
 	RenderEffects();
 	
-	RenderHealthBars();
+	RenderWorldSpaceSprites();
 	mUIManager.RenderPanel();
 	if (mNetworkManager->mMode == NetworkManager::SERVER) mUIManager.RenderManaBar();
 	mUIManager.RenderObjectives(mGameState, mNetworkManager->mMode == NetworkManager::SERVER);
@@ -836,10 +932,10 @@ void Level01::VRender()
 	switch (mGameState)
 	{
 	case GAME_STATE_FINAL_GHOST_WIN:
-		mUIManager.RenderEndScreen(true);
+		mUIManager.RenderEndScreen(true, [this]() {SetRestart(); return true; });
 		break;
 	case GAME_STATE_FINAL_EXPLORERS_WIN:
-		mUIManager.RenderEndScreen(false);
+		mUIManager.RenderEndScreen(false, [this]() {SetRestart(); return true; });
 		break;
 	case GAME_STATE_INITIAL:
 		mUIManager.RenderReadyScreen(mNetworkManager->ID());
@@ -1370,14 +1466,35 @@ void Level01::RenderMinions()
 	}
 }
 
-void Level01::RenderHealthBars()
+void Level01::RenderWorldSpaceSprites()
 {
-	UINT sCount = 0;
+	bool isGhost = mNetworkManager->ID() == 0;
+
+	for (auto& d : Factory<DominationPoint>())
+	{
+		if (d.mTier == 1 && mGameState < GAME_STATE_CAPTURE_1) continue;
+		auto screenPos = mCameraManager->World2Screen(d.mTransform->GetPosition());
+		mSpriteManager->DrawSprite(SPRITESHEET_GENERAL_ICONS, 6, screenPos, isGhost ? vec2f(70, 70) : vec2f(300, 300), vec4f(1, 1, 1, .5f));
+		mSpriteManager->DrawSprite(SPRITESHEET_GENERAL_ICONS, 6, screenPos, isGhost ? vec2f(70, 70) : vec2f(300, 300), vec4f(1, 0, 0, .5f), vec2f(1, 1), 2 * PI * d.mController->mProgress);
+	}
+
 	for (Health& h : Factory<Health>())
 	{
-		auto screenPos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, -90);
-		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 1, screenPos, vec2f(90, 12), vec4f(1,1,1,1), vec2f(h.GetHealthPerc(), 1));
-		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 0, screenPos, vec2f(90, 12));
+		auto screenPos = mCameraManager->World2Screen(h.mSceneObject->mTransform->GetPosition()) + vec2f(0, isGhost ? -30.0f : -90.0f);
+		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 1, screenPos, isGhost ? vec2f(75, 11) : vec2f(90, 12), vec4f(1, 1, 1, 1), vec2f(h.GetHealthPerc(), 1));
+		mSpriteManager->DrawSprite(SPRITESHEET_BARS, 0, screenPos, isGhost ? vec2f(75, 11) : vec2f(90, 12));
+	}
+
+	for (StatusEffect& s : Factory<StatusEffect>())
+	{
+		for (auto &m : s.mMinions) {
+			auto screenPos = mCameraManager->World2Screen(m.first->mTransform->GetPosition());
+			mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, isGhost ? 10.0f : 14.0f, screenPos, vec4f(1, 1, 1, 1), ALIGN_CENTER, "%s", s.mFlavorText);
+		}
+		for (auto &m : s.mExplorers) {
+			auto screenPos = mCameraManager->World2Screen(m.first->mTransform->GetPosition());
+			mSpriteManager->DrawTextSprite(SPRITESHEET_FONT_NORMAL, isGhost ? 10.0f : 14.0f, screenPos, vec4f(1, 1, 1, 1), ALIGN_CENTER, "%s", s.mFlavorText);
+		}
 	}
 }
 
@@ -1478,7 +1595,7 @@ void Level01::ComputeGrid()
 
 	mRenderer->VSetVertexShaderInstanceBuffer(mStaticMeshShaderResource, 0, 1);
 	
-	//First no floors
+	//First no floors/stairs
 	int instanceCount = 0;
 	for (Factory<StaticMesh>::iterator it = Factory<StaticMesh>().begin(); it != Factory<StaticMesh>().end();)
 	{
@@ -1486,7 +1603,11 @@ void Level01::ComputeGrid()
 		auto modelCluster = staticMesh.mModel;
 		auto numElements = modelCluster->ShareCount();
 
-		if (modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR]) {
+		if (modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR] &&
+			modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_STAIRS] &&
+			modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_STAIRS_LEFT] &&
+			modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_STAIR_FULL] &&
+			modelCluster->mName != kStaticMeshModelNames[STATIC_MESH_STAIR_HALF]) {
 			mRenderer->VBindMesh(modelCluster->mMesh);
 			mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
 		}
@@ -1497,7 +1618,7 @@ void Level01::ComputeGrid()
 
 	mRenderer->VCopySubresource(mGridContext, 4, 2);
 
-	//Now only the floors
+	//Now only the floors/stairs
 	instanceCount = 0;
 	for (Factory<StaticMesh>::iterator it = Factory<StaticMesh>().begin(); it != Factory<StaticMesh>().end();)
 	{
@@ -1505,7 +1626,11 @@ void Level01::ComputeGrid()
 		auto modelCluster = staticMesh.mModel;
 		auto numElements = modelCluster->ShareCount();
 
-		if (modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR]) {
+		if (modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_MODEL_FLOOR] &&
+			modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_STAIRS] &&
+			modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_MODEL_CURVED_STAIRS_LEFT] &&
+			modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_STAIR_FULL] &&
+			modelCluster->mName == kStaticMeshModelNames[STATIC_MESH_STAIR_HALF]) {
 			mRenderer->VBindMesh(modelCluster->mMesh);
 			mRenderer->GetDeviceContext()->DrawIndexedInstanced(modelCluster->mMesh->GetIndexCount(), numElements, 0, 0, instanceCount);
 			break; // Early exit;

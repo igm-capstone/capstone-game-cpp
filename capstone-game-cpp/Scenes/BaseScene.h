@@ -55,6 +55,7 @@ public:
 
 	void SetStaticMemory(void* staticMemory, size_t size);
 	virtual void VFixedUpdate(double milliseconds) = 0;
+	virtual void Restart(void) {};
 
 	// Common methods
 	void RenderFPSIndicator();

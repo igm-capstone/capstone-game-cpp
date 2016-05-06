@@ -30,10 +30,10 @@ void CameraManager::ChangeLookAtBy(const vec3f& offset)
 
 void CameraManager::SetLevelBounds(vec2f center, vec2f extends)
 {
-	mLevelCenter = center;
-	mLevelExtends = extends;
+	mLevelCenter = vec3f(0);
+	mLevelExtends = extends; 
 
-	mCameraPersp.SetViewMatrix(mat4f::lookAtLH(center, center, vec3f(0, 1, 0)));
+	mCameraPersp.SetViewMatrix(mat4f::lookAtLH(mLevelCenter, center, vec3f(0, 1, 0)));
 	mCBufferFullLevelOrto.view = mCBufferPersp.view;
 
 	mCameraQuadOrto.SetProjectionMatrix(mat4f::normalizedOrthographicLH(mLevelCenter.x - mLevelExtends.x, mLevelCenter.x + mLevelExtends.x, mLevelCenter.y - mLevelExtends.y, mLevelCenter.y + mLevelExtends.y, mNearPlane, mFarPlane));

@@ -46,7 +46,8 @@ class AnimationController :
 	public BaseComponent
 {
 	EXPOSE_CALLBACK_2(CommandExecuted, AnimationControllerState, AnimationControllerCommand)
-	
+	EXPOSE_CALLBACK_2(StateChanged, AnimationControllerState, AnimationControllerState)
+
 	friend class Factory<AnimationController>;
 
 	uint32_t		mPreviousKeyframeIndex;

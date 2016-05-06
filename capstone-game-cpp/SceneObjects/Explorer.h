@@ -51,11 +51,12 @@ public:
 	void DebugSpawn(vec3f pos, int UUID);
 	void UpdateComponents(quatf rotation, vec3f position);
 
-	static void OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot);
+	static void OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot, bool sync = true);
 	static void OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth);
 	static void OnNetSyncTransform(BaseSceneObject* obj, vec3f newPos, quatf newRot);
 	//static void OnNetHealthChange(BaseSceneObject* obj, float newVal);
 	static void OnAnimationCommandExecuted(BaseSceneObject* obj, AnimationControllerState state, AnimationControllerCommand command);
+	static void OnAnimStateChange(BaseSceneObject* obj, AnimationControllerState prevState, AnimationControllerState newState);
 	static void OnNetSyncAnimation(BaseSceneObject* obj, byte state, byte command);
 	static void OnHealthChange(BaseSceneObject* obj, float oldVal, float newVal, float hitDirection);
 	static void OnDeath(BaseSceneObject* obj);

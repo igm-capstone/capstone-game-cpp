@@ -9,12 +9,12 @@ AbominationController::AbominationController()
 {
 	mBehaviorTree = &TreeBuilder(mAllocator)
 		.Composite<Priority>("(/!\\) Priority Selector")
-		.Subtree(CreateKnockbackSubtree())
-		.Subtree(CreateAttackSubtree())
-		.Subtree(CreateChaseSubtree())
-		.Subtree(CreateWanderSubtree())
+			.Subtree(CreateKnockbackSubtree())
+			.Subtree(CreateAttackSubtree())
+			.Subtree(CreateChaseSubtree())
+			.Subtree(CreateWanderSubtree())
 		.End()
-		.End();
+	.End();
 }
 
 

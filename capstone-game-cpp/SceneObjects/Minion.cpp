@@ -113,7 +113,8 @@ void Minion::Spawn(vec3f pos, int UUID, json config)
 
 	if (config.find("attackRange") != config.end())
 	{
-		mController->mAttackRange = config["attackRange"].get<float>();
+		// hardcoded (Wanna fix? go ahead)
+		//mController->mAttackRange = config["attackRange"].get<float>();
 	}
 
 	if (config.find("splashRange") != config.end())
@@ -137,8 +138,8 @@ void Minion::SpawnImp(vec3f pos, int UUID)
 	Spawn(pos, UUID, config);
 
 	mTransform->SetScale(0.3f);
-	mCollider->mOffset = { 0.0f, 0.65f, 0.0f };
-	mCollider->mCollider.radius = 1.45f;
+	mCollider->mOffset = { 0.0f, 1.0f, 0.0f };
+	mCollider->mCollider.radius = 0.5f;
 
 	mMeleeColliderComponent->mCollider.radius = 1.0f;
 	mMeleeColliderComponent->mOffset = { 0.0f, 0.65f, mCollider->mCollider.radius + mMeleeColliderComponent->mCollider.radius + 0.01f };
@@ -170,9 +171,9 @@ void Minion::SpawnAbomination(vec3f pos, int UUID)
 	auto config = findByName(minions, "AOEToad");
 	Spawn(pos, UUID, config);
 
-	mTransform->SetScale(0.3f);
-	mCollider->mOffset = { 0.0f, 0.65f, 0.0f };
-	mCollider->mCollider.radius = 1.45f;
+	mTransform->SetScale(0.6f);
+	mCollider->mOffset = { 0.0f, 1.0f, 0.0f };
+	mCollider->mCollider.radius = 0.5f;
 
 	mMeleeColliderComponent->mCollider.radius = 1.0f;
 	mMeleeColliderComponent->mOffset = { 0.0f, 0.65f, mCollider->mCollider.radius + mMeleeColliderComponent->mCollider.radius + 0.01f };
@@ -211,7 +212,7 @@ void Minion::SpawnFlytrap(vec3f pos, int UUID)
 	mCollider->mIsDynamic = false;
 
 	mMeleeColliderComponent->mCollider.radius = 1.0f;
-	mMeleeColliderComponent->mOffset = { 0.0f, 0.65f, mCollider->mCollider.radius + mMeleeColliderComponent->mCollider.radius + 0.01f };
+	mMeleeColliderComponent->mOffset = { -(mCollider->mCollider.radius + mMeleeColliderComponent->mCollider.radius + 0.01f), 0.65f, 0.0f };
 	mMeleeColliderComponent->mIsDynamic = false;
 
 	Application::SharedInstance().GetModelManager()->GetModel(kPlantModelName)->Link(this);

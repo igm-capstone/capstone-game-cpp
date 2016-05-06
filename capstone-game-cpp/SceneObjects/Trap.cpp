@@ -69,6 +69,7 @@ void Trap::SpawnPoison(int UUID, vec3f position, float duration)
 {
 	Spawn(UUID, position, duration);
 	mEffect->mOnUpdateCallback = StatusEffect::OnPoisonUpdate;
+	mEffect->mFlavorText = "POISONED";
 	mEffect->mDuration = duration;
 }
 
@@ -78,6 +79,7 @@ void Trap::SpawnSlow(int UUID, vec3f position, float duration)
 	mEffect->mOnEnterCallback = StatusEffect::OnSlowEnter;
 	mEffect->mOnUpdateCallback = StatusEffect::OnSlowUpdate;
 	mEffect->mOnDestroyCallback = StatusEffect::OnSlowDestroy;
+	mEffect->mFlavorText = "SLOWED";
 	mEffect->mDuration = duration;
 }
 

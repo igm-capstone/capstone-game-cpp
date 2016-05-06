@@ -52,6 +52,8 @@ Explorer::Explorer()
 
 	mAnimationController = Factory<AnimationController>::Create();
 	mAnimationController->mSceneObject = this;
+	mAnimationController->RegisterStateChangedCallback(&OnAnimStateChange);
+	mAnimationController->RegisterCommandExecutedCallback(&OnAnimationCommandExecuted);
 
 	mController = Factory<ExplorerController>::Create();
 	mController->mSceneObject = this;
@@ -60,12 +62,12 @@ Explorer::Explorer()
 	mController->mAnimationController = mAnimationController;	// Be careful if you move this code. AnimationController should exist before here.
 
 	mCollider = Factory<SphereColliderComponent>::Create();
-	mCollider->mCollider.radius = 1.4f;
+	mCollider->mCollider.radius = 0.5f;
 	mCollider->mIsDynamic = true;
 	mCollider->mSceneObject = this;
 	mCollider->mIsActive = false;
 	mCollider->mLayer = COLLISION_LAYER_EXPLORER;
-	mCollider->mOffset = { 0.0f, 2.5f, 0.0f };
+	mCollider->mOffset = { 0.0f, 1.0f, 0.0f };
 	mCollider->RegisterCollisionExitCallback(&OnCollisionExit);
 	
 	mInteractionCollider = Factory<SphereColliderComponent>::Create();
@@ -162,14 +164,14 @@ void Explorer::Spawn(vec3f pos, int UUID)
 	mController->PlayStateAnimation(ANIM_STATE_IDLE);
 }
 
-void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot)
+void Explorer::OnMove(BaseSceneObject* obj, vec3f newPos, quatf newRot, bool sync)
 {
 	auto e = static_cast<Explorer*>(obj);
 	e->mTransform->SetPosition(newPos);
 	e->mTransform->SetRotation(newRot);
 	e->UpdateComponents(newRot, newPos);
 
-	if (e->mNetworkID->mHasAuthority) {
+	if (sync && e->mNetworkID->mHasAuthority) {
 		e->mCameraManager->ChangeLookAtTo(newPos);
 		Packet p(PacketTypes::SYNC_TRANSFORM);
 		p.UUID = e->mNetworkID->mUUID;
@@ -341,6 +343,18 @@ void Explorer::OnAnimationCommandExecuted(BaseSceneObject* obj, AnimationControl
 		p.AsAnimation.State = state;
 		p.AsAnimation.Command = command;
 		e->mNetworkClient->SendData(&p);
+	}
+}
+
+void Explorer::OnAnimStateChange(BaseSceneObject* obj, AnimationControllerState prevState, AnimationControllerState newState)
+{
+	if (newState != ANIM_STATE_MELEE)
+	{
+		auto e = reinterpret_cast<Explorer*>(obj);
+		if (e->mNetworkID->mHasAuthority)
+		{
+			e->mMeleeColliderComponent.asBaseColliderComponent->mIsActive = false;
+		}
 	}
 }
 
