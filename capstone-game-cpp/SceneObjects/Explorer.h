@@ -32,8 +32,10 @@ public:
 
 	MeleeColliderComponent				mMeleeColliderComponent;
 	float								mAttackDamage;
-	bool								mIsDead;
 	ExplorerType						mExplorerType;
+	bool								mIsDead;
+	bool								mIsTransmogrified;
+
 private:
 	class NetworkClient*				mNetworkClient;
 	class CameraManager*				mCameraManager;

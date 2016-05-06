@@ -36,6 +36,7 @@ void Transmogrify::Spawn(float duration, int targetUUID)
 
 	for (Explorer& e : Factory<Explorer>())
 	{
+		// Only affects clients who are not the target
 		if (e.mNetworkID->mUUID == targetUUID && !e.mNetworkID->mHasAuthority)
 		{
 			Attach(&e);
@@ -57,6 +58,7 @@ void Transmogrify::Attach(Explorer* pExplorer)
 
 	mTransform->SetScale(pExplorer->mTransform->GetScale());
 	pExplorer->mTransform->SetScale(0.3f); // Minion model scale
+	pExplorer->mIsTransmogrified = true;
 }
 
 void Transmogrify::Detach()
@@ -71,8 +73,8 @@ void Transmogrify::Detach()
 	mTargetAnimationController->mIsActive = true;
 	
 	pExplorer->mModel = mTargetModelCluster;
-
 	pExplorer->mTransform->SetScale(mTransform->GetScale());
+	pExplorer->mIsTransmogrified = false;
 
 	mAnimationController->mSceneObject = nullptr;
 	mAnimationController->mIsActive = false;

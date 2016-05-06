@@ -37,6 +37,7 @@ Skill* createExplorerSkill(Skill::UseCallback callback, SkillBinding binding, js
 Explorer::Explorer()
 	: mAttackDamage(0)
 	, mIsDead(false)
+	, mIsTransmogrified(false)
 {
 	mNetworkClient = &Singleton<NetworkManager>::SharedInstance().mClient;
 	mCameraManager = &Singleton<CameraManager>::SharedInstance();

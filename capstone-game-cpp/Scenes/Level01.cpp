@@ -1144,7 +1144,7 @@ void Level01::RenderExplorers()
 	mRenderer->VSetPixelShaderSamplerStates(mExplorerShaderResource);
 
 	//uint8_t materialIDs[3] = { 6, 3, 7 };
-	uint8_t materialIDs[3] = { 3, 3, 7 };
+	uint8_t materialIDs[4] = { 3, 3, 7, 0 };
 
 	for (Explorer& e : Factory<Explorer>())
 	{
@@ -1156,7 +1156,9 @@ void Level01::RenderExplorers()
 		mRenderer->VUpdateShaderConstantBuffer(mExplorerShaderResource, mSkinnedMeshMatrices, 2);
 		mRenderer->VSetVertexShaderConstantBuffer(mExplorerShaderResource, 2, 2);
 		
-		mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, materialIDs[e.GetExplorerType() - 1], 0);
+		uint8_t materialIndex = (e.mIsTransmogrified) ? 3 : e.GetExplorerType() - 1;
+
+		mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, materialIDs[materialIndex], 0);
 
 		mRenderer->VBindMesh(e.mModel->mMesh);
 		mRenderer->VDrawIndexed(0, e.mModel->mMesh->GetIndexCount());
