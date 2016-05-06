@@ -2,7 +2,7 @@
 #include <Windows.h>
 #include <stdint.h>
 #include "Rig3D\Options.h"
-#include "Memory/Memory/Memory.h"
+#include "Rig3D\Common\WMEventHandler.h"
 
 #ifdef _WINDLL
 #define RIG3D __declspec(dllexport)
@@ -16,6 +16,8 @@ namespace Rig3D
 	class IScene;
 	class IMesh;
 	class IShader;
+	class IShaderResource;
+	class IRenderContext;
 
 	enum InputClass
 	{
@@ -25,9 +27,18 @@ namespace Rig3D
 
 	enum InputFormat
 	{
-		FLOAT2,
-		FLOAT3,
-		FLOAT4
+		R_FLOAT32,
+		RG_FLOAT32,
+		RGB_FLOAT32,
+		RGBA_FLOAT32,
+		R_SNORM8,
+		RG_SNORM8,
+		RGBA_SNORM8,
+		R_TYPELESS8,
+		RG_TYPELESS8,
+		RGBA_TYPELESS8,
+		R_UINT32,
+		RGBA_UINT32
 	};
 
 	struct InputElement
@@ -41,6 +52,13 @@ namespace Rig3D
 		InputClass	InputSlotClass;
 	};
 
+	enum SamplerStateAddressType
+	{
+		SAMPLER_STATE_ADDRESS_CLAMP,
+		SAMPLER_STATE_ADDRESS_WRAP,
+		SAMPLER_STATE_ADDRESS_BORDER,
+	};
+
 	class RIG3D IRendererDelegate
 	{
 	public:
@@ -50,89 +68,154 @@ namespace Rig3D
 		virtual ~IRendererDelegate() {};
 	};
 
-	class RIG3D IRenderer
+	template <class Base>
+	class IRenderer : public Base, public IObserver
 	{
 	public:
-		IRenderer();
-		virtual ~IRenderer();
+		IRenderer() : 
+			mHINSTANCE(nullptr),
+			mHWND(nullptr),
+			mWindowWidth(0),
+			mWindowHeight(0),
+			mGraphicsAPI(GRAPHICS_API_DIRECTX11),
+			mDelegate(nullptr),
+			mWindowCaption(""),
+			mFullScreen(false)
+
+		{
+
+		}
+
+		~IRenderer()
+		{
 		
-		virtual int		VInitialize(HINSTANCE hInstance, HWND hwnd, Options options) = 0;
-		virtual void	VOnResize() = 0;
-		virtual void	VUpdateScene(const double& milliseconds) = 0;
-		virtual void	VRenderScene() = 0;
-		virtual void	VShutdown() = 0;
+		}
 
-		virtual void	VSetPrimitiveType(GPUPrimitiveType type) = 0;
-		virtual void	VDrawIndexed(GPUPrimitiveType type, uint32_t startIndex, uint32_t count) = 0;
-		virtual void    VDrawIndexed(uint32_t startIndex, uint32_t count) = 0;
+		inline int VInitialize(HINSTANCE hInstance, HWND hwnd, Options options)
+		{
+			mHINSTANCE = hInstance;
+			mHWND = hwnd;
+			mWindowWidth = options.mWindowWidth;
+			mWindowHeight = options.mWindowHeight;
+			mWindowCaption = options.mWindowCaption;
+			mFullScreen = options.mFullScreen;
 
-#pragma region Buffer
+			if (Base::VInitialize(hInstance, hwnd, options) != RIG_SUCCESS)
+			{
+				return 0;
+			}
 
-		virtual void	VCreateVertexBuffer(void* buffer, void* vertices, const size_t& size) = 0;
-		virtual void	VCreateStaticVertexBuffer(void* buffer, void* vertices, const size_t& size) = 0;
-		virtual void	VCreateDynamicVertexBuffer(void* buffer, void* vertices, const size_t& size) = 0;
+			WMEventHandler::SharedInstance().RegisterObserver(WM_SIZE, this);
+			WMEventHandler::SharedInstance().RegisterObserver(WM_ENTERSIZEMOVE, this);
+			WMEventHandler::SharedInstance().RegisterObserver(WM_EXITSIZEMOVE, this);
 
-		virtual void	VCreateIndexBuffer(void* buffer, uint16_t* indices, const uint32_t& count) = 0;
-		virtual void	VCreateStaticIndexBuffer(void* buffer, uint16_t* indices, const uint32_t& count) = 0;
-		virtual void	VCreateDynamicIndexBuffer(void* buffer, uint16_t* indices, const uint32_t& count) = 0;
+			return RIG_SUCCESS;
+		}
 
-		virtual void	VCreateInstanceBuffer(void* buffer, void* data, const size_t& size) = 0;
-		virtual void	VCreateStaticInstanceBuffer(void* buffer, void* data, const size_t& size) = 0;
-		virtual void	VCreateDynamicInstanceBuffer(void* buffer, void* data, const size_t& size) = 0;
+		inline void SetWindowCaption(const char* caption)
+		{
+			LPCWSTR wideWindowCaption;
+			CSTR2WSTR(caption, wideWindowCaption)
+			SetWindowTextW(mHWND, wideWindowCaption);
+		};
 
-		virtual void	VCreateConstantBuffer(void* buffer, void* data, const size_t& size) = 0;
-		virtual void	VCreateStaticConstantBuffer(void* buffer, void* data, const size_t& size) = 0;
-		virtual void	VCreateDynamicConstantBuffer(void* buffer, void* data, const size_t& size) = 0;
-
-		virtual void	VUpdateConstantBuffer(void* buffer, void* data) = 0;
-#pragma endregion
-
-		virtual void	VSetMeshVertexBuffer(IMesh* mesh, void* vertices, const size_t& size, const size_t& stride) = 0;
-		virtual void	VSetStaticMeshVertexBuffer(IMesh* mesh, void* vertices, const size_t& size, const size_t& stride) = 0;
-		virtual void	VSetDynamicMeshVertexBuffer(IMesh* mesh, void* vertices, const size_t& size, const size_t& stride) = 0;
-
-		virtual void	VSetMeshIndexBuffer(IMesh* mesh, uint16_t* indices, const uint32_t& count) = 0;
-		virtual void	VSetStaticMeshIndexBuffer(IMesh* mesh, uint16_t* indices, const uint32_t& count) = 0;
-		virtual void	VSetDynamicMeshIndexBuffer(IMesh* mesh, uint16_t* indices, const uint32_t& count) = 0;
-
-		virtual void	VUpdateMeshVertexBuffer(IMesh* mesh, void* data, const size_t& size) = 0;
-		virtual void	VUpdateMeshIndexBuffer(IMesh* mesh, void* data, const uint32_t& count) = 0;
-
-		virtual void    VBindMesh(IMesh* mesh) = 0;
-
-#pragma region Shaders
-
-		virtual void	VCreateShader(IShader** shader, LinearAllocator* allocator) = 0;
-		virtual void	VLoadVertexShader(IShader* vertexShader, const char* filename, InputElement* inputElements, const uint32_t& count) = 0;
-		virtual void	VLoadVertexShader(IShader* vertexShader, const char* filename, LinearAllocator* allocator) = 0;
-		virtual void	VLoadVertexShader(IShader* vertexShader, const char* filename) = 0;
-		virtual void	VLoadPixelShader(IShader* vertexShader, const char* filename, LinearAllocator* allocator) = 0;
-		virtual void	VLoadPixelShader(IShader* pixelShader, const char* filename) = 0;
-
-		virtual void	VSetInputLayout(IShader* vertexShader) = 0;
-		virtual void	VSetVertexShaderInputLayout(IShader* vertexShader) = 0;
-		virtual void	VSetVertexShaderResources(IShader* vertexShader) = 0;
-		virtual void	VSetVertexShader(IShader* shader) = 0;
-		virtual void	VSetPixelShader(IShader* shader) = 0;
-
-		// Constant buffers will be bound to GPU registers in the order they are arranged
-		virtual void	VCreateShaderConstantBuffers(IShader* shader, void** data, size_t* sizes, const uint32_t& count) = 0;
-
-		// Use the register number as an index
-		virtual void	VUpdateShaderConstantBuffer(IShader* shader, void* data, uint32_t index) = 0;
-
-#pragma endregion
-
-		virtual void    VSwapBuffers() = 0;
-
-		void SetWindowCaption(const char* caption);
-		
 		inline float		GetAspectRatio() const { return static_cast<float>(mWindowWidth) / mWindowHeight; };
 		inline const int&	GetWindowWidth() const { return mWindowWidth; };
 		inline const int&	GetWindowHeight() const { return mWindowHeight; };
 		inline GraphicsAPI	GetGraphicsAPI() const { return mGraphicsAPI; };
-	
+		inline HWND			GetHWND() const { return mHWND; };
+
 		inline void SetDelegate(IRendererDelegate* renderDelegate) { mDelegate = renderDelegate; };
+
+		void HandleEvent(const IEvent& iEvent) override
+		{
+			const WMEvent& wmEvent = static_cast<const WMEvent&>(iEvent);
+			switch (wmEvent.msg)
+			{
+			case WM_SIZE:
+				// Save the new client area dimensions.
+				mWindowWidth = LOWORD(wmEvent.lparam);
+				mWindowHeight = HIWORD(wmEvent.lparam);
+
+				if (Base::GetDevice())
+				{
+					if (wmEvent.wparam == SIZE_MINIMIZED)
+					{
+						mIsPaused = true;
+						mIsMinimized = true;
+						mIsMaximized = false;
+					}
+					else if (wmEvent.wparam == SIZE_MAXIMIZED)
+					{
+						mIsPaused = false;
+						mIsMinimized = false;
+						mIsMaximized = true;
+						VOnResize(mWindowWidth, mWindowHeight);
+					}
+					else if (wmEvent.wparam == SIZE_RESTORED)
+					{
+						// Restoring from minimized state?
+						if (mIsMinimized)
+						{
+							mIsPaused = false;
+							mIsMinimized = false;
+							VOnResize(mWindowWidth, mWindowHeight);
+						}
+
+						// Restoring from maximized state?
+						else if (mIsMaximized)
+						{
+							mIsPaused = false;
+							mIsMaximized = false;
+							VOnResize(mWindowWidth, mWindowHeight);
+						}
+						else if (mIsResizing)
+						{
+							// If user is dragging the resize bars, we do not resize 
+							// the buffers here because as the user continuously 
+							// drags the resize bars, a stream of WM_SIZE messages are
+							// sent to the window, and it would be pointless (and slow)
+							// to resize for each WM_SIZE message received from dragging
+							// the resize bars.  So instead, we reset after the user is 
+							// done resizing the window and releases the resize bars, which 
+							// sends a WM_EXITSIZEMOVE message.
+						}
+						else // API call such as SetWindowPos or mSwapChain->SetFullscreenState.
+						{
+							VOnResize(mWindowWidth, mWindowHeight);
+						}
+					}
+				}
+				break;
+				// WM_EXITSIZEMOVE is sent when the user grabs the resize bars.
+			case WM_ENTERSIZEMOVE:
+				mIsPaused = true;
+				mIsResizing = true;
+				//timer.Stop();
+				break;
+
+				// WM_EXITSIZEMOVE is sent when the user releases the resize bars.
+				// Here we reset everything based on the new window dimensions.
+			case WM_EXITSIZEMOVE:
+				mIsPaused = false;
+				mIsResizing = false;
+				//timer.Start();
+				VOnResize(mWindowWidth, mWindowHeight);
+				break;
+			default:
+				break;
+			}
+		}
+
+		void VOnResize(int windowWidth, int windowHeight)
+		{
+			Base::VOnResize(mWindowWidth, mWindowHeight);
+
+			if (mDelegate)
+			{
+				mDelegate->VOnResize();
+			}
+		}
 
 	protected:
 		HINSTANCE			mHINSTANCE;
@@ -141,8 +224,13 @@ namespace Rig3D
 		int					mWindowHeight;
 		GraphicsAPI			mGraphicsAPI;
 		IRendererDelegate*	mDelegate;
-		const char*			mWindowCaption;		
+		const char*			mWindowCaption;
+		
 		bool				mFullScreen;
-	};
+		bool					mIsPaused;
+		bool					mIsMaximized;
+		bool					mIsMinimized;
+		bool					mIsResizing;
+		};
 }
 

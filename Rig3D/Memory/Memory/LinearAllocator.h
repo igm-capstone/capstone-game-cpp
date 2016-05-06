@@ -21,7 +21,10 @@ namespace cliqCity
 		public:
 			LinearAllocator(size_t size);
 			LinearAllocator(void* start, void* end);
+			LinearAllocator();
 			~LinearAllocator();
+
+			void	SetMemory(void* start, void* end);
 
 			void*	Allocate(size_t size, size_t alignment, size_t offset);
 			void	Reset();
@@ -33,7 +36,7 @@ namespace cliqCity
 			uint8_t* mEnd;
 			bool     mIsOwner;
 
-			LinearAllocator();
+			LinearAllocator(const LinearAllocator& other) = delete;
 		};
 	}
 }

@@ -11,9 +11,23 @@ void* AlignedPointer(void* buffer, unsigned int alignment)
 	char adjustment = alignment - misalignment;
 	char* alignedPointer = rawPointer + adjustment;
 
-	assert(adjustment < 256, __FILE__, __LINE__);
+	assert(adjustment < 256);
 	alignedPointer[-1] = adjustment;
 
 	return (void*)alignedPointer;
 }
+
+void* RawPointer(void* alignedPointer)
+{
+	char* asChar = alignedPointer;
+	char adjustment = asChar[-1];
+	void* rawPointer = asChar - adjustment;
+
+	return rawPointer;
+}
 	
+char  Adjustment(void* alignedPointer)
+{
+	char* asChar = alignedPointer;
+	return asChar[-1];
+}

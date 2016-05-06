@@ -1,0 +1,437 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{9CDF32CA-A3F4-45A2-B703-EC18792690EF}</ProjectGuid>
+    <RootNamespace>capstone-game-cpp</RootNamespace>
+    <ProjectName>capstone-game-cpp</ProjectName>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)ext\fmod\studio\inc;$(SolutionDir)ext\fmod\lowlevel\inc;$(SolutionDir)ext\fmod\fsbank\inc;$(ProjectDir);$(SolutionDir)Rig3D\;$(SolutionDir);$(SolutionDir)ext\Autodesk\2016.1.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <BrowseInformation>true</BrowseInformation>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Rig3D.lib;Memory.lib;GraphicsMath.lib;EventHandler.lib;d3d11.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)ext\fmod\fsbank\lib;$(SolutionDir)ext\fmod\lowlevel\lib;$(SolutionDir)ext\fmod\studio\lib;$(SolutionDir)ext\Autodesk\2016.1.2\lib\vs2015\x86\release;$(TargetDir)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>taskkill /f /fi "imagename eq $(TargetFileName)" &gt; NUL</Command>
+      <Message>Killing existing processes.</Message>
+    </PreBuildEvent>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+      <ObjectFileOutput />
+      <HeaderFileOutput>$(ProjectDir)Shaders/obj/%(Filename).h</HeaderFileOutput>
+      <VariableName>g%(Filename)</VariableName>
+    </FxCompile>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)ext\fmod\studio\inc;$(SolutionDir)ext\fmod\lowlevel\inc;$(SolutionDir)ext\fmod\fsbank\inc;$(ProjectDir);$(SolutionDir)Rig3D\;$(SolutionDir);$(SolutionDir)ext\Autodesk\2016.1.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>Rig3D.lib;Memory.lib;GraphicsMath.lib;EventHandler.lib;d3d11.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)ext\Autodesk\2016.1.2\lib\vs2015\x86\release;$(SolutionDir)ext\fmod\fsbank\lib;$(SolutionDir)ext\fmod\lowlevel\lib;$(SolutionDir)ext\fmod\studio\lib;$(TargetDir)</AdditionalLibraryDirectories>
+    </Link>
+    <FxCompile>
+      <HeaderFileOutput>$(ProjectDir)Shaders/obj/%(Filename).h</HeaderFileOutput>
+      <ShaderModel>5.0</ShaderModel>
+      <VariableName>g%(Filename)</VariableName>
+      <ObjectFileOutput />
+    </FxCompile>
+    <PreBuildEvent>
+      <Command>taskkill /f /fi "imagename eq $(TargetFileName)" &gt; NUL</Command>
+      <Message>Killing existing processes.</Message>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="BehaviorTree\BehaviorTreeTests.cpp" />
+    <ClCompile Include="BehaviorTree\Builder.cpp" />
+    <ClCompile Include="BehaviorTree\Conditional.cpp" />
+    <ClCompile Include="BehaviorTree\Decorator.cpp" />
+    <ClCompile Include="BehaviorTree\Mute.cpp" />
+    <ClCompile Include="BehaviorTree\Parallel.cpp" />
+    <ClCompile Include="BehaviorTree\Predicate.cpp" />
+    <ClCompile Include="BehaviorTree\Priority.cpp" />
+    <ClCompile Include="BehaviorTree\Race.cpp" />
+    <ClCompile Include="BehaviorTree\Selector.cpp" />
+    <ClCompile Include="BehaviorTree\Tree.cpp" />
+    <ClCompile Include="BVHTree.cpp" />
+    <ClCompile Include="BehaviorTree\Behavior.cpp" />
+    <ClCompile Include="BehaviorTree\Composite.cpp" />
+    <ClCompile Include="BehaviorTree\Sequence.cpp" />
+    <ClCompile Include="BehaviorTree\TestSuite.cpp" />
+    <ClCompile Include="Components\AbominationController.cpp" />
+    <ClCompile Include="Components\AnimationController.cpp" />
+    <ClCompile Include="CameraManager.cpp" />
+    <ClCompile Include="CollisionManager.cpp" />
+    <ClCompile Include="Components\AnimationUtility.cpp" />
+    <ClCompile Include="Components\ColliderComponent.cpp" />
+    <ClCompile Include="Components\DominationPointController.cpp" />
+    <ClCompile Include="Components\ExplorerController.cpp" />
+    <ClCompile Include="Components\FmodEvent.cpp" />
+    <ClCompile Include="Components\FmodEventCollection.cpp" />
+    <ClCompile Include="Components\GhostController.cpp" />
+    <ClCompile Include="Components\Health.cpp" />
+    <ClCompile Include="Components\ImpController.cpp" />
+    <ClCompile Include="Components\MinionController.cpp" />
+    <ClCompile Include="Components\Skill.cpp" />
+    <ClCompile Include="Console.cpp" />
+    <ClCompile Include="DebugRender.cpp" />
+    <ClCompile Include="Factory.cpp" />
+    <ClCompile Include="Components\FlyTrapController.cpp" />
+    <ClCompile Include="jsonUtils.cpp" />
+    <ClCompile Include="SceneObjects\Explosion.cpp" />
+    <ClCompile Include="SceneObjects\Lantern.cpp" />
+    <ClCompile Include="SceneObjects\Door.cpp" />
+    <ClCompile Include="SceneObjects\Heal.cpp" />
+    <ClCompile Include="ModelManager.cpp" />
+    <ClCompile Include="SceneObjects\Lamp.cpp" />
+    <ClCompile Include="SceneObjects\Region.cpp" />
+    <ClCompile Include="Resource.cpp" />
+    <ClCompile Include="ScareTacticsApplication.cpp" />
+    <ClCompile Include="SceneObjects\BaseSceneObject.cpp" />
+    <ClCompile Include="SceneObjects\Explorer.cpp" />
+    <ClCompile Include="SceneObjects\Ghost.cpp" />
+    <ClCompile Include="SceneObjects\Minion.cpp" />
+    <ClCompile Include="SceneObjects\StatusEffect.cpp" />
+    <ClCompile Include="Scenes\BaseScene.cpp" />
+    <ClCompile Include="AIManager.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Network\NetworkClient.cpp" />
+    <ClCompile Include="Network\NetworkManager.cpp" />
+    <ClCompile Include="Network\NetworkServer.cpp" />
+    <ClCompile Include="Scenes\Level01.cpp" />
+    <ClCompile Include="Scenes\LoadingScreen.cpp" />
+    <ClCompile Include="Scenes\MainMenuScene.cpp" />
+    <ClCompile Include="SkeletalHierarchy.cpp" />
+    <ClCompile Include="SceneObjects\Trap.cpp" />
+    <ClCompile Include="SceneObjects\Transmogrify.cpp" />
+    <ClCompile Include="UI\UIManager.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="TargetFollower.cpp" />
+    <ClCompile Include="trace.cpp" />
+    <ClCompile Include="UI\SpriteManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Rig3D\Rig3D\Rig3D.vcxproj">
+      <Project>{77b5f1d0-8a48-4f96-aff6-366d6fbaf351}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BehaviorTree\BehaviorTree.h" />
+    <ClInclude Include="BehaviorTree\BehaviorTreeTests.h" />
+    <ClInclude Include="BehaviorTree\Builder.h" />
+    <ClInclude Include="BehaviorTree\Conditional.h" />
+    <ClInclude Include="BehaviorTree\Decorator.h" />
+    <ClInclude Include="BehaviorTree\Mute.h" />
+    <ClInclude Include="BehaviorTree\Parallel.h" />
+    <ClInclude Include="BehaviorTree\Predicate.h" />
+    <ClInclude Include="BehaviorTree\Priority.h" />
+    <ClInclude Include="BehaviorTree\Race.h" />
+    <ClInclude Include="BehaviorTree\Selector.h" />
+    <ClInclude Include="BehaviorTree\Tree.h" />
+    <ClInclude Include="BINResource.h" />
+    <ClInclude Include="BVHTree.h" />
+    <ClInclude Include="BehaviorTree\Behavior.h" />
+    <ClInclude Include="BehaviorTree\Composite.h" />
+    <ClInclude Include="BehaviorTree\Sequence.h" />
+    <ClInclude Include="BehaviorTree\TestSuite.h" />
+    <ClInclude Include="Components\AbominationController.h" />
+    <ClInclude Include="Components\AnimationController.h" />
+    <ClInclude Include="CameraManager.h" />
+    <ClInclude Include="CollisionManager.h" />
+    <ClInclude Include="Components\AnimationUtility.h" />
+    <ClInclude Include="Components\BaseComponent.h" />
+    <ClInclude Include="Components\ColliderComponent.h" />
+    <ClInclude Include="Components\DominationPointController.h" />
+    <ClInclude Include="Components\FmodEvent.h" />
+    <ClInclude Include="Components\FmodEventCollection.h" />
+    <ClInclude Include="Components\GhostController.h" />
+    <ClInclude Include="Components\Health.h" />
+    <ClInclude Include="Components\ImpController.h" />
+    <ClInclude Include="Components\MinionController.h" />
+    <ClInclude Include="DebugRender.h" />
+    <ClInclude Include="FBXResource.h" />
+    <ClInclude Include="Components\FlyTrapController.h" />
+    <ClInclude Include="jsonUtils.h" />
+    <ClInclude Include="SceneObjects\Explosion.h" />
+    <ClInclude Include="SceneObjects\Lantern.h" />
+    <ClInclude Include="SceneObjects\Heal.h" />
+    <ClInclude Include="fmodwrap.h" />
+    <ClInclude Include="Mathf.h" />
+    <ClInclude Include="ModelManager.h" />
+    <ClInclude Include="SceneObjects\Door.h" />
+    <ClInclude Include="SceneObjects\Region.h" />
+    <ClInclude Include="SceneObjects\Ghost.h" />
+    <ClInclude Include="Components\Skill.h" />
+    <ClInclude Include="capstone-game-cpp.rc.h" />
+    <ClInclude Include="Console.h" />
+    <ClInclude Include="Culler.h" />
+    <ClInclude Include="SceneObjects\DominationPoint.h" />
+    <ClInclude Include="SceneObjects\Minion.h" />
+    <ClInclude Include="Components\ExplorerController.h" />
+    <ClInclude Include="Factory.h" />
+    <ClInclude Include="Components\NetworkID.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="ScareTacticsApplication.h" />
+    <ClInclude Include="SceneObjects\SpawnPoint.h" />
+    <ClInclude Include="SceneObjects\LegacySceneObject.h" />
+    <ClInclude Include="SceneObjects\Explorer.h" />
+    <ClInclude Include="SceneObjects\Lamp.h" />
+    <ClInclude Include="SceneObjects\StaticCollider.h" />
+    <ClInclude Include="SceneObjects\StaticMesh.h" />
+    <ClInclude Include="SceneObjects\StatusEffect.h" />
+    <ClInclude Include="Scenes\BaseScene.h" />
+    <ClInclude Include="Colors.h" />
+    <ClInclude Include="AIManager.h" />
+    <ClInclude Include="json.h" />
+    <ClInclude Include="Network\NetworkData.h" />
+    <ClInclude Include="Network\NetworkClient.h" />
+    <ClInclude Include="Network\NetworkManager.h" />
+    <ClInclude Include="Network\NetworkServer.h" />
+    <ClInclude Include="Node.h" />
+    <ClInclude Include="PathFinder\Graph.h" />
+    <ClInclude Include="PathFinder\Fringe.h" />
+    <ClInclude Include="RayCast.h" />
+    <ClInclude Include="SceneObjects\BaseSceneObject.h" />
+    <ClInclude Include="Scenes\Level01.h" />
+    <ClInclude Include="Scenes\LoadingScreen.h" />
+    <ClInclude Include="Scenes\MainMenuScene.h" />
+    <ClInclude Include="SkeletalHierarchy.h" />
+    <ClInclude Include="SceneObjects\Trap.h" />
+    <ClInclude Include="SceneObjects\Transmogrify.h" />
+    <ClInclude Include="UI\UIManager.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TargetFollower.h" />
+    <ClInclude Include="trace.h" />
+    <ClInclude Include="UI\SpriteManager.h" />
+    <ClInclude Include="Uniforms.h" />
+    <ClInclude Include="Vertex.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\PSDef2DTexture.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\PSFwdDistanceMaterial.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\PSFwdPointLightVolume.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\PSFwdPointLightVolumeNS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\PSFwdSingleMaterial.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\PSDefInstancedMaterial.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\PSFwdTexture.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\VSFwdSingleColor.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\PSDefColor.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\VSDefSingleColor.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\VSDefSingleMaterial.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\CSGridPass1.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\CSGridPass2.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\PSFwdDeferredOutput.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\VSFwdFullScreenQuad.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\PSFwdColor.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\VSDefSkinnedMaterial.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\PSFwdSpotLightVolume.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\VSDefInstancedColor.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\VSFwdSingleMaterial.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\VSFwdSpotLightVolume.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\VSFwdLineTrace.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\PSDefMaterial.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\VSDefInstancedMaterial.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\PSFwd2DTexture.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\VSFwdSpriteGlyphs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\VSFwdSprites.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="capstone-game-cpp.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\Assets\icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="External\fmodstudioL.ref">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">COPY "$(SolutionDir)ext\fmod\studio\lib\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename).dll to output directory...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(Filename).dll</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)ext\fmod\studio\lib\%(Filename).dll</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">COPY "$(SolutionDir)ext\fmod\studio\lib\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename).dll to output directory...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).dll</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)ext\fmod\studio\lib\%(Filename).dll</AdditionalInputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="External\fmodL.ref">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">COPY "$(SolutionDir)ext\fmod\lowlevel\lib\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">COPY "$(SolutionDir)ext\fmod\lowlevel\lib\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename).dll to output directory...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(Filename).dll</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename).dll to output directory...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).dll</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)ext\fmod\lowlevel\lib\%(Filename).dll</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)ext\fmod\lowlevel\lib\%(Filename).dll</AdditionalInputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="External\libfbxsdk.ref">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">COPY "$(SolutionDir)ext\Autodesk\2016.1.2\lib\vs2015\x86\release\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying %(Filename).dll to output directory...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Filename).dll</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)ext\Autodesk\2016.1.2\lib\vs2015\x86\release\%(Filename).dll</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">COPY "$(SolutionDir)ext\Autodesk\2016.1.2\lib\vs2015\x86\debug\%(Filename).dll" "$(OutDir)" &gt; NUL</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying %(Filename).dll to output directory...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(Filename).dll</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)ext\Autodesk\2016.1.2\lib\vs2015\x86\debug\%(Filename).dll</AdditionalInputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

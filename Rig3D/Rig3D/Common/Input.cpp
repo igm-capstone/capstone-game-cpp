@@ -1,26 +1,21 @@
 #include "Input.h"
 #include "rig_defines.h"
+#include "stdio.h"
 
 #include <Windowsx.h>
 
 using namespace Rig3D;
 
-Input& Input::SharedInstance()
-{
-	static Input sharedInput;
-	return sharedInput;
-}
-
 Input::Input()
+	: mCurrMouseState(0)
+	, mPrevMouseState(0)
+	, mIsMouseActive(true)
 {
-	mKeysDown		= new std::unordered_set<KeyCode>();
-	mKeysUp			= new std::unordered_set<KeyCode>();
-	mKeysPressed	= new std::unordered_set<KeyCode>();
+	mKeysDown = new std::unordered_set<KeyCode>();
+	mKeysUp = new std::unordered_set<KeyCode>();
+	mKeysPressed = new std::unordered_set<KeyCode>();
 
-	mPrevMouseState = 0;
-	mCurrMouseState = 0;
-
-	mEventHandler	= &WMEventHandler::SharedInstance();
+	mEventHandler = &WMEventHandler::SharedInstance();
 }
 
 Input::~Input()
@@ -77,6 +72,11 @@ bool Input::GetKeyUp(KeyCode key)
 
 bool Input::GetMouseButtonDown(MouseButton button)
 {
+	if (!mIsMouseActive)
+	{
+		return false;
+	}
+
 	bool wasNotPressed = (mPrevMouseState & button) == 0;
 	bool isPressed = (mCurrMouseState & button) == button;
 
@@ -85,6 +85,11 @@ bool Input::GetMouseButtonDown(MouseButton button)
 
 bool Input::GetMouseButtonUp(MouseButton button)
 {
+	if (!mIsMouseActive)
+	{
+		return false;
+	}
+
 	bool wasPressed = (mPrevMouseState & button) == button;
 	bool isNotPressed = (mCurrMouseState & button) == 0;
 
@@ -93,9 +98,252 @@ bool Input::GetMouseButtonUp(MouseButton button)
 
 bool Input::GetMouseButton(MouseButton button)
 {
+	if (!mIsMouseActive)
+	{
+		return false;
+	}
+
 	bool isPressed = (mCurrMouseState & button) == button;
 
 	return isPressed;
+}
+
+bool Input::GetGamepadButtonDown(GamepadButton buttonMask, bool isAdditive, short id)
+{
+	bool justPressed = false;
+	if (id == -1)
+	{
+		for (int i = 0; i < XUSER_MAX_COUNT; i++)
+		{
+			justPressed |= GetGamepadButtonDown(buttonMask, isAdditive, i);
+		}
+
+		return justPressed;
+	}
+
+	auto currGamepad = mCurrGamepadState[id].Gamepad;
+	auto prevGamepad = mPrevGamepadState[id].Gamepad;
+
+	auto totalKeys = 0;
+	auto pressedKeys = 0;
+
+	// if is additive, we stop as soon as a button in the mask is was not pressed this frame
+	// otherwise we return true.
+	// if is not additive, we stop as soon as a button in the mas was pressed this frame
+	// otherwise we return false.
+	for (int button = GAMEPADBUTTON_UP; button <= GAMEPADBUTTON_Y; button <<= 1)
+	{
+		// button not in flag
+		if ((button & buttonMask) == 0)
+		{
+			continue;
+		}
+
+		auto wasButtonPressed = (prevGamepad.wButtons & button) == button;
+		auto isButtonPressed = (currGamepad.wButtons & button) == button;
+
+		justPressed |= !wasButtonPressed && isButtonPressed;
+
+		// if additive, return true if any button from the mask was just pressed
+		if (isAdditive && justPressed)
+		{
+			return true;
+		}
+
+		// if not additive, accumulate counters
+		if (!isAdditive)
+		{
+			totalKeys += 1;
+			if (isButtonPressed)
+			{
+				pressedKeys += 1;
+			}
+		}
+	}
+
+	// if is addictive, return true if all keys are pressed and one of the keys was just pressed
+	if (!isAdditive)
+	{
+		return justPressed && pressedKeys == totalKeys;
+	}
+
+	// otherwise [if addictive] return false
+	return false;
+}
+
+bool Input::GetGamepadButtonUp(GamepadButton buttonMask, bool isAdditive, short id)
+{
+	bool justReleased = false;
+	if (id == -1)
+	{
+		for (int i = 0; i < XUSER_MAX_COUNT; i++)
+		{
+			justReleased |= GetGamepadButtonUp(buttonMask, isAdditive, i);
+		}
+
+		return justReleased;
+	}
+
+	auto currGamepad = mCurrGamepadState[id].Gamepad;
+	auto prevGamepad = mPrevGamepadState[id].Gamepad;
+
+	auto totalKeys = 0;
+	auto pressedKeys = 0;
+
+	// if is additive, we stop as soon as a button in the mask is was not pressed this frame
+	// otherwise we return true.
+	// if is not additive, we stop as soon as a button in the mas was pressed this frame
+	// otherwise we return false.
+	for (int button = GAMEPADBUTTON_UP; button <= GAMEPADBUTTON_Y; button <<= 1)
+	{
+		// button not in flag
+		if ((button & buttonMask) == 0)
+		{
+			continue;
+		}
+
+		auto wasButtonPressed = (prevGamepad.wButtons & button) == button;
+		auto isButtonPressed = (currGamepad.wButtons & button) == button;
+
+		justReleased |= wasButtonPressed && !isButtonPressed;
+
+		// if additive, return true if any button from the mask was just pressed
+		if (isAdditive && justReleased)
+		{
+			return true;
+		}
+
+		// if not additive, accumulate counters
+		if (!isAdditive)
+		{
+			totalKeys += 1;
+			if (wasButtonPressed)
+			{
+				pressedKeys += 1;
+			}
+		}
+	}
+
+	// if is addictive, return true if all keys are pressed and one of the keys was just released
+	if (!isAdditive)
+	{
+		return justReleased && totalKeys == pressedKeys;
+	}
+
+	// otherwise [if addictive] return false
+	return false;
+}
+
+bool Input::GetGamepadButton(GamepadButton buttonMask, bool isAdditive, short id)
+{
+	bool isPressed = false;
+	if (id == -1)
+	{
+		for (int i = 0; i < XUSER_MAX_COUNT; i++)
+		{
+			isPressed |= GetGamepadButton(buttonMask, isAdditive, i);
+		}
+
+		return isPressed;
+	}
+
+	auto gamepad = mCurrGamepadState[id].Gamepad;
+
+	// if is not additive, we stop as soon as a button in the mask is not pressed
+	// otherwise we return true.
+	// if is additive, we stop as soon as a button in the mas IS pressed
+	// otherwise we return false.
+	for (int button = GAMEPADBUTTON_UP; button <= GAMEPADBUTTON_Y; button <<= 1)
+	{
+		// button not in flag
+		if ((button & buttonMask) == 0)
+		{
+			continue;
+		}
+
+		// button is pressed
+		auto isButtonPressed = (gamepad.wButtons & button) == button;
+
+		if (!isButtonPressed && !isAdditive)
+		{
+			//char str[100];
+			//sprintf_s(str, "not additive %x %x\n", gamepad.wButtons, button);
+			//OutputDebugStringA(str);
+
+			return false;
+		}
+
+		if (isButtonPressed && isAdditive)
+		{
+			return true;
+		}
+	}
+
+	// if it is additive and no button was pressed return false,
+	// if it is not additive and all buttons were pressed return true
+	return !isAdditive;
+}
+
+float Input::GetGamepadAxis(GamepadAxis axis, short id)
+{
+	float rawValue;
+	float deadzone;
+	float rawLimit;
+
+	auto gamepad = mCurrGamepadState[id].Gamepad;
+	switch (axis)
+	{
+	case GAMEPADAXIS_LEFT_THUMB_X:
+		rawValue = gamepad.sThumbLX;
+		deadzone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
+		rawLimit = 32767;
+		break;
+	case GAMEPADAXIS_LEFT_THUMB_Y:
+		rawValue = gamepad.sThumbLY;
+		deadzone = XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
+		rawLimit = 32767;
+		break;
+	case GAMEPADAXIS_RIGHT_THUMB_X:
+		rawValue = gamepad.sThumbRX;
+		deadzone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
+		rawLimit = 32767;
+		break;
+	case GAMEPADAXIS_RIGHT_THUMB_Y:
+		rawValue = gamepad.sThumbRY;
+		deadzone = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
+		rawLimit = 32767;
+		break;
+	case GAMEPADAXIS_LEFT_TRIGGER:
+		rawValue = gamepad.bLeftTrigger;
+		deadzone = XINPUT_GAMEPAD_TRIGGER_THRESHOLD;
+		rawLimit = 255;
+		break;
+	case GAMEPADAXIS_RIGHT_TRIGGER:
+		rawValue = gamepad.bRightTrigger;
+		deadzone = XINPUT_GAMEPAD_TRIGGER_THRESHOLD;
+		rawLimit = 255;
+		break;
+	default:
+		return 0;
+	}
+
+	float sign = rawValue > 0 ? 1.0f : -1.0f;
+	float magnitude = rawValue * sign;
+
+	//check if the controller is outside a circular dead zone
+	if (magnitude < deadzone)
+	{
+		return 0;
+	}
+
+	//clip the magnitude at its expected maximum value
+	if (magnitude > rawLimit) rawValue = rawLimit * sign;
+
+	//adjust magnitude relative to the end of the dead zone
+	rawValue -= deadzone * sign;
+
+	//giving a magnitude value of 0.0 to 1.0
+	return rawValue / (rawLimit - deadzone);
 }
 
 #pragma endregion
@@ -105,28 +353,29 @@ bool Input::GetMouseButton(MouseButton button)
 void Input::HandleEvent(const IEvent& iEvent)
 {
 	const WMEvent& wmEvent = (const WMEvent&)iEvent;
+
 	switch (wmEvent.msg)
 	{
 	case WM_LBUTTONDOWN:
-			OnMouseDown(MOUSEBUTTON_LEFT, wmEvent.wparam, wmEvent.lparam);
+		OnMouseDown(MOUSEBUTTON_LEFT, wmEvent.wparam, wmEvent.lparam);
 		break;
 	case WM_MBUTTONDOWN:
-			OnMouseDown(MOUSEBUTTON_MIDDLE, wmEvent.wparam, wmEvent.lparam);
+		OnMouseDown(MOUSEBUTTON_MIDDLE, wmEvent.wparam, wmEvent.lparam);
 		break;
 	case WM_RBUTTONDOWN:
-			OnMouseDown(MOUSEBUTTON_RIGHT, wmEvent.wparam, wmEvent.lparam);
+		OnMouseDown(MOUSEBUTTON_RIGHT, wmEvent.wparam, wmEvent.lparam);
 		break;
 	case WM_XBUTTONDOWN:
 		OnMouseDown(MOUSEBUTTON_X, wmEvent.wparam, wmEvent.lparam);
 		break;
 	case WM_LBUTTONUP:
-			OnMouseUp(MOUSEBUTTON_LEFT, wmEvent.wparam, wmEvent.lparam);
+		OnMouseUp(MOUSEBUTTON_LEFT, wmEvent.wparam, wmEvent.lparam);
 		break;
 	case WM_MBUTTONUP:
-			OnMouseUp(MOUSEBUTTON_MIDDLE, wmEvent.wparam, wmEvent.lparam);
+		OnMouseUp(MOUSEBUTTON_MIDDLE, wmEvent.wparam, wmEvent.lparam);
 		break;
 	case WM_RBUTTONUP:
-			OnMouseUp(MOUSEBUTTON_RIGHT, wmEvent.wparam, wmEvent.lparam);
+		OnMouseUp(MOUSEBUTTON_RIGHT, wmEvent.wparam, wmEvent.lparam);
 		break;
 	case WM_XBUTTONUP:
 		OnMouseUp(MOUSEBUTTON_X, wmEvent.wparam, wmEvent.lparam);
@@ -153,6 +402,8 @@ void Input::HandleEvent(const IEvent& iEvent)
 
 void Input::Flush()
 {
+
+
 	// persist all keys pressed at this frame.
 	for (const KeyCode &key : *mKeysDown)
 	{
@@ -164,18 +415,46 @@ void Input::Flush()
 	mKeysUp->clear();
 
 	// copy current mouse state to previous mouse state
+	delta.x = mousePosition.x - prevMousePosition.x;
+	delta.y = mousePosition.y - prevMousePosition.y;
+	prevMousePosition = mousePosition;
 	mPrevMouseState = mCurrMouseState;
+
+	// copy current joypad state
+	for (auto i = 0; i< XUSER_MAX_COUNT; i++)
+	{
+		mPrevGamepadState[i] = mCurrGamepadState[i];
+
+		ZeroMemory(&mCurrGamepadState[i], sizeof(XINPUT_STATE));
+
+		// Simply get the state of the controller from XInput.
+		auto dwResult = XInputGetState(i, &mCurrGamepadState[i]);
+
+		continue;
+
+		// CHECK IF CONTROLLER IS CONNECTED
+		if (dwResult == ERROR_SUCCESS)
+		{
+			// Controller is connected 
+		}
+		else
+		{
+			// Controller is not connected 
+		}
+	}
 }
 
 KeyCode Input::KeyCodeFromWParam(WPARAM wParam)
 {
 	// any exception from wParam value to keyCode value
 	// must be done here
-	switch (wParam)
-	{
-	default:
-		return static_cast<KeyCode>(wParam);
-	}
+	//switch (wParam)
+	//{
+	//default:
+	//	return static_cast<KeyCode>(wParam);
+	//}
+
+	return static_cast<KeyCode>(wParam);
 }
 
 void Input::OnKeyDown(WPARAM wParam, LPARAM lParam)
@@ -241,5 +520,7 @@ void Input::OnMouseMove(WPARAM wParam, LPARAM lParam)
 	mousePosition.x = GET_X_LPARAM(lParam);
 	mousePosition.y = GET_Y_LPARAM(lParam);
 }
+
+
 
 #pragma endregion

@@ -1,0 +1,182 @@
+{
+  "ghost": {
+    "regenEnergy": [ 0.25, 0.28, 0.32, 0.4 ],
+    "regenEnergyTick": 0.1,
+    "baseEnergy": 100,
+    "skills": [
+      {
+        "name": "SpawnMinion",
+        "description": "Imp Squad",
+        "cooldown": 2.0,
+        "cost": 10,
+        "spawnRadius": 4.0,
+        "spawnCount": 2
+      },
+      {
+        "name": "SpawnAOE",
+        "description": "Bomber",
+        "cooldown": 4.0,
+        "cost": 25
+      },
+      {
+        "name": "SpawnPlant",
+        "description": "Terror Tree",
+        "cooldown": 3.0,
+        "cost": 20
+      },
+      {
+        "name": "Haunt_ExpToMinion",
+        "description": "Imp Illusion",
+        "cooldown": 17.0,
+        "cost": 0,
+        "duration": 15.0
+      }
+    ]
+  },
+  "explorers": [
+    {
+      "name": "ConeSprinter",
+      "moveSpeed": 100.0,
+      "baseHealth": 140,
+      "skills": [
+        {
+          "name": "InteractSkill",
+          "description": "InteractSkill",
+          "cooldown": 0.0,
+          "cost": 0
+        },
+        {
+          "name": "ConeAttack",
+          "description": "Quick Slash",
+          "cooldown": 0.3,
+          "cost": 0,
+          "damage": 8,
+          "knockback": 2.5
+        },
+        {
+          "name": "Sprint",
+          "description": "Sprint",
+          "cooldown": 2.0,
+          "cost": 0,
+          "duration": 1.0,
+          "speedMultiplier": 1.5
+        },
+        {
+          "name": "SetRegLantern",
+          "description": "Drop Lantern",
+          "cooldown": 1.0,
+          "cost": 0,
+          "charges": 6
+        }
+      ]
+    },
+    {
+      "name": "LongAttackSupport",
+      "moveSpeed": 75.0,
+      "baseHealth": 160,
+      "skills": [
+        {
+          "name": "InteractSkill",
+          "description": "InteractSkill",
+          "cooldown": 0.0,
+          "cost": 0
+        },
+        {
+          "name": "LongAttack",
+          "description": "Sword Swing",
+          "cooldown": 0.4,
+          "cost": 0,
+          "damage": 17,
+          "knockback": 5.0
+        },
+        {
+          "name": "Heal",
+          "description": "Heal",
+          "cooldown": 6.0,
+          "cost": 0,
+          "heal": 60,
+          "aoe": 3.0
+        },
+        {
+          "name": "SetRegLantern",
+          "description": "Drop Lantern",
+          "cooldown": 1.0,
+          "cost": 0,
+          "charges": 6
+        }
+      ]
+    },
+    {
+      "name": "GrenadeTrapper",
+      "moveSpeed": 85.0,
+      "baseHealth": 200,
+      "skills": [
+        {
+          "name": "InteractSkill",
+          "description": "InteractSkill",
+          "cooldown": 0.0,
+          "cost": 0
+        },
+        {
+          "name": "GrenadeToss",
+          "description": "Grenade Toss",
+          "cooldown": 0.6,
+          "cost": 0,
+          "damage": 10,
+          "aoe": 2.5,
+          "maxRange": 7.0,
+          "knockback": 3.0
+        },
+        {
+          "name": "SetTrapPoison",
+          "description": "Poison Trap",
+          "cooldown": 2.5,
+          "cost": 0,
+          "duration": 0,
+          "damageOverTime": 0
+        },
+        {
+          "name": "SetTrapGlue",
+          "description": "Glue Trap",
+          "cooldown": 2.5,
+          "cost": 0,
+          "duration": 0,
+          "speedMultiplier": 0
+        },
+        {
+          "name": "SetRegLantern",
+          "description": "Drop Lantern",
+          "cooldown": 1.0,
+          "cost": 0,
+          "charges": 6
+        }
+      ]
+    }
+  ],
+  "minions": [
+    {
+      "name": "BasicMinion",
+      "baseHealth": 40,
+      "moveSpeed": 105.0,
+      "turnRate": 70.0,
+      "stunOnHitDuration": 0.3,
+      "attackDamage": 10,
+      "splashRange": 0.0
+    },
+    {
+      "name": "AOEToad",
+      "baseHealth": 60,
+      "moveSpeed": 60.0,
+      "turnRate": 30.0,
+      "stunOnHitDuration": 0.5,
+      "attackDamage": 60,
+      "splashRange": 6.0
+    },
+    {
+      "name": "PlantPolterTrap",
+      "baseHealth": 50,
+      "attackDamage": 25,
+      "attackRange": 3.5
+    }
+  ]
+}

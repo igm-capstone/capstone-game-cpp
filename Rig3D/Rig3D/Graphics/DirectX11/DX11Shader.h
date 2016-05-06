@@ -13,18 +13,6 @@ namespace Rig3D
 		DX11Shader();
 		~DX11Shader();
 
-		ID3D11Buffer**				GetBuffers();
-		ID3D11ShaderResourceView**	GetShaderResourceViews();
-		ID3D11SamplerState**		GetSamplerStates();
-
-		uint32_t GetBufferCount() const;
-		uint32_t GetShaderResourceViewCount() const;
-		uint32_t GetSamplerStateCount() const;
-
-		void SetBuffers(std::vector<ID3D11Buffer*>& buffers);
-		void SetShaderResourceViews(std::vector<ID3D11ShaderResourceView*>& shaderResourceViews);
-		void SetSamplerStates(std::vector<ID3D11SamplerState*>& samplerStates);
-
 		union
 		{
 			struct
@@ -38,15 +26,12 @@ namespace Rig3D
 				ID3D11PixelShader*	mPixelShader;
 				char padding[sizeof(void*)];
 			};
+
+			struct
+			{
+				ID3D11ComputeShader* mComputeShader;
+				char padding[sizeof(void*)];
+			};
 		};
-
-	private:
-		std::vector<ID3D11Buffer*>				mBuffers;
-		std::vector<ID3D11ShaderResourceView*>	mShaderResourceViews;
-		std::vector<ID3D11SamplerState*>		mSamplerStates;
-
-		void ClearBuffers();
-		void ClearShaderResourceViews();
-		void ClearSamplerStates();
 	};
 }

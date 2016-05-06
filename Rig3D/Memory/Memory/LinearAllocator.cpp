@@ -13,18 +13,19 @@ LinearAllocator::LinearAllocator(size_t size) : mIsOwner(true)
 	mCurrent	= mStart;
 }
 
-LinearAllocator::LinearAllocator(void* start, void* end) : mStart(static_cast<uint8_t*>(start)), mEnd(static_cast<uint8_t*>(end)), mIsOwner(false)
+LinearAllocator::LinearAllocator(void* start, void* end) : 
+	mCurrent(static_cast<uint8_t*>(start)),
+	mStart(static_cast<uint8_t*>(start)), 
+	mEnd(static_cast<uint8_t*>(end)), 
+	mIsOwner(false)
 {
-	mCurrent = mStart;
+
 }
 
-LinearAllocator::LinearAllocator()
+LinearAllocator::LinearAllocator() : LinearAllocator(nullptr, nullptr)
 {
-	mStart		= nullptr;
-	mEnd		= nullptr;
-	mCurrent	= nullptr;
-}
 
+}
 
 LinearAllocator::~LinearAllocator()
 {
@@ -33,17 +34,24 @@ LinearAllocator::~LinearAllocator()
 	mCurrent	= nullptr;
 }
 
+void LinearAllocator::SetMemory(void* start, void* end)
+{
+	mStart		= static_cast<uint8_t*>(start);
+	mEnd		= static_cast<uint8_t*>(end);
+	mCurrent	= mStart;
+}
+
 void* LinearAllocator::Allocate(size_t size, size_t alignment, size_t offset)
 {
 	assert((alignment & (alignment - 1)) == 0);	// Check for power of 2
 
 	// offset pointer first, align it, and offset it back
-	mCurrent = (uint8_t*)AlignedPointer((void*)(mCurrent + offset), alignment) - offset;
+	mCurrent = static_cast<uint8_t*>(AlignedPointer(static_cast<void*>(mCurrent + offset), alignment)) - offset;
 
 	void* userPtr = mCurrent;
 	mCurrent += size + alignment + offset;
 
-	if (mCurrent >= mEnd)
+	if (mCurrent > mEnd)
 	{
 		// out of memory
 		return nullptr;

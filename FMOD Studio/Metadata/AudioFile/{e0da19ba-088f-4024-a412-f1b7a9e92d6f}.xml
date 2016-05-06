@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.07.00">
+    <object class="AudioFile" id="{e0da19ba-088f-4024-a412-f1b7a9e92d6f}">
+        <property name="frequencyInKHz">
+            <value>48</value>
+        </property>
+        <property name="channelCount">
+            <value>2</value>
+        </property>
+        <property name="length">
+            <value>3.6335625</value>
+        </property>
+        <property name="audioFilePath">
+            <value>$(AUDIO_BIN_DIR)/ScareTactics_BasicMinion_Idle-004 {1d368e5b-19db-476c-8717-3eff03f2647a}.wav</value>
+        </property>
+        <relationship name="container">
+            <destination>{66cee54a-83ed-4cc1-a78e-08e1a30d53b9}</destination>
+        </relationship>
+    </object>
+</objects>

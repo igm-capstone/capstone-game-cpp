@@ -31,7 +31,7 @@ namespace cliqCity
 
 		inline float128_t Set(float x, float y, float z, float w)
 		{
-			return _mm_set_ps(z, y, x, w);
+			return _mm_set_ps(w, z, y, x);
 		}
 
 		inline void Store(float* p, float128_arg_t v)

@@ -1,7 +1,7 @@
 #include "Engine.h"
 #include "rig_defines.h"
-#include "Rig3D\Graphics\DirectX11\DX3D11Renderer.h"
 #include "Rig3D\Graphics\Interface\IScene.h"
+#include "Rig3D\IApplication.h"
 
 using namespace Rig3D;
 
@@ -30,19 +30,19 @@ int Engine::Initialize(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine
 		return RIG_ERROR;
 	}
 
-	mRenderer = (options.mGraphicsAPI == GRAPHICS_API_DIRECTX11) ? &DX3D11Renderer::SharedInstance() : NULL; // TO DO: OpenGL Renderer
+	mRenderer = &TSingleton<IRenderer, DX3D11Renderer>::SharedInstance();
 	if (mRenderer->VInitialize(hInstance, mHWND, options) == RIG_ERROR)
 	{
 		return RIG_ERROR;
 	}
 
-	mInput = &Input::SharedInstance();
+	mInput = &Singleton<Input>::SharedInstance();
 	if (mInput->Initialize() == RIG_ERROR)
 	{
 		return RIG_ERROR;
 	}
 
-	mTimer = &Timer::SharedInstance();
+	mTimer = &Singleton<Timer>::SharedInstance();
 
 	return 0;
 }
@@ -63,11 +63,11 @@ int Engine::InitializeMainWindow(HINSTANCE hInstance, HINSTANCE prevInstance, PS
 	ex.hIconSm = NULL;
 
 	if (options.mFullScreen == false) {
-		ex.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+		ex.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
 	}
 
 	if (!RegisterClassEx(&ex)) {
-		MessageBox(0, L"RegisterClass Failed.", 0, 0);
+		MessageBox(nullptr, L"RegisterClass Failed.", nullptr, 0);
 		return RIG_ERROR;
 	}
 
@@ -85,8 +85,9 @@ int Engine::InitializeMainWindow(HINSTANCE hInstance, HINSTANCE prevInstance, PS
 	mHWND = CreateWindowEx(NULL,
 		WND_CLASS_NAME,
 		wideWindowCaption,
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT,
+		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
+		GetSystemMetrics(SM_CXSCREEN) / 2 - width/2,
+		GetSystemMetrics(SM_CYSCREEN) / 2 - height/2,
 		width, height,
 		NULL,
 		NULL,
@@ -127,7 +128,7 @@ int Engine::Shutdown()
 
 void Engine::HandleEvent(const IEvent& iEvent)
 {
-	const WMEvent& wmEvent = (const WMEvent&)iEvent;
+	const WMEvent& wmEvent = static_cast<const WMEvent&>(iEvent);
 	switch (wmEvent.msg)
 	{
 	case WM_QUIT:
@@ -147,7 +148,6 @@ void Engine::HandleEvent(const IEvent& iEvent)
 void Engine::RunScene(IScene* iScene)
 {
 	iScene->VInitialize();
-
 	// The message loop
 	double deltaTime = 0.0;
 	mTimer->Reset();
@@ -165,7 +165,37 @@ void Engine::RunScene(IScene* iScene)
 	Shutdown();
 }
 
-IRenderer* Engine::GetRenderer() const
+void Engine::RunApplication(IApplication* app)
+{
+	app->VInitialize();
+
+	// The message loop
+	double deltaTime = 0.0;
+	mTimer->Reset();
+	while (!mShouldQuit)
+	{
+		mTimer->Update(&deltaTime);
+		mEventHandler->Update();
+		app->VUpdateCurrentScene();
+		app->VUpdate(static_cast<float>(deltaTime));
+		mInput->Flush();
+	}
+
+	app->VShutdown();
+	Shutdown();
+}
+
+Renderer* Engine::GetRenderer() const
 {
 	return mRenderer;
+}
+
+Input* Engine::GetInput() const
+{
+	return mInput;
+}
+
+Timer* Engine::GetTimer() const
+{
+	return mTimer;
 }

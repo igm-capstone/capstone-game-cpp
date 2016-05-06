@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include "Rig3D\Options.h"
 
+
 #ifdef _WINDLL
 #define RIG3D __declspec(dllexport)
 #else
@@ -10,11 +11,11 @@
 
 namespace Rig3D
 {
+	class Engine;
+
 	class RIG3D IScene
 	{
 	public:
-		Options		mOptions;
-
 		IScene();
 		virtual ~IScene();
 

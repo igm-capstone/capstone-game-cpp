@@ -6,6 +6,8 @@
 #include "Common/Transform.h"
 #include "Memory/Memory/Memory.h"
 
+#pragma warning(disable: 4251)
+
 #ifdef _WINDLL
 #define RIG3D __declspec(dllexport)
 #else

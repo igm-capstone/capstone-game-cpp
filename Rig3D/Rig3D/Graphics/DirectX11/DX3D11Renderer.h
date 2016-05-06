@@ -1,5 +1,6 @@
 #pragma once
 #include "Rig3D\Graphics\Interface\IRenderer.h"
+#include "Memory/Memory/Memory.h"
 #include "Rig3D\Common\WMEventHandler.h"
 #include "Rig3D\Graphics\rig_graphics_api_conversions.h"
 #include "Rig3D\Graphics\DirectX11\dxerr.h"
@@ -39,73 +40,246 @@ namespace Rig3D
 {
 	class DX11Shader;
 
-	class RIG3D DX3D11Renderer : public IRenderer, public IObserver
+	class RIG3D DX3D11Renderer// : public IObserver
 	{
 	public:
 		static DX3D11Renderer& SharedInstance();
 
-		int		VInitialize(HINSTANCE hInstance, HWND hwnd, Options options) override;
-		void	VOnResize() override;
-		void	VUpdateScene(const double& milliseconds) override;
-		void	VRenderScene() override;
-		void	VShutdown() override;
+		int		VInitialize(HINSTANCE hInstance, HWND hwnd, Options options);
+		void	VOnResize(int windowWidth, int windowHeight);
+		void	VUpdateScene(const double& milliseconds);
+		void	VRenderScene();
+		void	VShutdown();
 
-		inline void	VSetPrimitiveType(GPUPrimitiveType type) override;
-		inline void	VDrawIndexed(GPUPrimitiveType type, uint32_t startIndex, uint32_t count) override;
-		inline void	VDrawIndexed(uint32_t startIndex, uint32_t count) override;
+		inline void	VSetPrimitiveType(GPUPrimitiveType type);
+		inline void	VDrawIndexed(GPUPrimitiveType type, uint32_t startIndex, uint32_t count);
+		inline void	VDrawIndexed(uint32_t startIndex, uint32_t count);
 
-		void	VCreateVertexBuffer(void* buffer, void* vertices, const size_t& size) override;
-		void	VCreateStaticVertexBuffer(void* buffer, void* vertices, const size_t& size) override;
-		void	VCreateDynamicVertexBuffer(void* buffer, void* vertices, const size_t& size) override;
+#pragma region Viewport
 
-		void	VCreateIndexBuffer(void* buffer, uint16_t* indices, const uint32_t& count) override;
-		void	VCreateStaticIndexBuffer(void* buffer, uint16_t* indices, const uint32_t& count) override;
-		void	VCreateDynamicIndexBuffer(void* buffer, uint16_t* indices, const uint32_t& count) override;
+		inline void SetViewport();
+		inline void SetViewport(float topLeftX, float topLeftY, float width, float height, float minDepth, float maxDepth);
 
-		void	VCreateInstanceBuffer(void* buffer, void* data, const size_t& size) override;
-		void	VCreateStaticInstanceBuffer(void* buffer, void* data, const size_t& size) override;
-		void	VCreateDynamicInstanceBuffer(void* buffer, void* data, const size_t& size) override;
+#pragma endregion 
 
-		void	VCreateConstantBuffer(void* buffer, void* data, const size_t& size) override;
-		void	VCreateStaticConstantBuffer(void* buffer, void* data, const size_t& size) override;
-		void	VCreateDynamicConstantBuffer(void* buffer, void* data, const size_t& size) override;
+#pragma region  Buffer
 
-		void	VUpdateConstantBuffer(void* buffer, void* data) override;
+		void	VCreateVertexBuffer(void* buffer, void* vertices, const size_t& size);
+		void	VCreateStaticVertexBuffer(void* buffer, void* vertices, const size_t& size);
+		void	VCreateDynamicVertexBuffer(void* buffer, void* vertices, const size_t& size);
 
-		void	VSetMeshVertexBuffer(IMesh* mesh, void* vertices, const size_t& size, const size_t& stride) override;
-		void	VSetStaticMeshVertexBuffer(IMesh* mesh, void* vertices, const size_t& size, const size_t& stride) override;
-		void	VSetDynamicMeshVertexBuffer(IMesh* mesh, void* vertices, const size_t& size, const size_t& stride) override;
+		void	VCreateIndexBuffer(void* buffer, uint16_t* indices, const uint32_t& count);
+		void	VCreateIndexBuffer(void* buffer, uint32_t* indices, const uint32_t& count);
+		void	VCreateStaticIndexBuffer(void* buffer, uint16_t* indices, const uint32_t& count);
+		void	VCreateStaticIndexBuffer(void* buffer, uint32_t* indices, const uint32_t& count);
+		void	VCreateDynamicIndexBuffer(void* buffer, uint16_t* indices, const uint32_t& count);
+		void	VCreateDynamicIndexBuffer(void* buffer, uint32_t* indices, const uint32_t& count);
+		
+		void	VCreateInstanceBuffer(void* buffer, void* data, const size_t& size);
+		void	VCreateStaticInstanceBuffer(void* buffer, void* data, const size_t& size);
+		void	VCreateDynamicInstanceBuffer(void* buffer, void* data, const size_t& size);
 
-		void	VSetMeshIndexBuffer(IMesh* mesh, uint16_t* indices, const uint32_t& count) override;
-		void	VSetStaticMeshIndexBuffer(IMesh* mesh, uint16_t* indices, const uint32_t& count) override;
-		void	VSetDynamicMeshIndexBuffer(IMesh* mesh, uint16_t* indices, const uint32_t& count) override;
+		void	VCreateConstantBuffer(void* buffer, void* data, const size_t& size);
+		void	VCreateStaticConstantBuffer(void* buffer, void* data, const size_t& size);
+		void	VCreateDynamicConstantBuffer(void* buffer, void* data, const size_t& size);
 
-		void	VUpdateMeshVertexBuffer(IMesh* mesh, void* data, const size_t& size) override;
-		void	VUpdateMeshIndexBuffer(IMesh* mesh, void* data, const uint32_t& count) override;
+		void	VUpdateBuffer(void* buffer, void* data);
+		void	VUpdateBuffer(void* buffer, void* data, const size_t& size);
 
-		void    VBindMesh(IMesh* mesh) override;
+#pragma endregion 
 
-		void	VCreateShader(IShader** shader, LinearAllocator* allocator) override;
-		void	VLoadVertexShader(IShader* vertexShader, const char* filename, InputElement* inputElements, const uint32_t& count) override;
-		void	VLoadVertexShader(IShader* vertexShader, const char* filename, LinearAllocator* allocator) override;
-		void	VLoadVertexShader(IShader* vertexShader, const char* filename) override;
-		void	VLoadPixelShader(IShader* vertexShader, const char* filename, LinearAllocator* allocator) override;
-		void	VLoadPixelShader(IShader* pixelShader, const char* filename) override;
+#pragma region Texture
 
-		void	VSetInputLayout(IShader* vertexShader) override;
-		void	VSetVertexShaderInputLayout(IShader* vertexShader) override;
-		void	VSetVertexShaderResources(IShader* vertexShader) override;
-		void	VSetVertexShader(IShader* shader) override;
+		void VCreateNativeFormat(void* nativeFormat, InputFormat textureFormat);
+		void VCreateTexture2D(void* texture, void* data, uint32_t mipLevels, InputFormat textureFormat, uint32_t width, uint32_t height);
 
-		void	VSetPixelShader(IShader* shader) override;
+		// 1 Channel (32 Bit) Texture.
+		void VCreateDepthTexture2D(void* texture2D, uint32_t width, uint32_t height);
+		void VCreateDepthResourceTexture2D(void * texture2D, uint32_t width, uint32_t height);
 
-		void	VCreateShaderConstantBuffers(IShader* shader, void** data, size_t* sizes, const uint32_t& count) override;
-		void	VUpdateShaderConstantBuffer(IShader* shader, void* data, uint32_t index) override;
+		void VCreateDepthStencilTexture2D(void* texture2D, uint32_t width, uint32_t height);
+		void VCreateDepthStencilResourceTexture2D(void * texture2D, uint32_t width, uint32_t height);
 
-		void	VSwapBuffers() override;
+		// 4 Channel (32 Bit) Texture.
+		void VCreateRenderTexture2D(void* texture2D, uint32_t width, uint32_t height);
+		void VCreateRenderResourceTexture2D(void * texture2D, uint32_t width, uint32_t height);
 
+		void VCreateRenderResourceTextureCube(ID3D11Texture2D** textureCube, uint32_t width, uint32_t height, uint8_t mipLevels, DXGI_FORMAT format);
 
-		int						InitializeD3D11();
+#pragma endregion 
+
+#pragma region SamplerState
+
+		void VCreateLinearClampSamplerState(void* samplerState);
+		void VCreateLinearWrapSamplerState(void* samplerState);
+		void VCreateLinearBorderSamplerState(void* samplerState, float* color);
+		void VCreatePointClampSamplerState(void* samplerState);
+		void VCreatePointWrapSamplerState(void* samplerState);
+		void VCreatePointBorderSamplerState(void* samplerState, float* color);
+
+#pragma endregion 
+
+#pragma region BlendState
+
+		void CreateAdditiveBlendState(ID3D11BlendState** blendState);
+
+#pragma endregion 
+
+#pragma region Mesh
+
+		void	VSetMeshVertexBuffer(IMesh* mesh, void* vertices, const size_t& size, const size_t& stride);
+		void	VSetStaticMeshVertexBuffer(IMesh* mesh, void* vertices, const size_t& size, const size_t& stride);
+		void	VSetDynamicMeshVertexBuffer(IMesh* mesh, void* vertices, const size_t& size, const size_t& stride);
+
+		void	VSetMeshIndexBuffer(IMesh* mesh, uint16_t* indices, const uint32_t& count);
+		void	VSetMeshIndexBuffer(IMesh* mesh, uint32_t* indices, const uint32_t& count);
+		void	VSetStaticMeshIndexBuffer(IMesh* mesh, uint16_t* indices, const uint32_t& count);
+		void	VSetStaticMeshIndexBuffer(IMesh* mesh, uint32_t* indices, const uint32_t& count);
+		void	VSetDynamicMeshIndexBuffer(IMesh* mesh, uint16_t* indices, const uint32_t& count);
+		void	VSetDynamicMeshIndexBuffer(IMesh* mesh, uint32_t* indices, const uint32_t& count);
+		
+		void	VUpdateMeshVertexBuffer(IMesh* mesh, void* data, const size_t& size);
+		void	VUpdateMeshIndexBuffer(IMesh* mesh, void* data, const uint32_t& count);
+
+		void    VBindMesh(IMesh* mesh);
+		void	VBindMesh32(IMesh* mesh);
+
+#pragma endregion 
+
+#pragma region Shader
+		// Allocate
+		void	VCreateShader(IShader** shader, LinearAllocator* allocator);
+		
+		// VS
+		void	VLoadVertexShader(IShader* vertexShader, const char* filename, InputElement* inputElements, const uint32_t& count);
+		void	VLoadVertexShader(IShader* vertexShader, const void* byteCode, size_t byteSize, InputElement* inputElements, const uint32_t& count);
+
+		// IL
+		void	VLoadInputLayout(IShader* vertexShader, const void* byteCode, size_t byteSize, InputElement* inputElements, const uint32_t& count);
+		void	VLoadVertexShader(IShader* vertexShader, const char* filename, LinearAllocator* allocator);
+		void	VLoadVertexShader(IShader* vertexShader, const char* filename);
+
+		// PS
+		void	VLoadPixelShader(IShader* pixelShader, const char* filename, LinearAllocator* allocator);
+		void	VLoadPixelShader(IShader* pixelShader, const char* filename);
+		void	VLoadPixelShader(IShader* pixelShader, const void* byteCode, size_t byteSize);
+
+		// CS
+		void	VLoadComputeShader(IShader* computeShader, const char* filename);
+		void	VLoadComputeShader(IShader* computeShader, const void* byteCode, size_t byteSize);
+
+		void	VSetInputLayout(IShader* vertexShader);
+		void	VSetVertexShaderInputLayout(IShader* vertexShader);
+		void	VSetVertexShader(IShader* shader);
+		void	VSetPixelShader(IShader* shader);
+		void	VSetComputeShader(IShader* shader);
+
+#pragma endregion 
+
+#pragma region Shader Resource
+
+		void	VCreateShaderResource(IShaderResource** shaderResouce, LinearAllocator* allocator);
+
+		void	VCreateShaderTextures2D(IShaderResource* shader, const char** filenames, const uint32_t count);
+		void	VCreateShaderContextTextures2D(IShaderResource* shader, IRenderContext* context);
+
+		void	VCreateShaderTexture2DArray(IShaderResource* shader, const char** filenames, const uint32_t count);
+
+		void	VAddShaderTextures2D(IShaderResource* shader, const char** filenames, const uint32_t count);
+
+		void	VCreateShaderTextureCubes(IShaderResource* shader, const char** filenames, const uint32_t count);
+
+		void	VCreateShaderConstantBuffers(IShaderResource* shader, void** data, size_t* sizes, const uint32_t& count);
+
+		void	VCreateShaderInstanceBuffers(IShaderResource* shader, void** data, size_t* sizes, size_t* strides, size_t* offsets, const uint32_t& count);
+		void	VCreateStaticShaderInstanceBuffers(IShaderResource* shader, void** data, size_t* sizes, size_t* strides, size_t* offsets, const uint32_t& count);
+		void	VCreateDynamicShaderInstanceBuffers(IShaderResource* shader, void** data, size_t* sizes, size_t* strides, size_t* offsets, const uint32_t& count);
+
+		void	VUpdateShaderConstantBuffer(IShaderResource* shader, void* data, const uint32_t& index);
+		void	VUpdateShaderInstanceBuffer(IShaderResource* shader, void* data, const size_t& size, const uint32_t& index);
+
+		void	VSetVertexShaderConstantBuffers(IShaderResource* shaderResource);
+		void	VSetVertexShaderConstantBuffer(IShaderResource* shaderResource, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+
+		void	VSetPixelShaderConstantBuffers(IShaderResource* shaderResource);
+		void	VSetPixelShaderConstantBuffer(IShaderResource* shaderResource, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+
+		void	VSetComputeShaderConstantBuffers(IShaderResource* shaderResource);
+		void	VSetComputeShaderConstantBuffer(IShaderResource* shaderResource, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+
+		void	VSetVertexShaderInstanceBuffers(IShaderResource* shaderResource);
+		void	VSetVertexShaderInstanceBuffer(IShaderResource* shaderResource, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+
+		void	VSetPixelShaderResourceViews(IShaderResource* shaderResource);
+
+		void	VSetVertexShaderResourceView(IShaderResource* shaderResource, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+		void	VSetPixelShaderResourceView(IShaderResource* shaderResource, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+		void	VSetComputeShaderResourceView(IShaderResource* shaderResource, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+
+		void	VAddShaderLinearSamplerState(IShaderResource* shaderResource, SamplerStateAddressType addressType, float* color = nullptr);
+		void	VAddShaderPointSamplerState(IShaderResource* shaderResource, SamplerStateAddressType addressType, float* color = nullptr);
+
+		void	VSetVertexShaderSamplerStates(IShaderResource* shaderResource);
+		void	VSetPixelShaderSamplerStates(IShaderResource* shaderResource);
+
+		void	AddAdditiveBlendState(IShaderResource* shaderResource);
+
+		void	SetBlendState(IShaderResource* shaderResource, const uint32_t& atIndex, float* color, uint32_t sampleMask);
+
+#pragma endregion 
+
+#pragma region Render Context
+
+		void	VCreateRenderContext(IRenderContext** renderContext, LinearAllocator* allocator);
+
+		void	VCreateContextTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
+		void	VCreateContextDepthStencilTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
+
+		void	VCreateContextResourceTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
+		void	VCreateContextDepthStencilResourceTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
+
+		void	VCreateContextCubicShadowTargets(IRenderContext* renderContext, const uint32_t& count, uint32_t width, uint32_t height);
+
+		void	VSetContextTarget();
+		void	VSetContextTargetWithDepth();
+		void	VSetContextTargetWithDepth(IRenderContext* render, const uint32_t DSVIndex);
+		void	VSetRenderContextTargets(IRenderContext* renderContext);
+		void	VSetRenderContextTargetsWithDepth(IRenderContext* renderContext, const uint32_t DSVIndex);
+
+		void	VSetRenderContextTarget(IRenderContext* renderContext, const uint32_t& atIndex);
+		void	VSetRenderContextTargetWithDepth(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& DSVIndex);
+
+		void	VSetRenderContextDepthTarget(IRenderContext* renderContext, const uint32_t& atIndex);
+
+		void	VClearContext(const float* color, float depth, uint8_t stencil);
+		void	VClearContext(IRenderContext* renderContext, const float* color, float depth, uint8_t stencil);
+
+		void	VClearContextTarget(const float* color);
+		void	VClearContextTarget(IRenderContext* renderContext, const uint32_t& atIndex, const float* color);
+
+		void	VClearDepthStencil(float depth, uint8_t stencil);
+		void VClearStencil(IRenderContext* renderContext, const uint32_t& atIndex, uint8_t stencil);
+		void	VClearDepthStencil(IRenderContext* renderContext, const uint32_t& atIndex, float depth, uint8_t stencil);
+
+		void	VSetVertexShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+		void	VSetPixelShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+		void	VSetComputeShaderDepthResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+
+		void	VSetVertexShaderResourceViews(IRenderContext* renderContext);
+		void	VSetPixelShaderResourceViews(IRenderContext* renderContext);
+		void	VSetComputeShaderResourceViews(IRenderContext* renderContext);
+
+		void	VSetVertexShaderResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+		void	VSetPixelShaderResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+		void	VSetComputeShaderResourceView(IRenderContext* renderContext, const uint32_t& atIndex, const uint32_t& toBindingIndex);
+		
+		void	VCopySubresource(IRenderContext* renderContext, const uint32_t& dstIndex, const uint32_t& srcIndex);
+
+#pragma endregion 
+
+		void	VSwapBuffers();
+
+		int						InitializeD3D11(HWND hwnd, Options options);
 		ID3D11Device*			GetDevice()				const;
 		ID3D11DeviceContext*	GetDeviceContext()		const;
 		IDXGISwapChain*			GetSwapChain()			const;
@@ -114,7 +288,10 @@ namespace Rig3D
 		ID3D11DepthStencilView* GetDepthStencilView()	const;
 		D3D11_VIEWPORT const&	GetViewport()			const;
 
-		void	HandleEvent(const IEvent& iEvent) override;
+		//void	HandleEvent(const IEvent& iEvent) override;
+
+		DX3D11Renderer();
+		~DX3D11Renderer();
 
 	private:
 		UINT					mMSAA4xQuality;
@@ -129,17 +306,7 @@ namespace Rig3D
 		D3D_FEATURE_LEVEL		mFeatureLevel;
 
 		bool					mEnable4xMsaa;
-		bool					mIsPaused;
-		bool					mIsMaximized;
-		bool					mIsMinimized;
-		bool					mIsResizing;
 
-		DX3D11Renderer();
-		~DX3D11Renderer();
-
-		DX3D11Renderer(DX3D11Renderer const&) = delete;
-		void operator=(DX3D11Renderer const&) = delete;
-	
 		void SetVertexShaderInputLayout(ID3D11ShaderReflection* reflection, ID3DBlob* vsBlob, D3D11_SHADER_DESC* shaderDesc, DX11Shader* vertexShader);
 		void SetShaderConstantBuffers(ID3D11ShaderReflection* reflection, D3D11_SHADER_DESC* shaderDesc, DX11Shader* shader, LinearAllocator* allocator);
 		void SetShaderResources(ID3D11ShaderReflection* reflection, D3D11_SHADER_DESC* shaderDesc, DX11Shader* shader);
