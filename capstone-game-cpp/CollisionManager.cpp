@@ -529,7 +529,6 @@ void CollisionManager::DetectCollisions(double milliseconds)
 			}
 		}
 
-		TRACE_WARN("No pRegion (Minion: " << pSphereComponent->mSceneObject->Is<Minion>() << ") (Explorer: " << pSphereComponent->mSceneObject->Is<Explorer>() << ")");
 		if (pMinRegion)
 		{
 			if (minZ == FLT_MAX)
@@ -545,6 +544,10 @@ void CollisionManager::DetectCollisions(double milliseconds)
 
 			pSphereComponent->mSceneObject->mTransform->SetPosition(position);
 			pNode->object->OnCollisionExit(pMinRegion);
+		}
+		else
+		{
+			TRACE_WARN("No pRegion (Minion: " << pSphereComponent->mSceneObject->Is<Minion>() << ") (Explorer: " << pSphereComponent->mSceneObject->Is<Explorer>() << ")");
 		}
 
 		colliderIndices.clear();
