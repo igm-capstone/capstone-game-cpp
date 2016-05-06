@@ -117,9 +117,12 @@ void Trap::OnTriggerEnter(BaseSceneObject* self, BaseSceneObject* other)
 	Trap* pTrap = reinterpret_cast<Trap*>(self);
 	if (!pTrap->mEffect->mIsActive)
 	{
-		//pTrap->mEffect->mIsActive = true;
-		pTrap->mAnimationController->SetState(ANIM_STATE_MELEE);
-		pTrap->mAnimationController->Resume();
+		if (other->Is<Minion>())
+		{
+			//pTrap->mEffect->mIsActive = true;
+			pTrap->mAnimationController->SetState(ANIM_STATE_MELEE);
+			pTrap->mAnimationController->Resume();
+		}
 	}
 }
 
