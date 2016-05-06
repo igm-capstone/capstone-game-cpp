@@ -6,10 +6,10 @@
 #include <ScareTacticsApplication.h>
 
 Animation gSprinterAnimations[Animations::SPRINTER_ANIMATION_COUNT] = {
-	{ "SprinterFinal.0004", 1, 70, 1 },
-	{ "SprinterFinal.0004", 80, 93, 1 },
-	{ "SprinterFinal.0004", 100, 150, 1 },
-	{ "SprinterFinal.0004", 160, 217, 1 }
+	{ "Take 001", 1, 70, 1 },
+	{ "Take 001", 80, 93, 1 },
+	{ "Take 001", 100, 150, 1 },
+	{ "Take 001", 160, 217, 1 }
 };
 
 Animation gTrapperAnimations[Animations::TRAPPER_ANIMATION_COUNT] = {

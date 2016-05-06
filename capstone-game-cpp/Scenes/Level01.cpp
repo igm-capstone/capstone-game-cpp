@@ -376,7 +376,7 @@ void Level01::InitializeShaderResources()
 			"Assets/Textures/BascMinionFull.png", 
 			"Assets/Textures/flytraptxt.png", 
 			"Assets/Textures/StaticMesh/Door.png", 
-			"Assets/Textures/Sprinter_D.png", 
+			"Assets/Textures/Sprinter_D_1024.png", 
 			"Assets/Textures/Heal.png",
 			"Assets/Textures/Trap.png",
 			"Assets/Textures/Professor.png",
