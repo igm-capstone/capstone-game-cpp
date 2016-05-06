@@ -7,6 +7,7 @@
 #include "SceneObjects/Region.h"
 #include "SceneObjects/Heal.h"
 #include "SceneObjects/Explosion.h"
+#include "Mathf.h"
 
 // Functor used to find matching collisions
 namespace
@@ -55,7 +56,7 @@ void CollisionManager::Update(double milliseconds)
 
 	frameCollisions.clear();
 
-	DetectCollisions();
+	DetectCollisions(milliseconds);
 	ResolveCollisions();
 }
 
@@ -355,7 +356,7 @@ void CollisionManager::DispatchTriggerExit(Collision* collision)
 	}
 }
 
-void CollisionManager::DetectCollisions()
+void CollisionManager::DetectCollisions(double milliseconds)
 {
 	std::vector<Collision>& collisions = mCollisions;
 
@@ -503,9 +504,12 @@ void CollisionManager::DetectCollisions()
 		vec3f position = pNode->object->mSceneObject->mTransform->GetPosition();
 		
 		Ray<vec3f> ray;
-		ray.origin = position;
+		ray.origin = position + vec3f(0, 0, -2);
 		ray.origin.z -= pSphereComponent->mCollider.radius;
 		ray.normal = { 0.0f, 0.0f, 1.0f };
+
+		float minZ = FLT_MAX;
+		Region* pMinRegion = nullptr;
 
 		for (uint32_t nIdx : colliderIndices)
 		{
@@ -516,11 +520,20 @@ void CollisionManager::DetectCollisions()
 
 			if (IntersectRayOBB(ray, pRegion->mColliderComponent->mCollider, poi, t))
 			{
-				
-				position.z = poi.z;
-				pSphereComponent->mSceneObject->mTransform->SetPosition(position);
-				pNode->object->OnCollisionExit(pRegion);
+				if (poi.z < minZ)
+				{
+					minZ = poi.z;
+					pMinRegion = pRegion;
+				}
 			}
+		}
+
+		position.z = Mathf::Lerp(position.z, minZ, min(float(milliseconds) * 0.01f, 1));
+		pSphereComponent->mSceneObject->mTransform->SetPosition(position);
+
+		if (!pMinRegion)
+		{
+			pNode->object->OnCollisionExit(pMinRegion);
 		}
 
 		colliderIndices.clear();
