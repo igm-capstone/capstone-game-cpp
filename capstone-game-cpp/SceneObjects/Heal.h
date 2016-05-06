@@ -10,6 +10,7 @@ public:
 	class NetworkID*				mNetworkID;
 
 	float mHealthRestored;
+	float mActiveDuration;
 	float mDuration;
 
 	void Spawn(vec3f pos, int UUID, float duration);

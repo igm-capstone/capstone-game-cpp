@@ -1143,6 +1143,9 @@ void Level01::RenderEffects()
 	//mTime.rate = 1.0f;
 	//mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
 	//mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 2, 0);
+	mTime.color = { 0.0f, 1.0f, 0.0f, 1.0f };
+	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
+	mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 2, 0);
 
 	for (Heal& heal : Factory<Heal>())
 	{
@@ -1153,6 +1156,10 @@ void Level01::RenderEffects()
 		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
 	}
 
+	mTime.color = { 1.0f, 0.0f, 0.0f, 1.0f };
+	mRenderer->VUpdateShaderConstantBuffer(mPLVShaderResource, &mTime, 2);
+	mRenderer->VSetPixelShaderConstantBuffer(mPLVShaderResource, 2, 0);
+
 	for (Explosion& explosion : Factory<Explosion>())
 	{
 		mModel.world = explosion.mTransform->GetWorldMatrix().transpose();
@@ -1161,7 +1168,6 @@ void Level01::RenderEffects()
 
 		mRenderer->VDrawIndexed(0, mSphereMesh->GetIndexCount());
 	}
-
 
 	mTime.color = { 1.0f, 0.1f, 1.0f, 1.0f };
 
