@@ -8,6 +8,7 @@
 #include "SceneObjects/Heal.h"
 #include "SceneObjects/Explosion.h"
 #include "Mathf.h"
+#include "SceneObjects/Minion.h"
 
 // Functor used to find matching collisions
 namespace
@@ -528,7 +529,7 @@ void CollisionManager::DetectCollisions(double milliseconds)
 			}
 		}
 
-
+		TRACE_WARN("No pRegion (Minion: " << pSphereComponent->mSceneObject->Is<Minion>() << ") (Explorer: " << pSphereComponent->mSceneObject->Is<Explorer>() << ")");
 		if (pMinRegion)
 		{
 			if (minZ == FLT_MAX)
