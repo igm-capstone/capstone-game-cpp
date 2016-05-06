@@ -153,7 +153,7 @@ void UIManager::RenderReadyScreen(int playerID)
 
 	mSpriteManager->DrawSprite(SPRITESHEET_CONTROL_ICONS, 15, mSpriteManager->perc2f(0.5f, 0.5f), mSpriteManager->perc2f(1, 1), vec4f(0.7f, 0.7f, 0.7f, 0.5f));
 	
-	mSpriteManager->DrawSprite(SpriteSheetCode(SPRITESHEET_START_0+playerID), 0, mSpriteManager->perc2f(0.5f, 0.5f), mSpriteManager->perc2f(0.5f, 0.5f) * vec2f(1, 16.0f/11.0f));
+	mSpriteManager->DrawSprite(SpriteSheetCode(SPRITESHEET_START_0+playerID), 0, mSpriteManager->perc2f(0.5f, 0.5f), mSpriteManager->perc2f(0.6f, 0.6f).x * vec2f(1, 1));
 
 	mSpriteManager->DrawSprite(SPRITESHEET_GENERAL_ICONS, 0, mSpriteManager->perc2f(0.5f, 0.91f) + vec2f(-135, 0), vec2f(70, 70));
 	mSpriteManager->DrawSprite(SPRITESHEET_GENERAL_ICONS, 1, mSpriteManager->perc2f(0.5f, 0.91f) + vec2f(-45, 0), vec2f(70, 70));

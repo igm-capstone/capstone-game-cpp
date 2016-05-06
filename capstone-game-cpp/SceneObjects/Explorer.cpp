@@ -234,7 +234,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		skills = config["skills"].get<jarr_t>();
 
 		auto healConfig = findByName(skills, "Heal");
-		e->mSkills[HEAL_SKILL_INDEX] = createExplorerSkill(DoHeal, KEYCODE_Q, healConfig);
+		e->mSkills[HEAL_SKILL_INDEX] = createExplorerSkill(DoHeal, KEYCODE_SHIFT, healConfig);
 		e->mSkills[HEAL_SKILL_INDEX]->mSceneObject = e;
 
 		auto meleeConfig = findByName(skills, "LongAttack");
@@ -244,6 +244,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
 		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
 		mUIManager->AddSkill(e->mSkills[HEAL_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 0, 6);
+		mUIManager->AddSkill(e->mSkills[LANTERN_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 6, 9);
 
 		e->mAttackDamage = meleeConfig["damage"].get<float>();
 
@@ -254,19 +255,12 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		config = findByName(explorers, "GrenadeTrapper");
 		skills = config["skills"].get<jarr_t>();
 
-		auto poison = Factory<Skill>::Create();
-		poison->SetBinding(SkillBinding().Set(KEYCODE_Q));
-		poison->Setup("Poison Trap", 2.0f, 5.0f, DoPoison);
-		poison->mSceneObject = e;
-		e->mSkills[POISON_SKILL_INDEX] = poison;
-
-
 		auto poisonConfig = findByName(skills, "SetTrapPoison");
-		e->mSkills[POISON_SKILL_INDEX] = createExplorerSkill(DoPoison, KEYCODE_Q, poisonConfig);
+		e->mSkills[POISON_SKILL_INDEX] = createExplorerSkill(DoPoison, KEYCODE_SHIFT, poisonConfig);
 		e->mSkills[POISON_SKILL_INDEX]->mSceneObject = e;
 
 		auto glueConfig = findByName(skills, "SetTrapGlue");
-		e->mSkills[SLOW_SKILL_INDEX] = createExplorerSkill(DoSlow, KEYCODE_E, glueConfig);
+		e->mSkills[SLOW_SKILL_INDEX] = createExplorerSkill(DoSlow, KEYCODE_CONTROL, glueConfig);
 		e->mSkills[SLOW_SKILL_INDEX]->mSceneObject = e;
 
 		auto tossConfig = findByName(skills, "GrenadeToss");
@@ -281,6 +275,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
 		mUIManager->AddSkill(e->mSkills[POISON_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 2, 6);
 		mUIManager->AddSkill(e->mSkills[SLOW_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 4, 4);
+		mUIManager->AddSkill(e->mSkills[LANTERN_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 6, 9);
 
 		e->mAttackDamage = tossConfig["damage"].get<float>();
 
@@ -293,7 +288,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		skills = config["skills"].get<jarr_t>();
 
 		auto sprintConfig = findByName(skills, "Sprint");
-		e->mSkills[SPRINT_SKILL_INDEX] = createExplorerSkill(DoSprint, KEYCODE_Q, sprintConfig);
+		e->mSkills[SPRINT_SKILL_INDEX] = createExplorerSkill(DoSprint, KEYCODE_SHIFT, sprintConfig);
 		e->mSkills[SPRINT_SKILL_INDEX]->mSceneObject = e;
 
 		auto meleeConfig = findByName(skills, "ConeAttack");
@@ -303,6 +298,7 @@ void Explorer::OnNetAuthorityChange(BaseSceneObject* obj, bool newAuth)
 		UIManager* mUIManager = &Application::SharedInstance().GetCurrentScene()->mUIManager;
 		mUIManager->AddSkill(e->mSkills[MELEE_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 5, 8);
 		mUIManager->AddSkill(e->mSkills[SPRINT_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 1, 6);
+		mUIManager->AddSkill(e->mSkills[LANTERN_SKILL_INDEX], SPRITESHEET_EXPLORER_ICONS, 6, 9);
 
 		e->mAttackDamage = meleeConfig["damage"].get<float>();
 		e->mController->mSprintMultiplier = sprintConfig["speedMultiplier"].get<float>();
