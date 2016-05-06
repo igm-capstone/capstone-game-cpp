@@ -111,7 +111,7 @@ void loadLamps(jarr_t objs)
 		lamp->mTrigger->mCollider.axis[1] = vec3f(0, 1, 0);
 		lamp->mTrigger->mCollider.axis[2] = vec3f(0, 0, 1);
 		lamp->mTrigger->mCollider.origin = lamp->mTransform->GetPosition();
-		lamp->mTrigger->mCollider.halfSize = vec3f(2.0f, 2.0f, 2.0f);
+		lamp->mTrigger->mCollider.halfSize = vec3f(2.0f, 2.0f, 6.0f);
 		lamp->mTrigger->mLayer = COLLISION_LAYER_INTERACTABLE;
 	}
 }

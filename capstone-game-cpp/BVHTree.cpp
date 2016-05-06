@@ -294,7 +294,7 @@ void BVHTree::RayCastRecursively(Ray<vec3f> ray, const int& parentIndex, BaseCol
 				other.object->mLayer == COLLISION_LAYER_QUADRANT ||
 				other.object->mLayer == COLLISION_LAYER_INTERACTABLE ||
 				other.object->mLayer == COLLISION_LAYER_FLOOR ||
-				other.object->mLayer == COLLISION_LAYER_EXPLORER));
+				other.object->mLayer == COLLISION_LAYER_EXPLORER_SKILL));
 	});
 
 	float t;

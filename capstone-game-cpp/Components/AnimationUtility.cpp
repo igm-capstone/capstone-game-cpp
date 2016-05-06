@@ -24,7 +24,7 @@ Animation gProfessorAnimations[Animations::PROFESSOR_ANIMATION_COUNT] = {
 	{ "Take 001", 80, 94, 1 },
 	{ "Take 001", 105, 153, 1 },
 	{ "Take 001", 165, 223, 1 },
-	{ "Take 001", 245, 330, 1 }
+	{ "Take 001", 245, 322, 1 }
 };
 
 Animation gMinionAnimations[Animations::MINION_ANIMATION_COUNT] = {
