@@ -675,45 +675,6 @@ void Level01::VFixedUpdate(double milliseconds)
 		t.Update(seconds);
 	}
 
-#ifdef _DEBUG
-	if (mInput->GetKeyDown(KEYCODE_F3))
-	{
-		gDebugGrid = !gDebugGrid;
-	}
-
-	if (mInput->GetKeyDown(KEYCODE_F4))
-	{
-		gDebugColl = !gDebugColl;
-	}
-
-	if (mInput->GetKeyDown(KEYCODE_F5))
-	{
-		gDebugOrto = !gDebugOrto;
-	}
-
-	if (mInput->GetKeyDown(KEYCODE_F6))
-	{
-		gDebugGBuffer = !gDebugGBuffer;
-	}
-
-	if (mInput->GetKeyDown(KEYCODE_F7))
-	{
-		gDebugBVH = !gDebugBVH;
-	}
-
-	if (mInput->GetKeyDown(KEYCODE_F8))
-	{
-		gDebugBT = !gDebugBT;
-	}
-	//Do not use F9, already used else-where
-	if (mInput->GetKeyDown(KEYCODE_F10))
-	{
-		Application::SharedInstance().LoadScene<Level01>();
-	}
-#endif
-
-	UpdateGameState(milliseconds); //Input
-
 	if (mAIManager->IsGridDirty()) ComputeGrid(); 
 	mAIManager->Update();
 }
