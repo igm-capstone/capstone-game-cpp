@@ -528,13 +528,21 @@ void CollisionManager::DetectCollisions(double milliseconds)
 			}
 		}
 
-		position.z = Mathf::Lerp(position.z, minZ, min(float(milliseconds) * 0.01f, 1));
-		pSphereComponent->mSceneObject->mTransform->SetPosition(position);
-
-		if (!pMinRegion)
+		if (minZ == FLT_MAX)
 		{
-			pNode->object->OnCollisionExit(pMinRegion);
+			__debugbreak();
 		}
+
+	
+			position.z = Mathf::Lerp(position.z, minZ, min(float(milliseconds) * 0.01f, 1));
+
+			if (position.z > 10.0f || position.z < -10.0f)
+			{
+				__debugbreak();
+			}
+
+			pSphereComponent->mSceneObject->mTransform->SetPosition(position);
+			pNode->object->OnCollisionExit(pMinRegion);
 
 		colliderIndices.clear();
 	}

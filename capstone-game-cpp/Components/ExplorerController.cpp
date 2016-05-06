@@ -89,7 +89,7 @@ bool ExplorerController::RotateTowardsMoveDirection(float dt, vec3f& pos, quatf&
 bool ExplorerController::RotateTowardsMousePosition(float dt, vec3f& pos, quatf& rot)
 {
 	// rotate towards mouse
-
+	
 	auto mousePosition = mCameraManager->Screen2WorldAt(mInput->mousePosition, pos.z);
 	auto lastPos = mSceneObject->mTransform->GetPosition();
 	auto dir = normalize(mousePosition - lastPos);
