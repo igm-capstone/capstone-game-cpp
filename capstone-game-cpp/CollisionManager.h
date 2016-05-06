@@ -41,7 +41,7 @@ public:
 	inline void DispatchTriggerStay(Collision* collision);
 	inline void DispatchTriggerExit(Collision* collision);
 
-	void DetectCollisions();
+	void DetectCollisions(double milliseconds);
 	void ResolveCollisions();
 
 private:
