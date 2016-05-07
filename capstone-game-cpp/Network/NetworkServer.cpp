@@ -4,7 +4,11 @@
 #include <SceneObjects/Explorer.h>
 #include <Components/NetworkID.h>
 
-ExplorerType gSpawnOrder[] = { TRAPMASTER, HEALER, SPRINTER };
+ExplorerType gSpawnOrder[] = { 
+	HEALER, 
+	TRAPMASTER, 
+	SPRINTER, 
+};
 
 bool NetworkServer::Init(void)
 {
