@@ -1131,7 +1131,7 @@ void Level01::RenderDoors()
 	model = mModelManager->GetModel(kLanternModelName);
 	mRenderer->VBindMesh(model->mMesh);
 
-	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 9, 0);
+	mRenderer->VSetPixelShaderResourceView(mExplorerShaderResource, 10, 0);
 
 	for (Lantern& l : Factory<Lantern>())
 	{

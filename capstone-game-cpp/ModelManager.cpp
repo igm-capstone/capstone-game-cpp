@@ -20,7 +20,7 @@ const char* kStaticMeshModelNames[STATIC_MESH_MODEL_COUNT] =
 {
 	"BathroomCabinet",
 	"Bathtub",
-	"bedside drawers",
+	"BedsideDrawers",
 	"BigBox",
 	"Bookshelf",
 	"bookshelf_curved",

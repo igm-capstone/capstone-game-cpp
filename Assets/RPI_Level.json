@@ -2373,136 +2373,136 @@
         "textureName": "Cabinet_Toilet_Sink_Tub.png"
       }
     ],
-    "bedside drawers": [
+    "BedsideDrawers": [
       {
         "position": [ 12.9090, -46.8500, -6.5400 ],
         "rotation": [ 0.0000, 0.0000, -0.9239, 0.3827 ],
-        "scale": [ 0.3000, 0.2500, 0.2500 ],
+        "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 12.9030, -46.8560, -6.2881 ],
-          "extents": [ 0.2479, 0.9971, 0.6707 ]
+          "center": [ 12.9035, -46.8555, -6.2648 ],
+          "extents": [ 0.1575, 0.9762, 0.7329 ]
         },
-        "textureName": "SwatchPinkDAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ -92.2100, -45.6300, -6.5400 ],
         "rotation": [ 0.0000, 0.0000, -0.5852, 0.8109 ],
-        "scale": [ 0.3000, 0.2500, 0.2500 ],
+        "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -92.2073, -45.6381, -6.2881 ],
-          "extents": [ 0.7801, 0.6686, 0.6707 ]
+          "center": [ -92.2076, -45.6374, -6.2648 ],
+          "extents": [ 0.8020, 0.5784, 0.7329 ]
         },
-        "textureName": "SwatchPinkDAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ -92.3100, -55.2000, -6.5400 ],
         "rotation": [ 0.0000, 0.0000, -0.7328, 0.6804 ],
-        "scale": [ 0.3000, 0.2500, 0.2500 ],
+        "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -92.3106, -55.2085, -6.2881 ],
-          "extents": [ 0.4631, 0.9171, 0.6707 ]
+          "center": [ -92.3106, -55.2078, -6.2648 ],
+          "extents": [ 0.5179, 0.8423, 0.7329 ]
         },
-        "textureName": "SwatchPinkDAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ -72.1300, 5.7300, -11.5300 ],
         "rotation": [ 0.0000, 0.0000, 0.9347, 0.3554 ],
-        "scale": [ 0.3000, 0.2500, 0.2500 ],
+        "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -72.1364, 5.7357, -11.2781 ],
-          "extents": [ 1.0099, 0.1889, 0.6707 ]
+          "center": [ -72.1358, 5.7352, -11.2548 ],
+          "extents": [ 0.9837, 0.0999, 0.7329 ]
         },
-        "textureName": "SwatchPinkDAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ -76.8200, -4.8900, -11.5300 ],
         "rotation": [ 0.0000, 0.0000, 0.9884, -0.1517 ],
-        "scale": [ 0.3000, 0.2500, 0.2500 ],
+        "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -76.8282, -4.8926, -11.2781 ],
-          "extents": [ 0.6809, 0.7694, 0.6707 ]
+          "center": [ -76.8274, -4.8923, -11.2548 ],
+          "extents": [ 0.5911, 0.7926, 0.7329 ]
         },
-        "textureName": "SwatchPinkDAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 22.0100, 16.8700, -6.5000 ],
         "rotation": [ 0.0000, 0.0000, -0.9358, 0.3525 ],
-        "scale": [ 0.3000, 0.2500, 0.2500 ],
+        "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 22.0036, 16.8644, -6.2481 ],
-          "extents": [ 0.3119, 0.9789, 0.6707 ]
+          "center": [ 22.0042, 16.8649, -6.2248 ],
+          "extents": [ 0.2204, 0.9639, 0.7329 ]
         },
-        "textureName": "SwatchPinkDAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 20.9900, 40.7200, -1.5800 ],
         "rotation": [ 0.0000, 0.0000, -0.5542, 0.8324 ],
-        "scale": [ 0.3474, 0.2500, 0.2500 ],
+        "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 20.9938, 40.7109, -1.3281 ],
-          "extents": [ 0.8819, 0.7362, 0.6707 ]
+          "center": [ 20.9930, 40.7128, -1.3048 ],
+          "extents": [ 0.8433, 0.5164, 0.7329 ]
         },
-        "textureName": "SwatchPinkDAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 15.8000, 46.5330, -1.5800 ],
         "rotation": [ 0.0000, 0.0000, -0.0574, 0.9984 ],
-        "scale": [ 0.3381, 0.2593, 0.2500 ],
+        "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 15.8096, 46.5319, -1.3281 ],
-          "extents": [ 1.0486, 0.4323, 0.6707 ]
+          "center": [ 15.8077, 46.5321, -1.3048 ],
+          "extents": [ 0.8626, 0.4833, 0.7329 ]
         },
-        "textureName": "SwatchPinkDAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 11.3080, 54.9550, -1.5800 ],
         "rotation": [ 0.0000, 0.0000, -0.6074, 0.7944 ],
-        "scale": [ 0.3381, 0.2593, 0.2500 ],
+        "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 11.3105, 54.9457, -1.3281 ],
-          "extents": [ 0.7904, 0.8135, 0.6707 ]
+          "center": [ 11.3100, 54.9475, -1.3048 ],
+          "extents": [ 0.7688, 0.6218, 0.7329 ]
         },
-        "textureName": "SwatchPinkDAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 56.1452, 51.4004, -1.1105 ],
         "rotation": [ 0.1408, 0.6726, -0.7111, -0.1488 ],
-        "scale": [ 0.3381, 0.2593, 0.2500 ],
+        "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 56.0355, 51.1739, -1.0965 ],
-          "extents": [ 0.6526, 0.9834, 0.5859 ]
+          "center": [ 56.0278, 51.1518, -1.0952 ],
+          "extents": [ 0.4537, 0.9624, 0.6187 ]
         },
-        "textureName": "SwatchPinkDAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 54.4420, 55.1990, -1.1740 ],
         "rotation": [ -0.3312, -0.5865, -0.6403, -0.3693 ],
-        "scale": [ 0.3381, 0.2593, 0.2500 ],
+        "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 54.6530, 55.3349, -1.1507 ],
-          "extents": [ 1.1253, 0.4934, 0.4759 ]
+          "center": [ 54.6740, 55.3451, -1.1486 ],
+          "extents": [ 1.0843, 0.2966, 0.5011 ]
         },
-        "textureName": "SwatchPinkDAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 64.1316, -13.2323, -11.5198 ],
         "rotation": [ 0.0000, 0.0000, -0.9771, 0.2128 ],
-        "scale": [ 0.3000, 0.2500, 0.2500 ],
+        "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 64.1239, -13.2358, -11.2679 ],
-          "extents": [ 0.5803, 0.8478, 0.6707 ]
+          "center": [ 64.1246, -13.2355, -11.2445 ],
+          "extents": [ 0.4883, 0.8598, 0.7329 ]
         },
-        "textureName": "SwatchPinkDAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 75.2100, -13.6100, -11.5200 ],
         "rotation": [ 0.0000, 0.0000, -0.9842, -0.1773 ],
-        "scale": [ 0.3000, 0.2500, 0.2500 ],
+        "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 75.2020, -13.6070, -11.2681 ],
-          "extents": [ 1.0098, 0.1892, 0.6707 ]
+          "center": [ 75.2027, -13.6073, -11.2448 ],
+          "extents": [ 0.9533, 0.2627, 0.7329 ]
         },
-        "textureName": "SwatchPinkDAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       }
     ],
     "BigBox": [
@@ -3068,7 +3068,7 @@
           "center": [ -14.9832, -43.4152, -9.0635 ],
           "extents": [ 4.9969, 4.9906, 3.4635 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Stairs.png"
       },
       {
         "position": [ 76.1100, -2.5500, -5.6700 ],
@@ -3078,7 +3078,7 @@
           "center": [ 81.0948, -0.5068, -9.1335 ],
           "extents": [ 4.9906, 4.9969, 3.4635 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Stairs.png"
       }
     ],
     "CurvedStairsLeft": [
@@ -3090,7 +3090,7 @@
           "center": [ 4.9982, -43.4242, -9.0595 ],
           "extents": [ 4.9968, 4.9906, 3.4635 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Stairs.png"
       }
     ],
     "DiningChair": [
@@ -3403,70 +3403,70 @@
         "rotation": [ 0.0000, 0.0000, 1.0000, 0.0000 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 35.6100, -45.4710, -7.7138 ],
-          "extents": [ 2.0938, 1.0512, 2.0938 ]
+          "center": [ 35.6100, -45.4432, -7.9478 ],
+          "extents": [ 2.3278, 1.1687, 2.3278 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 39.9200, 20.6800, -5.6000 ],
         "rotation": [ 0.0000, 0.0000, 1.0000, 0.0000 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 39.9200, 20.9290, -7.6938 ],
-          "extents": [ 2.0938, 1.0512, 2.0938 ]
+          "center": [ 39.9200, 20.9568, -7.9278 ],
+          "extents": [ 2.3278, 1.1687, 2.3278 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ -92.7000, -1.8200, -10.6000 ],
         "rotation": [ 0.0000, 0.0000, 0.7071, -0.7071 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -92.9490, -1.8200, -12.6939 ],
-          "extents": [ 1.0512, 2.0938, 2.0938 ]
+          "center": [ -92.9768, -1.8200, -12.9278 ],
+          "extents": [ 1.1687, 2.3278, 2.3278 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ -67.3100, -50.6500, -5.6000 ],
         "rotation": [ 0.0000, 0.0000, 0.7071, 0.7071 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -67.0610, -50.6500, -7.6938 ],
-          "extents": [ 1.0512, 2.0938, 2.0938 ]
+          "center": [ -67.0332, -50.6500, -7.9278 ],
+          "extents": [ 1.1687, 2.3278, 2.3278 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 61.3000, -22.7600, -10.6000 ],
         "rotation": [ 0.0000, 0.0000, 0.7071, -0.7071 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 61.0510, -22.7600, -12.6939 ],
-          "extents": [ 1.0512, 2.0938, 2.0938 ]
+          "center": [ 61.0232, -22.7600, -12.9278 ],
+          "extents": [ 1.1687, 2.3278, 2.3278 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ -50.9900, -65.3900, -5.6200 ],
         "rotation": [ 0.0000, 0.0000, 0.3827, -0.9239 ],
-        "scale": [ 1.0000, 1.1000, 1.0000 ],
+        "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -51.1837, -65.5836, -7.7138 ],
-          "extents": [ 2.2982, 0.6629, 2.0938 ]
+          "center": [ -51.1857, -65.5857, -7.9478 ],
+          "extents": [ 2.4724, 0.8197, 2.3278 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 87.7600, -66.9400, -5.6200 ],
         "rotation": [ 0.0000, 0.0000, 0.7071, 0.7071 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 88.0090, -66.9400, -7.7138 ],
-          "extents": [ 1.0512, 2.0938, 2.0938 ]
+          "center": [ 88.0368, -66.9400, -7.9478 ],
+          "extents": [ 1.1687, 2.3278, 2.3278 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       }
     ],
     "Floor": [
@@ -12369,7 +12369,7 @@
           "center": [ 63.4900, -65.6000, -6.6941 ],
           "extents": [ 1.1291, 0.2419, 1.2107 ]
         },
-        "textureName": "Cabinet_Toilet_Sink_Tub.png"
+        "textureName": "OfficeChair_Table.png"
       },
       {
         "position": [ -29.4300, -4.1400, -5.5100 ],
@@ -12379,7 +12379,7 @@
           "center": [ -29.4300, -4.1400, -6.7141 ],
           "extents": [ 1.1502, 0.1018, 1.2107 ]
         },
-        "textureName": "Cabinet_Toilet_Sink_Tub.png"
+        "textureName": "OfficeChair_Table.png"
       }
     ],
     "OfficeDesk": [
@@ -12391,7 +12391,7 @@
           "center": [ 61.2400, -66.0000, -6.7296 ],
           "extents": [ 0.8671, 1.7623, 1.2396 ]
         },
-        "textureName": "Bookshelves.png"
+        "textureName": "OfficeChair_Table.png"
       },
       {
         "position": [ -29.2300, -2.6400, -5.5100 ],
@@ -12401,7 +12401,7 @@
           "center": [ -29.2300, -2.6400, -6.7496 ],
           "extents": [ 1.7624, 0.8671, 1.2396 ]
         },
-        "textureName": "Bookshelves.png"
+        "textureName": "OfficeChair_Table.png"
       }
     ],
     "OutsideFloor": [
@@ -14843,30 +14843,30 @@
         "rotation": [ 0.0000, 0.0000, 0.7071, -0.7071 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -89.7400, -50.6225, -8.0985 ],
-          "extents": [ 3.9901, 3.3823, 2.5015 ]
+          "center": [ -89.7400, -50.6221, -8.0787 ],
+          "extents": [ 3.9584, 3.3555, 2.4817 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ -73.9000, 0.0800, -10.6000 ],
         "rotation": [ 0.0000, 0.0000, 0.7071, 0.7071 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -73.9000, 0.1325, -13.0985 ],
-          "extents": [ 3.9900, 3.3823, 2.5015 ]
+          "center": [ -73.9000, 0.1321, -13.0787 ],
+          "extents": [ 3.9584, 3.3555, 2.4817 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 70.0100, -15.9300, -10.6000 ],
         "rotation": [ 0.0000, 0.0000, 1.0000, 0.0000 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 69.9575, -15.9300, -13.0985 ],
-          "extents": [ 3.3823, 3.9901, 2.5015 ]
+          "center": [ 69.9579, -15.9300, -13.0787 ],
+          "extents": [ 3.3555, 3.9584, 2.4817 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       }
     ],
     "Pillar": [
@@ -15122,7 +15122,7 @@
           "center": [ 35.6500, -49.6100, -6.2472 ],
           "extents": [ 1.5290, 1.5290, 0.6666 ]
         },
-        "textureName": "WardrobeWoodTexture3.png"
+        "textureName": "Pillar_RoundTable_Boxes.png"
       },
       {
         "position": [ 95.3900, -21.1000, -10.7700 ],
@@ -15142,7 +15142,7 @@
           "center": [ 1.2500, -48.2500, -6.2472 ],
           "extents": [ 1.5290, 1.5290, 0.6666 ]
         },
-        "textureName": "WardrobeWoodTexture3.png"
+        "textureName": "Pillar_RoundTable_Boxes.png"
       },
       {
         "position": [ -10.6400, -47.5300, -5.5900 ],
@@ -15152,7 +15152,7 @@
           "center": [ -10.6400, -47.5300, -6.2472 ],
           "extents": [ 1.5290, 1.5290, 0.6666 ]
         },
-        "textureName": "WardrobeWoodTexture3.png"
+        "textureName": "Pillar_RoundTable_Boxes.png"
       },
       {
         "position": [ 56.8200, -13.0600, -5.6000 ],
@@ -15945,70 +15945,70 @@
         "rotation": [ 0.0000, 0.0000, -0.5644, 0.8255 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 51.1232, 40.7083, -1.5609 ],
-          "extents": [ 2.7973, 0.8397, 1.0182 ]
+          "center": [ 51.1288, 40.6981, -1.8078 ],
+          "extents": [ 3.4807, 1.0449, 1.2670 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 49.4100, 49.6800, -0.5500 ],
         "rotation": [ 0.0000, 0.0000, 0.1319, 0.9913 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 49.4540, 49.6986, -1.5609 ],
-          "extents": [ 1.1336, 2.6917, 1.0182 ]
+          "center": [ 49.4647, 49.7031, -1.8078 ],
+          "extents": [ 1.4105, 3.3492, 1.2670 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 51.1100, 58.8600, -0.5500 ],
         "rotation": [ 0.0000, 0.0000, 0.6098, 0.7925 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 51.1159, 58.9074, -1.5609 ],
-          "extents": [ 1.7642, 2.3276, 1.0182 ]
+          "center": [ 51.1173, 58.9189, -1.8078 ],
+          "extents": [ 2.1952, 2.8962, 1.2670 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 13.9600, 41.3900, -0.5500 ],
         "rotation": [ 0.0000, 0.0000, 0.7530, -0.6580 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 13.9600, 41.3423, -1.5609 ],
-          "extents": [ 2.0397, 2.0904, 1.0182 ]
+          "center": [ 13.9600, 41.3306, -1.8078 ],
+          "extents": [ 2.5380, 2.6011, 1.2670 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 12.9300, 48.6200, -0.5500 ],
         "rotation": [ 0.0000, 0.0000, 0.1119, -0.9937 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 12.9775, 48.6158, -1.5609 ],
-          "extents": [ 2.2647, 1.8443, 1.0182 ]
+          "center": [ 12.9892, 48.6147, -1.8078 ],
+          "extents": [ 2.8179, 2.2948, 1.2670 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 17.0800, 59.2300, -0.5500 ],
         "rotation": [ 0.0000, 0.0000, -0.6437, -0.7653 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 17.0818, 59.2777, -1.5609 ],
-          "extents": [ 1.9597, 2.1656, 1.0182 ]
+          "center": [ 17.0822, 59.2893, -1.8078 ],
+          "extents": [ 2.4384, 2.6946, 1.2670 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       },
       {
         "position": [ 23.8500, 43.3400, -0.5500 ],
         "rotation": [ 0.0000, 0.0000, 0.2155, -0.9765 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 23.8956, 43.3259, -1.5609 ],
-          "extents": [ 2.5995, 1.3314, 1.0182 ]
+          "center": [ 23.9067, 43.3225, -1.8078 ],
+          "extents": [ 3.2345, 1.6567, 1.2670 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Fireplace_Beds_SideTable.png"
       }
     ],
     "Stair_Full": [
@@ -16020,7 +16020,7 @@
           "center": [ -64.9916, -31.5000, -8.1000 ],
           "extents": [ 4.9984, 3.0000, 2.5000 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Stairs.png"
       },
       {
         "position": [ -69.0000, 9.4900, -5.6000 ],
@@ -16030,7 +16030,7 @@
           "center": [ -66.5000, 4.4916, -8.1000 ],
           "extents": [ 2.5000, 4.9984, 2.5000 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Stairs.png"
       },
       {
         "position": [ -100.0000, -36.4900, -5.6000 ],
@@ -16040,7 +16040,7 @@
           "center": [ -102.5000, -31.4916, -8.1000 ],
           "extents": [ 2.5000, 4.9984, 2.5000 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Stairs.png"
       },
       {
         "position": [ -26.0000, -18.5030, -5.6000 ],
@@ -16050,7 +16050,7 @@
           "center": [ -23.0000, -23.5014, -8.1000 ],
           "extents": [ 3.0000, 4.9984, 2.5000 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Stairs.png"
       },
       {
         "position": [ -50.0100, 19.5000, -0.6000 ],
@@ -16060,7 +16060,7 @@
           "center": [ -55.0084, 17.0000, -3.1000 ],
           "extents": [ 4.9984, 2.5000, 2.5000 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Stairs.png"
       },
       {
         "position": [ 29.9900, -11.5000, -5.6000 ],
@@ -16070,7 +16070,7 @@
           "center": [ 24.9916, -14.0000, -8.1000 ],
           "extents": [ 4.9984, 2.5000, 2.5000 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Stairs.png"
       },
       {
         "position": [ 61.0000, 19.4900, -0.6000 ],
@@ -16080,7 +16080,7 @@
           "center": [ 64.2499, 14.4916, -3.1000 ],
           "extents": [ 3.2499, 4.9984, 2.5000 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Stairs.png"
       },
       {
         "position": [ -26.0000, 1.4970, -0.6220 ],
@@ -16090,17 +16090,17 @@
           "center": [ -23.0000, -3.5014, -3.1220 ],
           "extents": [ 3.0000, 4.9984, 2.5000 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Stairs.png"
       },
       {
         "position": [ -55.0000, -12.4870, -5.5700 ],
         "rotation": [ 0.0000, 0.0000, 0.7071, 0.7071 ],
-        "scale": [ 1.0000, 1.0249, 1.0000 ],
+        "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -52.4378, -17.4854, -8.0700 ],
-          "extents": [ 2.5622, 4.9984, 2.5000 ]
+          "center": [ -52.5000, -17.4854, -8.0700 ],
+          "extents": [ 2.5000, 4.9984, 2.5000 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Stairs.png"
       },
       {
         "position": [ 79.9900, -54.5000, -5.6000 ],
@@ -16110,7 +16110,7 @@
           "center": [ 74.9916, -57.0000, -8.1000 ],
           "extents": [ 4.9984, 2.5000, 2.5000 ]
         },
-        "textureName": "SwatchNavyAlbedo.png"
+        "textureName": "Stairs.png"
       }
     ],
     "Stairs_Full_Railing": [
@@ -16119,120 +16119,120 @@
         "rotation": [ 0.0000, 0.0000, 1.0000, 0.0000 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -64.9900, -28.2500, -9.0731 ],
-          "extents": [ 5.0000, 0.2500, 3.4731 ]
+          "center": [ -64.9900, -28.0000, -9.0635 ],
+          "extents": [ 5.0000, 0.5000, 3.4635 ]
         },
-        "textureName": ""
+        "textureName": "Stairs.png"
       },
       {
         "position": [ -70.0000, -35.0000, -5.6000 ],
         "rotation": [ 0.0000, 0.0000, 1.0000, 0.0000 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -65.0000, -34.7500, -9.0731 ],
-          "extents": [ 5.0000, 0.2500, 3.4731 ]
+          "center": [ -65.0000, -34.5000, -9.0635 ],
+          "extents": [ 5.0000, 0.5000, 3.4635 ]
         },
-        "textureName": ""
+        "textureName": "Stairs.png"
       },
       {
         "position": [ -64.0000, 9.4900, -5.6000 ],
         "rotation": [ 0.0000, 0.0000, 0.7071, 0.7071 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -63.7500, 4.4900, -9.0731 ],
-          "extents": [ 0.2500, 5.0000, 3.4731 ]
+          "center": [ -63.5000, 4.4900, -9.0635 ],
+          "extents": [ 0.5000, 5.0000, 3.4635 ]
         },
-        "textureName": ""
+        "textureName": "Stairs.png"
       },
       {
         "position": [ -99.5000, -36.4900, -5.6000 ],
         "rotation": [ 0.0000, 0.0000, 0.7071, -0.7071 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -99.7500, -31.4900, -9.0731 ],
-          "extents": [ 0.2500, 5.0000, 3.4731 ]
+          "center": [ -100.0000, -31.4900, -9.0635 ],
+          "extents": [ 0.5000, 5.0000, 3.4635 ]
         },
-        "textureName": ""
+        "textureName": "Stairs.png"
       },
       {
         "position": [ -26.0000, -18.5000, -5.6000 ],
         "rotation": [ 0.0000, 0.0000, 0.7071, 0.7071 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -25.7500, -23.5000, -9.0731 ],
-          "extents": [ 0.2500, 5.0000, 3.4731 ]
+          "center": [ -25.5000, -23.5000, -9.0635 ],
+          "extents": [ 0.5000, 5.0000, 3.4635 ]
         },
-        "textureName": ""
+        "textureName": "Stairs.png"
       },
       {
         "position": [ -50.0100, 14.5000, -0.6000 ],
         "rotation": [ 0.0000, 0.0000, 0.0000, 1.0000 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -55.0100, 14.2500, -4.0731 ],
-          "extents": [ 5.0000, 0.2500, 3.4731 ]
+          "center": [ -55.0100, 14.0000, -4.0635 ],
+          "extents": [ 5.0000, 0.5000, 3.4635 ]
         },
-        "textureName": ""
+        "textureName": "Stairs.png"
       },
       {
         "position": [ 29.9900, -11.0000, -5.6000 ],
         "rotation": [ 0.0000, 0.0000, 0.0000, -1.0000 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 24.9900, -11.2500, -9.0731 ],
-          "extents": [ 5.0000, 0.2500, 3.4731 ]
+          "center": [ 24.9900, -11.5000, -9.0635 ],
+          "extents": [ 5.0000, 0.5000, 3.4635 ]
         },
-        "textureName": ""
+        "textureName": "Stairs.png"
       },
       {
         "position": [ 29.9900, -16.5000, -5.9100 ],
         "rotation": [ 0.0000, 0.0000, 0.0000, -1.0000 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 24.9900, -16.7500, -9.3831 ],
-          "extents": [ 5.0000, 0.2500, 3.4731 ]
+          "center": [ 24.9900, -17.0000, -9.3735 ],
+          "extents": [ 5.0000, 0.5000, 3.4635 ]
         },
-        "textureName": ""
+        "textureName": "Stairs.png"
       },
       {
         "position": [ -26.0000, 1.5000, -0.6000 ],
         "rotation": [ 0.0000, 0.0000, 0.7071, 0.7071 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -25.7500, -3.5000, -4.0731 ],
-          "extents": [ 0.2500, 5.0000, 3.4731 ]
+          "center": [ -25.5000, -3.5000, -4.0635 ],
+          "extents": [ 0.5000, 5.0000, 3.4635 ]
         },
-        "textureName": ""
+        "textureName": "Stairs.png"
       },
       {
         "position": [ -55.5000, -12.4900, -5.6000 ],
         "rotation": [ 0.0000, 0.0000, 0.7071, 0.7071 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -55.2500, -17.4900, -9.0731 ],
-          "extents": [ 0.2500, 5.0000, 3.4731 ]
+          "center": [ -55.0000, -17.4900, -9.0635 ],
+          "extents": [ 0.5000, 5.0000, 3.4635 ]
         },
-        "textureName": ""
+        "textureName": "Stairs.png"
       },
       {
         "position": [ 79.9900, -59.5000, -5.6000 ],
         "rotation": [ 0.0000, 0.0000, 0.0000, -1.0000 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ 74.9900, -59.7500, -9.0731 ],
-          "extents": [ 5.0000, 0.2500, 3.4731 ]
+          "center": [ 74.9900, -60.0000, -9.0635 ],
+          "extents": [ 5.0000, 0.5000, 3.4635 ]
         },
-        "textureName": ""
+        "textureName": "Stairs.png"
       },
       {
         "position": [ -49.9500, -12.5000, -5.6000 ],
         "rotation": [ 0.0000, 0.0000, 0.7071, 0.7071 ],
         "scale": [ 1.0000, 1.0000, 1.0000 ],
         "bounds": {
-          "center": [ -49.7000, -17.5000, -9.0731 ],
-          "extents": [ 0.2500, 5.0000, 3.4731 ]
+          "center": [ -49.4500, -17.5000, -9.0635 ],
+          "extents": [ 0.5000, 5.0000, 3.4635 ]
         },
-        "textureName": ""
+        "textureName": "Stairs.png"
       }
     ],
     "StudyChair": [
