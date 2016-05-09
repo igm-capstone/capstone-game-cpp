@@ -156,26 +156,26 @@
   "minions": [
     {
       "name": "BasicMinion",
-      "baseHealth": 40,
-      "moveSpeed": 105.0,
+      "baseHealth": 20,
+      "moveSpeed": 90.0,
       "turnRate": 70.0,
       "stunOnHitDuration": 0.3,
-      "attackDamage": 10,
+      "attackDamage": 8,
       "splashRange": 0.0
     },
     {
       "name": "AOEToad",
-      "baseHealth": 60,
+      "baseHealth": 40,
       "moveSpeed": 60.0,
       "turnRate": 30.0,
       "stunOnHitDuration": 0.5,
-      "attackDamage": 60,
-      "splashRange": 6.0
+      "attackDamage": 40,
+      "splashRange": 5.0
     },
     {
       "name": "PlantPolterTrap",
       "baseHealth": 50,
-      "attackDamage": 25,
+      "attackDamage": 20,
       "attackRange": 3.5
     }
   ]
